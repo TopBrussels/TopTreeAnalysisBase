@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<datasets>
+<!-- SM samples-->
+<!-- add="1" means run on the sample -->
+<!-- add="0" means do not run on the sample -->
+<!-- ex with eqlumi <d name="TTJets" add="1" color="4" ls="1" lw="1" normf="0.000437334" xsection="414" filenames="/user/echabert/TopTree_Prod229/TopTree_TTJets.root" EqLumi="2287."/> -->
+<!-- ex with NofEvts <d name="TTJets" add="1" color="4" ls="1" lw="1" normf="0.000437334" xsection="414" filenames="/user/echabert/TopTree_Prod229/TopTree_TTJets.root" NofEvts="946644"/> -->
+<!-- ex with PreselEff NofPSEvts <d name="TTJets" add="1" color="4" ls="1" lw="1" normf="0.000437334" xsection="414" filenames="/user/echabert/TopTree_Prod229/TopTree_TTJets.root" PreselEff="0.207" NofEvts="218404"/> -->
+<d name="TTJets" add="1" color="4" ls="1" lw="1" normf="0.000437334" xsection="414" filenames="/user/echabert/TopTree_Prod229/TopTree_TTJets.root" />
+<d name="QCD" add="0" color="12" ls="1" lw="1" normf="0.0192612" xsection="121650" filenames="/user/echabert/TopTree_Prod229/TopTree_QCD.root"/>
+<d name="ZJets" add="0" color="28" ls="1" lw="1" normf="0.00334015" xsection="4218" filenames="/user/echabert/TopTree_Prod229/TopTree_ZJets.root" />
+<d name="WJets" add="0" color="2" ls="1" lw="1" normf="0.00467901" xsection="42600" filenames="/user/echabert/TopTree_Prod229/TopTree_WJets.root" />
+<!-- SUSY samples-->
+<d name="LM0" add="0" color="6" ls="1" lw="1" normf="0.000542711" xsection="110" filenames="/user/echabert/TopTree_Prod229/LMX/TopTree_LM0.root" />
+<d name="LM1" add="1" color="7" ls="1" lw="1" normf="4.91883e-05" xsection="16.06" filenames="/user/echabert/TopTree_Prod229/LMX/TopTree_LM1.root" />
+<d name="LM2" add="0" color="8" ls="1" lw="1" normf="1.99013e-05" xsection="2.42" filenames="/user/echabert/TopTree_Prod229/LMX/TopTree_LM2.root" />
+<d name="LM3" add="0" color="9" ls="1" lw="1" normf="4.37229e-05" xsection="6.06" filenames="/user/echabert/TopTree_Prod229/LMX/TopTree_LM3.root" />
+<d name="LM4" add="0" color="14" ls="1" lw="1" normf="6.63366e-05" xsection="6.70" filenames="/user/echabert/TopTree_Prod229/LMX/TopTree_LM4.root" />
+<d name="LM5" add="0" color="28" ls="1" lw="1" normf="1.0555e-05" xsection="1.94" filenames="/user/echabert/TopTree_Prod229/LMX/TopTree_LM5.root" />
+<d name="LM6" add="0" color="30" ls="1" lw="1" normf="9.87654e-06" xsection="1.28" filenames="/user/echabert/TopTree_Prod229/LMX/TopTree_LM6.root" />
+<d name="LM7" add="0" color="38" ls="1" lw="1" normf="3.23661e-05" xsection="2.90" filenames="/user/echabert/TopTree_Prod229/LMX/TopTree_LM7.root" />
+<d name="LM8" add="0" color="41" ls="1" lw="1" normf="1.35351e-05" xsection="2.86" filenames="/user/echabert/TopTree_Prod229/LMX/TopTree_LM8.root" />
+<d name="LM9" add="0" color="12" ls="1" lw="1" normf="7.86915e-06" xsection="11.58" filenames="/user/echabert/TopTree_Prod229/LMX/TopTree_LM9.root" />
+<d name="LM10" add="0" color="46" ls="1" lw="1" normf="3.20418e-07" xsection="0.065" filenames="/user/echabert/TopTree_Prod229/LMX/TopTree_LM10.root" />
+</datasets>

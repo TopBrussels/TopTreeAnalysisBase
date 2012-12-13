@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<!-- add="1" means run on the sample -->
+<!-- add="0" means do not run on the sample -->
+<!-- ex with eqlumi <d name="TTJets" add="1" color="4" ls="1" lw="1" normf="0.000437334" xsection="414" filenames="/user/echabert/TopTree_Prod229/TopTree_TTJets.root" EqLumi="2287."/> -->
+<!-- ex with NofEvts <d name="TTJets" add="1" color="4" ls="1" lw="1" normf="0.000437334" xsection="414" filenames="/user/echabert/TopTree_Prod229/TopTree_TTJets.root" NofEvts="946644"/> -->
+<!-- ex with PreselEff NofPSEvts <d name="TTJets" add="1" color="4" ls="1" lw="1" normf="0.000437334" xsection="414" filenames="/user/echabert/TopTree_Prod229/TopTree_TTJets.root" PreselEff="0.2307" NofPSEvts="218404"/> -->
+
+<datasets>
+<!-- SM samples -->
+
+<d name="Data" title="Data" add="1" color="4" ls="1" lw="2" normf="1" xsection="1" EqLumi="1" filenames="/home/stijn/TopTreeAnalysis/CMSSW_53X_v1_patch1/Samples/Data_Jet_2012A_13July2012ReReco_Id2087/TopTree_Skimmed_*.root"/>
+
+<!--
+<d name="QCD_Flat_pythia6" title="QCD Flat pythia6" add="1" color="4" ls="1" lw="2" normf="1" xsection="1" EqLumi="1" filenames="/home/stijn/TopTreeAnalysis/CMSSW_53X_v1_patch1/Samples/QCD_Flat_53X/TopTree_Skimmed_*.root"/>
+-->
+
+</datasets>
+
+<analysis>
+<!-- JetType: 0=TRootJet - 1=TRootCaloJet - 2=TRootPFJet -->
+<!--
+<a type="Collections" PVCollection="PrimaryVertex" JetType="2" JetCollection="PFJets_selectedPatJetsPF2PAT" METType="2" METCollection="PFMET_patType1CorrectedPFMetPF2PAT" MuonCollection="Muons_selectedPatMuonsPF2PAT" ElectronCollection="Electrons_selectedPatElectronsPF2PAT" loadGenJetCollection="1" GenJetCollection="GenJets_ak5GenJetsNoNu" loadGenEventCollection="1" GenEventCollection="GenEvent" loadNPGenEventCollection="0" NPGenEventCollection="NPGenEvent" loadMCParticles="1" MCParticlesCollection="MCParticles" TrackMETCollection="" loadTrackMET="0"/>
+<a type="Collections" PVCollection="PrimaryVertex" JetType="2" JetCollection="PFJets_selectedPatJetsPF2PATNoPFnoPU" METType="2" METCollection="PFMET_patType1CorrectedPFMetPF2PATNoPFnoPU" MuonCollection="Muons_selectedPatMuonsPF2PATNoPFnoPU" ElectronCollection="Electrons_selectedPatElectronsPF2PATNoPFnoPU" loadGenJetCollection="1" GenJetCollection="GenJets_ak5GenJetsNoNu" loadGenEventCollection="1" GenEventCollection="GenEvent" loadNPGenEventCollection="0" NPGenEventCollection="NPGenEvent" loadMCParticles="1" MCParticlesCollection="MCParticles" TrackMETCollection="" loadTrackMET="0"/>
+-->
+<a type="Collections" PVCollection="PrimaryVertex" JetType="2" JetCollection="PFJets_selectedPatJetsPF2PATNoLeptonCleaning" METType="2" METCollection="PFMET_patType1CorrectedPFMetPF2PATNoLeptonCleaning" MuonCollection="Muons_selectedPatMuonsPF2PATNoLeptonCleaning" ElectronCollection="Electrons_selectedPatElectronsPF2PATNoLeptonCleaning" loadGenJetCollection="1" GenJetCollection="GenJets_ak5GenJetsNoNu" loadGenEventCollection="1" GenEventCollection="GenEvent" loadNPGenEventCollection="0" NPGenEventCollection="NPGenEvent" loadMCParticles="1" MCParticlesCollection="MCParticles" TrackMETCollection="" loadTrackMET="0"/>
+<a type="Selection" PVertexNdofCut="4" PVertexZCut="24." PVertexRhoCut="2." MuonPtCutSR="20." MuonEtaCutSR="2.1" MuonRelIsoCutSR="0.05" MuonNHitsCutSR="10" MuonD0CutSR="0.02" MuonDRJetsCut="0.3" MuonPtCutVetoSR="10." MuonEtaCutVetoSR="2.5" MuonRelIsoCutVetoSR="0.2" ElectronPtCut="15." ElectronEtaCut="2.5" ElectronRelIsoCut="0.2" JetsPtCutSR="30." JetsEtaCutSR="2.4" applyJetID="1" JetEMFCut="0.01" n90HitsCut="1" fHPDCut="0.98" NofJets="4" NofJetBins="2"/>
+<a type="Conditions" isMC="1" MCRound="0" Vars_ByFile="0" VarsFile="m0_100_m12_100" IntToCut="4" Verbose="2" Luminosity="9999999" JES="1." nPseudoExp="0" nPseudoSession="0" runonTTrees="0" doABCD="1" doVJEstim="1" doVJEstPE="1" doTtJEstim="1" doTemplComp="0" doSystematics="0"/><!-- Luminosity in pb-1 -->
+<a type="CRForTtbarEstimation"  BtagAlgo_ttjEst="0" BtagDiscriCut_ttjEst="4.38" MuonPtCutCR="30." MuonEtaCutCR="2.1" MuonRelIsoCutCR="0.1" JetsPtCutCR="30." JetsEtaCutCR="2.4" MblCut="160." DRBBCut="2.3" HTBBCut="500." NREvtFraction="0.75"/>
+<a type="CRForABCDEstimation"   NXbinsABCD="200" NYbinsABCD="200" XbinMinABCD="0" XbinMaxABCD="20" YbinMinABCD="0" YbinMaxABCD="20" cutXmin="0" cutX0="0.1" cutX1="0.2" cutXmax="20." cutYmin="0." cutY0="3." cutY1="4." cutYmax="20." region="1"/>
+<a type="ParamForVJetEstimation" BtagAlgo_vjEst="0" NofBtagWorkingPoint_vjEst="1" BtagWorkingPoint_vjEst="2.03,3.20" MinMethod="Minuit2" MinOption="Combined" useMJLE="0" useUnBinMLE="1" NVJetPE="500" TagEffInit="0.794,0.128,0.097-0.70,0.043,0.02-0.63,0.05,0.010/0.807,0.134,0.124-0.70,0.043,0.02-0.63,0.05,0.010" NVlikeInit="14./4." NTTlikeInit="6./8." EffEbsel="0.0515,0.4170,0.5281/0.0187,0.2604,0.7049" VJEstFixParam="0,1,2" NofIterationsVJestShapeEstim="40"/>
+<a type="Observables" runOnObsByString="0" listOfObsInts="2" listOfObsStrings="ET1oET2,ET1oET3" binning="../config/Binning.root" bins="20"/>
+<a type="CrossSection" MCExpFilename="../config/MCFile.root" LuminosityError="0.1" TriggerEff="1" TriggerEffError="0.05" SkimEff="1." SkimEffError="0" MuonSelEff="0.43" MuonSelEffError="0.003" SecondLeptonVetoEff="0.4833" SecondLeptonVetoEffError="0.01" JetSelEff="0.8206" JetSelEffError="0.04" NofSingleTopEvts="0" NofSingleTopEvtsError="0"/>
+<a type="Search" doBkgEstim="1" doDumpPseudoExpInfoInTTree="1" DumpTreeName="dumpTreeFile.root" FractionHWEvts="0.1,0.2,0.3" />
+</analysis>
+

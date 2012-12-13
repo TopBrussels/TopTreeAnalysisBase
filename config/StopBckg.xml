@@ -1,0 +1,109 @@
+<?xml version="1.0"?>
+<!-- add="1" means run on the sample -->
+<!-- add="0" means do not run on the sample -->
+<!-- ex with eqlumi <d name="TTJets" add="1" color="4" ls="1" lw="1" normf="0.000437334" xsection="414" filenames="/user/echabert/TopTree_Prod229/TopTree_TTJets.root" EqLumi="2287."/> -->
+<!-- ex with NofEvts <d name="TTJets" add="1" color="4" ls="1" lw="1" normf="0.000437334" xsection="414" filenames="/user/echabert/TopTree_Prod229/TopTree_TTJets.root" NofEvts="946644"/> -->
+<!-- ex with PreselEff NofPSEvts <d name="TTJets" add="1" color="4" ls="1" lw="1" normf="0.000437334" xsection="414" filenames="/user/echabert/TopTree_Prod229/TopTree_TTJets.root" PreselEff="0.2307" NofPSEvts="218404"/> -->
+
+<datasets>
+<!-- SM samples -->
+
+<d name="TT_Jets" title="TTJets" add="1" color="2" ls="1" lw="2" xsection="165" EqLumi="22436" filenames="/scratch/tc/Summer11-TT_Jets/*.root"/>
+<!--d name="WJets" title="W+Jets" add="1" color="3" ls="1" lw="2" normf="-1" xsection="31314" EqLumi="2597.73203679" filenames="/scratch/tc/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola__Fall11-PU_S6_START42_V14B-v1__06112011_123924/*.root"/-->
+<!--d name="W_Jets" title="W_Jets" add="1" color="3" ls="1" lw="2" normf="-1" xsection="31314" EqLumi="2597.73203679" filenames="/scratch/tc/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola__Summer11-PU_S4_START42_V11-v1__21122011_140400/*.root"/-->
+<d name="W_Jets" title="W_Jets" add="1" color="3" ls="1" lw="2" normf="-1" xsection="31314" EqLumi="2597.73203679" filenames="/scratch/tc/WJets_StopSkimmed_HLT_Obj10GeV/*"/>
+<d name="Data" title="Data" add="0" color="1" ls="1" lw="2" EqLumi="2100" filenames="/scratch/tc/Data_2011/Mu3JetsSkim_NormalPF2PAT_MuHad_May10ReReco_Id826/*.root,/scratch/tc/Data_2011/Mu3JetsSkim_NormalPF2PAT_MuHad_PromptRecoV4_Id836/*.root,/scratch/tc/Data_2011/Mu3JetsSkim_NormalPF2PAT_MuHad_Aug05ReReco_Id820/*.root,/scratch/tc/Data_2011/Mu3JetsSkim_NormalPF2PAT_MuHad_PromptRecoV6_Id828/*.root"/>
+<!--d name="Data" title="Data : Run2011A" add="1" color="1" ls="1" lw="2" EqLumi="600." filenames="/scratch/tc/Data_2011/Skim_828_Objects10GeV/*.root,/scratch/tc/Data_2011/Skim_863_Objects10GeV/*.root"/-->
+<!--d name="TT_Jets" title="t\bar{t}+Jets" add="1" color="2" ls="1" lw="2" xsection="165" EqLumi="-23504.36" PreselEff="0.308526673611" filenames="/scratch/tc/Skim_Stijn_Mu3Jets/TriJetSkim_TriJetHLT_OR_TTJets_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/*.root"/-->
+<!--d name="TT_Jets" title="t\bar{t}+Jets" add="1" color="1" ls="1" lw="2" xsection="157.5" EqLumi="-23504.36" PreselEff="0.239732669609" filenames="/scratch/tc/TTJets_StopSkimmed_HLT_Obj10GeV/*"/-->
+<!--d name="WJets" title="W+Jets" add="1" color="3" ls="1" lw="2" normf="-1" xsection="31314" EqLumi="2597.73203679" filenames="/scratch/tc/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola__Fall11-PU_S6_START42_V14B-v1__06112011_123924/*.root"/-->
+<!--d name="W_Jets" title="W+Jets" add="1" color="3" ls="1" lw="2" xsection="31314" EqLumi="-2123.46" PreselEff="0.00416209341451" filenames="/scratch/tc/Skim_Stijn_Mu3Jets/TriJetSkim_TriJetHLT_OR_WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/*.root"/-->
+<!--d name="W_Jets" title="W+Jets" add="1" color="2" ls="1" lw="2" xsection="31314" EqLumi="-2123.46" PreselEff="0.0530654949645" filenames="/scratch/tc/WJets_StopSkimmed_HLT_Obj10GeV/*"/-->
+<d name="DY_ll" title="Drell-Yan $\to$ $ll$" add="0" color="4" ls="1" lw="2" xsection="2475." EqLumi="-1." PreselEff="0.0588824780588" filenames="/scratch/tc/Skim_Stijn_Mu3Jets/TriJetSkim_TriJetHLT_OR_DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/*.root"/>  <!-- PreselEff = 1592152/27039487=0.0588824780588 -->
+<d name="ST_T-tW" title="Single top - t - tW channel" add="0" color="5" ls="1" lw="2" xsection="5.3" EqLumi="-1." PreselEff="0.0548616099579" filenames="/scratch/tc/Skim_Stijn_Mu3Jets/TriJetSkim_TriJetHLT_OR_T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola_Summer11-PU_S4_START42_V11-v1/*.root"/>
+<d name="ST_T-t" title="Single top - t - t channel" add="0" color="6" ls="1" lw="2" xsection="42.6" EqLumi="-1." PreselEff="0.210003867949" filenames="/scratch/tc/Skim_Stijn_Mu3Jets/TriJetSkim_TriJetHLT_OR_T_TuneZ2_t-channel_7TeV-powheg-tauola_Summer11-PU_S4_START42_V11-v1/*.root"/>
+<d name="ST_Tbar-t" title="Single top - \bar{t} - t channel" add="0" color="7" ls="1" lw="2" xsection="22.0" EqLumi="-1." PreselEff="0.0573730114738" filenames="/scratch/tc/Skim_Stijn_Mu3Jets/TriJetSkim_TriJetHLT_OR_Tbar_TuneZ2_t-channel_7TeV-powheg-tauola_Summer11-PU_S4_START42_V11-v1/*.root"/>
+<d name="ST_Tbar-tW" title="Single top - \bar{t} - tW channel" add="0" color="8" ls="1" lw="2" xsection="5.3" EqLumi="-1." PreselEff="0.210358106192" filenames="/scratch/tc/Skim_Stijn_Mu3Jets/TriJetSkim_TriJetHLT_OR_Tbar_TuneZ2_tW-channel-DR_7TeV-powheg-tauola_Summer11-PU_S4_START42_V11-v1/*.root"/>
+<d name="QCD_" title="QCD $p_{T}$ $\mu$ 15" add="0" color="9" ls="1" lw="2" xsection="84679.3" EqLumi="-1." PreselEff="0.000346115426544" filenames="/scratch/tc/Skim_Stijn_Mu3Jets/Mu3JetsSkim_QCD_MuEnriched_Id802/*.root"/>  <!-- XSec 2.966E8 FilterEff 2.855E-4 -->
+<!-- Cross-sections from the PREP tool : 27770.0 WJetsToLNu_TuneZ2_7TeV-madgraph-tauola  ;  94.76 TTJets_TuneZ2_7TeV-madgraph-tauola  ;  2475.0 DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola -->
+
+<d name="Stop_Chi" title="\tilde{t}_{1} (650) - \Chi_{1}^{0} (200)" add="0" color="4" ls="1" lw="2" normf="-1" xsection="1" EqLumi="-1" PreselEff="1" filenames="/scratch/tc/StopSignal/stp650-chi0200_2BC_100k_Summer11_428_AODSIM_v4/*"/>
+<d name="Stop_Chi" title="\tilde{t}_{1} (300) - \Chi_{1}^{0} (50)"  add="0" color="4" ls="1" lw="2" normf="-1" xsection="1" EqLumi="-1" PreselEff="1" filenames="/scratch/tc/StopSignal/stp300-chi050_2BC_100k_Summer11_428_AODSIM_v4/*"/>
+<d name="Stop_Chi" title="\tilde{t}_{1} (600) - \Chi_{1}^{0} (150)" add="0" color="4" ls="1" lw="2" normf="-1" xsection="1" EqLumi="-1" PreselEff="1" filenames="/scratch/tc/StopSignal/stp600-chi0150_2BC_100k_Summer11_428_AODSIM_v4/*"/>
+<d name="Stop_Chi" title="\tilde{t}_{1} (250) - \Chi_{1}^{0} (100)" add="0" color="4" ls="1" lw="2" normf="-1" xsection="1" EqLumi="-1" PreselEff="1" filenames="/scratch/tc/StopSignal/stp250-chi100_2BC_100k_Summer11_428_AODSIM_v4/*"/>
+<d name="Stop_Chi" title="\tilde{t}_{1} (500) - \Chi_{1}^{0} (50)"  add="0" color="4" ls="1" lw="2" normf="-1" xsection="1" EqLumi="-1" PreselEff="1" filenames="/scratch/tc/StopSignal/stp500-chi050_2BC_100k_Summer11_428_AODSIM_v4/*"/>
+<d name="Stop_Chi" title="\tilde{t}_{1} (450) - \Chi_{1}^{0} (200)" add="0" color="4" ls="1" lw="2" normf="-1" xsection="1" EqLumi="-1" PreselEff="1" filenames="/scratch/tc/StopSignal/stp450-ch0200_2BC_100k_Summer11_428_AODSIM_v4/*"/>
+<d name="Stop_Chi" title="\tilde{t}_{1} (400) - \Chi_{1}^{0} (150)" add="0" color="4" ls="1" lw="2" normf="-1" xsection="1" EqLumi="-1" PreselEff="1" filenames="/scratch/tc/StopSignal/stp400-chi0150_2BC_100k_Summer11_428_AODSIM_v4*"/>
+<d name="Stop_Chi" title="\tilde{t}_{1} (350) - \Chi_{1}^{0} (200)" add="0" color="4" ls="1" lw="2" normf="-1" xsection="1" EqLumi="-1" PreselEff="1" filenames="/scratch/tc/StopSignal/stp350-chi0200_2BC_100k_Summer11_428_AODSIM_v4/*"/>
+<d name="Stop_Chi" title="\tilde{t}_{1} (200) - \Chi_{1}^{0} (50)"  add="0" color="4" ls="1" lw="2" normf="-1" xsection="1" EqLumi="-1" PreselEff="1" filenames="/scratch/tc/StopSignal/stp200-chi050_2BC_100k_Summer11_428_AODSIM_v4/*"/>
+<d name="Stop_Chi" title="\tilde{t}_{1} (350) - \Chi_{1}^{0} (100)" add="0" color="4" ls="1" lw="2" normf="-1" xsection="1" EqLumi="-1" PreselEff="1" filenames="/scratch/tc/StopSignal/stp350-chi0100_2BC_100k_Summer11_428_AODSIM_v4/*"/>
+<d name="Stop_Chi" title="\tilde{t}_{1} (450) - \Chi_{1}^{0} (100)" add="0" color="4" ls="1" lw="2" normf="-1" xsection="1" EqLumi="-1" PreselEff="1" filenames="/scratch/tc/StopSignal/stp450-chi0100_2BC_100k_Summer11_428_AODSIM_v4/*"/>
+<d name="Stop_Chi" title="\tilde{t}_{1} (300) - \Chi_{1}^{0} (150)" add="0" color="4" ls="1" lw="2" normf="-1" xsection="1" EqLumi="-1" PreselEff="1" filenames="/scratch/tc/StopSignal/stp300-chi0150_2BC_100k_Summer11_428_AODSIM_v4/*"/>
+<d name="Stop_Chi" title="\tilde{t}_{1} (400) - \Chi_{1}^{0} (50)"  add="0" color="4" ls="1" lw="2" normf="-1" xsection="1" EqLumi="-1" PreselEff="1" filenames="/scratch/tc/StopSignal/stp400-chi050_2BC_100k_Summer11_428_AODSIM_v4/*"/>
+<d name="Stop_Chi" title="\tilde{t}_{1} (500) - \Chi_{1}^{0} (150)" add="0" color="4" ls="1" lw="2" normf="-1" xsection="1" EqLumi="-1" PreselEff="1" filenames="/scratch/tc/StopSignal/stp500-chi0150_2BC_100k_Summer11_428_AODSIM_v4/*"/>
+<d name="Stop_Chi" title="\tilde{t}_{1} (550) - \Chi_{1}^{0} (100)" add="0" color="4" ls="1" lw="2" normf="-1" xsection="1" EqLumi="-1" PreselEff="1" filenames="/scratch/tc/StopSignal/stp550-chi0100_2BC_100k_Summer11_428_AODSIM_v4/*"/>
+<d name="Stop_Chi" title="\tilde{t}_{1} (550) - \Chi_{1}^{0} (200)" add="0" color="4" ls="1" lw="2" normf="-1" xsection="1" EqLumi="-1" PreselEff="1" filenames="/scratch/tc/StopSignal/stp550-chi0200_2BC_100k_Summer11_428_AODSIM_v4/*"/>
+<!--d name="TTbarJets" title="TTJets" add="1" color="4" ls="1" lw="2" xsection="165" EqLumi="22436" filenames="/scratch/tc/Summer11-TT_Jets/*.root"/-->
+<!--d name="WWJets" title="WW+Jets" add="0" color="3" ls="1" lw="2" normf="-1" xsection="43" EqLumi="98265.8" filenames="/scratch/tc/Summer11-WW_Jets/*.root "/-->
+<!--d name="ZZJets" title="ZZ+Jets" add="0" color="2" ls="1" lw="2" normf="-1" xsection="5.9" EqLumi="21127451.6" filenames="/scratch/tc/Summer11-ZZ_Jets/*.root "/-->
+<!--d name="WZJets" title="WZ+Jets" add="0" color="1" ls="1" lw="2" normf="-1" xsection="18.2" EqLumi="198907.5" filenames="/scratch/tc/Summer11-WZ_Jets/*.root "/-->
+
+<!--d name="TTbarJets" title="TTJets" add="1" color="4" ls="1" lw="2" xsection="165" filenames="dcap://maite.iihe.ac.be/pnfs/iihe/cms/store/user/dhondt/TTJets_TuneZ2_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/11102011_095135/TOPTREE/*.root"/-->
+<!--d name="WWJets" title="WW+Jets" add="1" color="3" ls="1" lw="2" normf="-1" xsection="43" EqLumi="98265.8" filenames="dcap://maite.iihe.ac.be/pnfs/iihe/cms/store/user/dhondt/WW_TuneZ2_7TeV_pythia6_tauola/Summer11-PU_S4_START42_V11-v1/07012012_140652/TOPTREE/*.root"/-->
+<!--d name="ZZJets" title="ZZ+Jets" add="1" color="2" ls="1" lw="2" normf="-1" xsection="5.9" EqLumi="21127451.6" filenames="dcap://maite.iihe.ac.be/pnfs/iihe/cms/store/user/dhondt/ZZ_TuneZ2_7TeV_pythia6_tauola/Summer11-PU_S4_START42_V11-v1/04082011_170614/TOPTREE/*.root"/-->
+<!--d name="WZJets" title="WZ+Jets" add="1" color="1" ls="1" lw="2" normf="-1" xsection="18.2" EqLumi="198907.5" filenames="dcap://maite.iihe.ac.be/pnfs/iihe/cms/store/user/dhondt/WZ_TuneZ2_7TeV_pythia6_tauola/Summer11-PU_S4_START42_V11-v1/07012012_130642/TOPTREE/*.root"/-->
+
+<d name="TTbarJets" title="TTJets" add="0" color="4" ls="1" lw="2" xsection="165" EqLumi="22436" filenames="/user/caebergs/GentSync/Summer11_TTJets/*.root"/>
+<d name="WWJets" title="WW+Jets" add="0" color="3" ls="1" lw="2" normf="-1" xsection="43" EqLumi="98265.8" filenames="/user/caebergs/GentSync/Summer11_WW/*.root"/>
+<d name="ZZJets" title="ZZ+Jets" add="0" color="2" ls="1" lw="2" normf="-1" xsection="5.9" EqLumi="21127451.6" filenames="/user/caebergs/GentSync/Summer11_ZZ/*.root"/>
+<d name="WZJets" title="WZ+Jets" add="0" color="1" ls="1" lw="2" normf="-1" xsection="18.2" EqLumi="198907.5" filenames="/user/caebergs/GentSync/Summer11_WZ/*.root"/>
+
+
+<!--d name="Data" title="Data (testfile)" add="0" color="1"  ls="1" lw="1" normf="1" xsection="1" EqLumi="3.036384" filenames="/user/gvonsem/TopTreesSpring11/24032011_223233_TOPTREE_1_1_7XC.root"/-->
+
+<!--<d name="Data" title="Data (3.036 pb-1)" add="1" color="1"  ls="1" lw="1" normf="1" xsection="1" EqLumi="3.036384" filenames="/Users/michael/Documents/doctoraat/JESanalysis/samples/JES/Mu_PD_CMSSW361patch4_JSON_HLT_Mu9_Skimmed_ALL_MERGED.root"/>-->
+
+
+
+</datasets>
+
+<!-- All parameters needed for the selection and the bkg estimation methods -->
+<analysis>
+<!-- JetType: 0=TRootJet - 1=TRootCaloJet - 2=TRootPFJet -->
+<!-- PFMET_patMETsPF2PAT PFMET -->
+<a type="Collections" PVCollection="PrimaryVertex" JetType="2" JetCollection="PFJets_selectedPatJetsPF2PAT" METType="2" METCollection="PFMET_patMETsPF2PAT" lloadTrackMET="0" TrackMETCollection="" MuonCollection="Muons_selectedPatMuonsPF2PAT" ElectronCollection="Electrons_selectedPatElectronsPF2PAT" loadGenJetCollection="0" GenJetCollection="GenJets_ak5GenJets" loadGenEventCollection="0" GenEventCollection="GenEvent" loadNPGenEventCollection="0" NPGenEventCollection="NPGenEvent" loadMCParticles="0" MCParticlesCollection="MCParticles"/>
+<a type="Selection" PVertexNdofCut="4" PVertexZCut="15." PVertexRhoCut="2." MuonPtCutSR="20." MuonEtaCutSR="2.1" MuonRelIsoCutSR="0.05" MuonNHitsCutSR="10" MuonD0CutSR="0.02" MuonDRJetsCut="0.3" MuonPtCutVetoSR="10." MuonEtaCutVetoSR="2.5" MuonRelIsoCutVetoSR="0.2" ElectronPtCut="15." ElectronEtaCut="2.5" ElectronRelIsoCut="0.2" JetsPtCutSR="30." JetsEtaCutSR="2.4" applyJetID="1" JetEMFCut="0.01" n90HitsCut="1" fHPDCut="0.98" NofJets="4" NofJetBins="2"/>
+
+<a type="Conditions" isMC="1" MCRound="0" Vars_ByFile="0" VarsFile="m0_100_m12_100" IntToCut="4" Verbose="2" Luminosity="1" JES="1." nPseudoExp="0" nPseudoSession="0" runonTTrees="0" doABCD="1" doVJEstim="1" doVJEstPE="1" doTtJEstim="1" doTemplComp="0" doSystematics="0"/><!-- Luminosity in pb-1 -->
+<a type="CRForTtbarEstimation"  BtagAlgo_ttjEst="0" BtagDiscriCut_ttjEst="4.38" MuonPtCutCR="30." MuonEtaCutCR="2.1" MuonRelIsoCutCR="0.1" JetsPtCutCR="30." JetsEtaCutCR="2.4" MblCut="160." DRBBCut="2.3" HTBBCut="500." NREvtFraction="0.75"/>
+<a type="CRForABCDEstimation"   NXbinsABCD="200" NYbinsABCD="200" XbinMinABCD="0" XbinMaxABCD="20" YbinMinABCD="0" YbinMaxABCD="20" cutXmin="0" cutX0="0.1" cutX1="0.2" cutXmax="20." cutYmin="0." cutY0="3." cutY1="4." cutYmax="20." region="1"/>
+
+<!-- VJet-estimation
+Method: "Minuit" / "Minuit2", options : "Migrad", "Simplex", "Combined", "Scan", ("Fumili" option needs more inputs, therefore not available for the moment)
+Method: "GSLMultiMin", option : "ConjugateFR", "ConjugatePR", "BFGS", "BFGS2" and "SteepestDescent" (convergence prob. not optimal)
+Method: "GSLMultiFit" / "GSLSimAn", options : ""
+-->
+<!-- btagging algorithms and working points: -->
+  <!-- 0 == TrackCountingHighEff    : loose/medium/tight = 2.030/4.380/14.200-->
+  <!-- 1 == TrackCountingHighPur    : loose/medium/tight = 1.470/2.360/ 5.360-->
+  <!-- 2 == JetProbability          : loose/medium/tight = 0.241/0.490/ 0.795-->
+  <!-- 3 == JetBProbability         : loose/medium/tight = 1.100/2.370/ 3.390-->
+  <!-- 4 == simpleSecondaryVertex   : loose/medium/tight = 1.250/2.050/ 4.070-->
+  <!-- 5 == combinedSecondaryVertex : loose/medium/tight = 0.387/0.838/ 0.940-->
+<!--
+TaggEffInit:	/ separate jet multiplicity (true also for NVlikeInit and NTTlikeInit)
+		- separate btag working point
+		, separate: eb,eudsc(TTlike),euds(Vlike)
+EffEbsel        : efficiency to select 0,1,2 b-quark-jet
+	        / separate jet multiplicity
+VJEstFixParam   : 0: eb, 1: eudsc(TTlike), 2: euds(Vlike)
+-->
+
+<a type="ParamForVJetEstimation" BtagAlgo_vjEst="0" NofBtagWorkingPoint_vjEst="1" BtagWorkingPoint_vjEst="2.03,3.20" MinMethod="Minuit2" MinOption="Combined" useMJLE="0" useUnBinMLE="1" NVJetPE="500" TagEffInit="0.794,0.128,0.097-0.70,0.043,0.02-0.63,0.05,0.010/0.807,0.134,0.124-0.70,0.043,0.02-0.63,0.05,0.010" NVlikeInit="14./4." NTTlikeInit="6./8." EffEbsel="0.0515,0.4170,0.5281/0.0187,0.2604,0.7049" VJEstFixParam="0,1,2" NofIterationsVJestShapeEstim="40"/>
+<a type="Observables" runOnObsByString="0" listOfObsInts="2" listOfObsStrings="ET1oET2,ET1oET3" binning="../config/Binning.root" bins="20" eventsperbin="10" EpsilonValue="1.30" Correl_cut="0.80"/>
+<a type="CrossSection" MCExpFilename="../config/MCFile.root" LuminosityError="0.1" TriggerEff="1" TriggerEffError="0.05" SkimEff="1." SkimEffError="0" MuonSelEff="0.43" MuonSelEffError="0.003" SecondLeptonVetoEff="0.4833" SecondLeptonVetoEffError="0.01" JetSelEff="0.8206" JetSelEffError="0.04" NofSingleTopEvts="0" NofSingleTopEvtsError="0"/>
+<a type="Search" doBkgEstim="1" doDumpPseudoExpInfoInTTree="1" DumpTreeName="dumpTreeFile.root" FractionHWEvts="0.1,0.2,0.3" />
+<!-- LuminosityError has to be relative [0-1], ex: 0.1 means 10% uncertainty on luminosity -->
+<!-- other errors should be absolute -->
+</analysis>
+
