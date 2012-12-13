@@ -1,6 +1,6 @@
 #ifndef PlotObservables_h
 #define PlotObservables_h
-#include "TopTreeAnalysis/Reconstruction/interface/Observables.h"
+#include "TopTreeAnalysisBase/Reconstruction/interface/Observables.h"
 
 #include <iostream>
 #include <iomanip>

@@ -1,7 +1,7 @@
 #ifndef _BinningFirstGuess_h_
 #define _BinningFirstGuess_h_
 
-#include "TopTreeAnalysis/Reconstruction/interface/Observables.h"
+#include "TopTreeAnalysisBase/Reconstruction/interface/Observables.h"
 #include "TH1D.h"
 #include "TObject.h"
 #include "TMap.h"

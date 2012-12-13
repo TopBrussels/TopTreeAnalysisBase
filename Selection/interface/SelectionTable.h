@@ -1,8 +1,8 @@
 #ifndef SelectionTable_h
 #define SelectionTable_h
 #include "Selection.h"
-#include "TopTreeAnalysis/Tools/interface/Efficiency.h"
-#include "TopTreeAnalysis/Content/interface/Dataset.h"
+#include "TopTreeAnalysisBase/Tools/interface/Efficiency.h"
+#include "TopTreeAnalysisBase/Content/interface/Dataset.h"
 
 #include <iostream>
 #include <iomanip>

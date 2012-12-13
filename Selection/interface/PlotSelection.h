@@ -1,7 +1,7 @@
 #ifndef PlotSelection_h
 #define PlotSelection_h
 #include "Selection.h"
-#include "TopTreeAnalysis/Tools/interface/Efficiency.h"
+#include "TopTreeAnalysisBase/Tools/interface/Efficiency.h"
 
 #include <iostream>
 #include <iomanip>

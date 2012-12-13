@@ -16,8 +16,8 @@
 #include "TStopwatch.h"
 #include "TH1F.h"
 
-#include "TopTreeAnalysisBaseBase/TMVA/src/Reader.h"
-#include "TopTreeAnalysisBaseBase/TMVA/src/Tools.h"
+#include "TopTreeAnalysisBase/TMVA/src/Reader.h"
+#include "TopTreeAnalysisBase/TMVA/src/Tools.h"
 
 using namespace std;
 

@@ -15,7 +15,7 @@
 
 #include "TopTreeProducer/interface/TRootGenTop.h"
 
-#include "TopTreeAnalysis/MCInformation/interface/JetPartonMatching.h"
+#include "TopTreeAnalysisBase/MCInformation/interface/JetPartonMatching.h"
 #include "Combination.h"
 
 using namespace TopTree;

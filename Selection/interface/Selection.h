@@ -2,7 +2,7 @@
  
   An example of how to use this class for e+jets and mu+jets selection (SelV4)
 
-  http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/NewPhysicsBrussels/TopTreeAnalysis/macros/SyncRefSel.cc?view=log&pathrev=CMSSW_38X#rev1.1.2.1
+  http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/NewPhysicsBrussels/TopTreeAnalysisBase/macros/SyncRefSel.cc?view=log&pathrev=CMSSW_38X#rev1.1.2.1
 
 */
 
@@ -20,8 +20,8 @@
 #include "TopTreeProducer/interface/TRootMCParticle.h"
 #include "TopTreeProducer/interface/TRootEvent.h"
 
-#include "TopTreeAnalysis/Reconstruction/interface/Combination.h"
-#include "TopTreeAnalysis/Content/interface/AnalysisEnvironment.h"
+#include "TopTreeAnalysisBase/Reconstruction/interface/Combination.h"
+#include "TopTreeAnalysisBase/Content/interface/AnalysisEnvironment.h"
 
 // system include files
 #include <memory>

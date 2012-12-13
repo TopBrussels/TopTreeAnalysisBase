@@ -1,9 +1,9 @@
 #ifndef PlotSelectionObservables_h
 #define PlotSelectionObservables_h
 #include "Selection.h"
-#include "TopTreeAnalysis/Tools/interface/Efficiency.h"
+#include "TopTreeAnalysisBase/Tools/interface/Efficiency.h"
 #include "PlotSelection.h"
-#include "TopTreeAnalysis/Reconstruction/interface/Observables.h"
+#include "TopTreeAnalysisBase/Reconstruction/interface/Observables.h"
 
 #include <iostream>
 #include <iomanip>

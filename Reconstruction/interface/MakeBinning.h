@@ -1,6 +1,6 @@
 #ifndef MakeBinning_h
 #define MakeBinning_h
-#include "TopTreeAnalysis/Reconstruction/interface/Observables.h"
+#include "TopTreeAnalysisBase/Reconstruction/interface/Observables.h"
 
 #include <iostream>
 #include <iomanip>

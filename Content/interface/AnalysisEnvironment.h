@@ -7,7 +7,7 @@
 #include <sstream>
 #include "TObject.h"
 
-#include "TopTreeAnalysis/Reconstruction/interface/Observables.h"
+#include "TopTreeAnalysisBase/Reconstruction/interface/Observables.h"
 
 
 using namespace std;

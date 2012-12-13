@@ -1,7 +1,7 @@
 #ifndef PlotTrigger_h
 #define PlotTrigger_h
 #include "Selection.h"
-#include "TopTreeAnalysis/Tools/interface/Efficiency.h"
+#include "TopTreeAnalysisBase/Tools/interface/Efficiency.h"
 #include "TopTreeProducer/interface/TRootRun.h"
 
 #include <iostream>

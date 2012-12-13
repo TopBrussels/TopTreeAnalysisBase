@@ -1,9 +1,9 @@
 #ifndef PlotTriggerObservables_h
 #define PlotTriggerObservables_h
 #include "Selection.h"
-#include "TopTreeAnalysis/Tools/interface/Efficiency.h"
+#include "TopTreeAnalysisBase/Tools/interface/Efficiency.h"
 #include "PlotTrigger.h"
-#include "TopTreeAnalysis/Reconstruction/interface/Observables.h"
+#include "TopTreeAnalysisBase/Reconstruction/interface/Observables.h"
 
 #include <iostream>
 #include <iomanip>
