@@ -1,0 +1,105 @@
+<?xml version="1.0"?>
+<MethodSetup Method="Likelihood::Likelihood">
+  <GeneralInfo>
+    <Info name="TMVA Release" value="4.0.3 [262147]"/>
+    <Info name="ROOT Release" value="5.28/00 [334848]"/>
+    <Info name="Creator" value="stijn"/>
+    <Info name="Date" value="Mon Jul  4 23:04:53 2011"/>
+    <Info name="Host" value="Linux stijn-Latitude-E6500 2.6.38-8-generic #42-Ubuntu SMP Mon Apr 11 03:31:24 UTC 2011 x86_64 x86_64 x86_64 GNU/Linux"/>
+    <Info name="Dir" value="/home/stijn/TopTreeAnalysis/CMSSW_41X/TopTreeAnalysis/macros"/>
+    <Info name="Training events" value="131940"/>
+    <Info name="TrainingTime" value="0.3476"/>
+    <Info name="AnalysisType" value="Classification"/>
+  </GeneralInfo>
+  <Options>
+    <Option name="V" modified="Yes">False</Option>
+    <Option name="VerbosityLevel" modified="No">Default</Option>
+    <Option name="VarTransform" modified="No">None</Option>
+    <Option name="H" modified="Yes">True</Option>
+    <Option name="CreateMVAPdfs" modified="No">False</Option>
+    <Option name="IgnoreNegWeightsInTraining" modified="No">False</Option>
+    <Option name="TransformOutput" modified="Yes">False</Option>
+  </Options>
+  <Variables NVar="5">
+    <Variable VarIndex="0" Expression="btag" Label="btag" Title="btag" Unit="" Internal="btag" Type="F" Min="0" Max="1"/>
+    <Variable VarIndex="1" Expression="ThPtOverSumPt" Label="ThPtOverSumPt" Title="ThPtOverSumPt" Unit="" Internal="ThPtOverSumPt" Type="F" Min="0" Max="0.721362"/>
+    <Variable VarIndex="2" Expression="AngleBlMu" Label="AngleBlMu" Title="AngleBlMu" Unit="" Internal="AngleBlMu" Type="F" Min="0" Max="3.11426"/>
+    <Variable VarIndex="3" Expression="AngleThBl" Label="AngleThBl" Title="AngleThBl" Unit="" Internal="AngleThBl" Type="F" Min="0" Max="3.1189"/>
+    <Variable VarIndex="4" Expression="AngleThMu" Label="AngleThMu" Title="AngleThMu" Unit="" Internal="AngleThMu" Type="F" Min="0" Max="3.13242"/>
+  </Variables>
+  <Spectators NSpec="0"/>
+  <Transformations NTransformations="0"/>
+  <MVAPdfs/>
+  <Weights NVariables="5" NClasses="2">
+    <PDFDescriptor VarIndex="0" ClassIndex="0">
+      <PDF Name="Likelihood PDF Sig[0]" MinNSmooth="20" MaxNSmooth="20" InterpolMethod="2" KDE_type="1" KDE_iter="1" KDE_border="1" KDE_finefactor="1.0000000000000000e+00">
+        <Histogram Name="btag_sig_original" NBins="219" XMin="0.0000000000000000e+00" XMax="1.0000000000000000e+00" HasEquidistantBins="1">
+          0 5 10 5 0 0 0 0 0 0 0 0 5 10 5 0 0 10 0 5 0 5 0 5 5 0 5 10 5 0 0 5 0 0 10 0 0 0 15 5 0 0 0 5 5 5 0 5 0 10 5 10 0 15 10 5 0 0 5 5 5 5 0 15 5 0 5 5 0 5 0 0 5 10 0 0 5 5 0 0 10 0 5 0 5 5 0 0 5 5 15 5 0 10 10 5 5 0 25 15 0 0 10 5 15 10 0 20 0 0 15 5 0 0 0 0 5 10 0 30 15 15 0 5 10 5 10 10 25 20 0 15 5 0 20 10 15 5 5 5 20 0 10 15 5 20 20 10 20 10 20 45 5 15 20 15 20 10 20 15 20 30 20 5 15 40 25 30 10 15 30 30 15 35 35 30 5 15 25 40 15 40 15 55 40 25 35 25 40 15 80 60 55 45 60 50 55 45 95 140 85 85 135 130 110 125 180 135 190 240 205 320 295 405 610 615 865 1450 2315 
+        </Histogram>
+      </PDF>
+    </PDFDescriptor>
+    <PDFDescriptor VarIndex="0" ClassIndex="1">
+      <PDF Name="Likelihood PDF Bkg[0]" MinNSmooth="20" MaxNSmooth="20" InterpolMethod="2" KDE_type="1" KDE_iter="1" KDE_border="1" KDE_finefactor="1.0000000000000000e+00">
+        <Histogram Name="btag_bgd_original" NBins="219" XMin="0.0000000000000000e+00" XMax="1.0000000000000000e+00" HasEquidistantBins="1">
+          6880 4865 3180 2595 2490 2110 1390 1500 1270 1270 1190 930 1055 1030 655 860 850 680 530 815 630 605 600 575 565 470 625 530 585 420 540 455 450 470 460 390 430 340 355 455 320 380 290 315 355 315 390 415 350 370 335 420 290 445 420 255 330 370 405 245 375 275 280 345 245 230 215 345 210 305 300 240 175 350 290 430 205 305 250 220 170 250 285 310 265 175 220 270 155 305 225 225 180 240 230 205 205 230 365 315 230 220 230 155 165 230 230 260 190 140 175 275 230 240 180 160 235 210 230 300 375 215 210 205 230 245 170 220 215 290 160 255 215 180 250 300 275 245 175 215 230 310 200 415 285 340 160 230 280 300 190 305 215 215 230 345 260 270 360 235 390 340 310 255 415 420 265 400 330 365 320 390 375 285 325 290 285 365 295 420 355 300 415 335 430 445 415 435 500 405 510 480 575 425 510 530 545 565 535 680 445 605 715 730 550 915 880 795 1000 1030 1065 1180 1095 1705 1880 1985 2325 3420 4565 
+        </Histogram>
+      </PDF>
+    </PDFDescriptor>
+    <PDFDescriptor VarIndex="1" ClassIndex="0">
+      <PDF Name="Likelihood PDF Sig[1]" MinNSmooth="1" MaxNSmooth="1" InterpolMethod="2" KDE_type="1" KDE_iter="1" KDE_border="1" KDE_finefactor="1.0000000000000000e+00">
+        <Histogram Name="ThPtOverSumPt_sig_original" NBins="219" XMin="0.0000000000000000e+00" XMax="7.2136175632476807e-01" HasEquidistantBins="1">
+          1 5 0 0 0 5 5 5 5 10 0 5 5 0 5 10 5 10 0 25 0 15 10 20 0 0 25 25 45 10 20 25 15 25 25 25 55 30 30 40 35 25 45 45 35 40 35 40 40 30 55 45 45 65 35 65 65 90 55 45 95 70 80 105 50 75 110 60 70 55 130 110 95 80 130 95 100 100 95 90 120 135 55 65 100 90 94 85 140 85 100 100 80 130 80 135 100 130 125 85 95 155 160 105 115 145 105 85 125 120 105 130 90 120 115 80 100 110 155 110 130 115 110 125 85 100 50 100 65 80 110 85 40 100 70 85 65 55 55 55 60 45 55 55 55 70 60 35 70 40 90 40 20 60 45 40 40 30 20 20 50 15 40 25 45 30 40 25 30 35 35 60 20 15 0 35 0 5 0 15 20 5 15 45 5 10 15 5 10 10 0 15 0 5 0 5 20 0 5 5 0 0 0 0 0 0 0 5 0 0 0 10 0 0 0 0 0 0 5 
+        </Histogram>
+      </PDF>
+    </PDFDescriptor>
+    <PDFDescriptor VarIndex="1" ClassIndex="1">
+      <PDF Name="Likelihood PDF Bkg[1]" MinNSmooth="10" MaxNSmooth="10" InterpolMethod="2" KDE_type="1" KDE_iter="1" KDE_border="1" KDE_finefactor="1.0000000000000000e+00">
+        <Histogram Name="ThPtOverSumPt_bgd_original" NBins="219" XMin="0.0000000000000000e+00" XMax="7.2136175632476807e-01" HasEquidistantBins="1">
+          16 40 15 60 120 175 130 160 145 215 270 340 295 345 400 485 340 425 494 500 660 360 620 715 720 585 785 770 705 575 835 755 825 1055 920 860 965 930 900 1250 1165 995 1110 1065 1330 1025 1210 1295 1040 1245 1190 1365 1245 1345 1210 1375 1510 1365 1205 1485 1420 1400 1570 1350 1225 1260 1465 1410 1445 1400 1685 1420 1435 1330 1595 1405 1205 1460 1375 1200 1245 1140 1175 1180 1085 1020 1045 1055 1060 845 1040 1190 865 950 940 960 770 1025 1045 980 730 895 830 855 650 755 810 740 1045 960 780 725 615 660 740 715 545 595 580 565 500 440 610 460 455 470 310 500 280 355 415 335 290 395 425 425 265 260 230 230 225 135 170 185 170 185 180 85 230 95 210 95 55 180 120 110 125 75 55 55 100 30 125 50 90 75 80 65 60 85 70 120 40 30 0 70 0 10 0 30 40 10 30 90 10 20 30 10 20 20 0 30 0 10 0 10 40 0 10 10 0 0 0 0 0 0 0 10 0 0 0 20 0 0 0 0 0 0 10 
+        </Histogram>
+      </PDF>
+    </PDFDescriptor>
+    <PDFDescriptor VarIndex="2" ClassIndex="0">
+      <PDF Name="Likelihood PDF Sig[2]" MinNSmooth="1" MaxNSmooth="1" InterpolMethod="2" KDE_type="1" KDE_iter="1" KDE_border="1" KDE_finefactor="1.0000000000000000e+00">
+        <Histogram Name="AngleBlMu_sig_original" NBins="219" XMin="0.0000000000000000e+00" XMax="3.1142644882202148e+00" HasEquidistantBins="1">
+          2 0 0 0 0 0 0 0 0 0 5 10 5 10 10 10 30 10 20 35 30 15 20 35 45 25 40 30 25 40 80 70 50 65 50 95 55 85 105 85 65 90 65 75 100 125 110 70 95 70 105 130 75 100 90 100 145 90 60 85 85 80 105 115 80 115 95 130 90 105 130 105 105 85 75 100 120 55 125 175 105 105 70 115 100 125 80 145 70 75 110 80 100 90 95 105 110 95 70 80 65 65 130 70 80 85 75 55 70 80 65 115 85 55 55 40 35 65 25 55 45 55 65 35 55 30 55 105 100 60 65 50 55 48 35 30 40 50 40 60 35 25 45 25 30 25 50 25 35 50 30 20 20 35 55 15 30 15 25 40 45 20 25 15 5 40 15 15 5 30 15 25 20 25 30 10 25 20 25 35 25 10 15 15 35 10 15 15 15 30 10 25 10 0 5 20 20 15 10 15 10 10 10 15 10 5 10 5 10 10 5 5 5 0 5 0 5 0 0 
+        </Histogram>
+      </PDF>
+    </PDFDescriptor>
+    <PDFDescriptor VarIndex="2" ClassIndex="1">
+      <PDF Name="Likelihood PDF Bkg[2]" MinNSmooth="1" MaxNSmooth="1" InterpolMethod="2" KDE_type="1" KDE_iter="1" KDE_border="1" KDE_finefactor="1.0000000000000000e+00">
+        <Histogram Name="AngleBlMu_bgd_original" NBins="219" XMin="0.0000000000000000e+00" XMax="3.1142644882202148e+00" HasEquidistantBins="1">
+          2 0 0 0 0 0 15 0 30 0 40 50 10 50 65 95 105 65 130 175 165 165 160 250 300 155 350 240 170 275 295 470 235 385 280 400 485 455 660 635 430 540 550 570 560 715 640 470 565 560 750 695 600 635 735 785 695 660 630 665 635 610 630 785 505 755 850 755 735 810 1010 690 795 755 840 770 885 845 820 1085 720 990 650 980 830 970 760 980 980 600 700 835 1025 630 1120 1005 715 805 785 895 865 715 800 665 1030 860 765 665 755 895 820 755 830 815 845 950 790 805 560 605 720 1010 850 655 950 690 710 960 785 810 820 745 785 700 715 660 695 880 860 915 985 845 645 860 780 860 805 845 685 835 615 730 535 670 785 870 780 735 680 440 690 685 545 690 385 530 450 555 415 390 585 485 505 695 523 425 680 460 545 505 500 365 330 570 460 410 555 390 330 480 455 380 395 435 280 430 310 210 350 300 305 230 290 300 230 145 200 220 290 155 85 205 85 90 85 105 100 45 60 
+        </Histogram>
+      </PDF>
+    </PDFDescriptor>
+    <PDFDescriptor VarIndex="3" ClassIndex="0">
+      <PDF Name="Likelihood PDF Sig[3]" MinNSmooth="1" MaxNSmooth="1" InterpolMethod="2" KDE_type="1" KDE_iter="1" KDE_border="1" KDE_finefactor="1.0000000000000000e+00">
+        <Histogram Name="AngleThBl_sig_original" NBins="219" XMin="0.0000000000000000e+00" XMax="3.1188993453979492e+00" HasEquidistantBins="1">
+          3 0 0 5 0 0 5 5 0 0 0 5 0 0 0 15 0 15 10 0 0 20 10 5 10 10 25 20 10 25 15 25 25 20 20 35 40 45 25 40 35 35 20 40 60 15 45 25 60 45 45 55 70 50 30 35 50 25 35 25 70 25 20 40 75 70 70 50 50 65 55 85 55 65 45 70 70 85 40 25 40 55 65 45 40 50 65 40 50 45 55 90 55 70 40 30 75 55 65 60 80 85 85 60 45 95 95 105 105 80 70 90 80 80 45 55 95 60 80 45 60 50 65 90 75 75 90 50 60 75 95 130 82 80 70 75 40 90 100 90 45 75 70 70 140 60 80 60 95 60 105 60 25 90 25 70 80 95 30 95 85 65 80 60 55 100 60 60 85 75 65 45 75 95 95 50 60 60 60 120 50 85 90 70 65 20 55 45 80 50 40 30 70 65 55 55 45 40 40 25 40 45 10 35 40 35 75 30 20 20 30 15 10 10 5 10 10 10 5 
+        </Histogram>
+      </PDF>
+    </PDFDescriptor>
+    <PDFDescriptor VarIndex="3" ClassIndex="1">
+      <PDF Name="Likelihood PDF Bkg[3]" MinNSmooth="1" MaxNSmooth="1" InterpolMethod="2" KDE_type="1" KDE_iter="1" KDE_border="1" KDE_finefactor="1.0000000000000000e+00">
+        <Histogram Name="AngleThBl_bgd_original" NBins="219" XMin="0.0000000000000000e+00" XMax="3.1188993453979492e+00" HasEquidistantBins="1">
+          3 0 45 55 75 75 70 160 120 210 120 115 180 240 285 390 180 330 395 405 480 250 680 565 560 485 410 730 545 755 450 755 635 862 670 670 755 795 740 785 970 805 685 845 885 795 840 770 990 945 780 800 935 910 810 790 1030 875 880 755 980 965 700 830 930 935 1010 760 850 805 755 860 785 880 825 785 800 725 860 1160 1040 815 925 735 695 670 745 695 700 960 965 765 830 665 845 600 855 770 910 945 850 710 890 555 660 820 790 750 735 760 620 840 730 820 705 875 910 615 670 450 570 490 715 690 825 615 810 610 555 705 655 770 665 730 650 495 605 510 695 540 600 555 455 665 670 480 625 405 610 450 705 450 425 720 350 425 415 610 465 550 515 460 430 525 395 530 345 405 470 390 370 300 450 535 535 280 345 405 345 450 310 380 435 455 310 265 305 345 355 235 215 165 305 280 200 215 150 140 170 170 170 225 185 160 185 160 270 135 115 85 105 75 110 50 55 35 65 80 55 
+        </Histogram>
+      </PDF>
+    </PDFDescriptor>
+    <PDFDescriptor VarIndex="4" ClassIndex="0">
+      <PDF Name="Likelihood PDF Sig[4]" MinNSmooth="1" MaxNSmooth="1" InterpolMethod="2" KDE_type="1" KDE_iter="1" KDE_border="1" KDE_finefactor="1.0000000000000000e+00">
+        <Histogram Name="AngleThMu_sig_original" NBins="219" XMin="0.0000000000000000e+00" XMax="3.1324224472045898e+00" HasEquidistantBins="1">
+          4 0 0 0 5 5 0 0 5 5 0 0 5 0 5 5 10 10 5 5 15 15 5 10 30 10 0 45 10 20 35 30 35 5 25 45 20 35 35 50 50 30 45 35 55 50 40 55 45 10 55 55 40 30 35 50 75 45 75 80 75 55 60 65 85 65 40 60 45 80 40 45 40 90 60 40 45 65 55 55 70 80 35 100 75 75 40 75 75 80 60 60 70 85 65 30 45 80 100 90 45 65 50 80 55 100 65 20 35 65 60 55 55 60 75 100 50 55 80 55 70 75 105 65 75 100 50 60 90 100 40 60 65 90 55 80 45 45 70 80 75 80 105 115 110 85 95 95 75 100 55 65 95 26 60 65 90 85 50 60 85 105 65 70 70 65 70 50 55 80 30 55 60 60 65 70 60 45 50 90 45 80 35 85 70 40 30 50 70 60 65 45 45 65 45 45 25 55 30 15 25 35 45 40 55 30 25 25 20 20 20 10 15 10 15 10 5 0 5 
+        </Histogram>
+      </PDF>
+    </PDFDescriptor>
+    <PDFDescriptor VarIndex="4" ClassIndex="1">
+      <PDF Name="Likelihood PDF Bkg[4]" MinNSmooth="1" MaxNSmooth="1" InterpolMethod="2" KDE_type="1" KDE_iter="1" KDE_border="1" KDE_finefactor="1.0000000000000000e+00">
+        <Histogram Name="AngleThMu_bgd_original" NBins="219" XMin="0.0000000000000000e+00" XMax="3.1324224472045898e+00" HasEquidistantBins="1">
+          4 15 30 45 25 10 30 45 70 100 60 75 100 45 100 160 140 200 190 175 300 300 340 230 345 275 285 405 260 385 505 465 490 475 650 480 550 580 610 580 595 780 690 730 650 715 785 680 570 710 680 710 755 705 700 850 840 825 840 820 795 815 840 790 815 715 785 765 750 910 800 780 695 795 900 680 750 790 710 920 830 730 730 1010 825 900 740 705 900 775 840 855 815 830 835 840 735 925 695 630 660 505 820 910 800 815 850 595 580 640 660 515 695 690 780 695 685 635 655 770 920 840 765 760 675 665 730 765 840 1010 620 780 670 720 770 895 780 555 770 610 686 820 855 710 685 965 670 760 690 710 545 790 790 510 660 745 765 725 610 585 545 585 625 725 590 640 410 370 590 535 540 440 495 450 490 530 480 465 505 510 360 460 295 545 560 365 270 370 440 420 415 420 405 340 420 300 320 290 300 165 230 295 285 275 275 180 125 170 160 220 130 95 150 80 75 50 25 15 55 
+        </Histogram>
+      </PDF>
+    </PDFDescriptor>
+  </Weights>
+</MethodSetup>
