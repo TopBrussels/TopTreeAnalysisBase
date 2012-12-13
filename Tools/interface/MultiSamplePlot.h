@@ -12,7 +12,7 @@
 
 #include "Math/Random.h"
 #include "Math/GSLRndmEngines.h"
-#include "TopTreeAnalysis/Content/interface/Dataset.h"
+#include "TopTreeAnalysisBase/Content/interface/Dataset.h"
 #include "PlottingTools.h"
 
 using namespace std;

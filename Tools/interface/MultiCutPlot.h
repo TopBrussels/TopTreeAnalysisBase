@@ -9,7 +9,7 @@
 #include "TLegend.h"
 #include "TCanvas.h"
 
-#include "TopTreeAnalysis/Content/interface/Dataset.h"
+#include "TopTreeAnalysisBase/Content/interface/Dataset.h"
 #include "PlottingTools.h"
 
 using namespace std;

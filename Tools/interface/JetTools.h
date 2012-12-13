@@ -15,9 +15,9 @@
 #include "TopTreeProducer/interface/TRootMET.h"
 #include "TopTreeProducer/interface/TRootVertex.h"
 
-#include "TopTreeAnalysis/Reconstruction/interface/FactorizedJetCorrector.h"
-#include "TopTreeAnalysis/Reconstruction/interface/JetCorrectorParameters.h"
-#include "TopTreeAnalysis/Reconstruction/interface/JetCorrectionUncertainty.h"
+#include "TopTreeAnalysisBase/Reconstruction/interface/FactorizedJetCorrector.h"
+#include "TopTreeAnalysisBase/Reconstruction/interface/JetCorrectorParameters.h"
+#include "TopTreeAnalysisBase/Reconstruction/interface/JetCorrectionUncertainty.h"
 
 using namespace std;
 using namespace TopTree;

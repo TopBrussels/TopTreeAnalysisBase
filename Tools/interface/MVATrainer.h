@@ -15,9 +15,9 @@
 #include "TROOT.h"
 #include "TPluginManager.h"
 
-#include "TopTreeAnalysis/TMVA/src/Factory.h"
-#include "TopTreeAnalysis/TMVA/src/Tools.h"
-#include "TopTreeAnalysis/TMVA/src/Config.h"
+#include "TopTreeAnalysisBase/TMVA/src/Factory.h"
+#include "TopTreeAnalysisBase/TMVA/src/Tools.h"
+#include "TopTreeAnalysisBase/TMVA/src/Config.h"
 
 
 
