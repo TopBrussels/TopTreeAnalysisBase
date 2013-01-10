@@ -3,6 +3,8 @@
 //____CONSTRUCTORS______________________________________________________//
 
 Selection::Selection() {
+  rho_ = 0;
+  elecIsoCorrType_ = 1; // 0: no corr, 1: rho corr, 2: dB corr.
   setJetCuts();
   setMuonCuts();
   setDiMuonCuts();
@@ -12,8 +14,42 @@ Selection::Selection() {
   setLooseElectronCuts();
   setLooseDiElectronCuts();
 }
+/*
+ Selection::Selection(const std::vector<TRootJet*>& jets_, const std::vector<TRootMuon*>& muons_, const std::vector<TRootMET*>& mets_){
+ rho_ = 0;
+ elecIsoCorrType_ = 1; // 0: no corr, 1: rho corr, 2: dB corr.
+ setJetCuts();
+ setMuonCuts();
+ setDiMuonCuts();
+ setElectronCuts();
+ setDiElectronCuts();
+ setLooseMuonCuts();
+ setLooseElectronCuts();
+ setLooseDiElectronCuts();
+ for(unsigned int i=0;i<jets_.size();i++) jets.push_back(jets_[i]);
+ for(unsigned int i=0;i<muons_.size();i++) muons.push_back(muons_[i]);
+ for(unsigned int i=0;i<mets_.size();i++) mets.push_back(mets_[i]);
+ }
+ Selection::Selection(const std::vector<TRootJet*>& jets_, const std::vector<TRootEelctron*>& electrons_, const std::vector<TRootMET*>& mets_){
+ rho_ = 0;
+ elecIsoCorrType_ = 1; // 0: no corr, 1: rho corr, 2: dB corr.
+ setJetCuts();
+ setMuonCuts();
+ setDiMuonCuts();
+ setElectronCuts();
+ setDiElectronCuts();
+ setLooseMuonCuts();
+ setLooseElectronCuts();
+ setLooseDiElectronCuts();
+ for(unsigned int i=0;i<jets_.size();i++) jets.push_back(jets_[i]);
+ for(unsigned int i=0;i<electrons_.size();i++) electrons.push_back(electrons_[i]);
+ for(unsigned int i=0;i<mets_.size();i++) mets.push_back(mets_[i]);
+ }
+*/
 
-Selection::Selection(const std::vector<TRootJet*>& jets_, const std::vector<TRootMuon*>& muons_, const std::vector<TRootMET*>& mets_){
+Selection::Selection(const std::vector<TRootJet*>& jets_, const std::vector<TRootMuon*>& muons_, const std::vector<TRootElectron*>& electrons_, const std::vector<TRootMET*>& mets_){
+  rho_ = 0;
+  elecIsoCorrType_ = 1; // 0: no corr, 1: rho corr, 2: dB corr.
   setJetCuts();
   setMuonCuts();
   setDiMuonCuts();
@@ -24,10 +60,13 @@ Selection::Selection(const std::vector<TRootJet*>& jets_, const std::vector<TRoo
   setLooseDiElectronCuts();
   for(unsigned int i=0;i<jets_.size();i++) jets.push_back(jets_[i]);
   for(unsigned int i=0;i<muons_.size();i++) muons.push_back(muons_[i]);
+  for(unsigned int i=0;i<electrons_.size();i++) electrons.push_back(electrons_[i]);
   for(unsigned int i=0;i<mets_.size();i++) mets.push_back(mets_[i]);
 }
 
-Selection::Selection(const std::vector<TRootJet*>& jets_, const std::vector<TRootMuon*>& muons_, const std::vector<TRootElectron*>& electrons_, const std::vector<TRootMET*>& mets_){
+Selection::Selection(const std::vector<TRootJet*>& jets_, const std::vector<TRootMuon*>& muons_, const std::vector<TRootElectron*>& electrons_, const std::vector<TRootMET*>& mets_, float rho){
+  rho_ = rho;
+  elecIsoCorrType_ = 1; // 0: no corr, 1: rho corr, 2: dB corr.
   setJetCuts();
   setMuonCuts();
   setDiMuonCuts();
@@ -44,19 +83,25 @@ Selection::Selection(const std::vector<TRootJet*>& jets_, const std::vector<TRoo
 
 Selection::Selection(const Selection& s) {
   // copy the objects
+  rho_ = s.rho_;
+  elecIsoCorrType_ = s.elecIsoCorrType_; // 0: no corr, 1: rho corr, 2: dB corr.
   jets = s.jets;
   electrons = s.electrons;
   muons = s.muons;
   mets = s.mets;
   // copy the cutvalues
   setJetCuts(s.JetPtThreshold_,s.JetEtaThreshold_,s.JetEMFThreshold_,s.n90HitsThreshold_,s.fHPDThreshold_,s.DRJetElectron_,s.DRJetMuon_);
+  
   setMuonCuts(s.MuonPtThreshold_,s.MuonEtaThreshold_,s.MuonRelIso_,s.MuonNofValidHits_,s.Muond0Cut_,s.MuonDRJetsCut_,s.MuonNMatchedStations_,s.MuonDistVzPVz_,s.MuonNTrackerLayersWithMeasurement_,s.MuonNValidPixelHits_);
   setDiMuonCuts(s.MuonPtThreshold_,s.MuonEtaThreshold_,s.MuonRelIso_,s.Muond0Cut_);
+  
   setLooseMuonCuts(s.JetPtThreshold_,s.JetEtaThreshold_,s.MuonRelIso_);
+  
   setElectronCuts(s.ElectronEtThreshold_,s.ElectronEtaThreshold_,s.ElectronRelIso_,s.Electrond0Cut_,s.ElectronMVAId_,s.ElectronDistVzPVz_,s.ElectronDRJetsCut_,s.ElectronMaxMissingHitsCut_);
   setDiElectronCuts(s.ElectronEtThreshold_,s.ElectronEtaThreshold_,s.ElectronRelIso_,s.Electrond0Cut_,s.ElectronMVAId_,s.ElectronDistVzPVz_,s.ElectronDRJetsCut_,s.ElectronMaxMissingHitsCut_);
+
   setLooseElectronCuts(s.ElectronLooseEtThreshold_,s.ElectronLooseEtaThreshold_,s.ElectronLooseRelIso_,s.ElectronLooseMVAId_);
-  setLooseDiElectronCuts(s.ElectronLooseEtThreshold_,s.ElectronLooseEtaThreshold_,s.ElectronLooseRelIso_);
+  setLooseDiElectronCuts(s.ElectronLooseEtThreshold_,s.ElectronLooseEtaThreshold_,s.ElectronLooseRelIso_,s.ElectronLooseMVAId_);
 
 }
 
@@ -91,6 +136,15 @@ void Selection::setJetCuts() {
   setJetCuts(35.,2.5,0.01,1.,0.98,0.3,0.1);
 }
 
+void Selection::setElectronIsoCorrType(int corrType){
+  elecIsoCorrType_ = corrType;
+  if (elecIsoCorrType_ == 1 && rho_ <= 0) {
+    cerr << "If you plan to use the rho correction for the electron relative isolation, please use the correct constructor:" << endl;
+    cerr << " - Selection::Selection(const std::vector<TRootJet*>& jets_, const std::vector<TRootMuon*>& muons_, const std::vector<TRootElectron*>& electrons_, const std::vector<TRootMET*>& mets_, float rho)" << endl;
+    cerr << " And/or specify a valid (i.e. positive) rho value." << endl;
+    exit(1);
+  }
+}
 void Selection::setElectronCuts(float Et, float Eta, float RelIso, float d0, float MVAId_, float DistVzPVz, float DRJets, int MaxMissingHits) {
   ElectronEtThreshold_ = Et;
   ElectronEtaThreshold_ = Eta;
@@ -136,14 +190,15 @@ void Selection::setLooseElectronCuts() {
 }
 
 
-void Selection::setLooseDiElectronCuts(float Et, float Eta, float RelIso) {
+void Selection::setLooseDiElectronCuts(float Et, float Eta, float RelIso, float MVAId) {
   ElectronLooseEtThreshold_ = Et;
   ElectronLooseEtaThreshold_ = Eta;
   ElectronLooseRelIso_ = RelIso;
+  ElectronLooseMVAId_ = MVAId;
 }
 
 void Selection::setLooseDiElectronCuts() {
-  setLooseDiElectronCuts(20,2.5,0.15); // refSel 2012 values
+  setLooseDiElectronCuts(20,2.5,0.15,0.); // refSel 2012 values
 }
 
 
@@ -524,7 +579,7 @@ std::vector<TRootMuon*> Selection::GetSelectedMuonsIsoRange(float PtThr, float E
 }
   
 // ______________ELECTRONS____________________________________________//
-
+/*
 bool Selection::passConversionRejection(TRootElectron* electron)
 {
   bool passed = false;
@@ -535,7 +590,7 @@ bool Selection::passConversionRejection(TRootElectron* electron)
     }
   return passed;
 }
-
+*/
 bool Selection::foundZCandidate(TRootElectron* electron, std::vector<TRootElectron*>& vetoElectrons, float windowsize)
 {
   bool foundZ = false;
@@ -627,14 +682,40 @@ std::vector<TRootElectron*> Selection::GetSelectedElectrons(float PtThr, float E
   {
     TRootElectron* el = (TRootElectron*) electrons[i];
 
-    //Compute isolation
     // Detector-based relative isolation
     //  float RelIso = (el->caloIso(3)+el->trackerIso(3)) / el->Et();
     // PF relative isolation
     //  float RelIso = (el->chargedHadronIso()+el->neutralHadronIso()+el->photonIso())/el->Pt();
     // PF relative isolation with dBeta correction:
-    float RelIso = (el->chargedHadronIso() + max( 0.0, el->neutralHadronIso() + el->photonIso() - 0.5*el->puChargedHadronIso() ) ) / el->Pt();
+    //  float RelIso = (el->chargedHadronIso()+max(0.0,el->neutralHadronIso()+el->photonIso()-0.5*el->puChargedHadronIso()))/el->Pt();
 
+    double EffectiveArea = 0.;
+    
+    // HCP 2012 updated for electron conesize = 0.3, taken from http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/EGamma/EGammaAnalysisTools/interface/ElectronEffectiveArea.h?revision=1.4&view=markup
+    if (fabs(el->superClusterEta()) >= 0.0   && fabs(el->superClusterEta()) < 1.0   ) EffectiveArea = 0.130;
+    if (fabs(el->superClusterEta()) >= 1.0   && fabs(el->superClusterEta()) < 1.479 ) EffectiveArea = 0.137;
+    if (fabs(el->superClusterEta()) >= 1.479 && fabs(el->superClusterEta()) < 2.0   ) EffectiveArea = 0.067;
+    if (fabs(el->superClusterEta()) >= 2.0   && fabs(el->superClusterEta()) < 2.2   ) EffectiveArea = 0.089;
+    if (fabs(el->superClusterEta()) >= 2.2   && fabs(el->superClusterEta()) < 2.3   ) EffectiveArea = 0.107;
+    if (fabs(el->superClusterEta()) >= 2.3   && fabs(el->superClusterEta()) < 2.4   ) EffectiveArea = 0.110;
+    if (fabs(el->superClusterEta()) >= 2.4) EffectiveArea = 0.138;
+
+    double isocorr = 0;
+    if(elecIsoCorrType_ == 1) // rho correction (default corr)
+      isocorr = rho_*EffectiveArea;
+    else if(elecIsoCorrType_ == 2) // dB correction
+      isocorr = 0.5*el->puChargedHadronIso();
+    else if (elecIsoCorrType_ == 0) // no correction
+      isocorr = 0.;
+    else{
+      cerr << "Please, specify the correction type to be applied for the calculation of the electron relative isolation" << endl;
+      cerr << " - Use setElectronIsoCorrType(int) method: " << endl;
+      cerr << " -- 0: no correction, 1: rho correction (default), 2: dB correction" << endl;
+      exit(1);
+    }
+    // Compute the relative isolation
+    float RelIso = (el->chargedHadronIso() + max(0.0 , el->neutralHadronIso() + el->photonIso() - isocorr) )/ el->Pt();
+    
     if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr)
       if(fabs(el->superClusterEta()) < 1.4442 || fabs(el->superClusterEta()) > 1.5660)
         if(fabs(el->d0()) < Electrond0Cut_)
@@ -648,6 +729,42 @@ std::vector<TRootElectron*> Selection::GetSelectedElectrons(float PtThr, float E
   return selectedElectrons;
 }
 
+/*
+//Method including rho correction
+std::vector<TRootElectron*> Selection::GetSelectedElectrons(float PtThr, float EtaThr, float ElectronRelIso, float rho) const {
+  std::vector<TRootElectron*> selectedElectrons;
+  //cout << ElectronRelIso << endl;
+  for(unsigned int i=0;i<electrons.size();i++)
+  {
+    TRootElectron* el = (TRootElectron*) electrons[i];
+    
+    double EffectiveArea = 0.;
+    
+    // HCP 2012 updated for electron conesize = 0.3, taken from http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/EGamma/EGammaAnalysisTools/interface/ElectronEffectiveArea.h?revision=1.4&view=markup
+    if (fabs(el->superClusterEta()) >= 0.0   && fabs(el->superClusterEta()) < 1.0   ) EffectiveArea = 0.130;
+    if (fabs(el->superClusterEta()) >= 1.0   && fabs(el->superClusterEta()) < 1.479 ) EffectiveArea = 0.137;
+    if (fabs(el->superClusterEta()) >= 1.479 && fabs(el->superClusterEta()) < 2.0   ) EffectiveArea = 0.067;
+    if (fabs(el->superClusterEta()) >= 2.0   && fabs(el->superClusterEta()) < 2.2   ) EffectiveArea = 0.089;
+    if (fabs(el->superClusterEta()) >= 2.2   && fabs(el->superClusterEta()) < 2.3   ) EffectiveArea = 0.107;
+    if (fabs(el->superClusterEta()) >= 2.3   && fabs(el->superClusterEta()) < 2.4   ) EffectiveArea = 0.110;
+    if (fabs(el->superClusterEta()) >= 2.4) EffectiveArea = 0.138;
+    
+    
+    float RelIso = (el->chargedHadronIso() + max( el->neutralHadronIso() + el->photonIso()  - rho*EffectiveArea, 0.) )/ el->Pt();
+    
+    if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr)
+      if(fabs(el->superClusterEta()) < 1.4442 || fabs(el->superClusterEta()) > 1.5660)
+        if(fabs(el->d0()) < Electrond0Cut_)
+          if(el->passConversion())
+            if(el->mvaTrigId() > ElectronMVAId_)
+              if(el->missingHits() <=  ElectronMaxMissingHitsCut_)
+                if(RelIso < ElectronRelIso_)
+                  selectedElectrons.push_back(electrons[i]);
+  }
+  std::sort(selectedElectrons.begin(),selectedElectrons.end(),HighestPt());
+  return selectedElectrons;
+}
+*/
 std::vector<TRootElectron*> Selection::GetSelectedElectrons() const{
   return GetSelectedElectrons(ElectronEtThreshold_, ElectronEtaThreshold_, ElectronRelIso_);
 }
@@ -656,6 +773,12 @@ std::vector<TRootElectron*> Selection::GetSelectedElectrons(TRootVertex* vertex)
   return GetSelectedElectrons(ElectronEtThreshold_, ElectronEtaThreshold_, ElectronRelIso_,vertex);
 }
 
+/*
+//Method including rho correction
+std::vector<TRootElectron*> Selection::GetSelectedElectrons(TRootVertex* vertex, float rho) const{
+  return GetSelectedElectrons(ElectronEtThreshold_, ElectronEtaThreshold_, ElectronRelIso_, vertex, rho);
+}
+*/
 std::vector<TRootElectron*> Selection::GetSelectedElectrons(TRootVertex* vertex, vector<TRootJet*>& selJets) const{
   return GetSelectedElectrons(ElectronEtThreshold_, ElectronEtaThreshold_, ElectronRelIso_,vertex, selJets);
 }
@@ -673,6 +796,23 @@ std::vector<TRootElectron*> Selection::GetSelectedElectrons(float EtThr, float E
   std::sort(selectedElectrons.begin(),selectedElectrons.end(),HighestPt());
   return selectedElectrons;
 }
+
+/*
+//Method including rho correction
+std::vector<TRootElectron*> Selection::GetSelectedElectrons(float EtThr, float EtaThr, float ElectronRelIso, TRootVertex* vertex, float rho) const {
+  std::vector<TRootElectron*> init_electrons = GetSelectedElectrons(EtThr,EtaThr,ElectronRelIso, rho);
+  std::vector<TRootElectron*> selectedElectrons;
+  for(unsigned int i=0;i<init_electrons.size();i++){
+    TRootElectron* el = (TRootElectron*) init_electrons[i];
+    if ( fabs(el->vz() - vertex->Z()) < ElectronDistVzPVz_) {
+      selectedElectrons.push_back(init_electrons[i]);
+    }
+  }
+  
+  std::sort(selectedElectrons.begin(),selectedElectrons.end(),HighestPt());
+  return selectedElectrons;
+}
+*/
 
 std::vector<TRootElectron*> Selection::GetSelectedElectrons(float EtThr, float EtaThr, float ElectronRelIso, TRootVertex* vertex, vector<TRootJet*>& selJets) const{
   std::vector<TRootElectron*> init_electrons = GetSelectedElectrons(EtThr,EtaThr,ElectronRelIso,vertex);
@@ -693,7 +833,27 @@ std::vector<TRootElectron*> Selection::GetSelectedElectrons(float EtThr, float E
   return selectedElectrons;
 }
 
-//
+/*
+//Method including rho correction
+std::vector<TRootElectron*> Selection::GetSelectedElectrons(float EtThr, float EtaThr, float ElectronRelIso, TRootVertex* vertex, float rho, vector<TRootJet*>& selJets) const{
+  std::vector<TRootElectron*> init_electrons = GetSelectedElectrons(EtThr,EtaThr,ElectronRelIso,vertex,rho);
+  std::vector<TRootElectron*> selectedElectrons;
+  for(unsigned int i=0;i<init_electrons.size();i++){
+    float mindRElJet = 999999.;
+    TRootJet* jet;
+    for(unsigned int j=0;j<selJets.size();j++) {
+      jet = selJets.at(j);
+      float dRElJet = init_electrons[i]->DeltaR(*jet);
+      if(dRElJet < mindRElJet) mindRElJet = dRElJet;
+    }
+    if(mindRElJet > ElectronDRJetsCut_){
+      selectedElectrons.push_back(init_electrons[i]);
+    }
+  }
+  std::sort(selectedElectrons.begin(),selectedElectrons.end(),HighestPt());
+  return selectedElectrons;
+}
+*/
 
 std::vector<TRootElectron*> Selection::GetSelectedDiElectrons(float PtThr, float EtaThr, float ElectronRelIso) const {
   std::vector<TRootElectron*> selectedElectrons;
@@ -701,16 +861,47 @@ std::vector<TRootElectron*> Selection::GetSelectedDiElectrons(float PtThr, float
   for(unsigned int i=0;i<electrons.size();i++)
   {
     TRootElectron* el = (TRootElectron*) electrons[i];
+
+    // Detector-based relative isolation
+    //  float RelIso = (el->caloIso(3)+el->trackerIso(3)) / el->Et();
+    // PF relative isolation
+    //  float RelIso = (el->chargedHadronIso()+el->neutralHadronIso()+el->photonIso())/el->Pt();
     // PF relative isolation with dBeta correction:
-    float RelIso = (el->chargedHadronIso() + max( 0.0, el->neutralHadronIso() + el->photonIso() - 0.5*el->puChargedHadronIso() ) ) / el->Pt(); //dbeta
-   
+    //  float RelIso = (el->chargedHadronIso()+max(0.0,el->neutralHadronIso()+el->photonIso()-0.5*el->puChargedHadronIso()))/el->Pt();
+    
+    double EffectiveArea = 0.;
+    
+    // HCP 2012 updated for electron conesize = 0.3, taken from http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/EGamma/EGammaAnalysisTools/interface/ElectronEffectiveArea.h?revision=1.4&view=markup
+    if (fabs(el->superClusterEta()) >= 0.0   && fabs(el->superClusterEta()) < 1.0   ) EffectiveArea = 0.130;
+    if (fabs(el->superClusterEta()) >= 1.0   && fabs(el->superClusterEta()) < 1.479 ) EffectiveArea = 0.137;
+    if (fabs(el->superClusterEta()) >= 1.479 && fabs(el->superClusterEta()) < 2.0   ) EffectiveArea = 0.067;
+    if (fabs(el->superClusterEta()) >= 2.0   && fabs(el->superClusterEta()) < 2.2   ) EffectiveArea = 0.089;
+    if (fabs(el->superClusterEta()) >= 2.2   && fabs(el->superClusterEta()) < 2.3   ) EffectiveArea = 0.107;
+    if (fabs(el->superClusterEta()) >= 2.3   && fabs(el->superClusterEta()) < 2.4   ) EffectiveArea = 0.110;
+    if (fabs(el->superClusterEta()) >= 2.4) EffectiveArea = 0.138;
+    
+    double isocorr = 0;
+    if(elecIsoCorrType_ == 1) // rho correction (default corr)
+      isocorr = rho_*EffectiveArea;
+    else if(elecIsoCorrType_ == 2) // dB correction
+      isocorr = 0.5*el->puChargedHadronIso();
+    else if (elecIsoCorrType_ == 0) // no correction
+      isocorr = 0.;
+    else{
+      cerr << "Please, specify the correction type to be applied for the calculation of the electron relative isolation" << endl;
+      cerr << " - Use setElectronIsoCorrType(int) method: " << endl;
+      cerr << " -- 0: no correction, 1: rho correction (default), 2: dB correction" << endl;
+      exit(1);
+    }
+    // Compute the relative isolation
+    float RelIso = (el->chargedHadronIso() + max( el->neutralHadronIso() + el->photonIso()  - isocorr, 0.) )/ el->Pt();
 
     if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr)
-      if ( fabs(el->d0()) < Electrond0Cut_)
+      if (fabs(el->d0()) < Electrond0Cut_)
         if (el->passConversion())
           if (el->mvaTrigId() > ElectronMVAId_)
             if(el->missingHits() <=  ElectronMaxMissingHitsCut_)
-              if ( RelIso < ElectronRelIso )
+              if(RelIso < ElectronRelIso)
                 selectedElectrons.push_back(electrons[i]);
   }
   std::sort(selectedElectrons.begin(),selectedElectrons.end(),HighestPt());
@@ -729,14 +920,43 @@ std::vector<TRootElectron*> Selection::GetSelectedLooseElectrons(float PtThr, fl
   std::vector<TRootElectron*> selectedElectrons;
   for(unsigned int i=0;i<electrons.size();i++){
     TRootElectron* el = (TRootElectron*) electrons[i];
-    //Compute isolation
-    //    float RelIso = (el->caloIso(3)+el->trackerIso(3)) / el->Et();
-    //float RelIso = (el->chargedHadronIso()+el->neutralHadronIso()+el->photonIso())/el->Pt();
-    float RelIso = (el->chargedHadronIso() + max( 0.0, el->neutralHadronIso() + el->photonIso() - 0.5*el->puChargedHadronIso() ) ) / el->Pt();
+
+    // Detector-based relative isolation
+    //  float RelIso = (el->caloIso(3)+el->trackerIso(3)) / el->Et();
+    // PF relative isolation
+    //  float RelIso = (el->chargedHadronIso()+el->neutralHadronIso()+el->photonIso())/el->Pt();
+    // PF relative isolation with dBeta correction:
+    //  float RelIso = (el->chargedHadronIso()+max(0.0,el->neutralHadronIso()+el->photonIso()-0.5*el->puChargedHadronIso()))/el->Pt();
+    
+    double EffectiveArea = 0.;
+    
+    // HCP 2012 updated for electron conesize = 0.3, taken from http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/EGamma/EGammaAnalysisTools/interface/ElectronEffectiveArea.h?revision=1.4&view=markup
+    if (fabs(el->superClusterEta()) >= 0.0   && fabs(el->superClusterEta()) < 1.0   ) EffectiveArea = 0.130;
+    if (fabs(el->superClusterEta()) >= 1.0   && fabs(el->superClusterEta()) < 1.479 ) EffectiveArea = 0.137;
+    if (fabs(el->superClusterEta()) >= 1.479 && fabs(el->superClusterEta()) < 2.0   ) EffectiveArea = 0.067;
+    if (fabs(el->superClusterEta()) >= 2.0   && fabs(el->superClusterEta()) < 2.2   ) EffectiveArea = 0.089;
+    if (fabs(el->superClusterEta()) >= 2.2   && fabs(el->superClusterEta()) < 2.3   ) EffectiveArea = 0.107;
+    if (fabs(el->superClusterEta()) >= 2.3   && fabs(el->superClusterEta()) < 2.4   ) EffectiveArea = 0.110;
+    if (fabs(el->superClusterEta()) >= 2.4) EffectiveArea = 0.138;
+    
+    double isocorr = 0;
+    if(elecIsoCorrType_ == 1) // rho correction (default corr)
+      isocorr = rho_*EffectiveArea;
+    else if(elecIsoCorrType_ == 2) // dB correction
+      isocorr = 0.5*el->puChargedHadronIso();
+    else if (elecIsoCorrType_ == 0) // no correction
+      isocorr = 0.;
+    else{
+      cerr << "Please, specify the correction type to be applied for the calculation of the electron relative isolation" << endl;
+      cerr << " - Use setElectronIsoCorrType(int) method: " << endl;
+      cerr << " -- 0: no correction, 1: rho correction (default), 2: dB correction" << endl;
+      exit(1);
+    }
+    // Compute the relative isolation
+    float RelIso = (el->chargedHadronIso() + max( el->neutralHadronIso() + el->photonIso()  - isocorr, 0.) )/ el->Pt();
 
     if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr)
-      if (fabs(el->superClusterEta()) < 1.4442 || fabs(el->superClusterEta()) > 1.5660)
-//        if (!vbtfid || (vbtfid && el->mvaTrigId()>ElectronLooseMVAId_) )
+//      if (fabs(el->superClusterEta()) < 1.4442 || fabs(el->superClusterEta()) > 1.5660)
         if (el->mvaTrigId()>ElectronLooseMVAId_)
           if ( RelIso < ElectronRelIso )
             selectedElectrons.push_back(electrons[i]);
@@ -745,20 +965,53 @@ std::vector<TRootElectron*> Selection::GetSelectedLooseElectrons(float PtThr, fl
   return selectedElectrons;
 }
 
-/*std::vector<TRootElectron*> Selection::GetSelectedLooseElectrons(bool vbtfid) const {
-  return GetSelectedLooseElectrons(ElectronLooseEtThreshold_, ElectronLooseEtaThreshold_, ElectronLooseRelIso_,vbtfid);
-}*/
+std::vector<TRootElectron*> Selection::GetSelectedLooseElectrons() const {
+  return GetSelectedLooseElectrons(ElectronLooseEtThreshold_, ElectronLooseEtaThreshold_, ElectronLooseRelIso_);
+}
 
 std::vector<TRootElectron*> Selection::GetSelectedLooseDiElectrons(float PtThr, float EtaThr, float ElectronRelIso) const {
   std::vector<TRootElectron*> selectedElectrons;
   for(unsigned int i=0;i<electrons.size();i++){
     TRootElectron* el = (TRootElectron*) electrons[i];
-    float RelIso = (el->chargedHadronIso() + max( 0.0, el->neutralHadronIso() + el->photonIso() - 0.5*el->puChargedHadronIso() ) ) / el->Pt();
+
+    // Detector-based relative isolation
+    //  float RelIso = (el->caloIso(3)+el->trackerIso(3)) / el->Et();
+    // PF relative isolation
+    //  float RelIso = (el->chargedHadronIso()+el->neutralHadronIso()+el->photonIso())/el->Pt();
+    // PF relative isolation with dBeta correction:
+    //  float RelIso = (el->chargedHadronIso()+max(0.0,el->neutralHadronIso()+el->photonIso()-0.5*el->puChargedHadronIso()))/el->Pt();
+    
+    double EffectiveArea = 0.;
+    
+    // HCP 2012 updated for electron conesize = 0.3, taken from http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/EGamma/EGammaAnalysisTools/interface/ElectronEffectiveArea.h?revision=1.4&view=markup
+    if (fabs(el->superClusterEta()) >= 0.0   && fabs(el->superClusterEta()) < 1.0   ) EffectiveArea = 0.130;
+    if (fabs(el->superClusterEta()) >= 1.0   && fabs(el->superClusterEta()) < 1.479 ) EffectiveArea = 0.137;
+    if (fabs(el->superClusterEta()) >= 1.479 && fabs(el->superClusterEta()) < 2.0   ) EffectiveArea = 0.067;
+    if (fabs(el->superClusterEta()) >= 2.0   && fabs(el->superClusterEta()) < 2.2   ) EffectiveArea = 0.089;
+    if (fabs(el->superClusterEta()) >= 2.2   && fabs(el->superClusterEta()) < 2.3   ) EffectiveArea = 0.107;
+    if (fabs(el->superClusterEta()) >= 2.3   && fabs(el->superClusterEta()) < 2.4   ) EffectiveArea = 0.110;
+    if (fabs(el->superClusterEta()) >= 2.4) EffectiveArea = 0.138;
+    
+    double isocorr = 0;
+    if(elecIsoCorrType_ == 1) // rho correction (default corr)
+      isocorr = rho_*EffectiveArea;
+    else if(elecIsoCorrType_ == 2) // dB correction
+      isocorr = 0.5*el->puChargedHadronIso();
+    else if (elecIsoCorrType_ == 0) // no correction
+      isocorr = 0.;
+    else{
+      cerr << "Please, specify the correction type to be applied for the calculation of the electron relative isolation" << endl;
+      cerr << " - Use setElectronIsoCorrType(int) method: " << endl;
+      cerr << " -- 0: no correction, 1: rho correction (default), 2: dB correction" << endl;
+      exit(1);
+    }
+    // Compute the relative isolation
+    float RelIso = (el->chargedHadronIso() + max( el->neutralHadronIso() + el->photonIso()  - isocorr, 0.) )/ el->Pt();
 
     if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr)
     	if ( RelIso < ElectronRelIso )
-	 if (el->mvaTrigId() > 0)
-	  selectedElectrons.push_back(electrons[i]);
+        if (el->mvaTrigId() > ElectronLooseMVAId_)
+          selectedElectrons.push_back(electrons[i]);
   }
   std::sort(selectedElectrons.begin(),selectedElectrons.end(),HighestPt());
   return selectedElectrons;
@@ -787,10 +1040,43 @@ std::vector<TRootElectron*> Selection::GetSelectedElectronsInvIso(float Electron
       float dRElJet = init_electrons[i]->DeltaR(*selJets.at(j));
       if(dRElJet < mindRElJet) mindRElJet = dRElJet;
     }
-    float reliso = (init_electrons[i]->chargedHadronIso()+init_electrons[i]->neutralHadronIso()+init_electrons[i]->photonIso())/init_electrons[i]->Pt();
-      if( fabs(init_electrons[i]->vz() - vertex->Z()) < ElectronDistVzPVz_ && mindRElJet > ElectronDRJetsCut_ && reliso > ElectronRelIso )
-	selectedElectrons.push_back(init_electrons[i]);
+    // Detector-based relative isolation
+    //  float RelIso = (el->caloIso(3)+el->trackerIso(3)) / el->Et();
+    // PF relative isolation
+    //  float RelIso = (el->chargedHadronIso()+el->neutralHadronIso()+el->photonIso())/el->Pt();
+    // PF relative isolation with dBeta correction:
+    //  float RelIso = (el->chargedHadronIso()+max(0.0,el->neutralHadronIso()+el->photonIso()-0.5*el->puChargedHadronIso()))/el->Pt();
+    
+    double EffectiveArea = 0.;
+    
+    // HCP 2012 updated for electron conesize = 0.3, taken from http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/EGamma/EGammaAnalysisTools/interface/ElectronEffectiveArea.h?revision=1.4&view=markup
+    if (fabs(init_electrons[i]->superClusterEta()) >= 0.0   && fabs(init_electrons[i]->superClusterEta()) < 1.0   ) EffectiveArea = 0.130;
+    if (fabs(init_electrons[i]->superClusterEta()) >= 1.0   && fabs(init_electrons[i]->superClusterEta()) < 1.479 ) EffectiveArea = 0.137;
+    if (fabs(init_electrons[i]->superClusterEta()) >= 1.479 && fabs(init_electrons[i]->superClusterEta()) < 2.0   ) EffectiveArea = 0.067;
+    if (fabs(init_electrons[i]->superClusterEta()) >= 2.0   && fabs(init_electrons[i]->superClusterEta()) < 2.2   ) EffectiveArea = 0.089;
+    if (fabs(init_electrons[i]->superClusterEta()) >= 2.2   && fabs(init_electrons[i]->superClusterEta()) < 2.3   ) EffectiveArea = 0.107;
+    if (fabs(init_electrons[i]->superClusterEta()) >= 2.3   && fabs(init_electrons[i]->superClusterEta()) < 2.4   ) EffectiveArea = 0.110;
+    if (fabs(init_electrons[i]->superClusterEta()) >= 2.4) EffectiveArea = 0.138;
+    
+    double isocorr = 0;
+    if(elecIsoCorrType_ == 1) // rho correction (default corr)
+      isocorr = rho_*EffectiveArea;
+    else if(elecIsoCorrType_ == 2) // dB correction
+      isocorr = 0.5*init_electrons[i]->puChargedHadronIso();
+    else if (elecIsoCorrType_ == 0) // no correction
+      isocorr = 0.;
+    else{
+      cerr << "Please, specify the correction type to be applied for the calculation of the electron relative isolation" << endl;
+      cerr << " - Use setElectronIsoCorrType(int) method: " << endl;
+      cerr << " -- 0: no correction, 1: rho correction (default), 2: dB correction" << endl;
+      exit(1);
     }
+    // Compute the relative isolation
+    float RelIso = (init_electrons[i]->chargedHadronIso() + max( init_electrons[i]->neutralHadronIso() + init_electrons[i]->photonIso()  - isocorr, 0.) )/ init_electrons[i]->Pt();
+
+    if( fabs(init_electrons[i]->vz() - vertex->Z()) < ElectronDistVzPVz_ && mindRElJet > ElectronDRJetsCut_ && RelIso > ElectronRelIso )
+      selectedElectrons.push_back(init_electrons[i]);
+  }
   std::sort(selectedElectrons.begin(),selectedElectrons.end(),HighestPt());
   return selectedElectrons;
 }

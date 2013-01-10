@@ -2,7 +2,7 @@
  
   An example of how to use this class for e+jets and mu+jets selection (SelV4)
 
-  http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/NewPhysicsBrussels/TopTreeAnalysisBase/macros/SyncRefSel.cc?view=log&pathrev=CMSSW_38X#rev1.1.2.1
+  http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/NewPhysicsBrussels/TopTreeAnalysis/macros/SyncRefSel.cc?view=log&pathrev=CMSSW_38X#rev1.1.2.1
 
 */
 
@@ -53,17 +53,19 @@ class Selection{
 
  public:
   Selection();
-  Selection(const std::vector<TRootJet*>&, const std::vector<TRootMuon*>&, const std::vector<TRootMET*>&);
+  //Selection(const std::vector<TRootJet*>&, const std::vector<TRootMuon*>&, const std::vector<TRootMET*>&);
+  //Selection(const std::vector<TRootJet*>&, const std::vector<TRootElectron*>&, const std::vector<TRootMET*>&);
   Selection(const std::vector<TRootJet*>&, const std::vector<TRootMuon*>&, const std::vector<TRootElectron*>&,const std::vector<TRootMET*>&);
+  Selection(const std::vector<TRootJet*>&, const std::vector<TRootMuon*>&, const std::vector<TRootElectron*>&,const std::vector<TRootMET*>&, const float rho);
   Selection(const Selection &);
   ~Selection();
      
-  void SetConfiguration(float PtThrJets, float EtaThrJets, float EMFThrJets, float PtThrMuons, float EtaThrMuons, float MuonRelIso, float MuonVetoEM, float MuonVetoHad);
+//  void SetConfiguration(float PtThrJets, float EtaThrJets, float EMFThrJets, float PtThrMuons, float EtaThrMuons, float MuonRelIso, float MuonVetoEM, float MuonVetoHad);
       
   bool isPVSelected(const std::vector<TRootVertex*>& vertex, int NdofCut, float Zcut, float RhoCut);
 
   //bool passVBTFID(TRootElectron* electron, std::map<std::string,float> cuts);
-  bool passConversionRejection(TRootElectron* electron);
+//  bool passConversionRejection(TRootElectron* electron);
   bool foundZCandidate(TRootElectron* electron, std::vector<TRootElectron*>& vetoElectrons, float windowsize = 15 );
   bool foundZCandidate(std::vector<TRootElectron*>& electrons1, std::vector<TRootElectron*>& electrons2, float windowsize = 15 );
   bool foundZCandidate(TRootMuon* muon, std::vector<TRootMuon*>& vetoMuons, float windowsize = 15 );
@@ -75,6 +77,7 @@ class Selection{
   void setJetCuts(float Pt, float Eta, float EMF, float n90Hits, float fHPD, float dRJetElectron, float dRJetMuon);  
   
 // ELECTRON SELECTION CUTS ========================================
+  void setElectronIsoCorrType(int corrType = 1);
 // -- single-lepton channel
   void setElectronCuts();
   void setElectronCuts(float Pt, float Eta, float RelIso, float d0, float MVAId, float DistVzPVz, float DRJets, int MaxMissingHits);
@@ -84,7 +87,7 @@ class Selection{
   void setDiElectronCuts();
   void setDiElectronCuts(float Et, float Eta, float RelIso, float d0, float MVAId, float DistVzPVz, float DRJets, int MaxMissingHits);
   void setLooseDiElectronCuts();
-  void setLooseDiElectronCuts(float Pt, float Eta, float RelIso);
+  void setLooseDiElectronCuts(float Pt, float Eta, float RelIso, float MVAId);
 
 // MUON SELECTION CUTS ========================================
 // -- single-lepton channel
@@ -111,17 +114,23 @@ class Selection{
   std::vector<TRootElectron*> GetSelectedElectrons(TRootVertex* vertex) const;
   std::vector<TRootElectron*> GetSelectedElectrons(TRootVertex* vertex, vector<TRootJet*>& selJets) const;
   std::vector<TRootElectron*> GetSelectedElectrons(float EtThr, float EtaThr, float ElectronRelIso) const;
+//  std::vector<TRootElectron*> GetSelectedElectrons(float EtThr, float EtaThr, float ElectronRelIso, float rho) const;
   std::vector<TRootElectron*> GetSelectedElectrons(float EtThr, float EtaThr, float ElectronRelIso, TRootVertex* vertex) const;
+//  std::vector<TRootElectron*> GetSelectedElectrons(float EtThr, float EtaThr, float ElectronRelIso, TRootVertex* vertex, float rho) const;
   std::vector<TRootElectron*> GetSelectedElectrons(float EtThr, float EtaThr, float ElectronRelIso, TRootVertex* vertex, vector<TRootJet*>& selJets) const;
-  std::vector<TRootElectron*> GetSelectedDiElectrons() const;
-  std::vector<TRootElectron*> GetSelectedDiElectrons(float EtThr, float EtaThr, float ElectronRelIso) const;
+//  std::vector<TRootElectron*> GetSelectedElectrons(float EtThr, float EtaThr, float ElectronRelIso, TRootVertex* vertex, float rho, vector<TRootJet*>& selJets) const;
   std::vector<TRootElectron*> GetSelectedLooseElectrons() const;
   std::vector<TRootElectron*> GetSelectedLooseElectrons(float EtThr, float EtaThr, float ElectronRelIso) const;
+  //  std::vector<TRootElectron*> GetSelectedLooseElectrons(float EtThr, float EtaThr, float ElectronRelIso, float rho) const;
+
+  std::vector<TRootElectron*> GetSelectedDiElectrons() const;
+  std::vector<TRootElectron*> GetSelectedDiElectrons(float EtThr, float EtaThr, float ElectronRelIso) const;
+//  std::vector<TRootElectron*> GetSelectedDiElectrons(float EtThr, float EtaThr, float ElectronRelIso, float rho) const;
   std::vector<TRootElectron*> GetSelectedLooseDiElectrons() const;
   std::vector<TRootElectron*> GetSelectedLooseDiElectrons(float EtThr, float EtaThr, float ElectronRelIso) const;
+
   std::vector<TRootElectron*> GetSelectedElectronsInvIso(float ElectronRelIso, TRootVertex* vertex) const;
   std::vector<TRootElectron*> GetSelectedElectronsInvIso(float ElectronRelIso, TRootVertex* vertex, vector<TRootJet*>& selJets) const;
-
 // MUON GETTERS ==================================================
   std::vector<TRootMuon*> GetSelectedMuons() const;
   std::vector<TRootMuon*> GetSelectedMuons(TRootVertex* vertex) const;
@@ -129,11 +138,11 @@ class Selection{
   std::vector<TRootMuon*> GetSelectedMuons(float PtThr, float EtaThr, float MuonRelIso) const;
   std::vector<TRootMuon*> GetSelectedMuons(float PtThr, float EtaThr, float MuonRelIso, vector<TRootJet*> selJets) const;
   std::vector<TRootMuon*> GetSelectedMuons(float PtThr, float EtaThr, float MuonRelIso, TRootVertex* vertex, vector<TRootJet*>& selJets) const;
+
   std::vector<TRootMuon*> GetSelectedDiMuons() const;
   std::vector<TRootMuon*> GetSelectedDiMuons(float PtThr, float EtaThr, float MuonRelIso) const;
   std::vector<TRootMuon*> GetSelectedLooseMuons() const;
   std::vector<TRootMuon*> GetSelectedLooseMuons(float PtThr, float EtaThr, float MuonRelIso) const;
-
   std::vector<TRootMuon*> GetSelectedMuonsNonIso() const;
   std::vector<TRootMuon*> GetSelectedMuonsNonIso(float PtThr, float EtaThr, vector<TRootJet*>& selJets) const;
   std::vector<TRootMuon*> GetSelectedMuonsInvIso(float MuonRelIso, TRootVertex* vertex) const;
@@ -151,6 +160,9 @@ class Selection{
   bool isSelected (float PtThrJets, float EtaThrJets, float PtThrMuons, float EtaThrMuons, float MuonRelIso,float PtThrElectrons, float EtaThrElectrons, float ElectronRelIso, unsigned int Njets = 4, bool Veto2ndLepton = false) const;
 
  private:
+  float rho_;
+  int elecIsoCorrType_;
+  
   //int JetType;
   std::vector<TRootJet*> jets;
   std::vector<TRootElectron*> electrons;
