@@ -80,7 +80,7 @@ class Selection{
   void setElectronIsoCorrType(int corrType = 1);
 // -- single-lepton channel
   void setElectronCuts();
-  void setElectronCuts(float Pt, float Eta, float RelIso, float d0, float MVAId, float DistVzPVz, float DRJets, int MaxMissingHits);
+  void setElectronCuts(float Pt, float Eta, float RelIso, float d0, float MVAId, float DRJets, int MaxMissingHits);
   void setLooseElectronCuts();
   void setLooseElectronCuts(float Pt, float Eta, float RelIso, float MVAId);
 // -- double-lepton channel
@@ -92,7 +92,7 @@ class Selection{
 // MUON SELECTION CUTS ========================================
 // -- single-lepton channel
   void setMuonCuts();
-  void setMuonCuts(float Pt, float Eta, float RelIso, int NValidHits, float d0, float DRJets, int NMatchedStations, float DistVzPVz, int NTrackerLayersWithMeas, int NValidPixelHits);
+  void setMuonCuts(float Pt, float Eta, float RelIso, float d0, float DRJets, int NMatchedStations, float Dz, int NTrackerLayersWithMeas, int NValidPixelHits);
   void setLooseMuonCuts();
   void setLooseMuonCuts(float Pt, float Eta, float RelIso);
 // -- double-lepton channel
@@ -111,14 +111,11 @@ class Selection{
 
 // ELECTRON GETTERS ===============================================
   std::vector<TRootElectron*> GetSelectedElectrons() const;
-  std::vector<TRootElectron*> GetSelectedElectrons(TRootVertex* vertex) const;
-  std::vector<TRootElectron*> GetSelectedElectrons(TRootVertex* vertex, vector<TRootJet*>& selJets) const;
+  std::vector<TRootElectron*> GetSelectedElectrons(vector<TRootJet*>& selJets) const;
   std::vector<TRootElectron*> GetSelectedElectrons(float EtThr, float EtaThr, float ElectronRelIso) const;
 //  std::vector<TRootElectron*> GetSelectedElectrons(float EtThr, float EtaThr, float ElectronRelIso, float rho) const;
-  std::vector<TRootElectron*> GetSelectedElectrons(float EtThr, float EtaThr, float ElectronRelIso, TRootVertex* vertex) const;
-//  std::vector<TRootElectron*> GetSelectedElectrons(float EtThr, float EtaThr, float ElectronRelIso, TRootVertex* vertex, float rho) const;
-  std::vector<TRootElectron*> GetSelectedElectrons(float EtThr, float EtaThr, float ElectronRelIso, TRootVertex* vertex, vector<TRootJet*>& selJets) const;
-//  std::vector<TRootElectron*> GetSelectedElectrons(float EtThr, float EtaThr, float ElectronRelIso, TRootVertex* vertex, float rho, vector<TRootJet*>& selJets) const;
+  std::vector<TRootElectron*> GetSelectedElectrons(float EtThr, float EtaThr, float ElectronRelIso, vector<TRootJet*>& selJets) const;
+//  std::vector<TRootElectron*> GetSelectedElectrons(float EtThr, float EtaThr, float ElectronRelIso, float rho, vector<TRootJet*>& selJets) const;
   std::vector<TRootElectron*> GetSelectedLooseElectrons() const;
   std::vector<TRootElectron*> GetSelectedLooseElectrons(float EtThr, float EtaThr, float ElectronRelIso) const;
   //  std::vector<TRootElectron*> GetSelectedLooseElectrons(float EtThr, float EtaThr, float ElectronRelIso, float rho) const;
@@ -129,8 +126,8 @@ class Selection{
   std::vector<TRootElectron*> GetSelectedLooseDiElectrons() const;
   std::vector<TRootElectron*> GetSelectedLooseDiElectrons(float EtThr, float EtaThr, float ElectronRelIso) const;
 
-  std::vector<TRootElectron*> GetSelectedElectronsInvIso(float ElectronRelIso, TRootVertex* vertex) const;
-  std::vector<TRootElectron*> GetSelectedElectronsInvIso(float ElectronRelIso, TRootVertex* vertex, vector<TRootJet*>& selJets) const;
+  std::vector<TRootElectron*> GetSelectedElectronsInvIso(float ElectronRelIso) const;
+  std::vector<TRootElectron*> GetSelectedElectronsInvIso(float ElectronRelIso, vector<TRootJet*>& selJets) const;
 // MUON GETTERS ==================================================
   std::vector<TRootMuon*> GetSelectedMuons() const;
   std::vector<TRootMuon*> GetSelectedMuons(TRootVertex* vertex) const;
@@ -185,12 +182,11 @@ class Selection{
   float MuonLoosePtThreshold_;
   float MuonLooseEtaThreshold_;
   float MuonLooseRelIso_;
-  int   MuonNofValidHits_;
   float Muond0Cut_;
   float MuonDRJetsCut_;
   float MuonNormChi2_;
   int   MuonNMatchedStations_;
-  float MuonDistVzPVz_;
+  float MuonDz_;
   int   MuonNTrackerLayersWithMeasurement_;
   int   MuonNValidPixelHits_;
 
@@ -204,7 +200,6 @@ class Selection{
   float ElectronLooseEtaThreshold_;
   float ElectronLooseRelIso_;
   float Electrond0Cut_;
-  float ElectronDistVzPVz_;
   float ElectronDRJetsCut_;
   float ElectronMVAId_;
   float ElectronLooseMVAId_;

@@ -230,7 +230,7 @@ void JetTools::correctJetJER(vector<TRootJet*> inJets, vector<TRootGenJet*> inGe
 
   // Apply correction for jet energy resolution on-the-fly, only for recoJets matched with a genJet
   for(size_t i=0; i<indexVector.size(); i++)
-    if( inGenJets[indexVector[i].second]->Pt() >= 15 )
+    if( inJets[indexVector[i].first]->Pt() >= 10. )
       correctJetJER(inJets[indexVector[i].first], inGenJets[indexVector[i].second], direction, oldnumbers);
 }
 
@@ -263,7 +263,7 @@ void JetTools::correctJetJER(vector<TRootJet*> inJets, vector<TRootGenJet*> inGe
 
   // Apply correction for jet energy resolution on-the-fly, only for recoJets matched with a genJet
   for(size_t i=0; i<indexVector.size(); i++)
-    if( inGenJets[indexVector[i].second]->Pt() >= 15 )
+    if( inJets[indexVector[i].first]->Pt() >= 10. )
     {
       inMET->SetPx(inMET->Px() + inJets[indexVector[i].first]->Px());
       inMET->SetPy(inMET->Py() + inJets[indexVector[i].first]->Py());

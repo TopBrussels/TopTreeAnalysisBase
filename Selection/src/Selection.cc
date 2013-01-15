@@ -92,13 +92,13 @@ Selection::Selection(const Selection& s) {
   // copy the cutvalues
   setJetCuts(s.JetPtThreshold_,s.JetEtaThreshold_,s.JetEMFThreshold_,s.n90HitsThreshold_,s.fHPDThreshold_,s.DRJetElectron_,s.DRJetMuon_);
   
-  setMuonCuts(s.MuonPtThreshold_,s.MuonEtaThreshold_,s.MuonRelIso_,s.MuonNofValidHits_,s.Muond0Cut_,s.MuonDRJetsCut_,s.MuonNMatchedStations_,s.MuonDistVzPVz_,s.MuonNTrackerLayersWithMeasurement_,s.MuonNValidPixelHits_);
+  setMuonCuts(s.MuonPtThreshold_,s.MuonEtaThreshold_,s.MuonRelIso_,s.Muond0Cut_,s.MuonDRJetsCut_,s.MuonNMatchedStations_,s.MuonDz_,s.MuonNTrackerLayersWithMeasurement_,s.MuonNValidPixelHits_);
   setDiMuonCuts(s.MuonPtThreshold_,s.MuonEtaThreshold_,s.MuonRelIso_,s.Muond0Cut_);
   
   setLooseMuonCuts(s.JetPtThreshold_,s.JetEtaThreshold_,s.MuonRelIso_);
   
-  setElectronCuts(s.ElectronEtThreshold_,s.ElectronEtaThreshold_,s.ElectronRelIso_,s.Electrond0Cut_,s.ElectronMVAId_,s.ElectronDistVzPVz_,s.ElectronDRJetsCut_,s.ElectronMaxMissingHitsCut_);
-  setDiElectronCuts(s.ElectronEtThreshold_,s.ElectronEtaThreshold_,s.ElectronRelIso_,s.Electrond0Cut_,s.ElectronMVAId_,s.ElectronDistVzPVz_,s.ElectronDRJetsCut_,s.ElectronMaxMissingHitsCut_);
+  setElectronCuts(s.ElectronEtThreshold_,s.ElectronEtaThreshold_,s.ElectronRelIso_,s.Electrond0Cut_,s.ElectronMVAId_,s.ElectronDRJetsCut_,s.ElectronMaxMissingHitsCut_);
+  setDiElectronCuts(s.ElectronEtThreshold_,s.ElectronEtaThreshold_,s.ElectronRelIso_,s.Electrond0Cut_,s.ElectronMVAId_,9999.,s.ElectronDRJetsCut_,s.ElectronMaxMissingHitsCut_);
 
   setLooseElectronCuts(s.ElectronLooseEtThreshold_,s.ElectronLooseEtaThreshold_,s.ElectronLooseRelIso_,s.ElectronLooseMVAId_);
   setLooseDiElectronCuts(s.ElectronLooseEtThreshold_,s.ElectronLooseEtaThreshold_,s.ElectronLooseRelIso_,s.ElectronLooseMVAId_);
@@ -145,19 +145,18 @@ void Selection::setElectronIsoCorrType(int corrType){
     exit(1);
   }
 }
-void Selection::setElectronCuts(float Et, float Eta, float RelIso, float d0, float MVAId_, float DistVzPVz, float DRJets, int MaxMissingHits) {
+void Selection::setElectronCuts(float Et, float Eta, float RelIso, float d0, float MVAId_, float DRJets, int MaxMissingHits) {
   ElectronEtThreshold_ = Et;
   ElectronEtaThreshold_ = Eta;
   ElectronRelIso_ = RelIso;
   Electrond0Cut_ = d0;
-  ElectronDistVzPVz_ = DistVzPVz;
   ElectronDRJetsCut_ = DRJets;
   ElectronMVAId_ = MVAId_;
   ElectronMaxMissingHitsCut_ = MaxMissingHits;
 }
 
 void Selection::setElectronCuts() {
-  setElectronCuts(30,2.5,0.1,0.02,0.,1,0.3,0); // refSel 2012 values
+  setElectronCuts(30,2.5,0.1,0.02,0.,0.3,0); // refSel 2012 values
 }
 
 
@@ -166,7 +165,6 @@ void Selection::setDiElectronCuts(float Et, float Eta, float RelIso, float d0, f
   ElectronEtaThreshold_ = Eta;
   ElectronRelIso_ = RelIso;
   Electrond0Cut_ = d0;
-  ElectronDistVzPVz_ = DistVzPVz;
   ElectronDRJetsCut_ = DRJets;
   ElectronMVAId_ = MVAId;
   ElectronMaxMissingHitsCut_ = MaxMissingHits;
@@ -202,21 +200,20 @@ void Selection::setLooseDiElectronCuts() {
 }
 
 
-void Selection::setMuonCuts(float Pt, float Eta, float RelIso, int NValidHits, float d0, float DRJets, int NMatchedStations, float DistVzPVz, int NTrackerLayersWithMeas, int NValidPixelHits) {
+void Selection::setMuonCuts(float Pt, float Eta, float RelIso, float d0, float DRJets, int NMatchedStations, float Dz, int NTrackerLayersWithMeas, int NValidPixelHits) {
   MuonPtThreshold_ = Pt;
   MuonEtaThreshold_ = Eta;
   MuonRelIso_ = RelIso;
-  MuonNofValidHits_ = NValidHits;
   Muond0Cut_ = d0;
   MuonDRJetsCut_ = DRJets;
   MuonNMatchedStations_ = NMatchedStations;
-  MuonDistVzPVz_ = DistVzPVz;
+  MuonDz_ = Dz;
   MuonNTrackerLayersWithMeasurement_ = NTrackerLayersWithMeas;
   MuonNValidPixelHits_ = NValidPixelHits;
 }
 
 void Selection::setMuonCuts() {
-  setMuonCuts(26,2.1,0.12,10,0.2,0.3,1,0.5,5,0); // refSel 2012 values
+  setMuonCuts(26,2.1,0.12,0.2,0.3,1,0.5,5,0); // refSel 2012 values
 }
 
 void Selection::setDiMuonCuts(float Pt, float Eta, float RelIso, float d0) {
@@ -413,23 +410,20 @@ std::vector<TRootMuon*> Selection::GetSelectedMuons(float PtThr, float EtaThr,fl
     float reliso = (muons[i]->chargedHadronIso() + max( 0.0, muons[i]->neutralHadronIso() + muons[i]->photonIso() - 0.5*muons[i]->puChargedHadronIso() ) ) / muons[i]->Pt(); // dBeta corrected
 
     //    cout << "mu global:  " << muons[i]->isGlobalMuon() << endl;
-    //    cout << "mu tracker:  " << muons[i]->isTrackerMuon() << endl;
+    //    cout << "mu PF:  " << muons[i]->isPFMuon() << endl;
     //    cout << "mu globalMuPromptTight:  " << muons[i]->idGlobalMuonPromptTight() << endl;
     //    cout << "mu pT:  " << muons[i]->Pt() << "  cutValue: " << PtThr << endl;
     //    cout << "mu Eta:  " << fabs(muons[i]->Eta()) << "  cutValue: " << EtaThr << endl;
     //    cout << "mu reliso:  " << reliso << "  cutValue: " << MuonRelIso << endl;
     //    cout << "mu puChargedHad Iso: "<< muons[i]->puChargedHadronIso() << endl;
     //    cout << "mu d0:  " << fabs(muons[i]->d0()) << "  cutValue: " << Muond0Cut_ << endl;
-    //    cout << "mu nValidHits:  " << muons[i]->nofValidHits() << "  cutValue: " << MuonNofValidHits_ << endl;
     //    cout << "mu nMatches:  " << muons[i]->nofMatches() << "  cutValue: " << MuonNMatches_ << endl;
     //    cout << "mu nPixLayers:  " << muons[i]->nofValidPixelHits() << "  cutValue: " << MuonNTrackerLayersWithMeasurement_ << endl;
-    if(muons[i]->isGlobalMuon() && muons[i]->isTrackerMuon()
-       && muons[i]->idGlobalMuonPromptTight() 
+    if(muons[i]->idGlobalMuonPromptTight() && muons[i]->isPFMuon()
        && muons[i]->Pt()>PtThr 
        && fabs(muons[i]->Eta())<EtaThr 
        && reliso < MuonRelIso 
        && fabs(muons[i]->d0()) <Muond0Cut_
-       && muons[i]->nofValidHits()>MuonNofValidHits_ 
        && muons[i]->nofMatchedStations()>MuonNMatchedStations_ 
        && muons[i]->nofTrackerLayersWithMeasurement() > MuonNTrackerLayersWithMeasurement_
        && muons[i]->nofValidPixelHits() > MuonNValidPixelHits_) {
@@ -469,8 +463,8 @@ std::vector<TRootMuon*> Selection::GetSelectedMuons(float PtThr, float EtaThr, f
   std::vector<TRootMuon*> init_muons=GetSelectedMuons(PtThr,EtaThr,MuonRelIso,selJets);
   for(unsigned int i=0;i<init_muons.size();i++){
     TRootMuon* mu = (TRootMuon*) init_muons[i];
-    //    cout << "mu fabs(mu->vz() - vertex->Z()):  " << fabs(mu->vz() - vertex->Z()) << "  cutValue: " << MuonDistVzPVz_ << endl;
-    if ( fabs(mu->vz() - vertex->Z()) < MuonDistVzPVz_) {
+    //    cout << "mu dz:  " << fabs(mu->dz()) << "  cutValue: " << MuonDz_ << endl;
+    if ( fabs(mu->dz()) < MuonDz_) {
       //      cout << "OK" << endl;
       selectedMuons.push_back(init_muons[i]);
     }
@@ -521,7 +515,6 @@ std::vector<TRootMuon*> Selection::GetSelectedLooseMuons(float PtThr, float EtaT
     //    cout << "mu Eta:  " << fabs(muons[i]->Eta()) << "  cutValue: " << EtaThr << endl;
     //    cout << "mu reliso:  " << reliso << "  cutValue: " << MuonRelIso << endl;
     if((muons[i]->isGlobalMuon() || muons[i]->isTrackerMuon()) && fabs(muons[i]->Eta())<EtaThr && muons[i]->Pt()>PtThr && reliso < MuonRelIso ) {
-      //      cout << "OK" << endl;
       selectedMuons.push_back(muons[i]);
     }
   }
@@ -551,7 +544,7 @@ std::vector<TRootMuon*> Selection::GetSelectedMuonsInvIso(float MuonRelIso, TRoo
       if(dRMuJet < mindRMuJet) mindRMuJet = dRMuJet;
     }
     float reliso = (init_muons[i]->chargedHadronIso()+init_muons[i]->neutralHadronIso()+init_muons[i]->photonIso())/init_muons[i]->Pt();
-    if ( fabs(init_muons[i]->vz() - vertex->Z()) < MuonDistVzPVz_ && mindRMuJet > MuonDRJetsCut_ && reliso > MuonRelIso )
+    if ( fabs(init_muons[i]->dz()) < MuonDz_ && mindRMuJet > MuonDRJetsCut_ && reliso > MuonRelIso )
       selectedMuons.push_back(init_muons[i]);
   }
   std::sort(selectedMuons.begin(),selectedMuons.end(),HighestPt());
@@ -769,53 +762,18 @@ std::vector<TRootElectron*> Selection::GetSelectedElectrons() const{
   return GetSelectedElectrons(ElectronEtThreshold_, ElectronEtaThreshold_, ElectronRelIso_);
 }
 
-std::vector<TRootElectron*> Selection::GetSelectedElectrons(TRootVertex* vertex) const{
-  return GetSelectedElectrons(ElectronEtThreshold_, ElectronEtaThreshold_, ElectronRelIso_,vertex);
-}
-
 /*
 //Method including rho correction
-std::vector<TRootElectron*> Selection::GetSelectedElectrons(TRootVertex* vertex, float rho) const{
-  return GetSelectedElectrons(ElectronEtThreshold_, ElectronEtaThreshold_, ElectronRelIso_, vertex, rho);
+std::vector<TRootElectron*> Selection::GetSelectedElectrons(float rho) const{
+  return GetSelectedElectrons(ElectronEtThreshold_, ElectronEtaThreshold_, ElectronRelIso_, rho);
 }
 */
-std::vector<TRootElectron*> Selection::GetSelectedElectrons(TRootVertex* vertex, vector<TRootJet*>& selJets) const{
-  return GetSelectedElectrons(ElectronEtThreshold_, ElectronEtaThreshold_, ElectronRelIso_,vertex, selJets);
+std::vector<TRootElectron*> Selection::GetSelectedElectrons(vector<TRootJet*>& selJets) const{
+  return GetSelectedElectrons(ElectronEtThreshold_, ElectronEtaThreshold_, ElectronRelIso_, selJets);
 }
 
-std::vector<TRootElectron*> Selection::GetSelectedElectrons(float EtThr, float EtaThr, float ElectronRelIso, TRootVertex* vertex) const {
+std::vector<TRootElectron*> Selection::GetSelectedElectrons(float EtThr, float EtaThr, float ElectronRelIso, vector<TRootJet*>& selJets) const{
   std::vector<TRootElectron*> init_electrons = GetSelectedElectrons(EtThr,EtaThr,ElectronRelIso);
-  std::vector<TRootElectron*> selectedElectrons;
-  for(unsigned int i=0;i<init_electrons.size();i++){
-    TRootElectron* el = (TRootElectron*) init_electrons[i];
-    if ( fabs(el->vz() - vertex->Z()) < ElectronDistVzPVz_) {
-      selectedElectrons.push_back(init_electrons[i]);
-    }
-  }
-
-  std::sort(selectedElectrons.begin(),selectedElectrons.end(),HighestPt());
-  return selectedElectrons;
-}
-
-/*
-//Method including rho correction
-std::vector<TRootElectron*> Selection::GetSelectedElectrons(float EtThr, float EtaThr, float ElectronRelIso, TRootVertex* vertex, float rho) const {
-  std::vector<TRootElectron*> init_electrons = GetSelectedElectrons(EtThr,EtaThr,ElectronRelIso, rho);
-  std::vector<TRootElectron*> selectedElectrons;
-  for(unsigned int i=0;i<init_electrons.size();i++){
-    TRootElectron* el = (TRootElectron*) init_electrons[i];
-    if ( fabs(el->vz() - vertex->Z()) < ElectronDistVzPVz_) {
-      selectedElectrons.push_back(init_electrons[i]);
-    }
-  }
-  
-  std::sort(selectedElectrons.begin(),selectedElectrons.end(),HighestPt());
-  return selectedElectrons;
-}
-*/
-
-std::vector<TRootElectron*> Selection::GetSelectedElectrons(float EtThr, float EtaThr, float ElectronRelIso, TRootVertex* vertex, vector<TRootJet*>& selJets) const{
-  std::vector<TRootElectron*> init_electrons = GetSelectedElectrons(EtThr,EtaThr,ElectronRelIso,vertex);
   std::vector<TRootElectron*> selectedElectrons;
   for(unsigned int i=0;i<init_electrons.size();i++){
     float mindRElJet = 999999.;
@@ -835,8 +793,8 @@ std::vector<TRootElectron*> Selection::GetSelectedElectrons(float EtThr, float E
 
 /*
 //Method including rho correction
-std::vector<TRootElectron*> Selection::GetSelectedElectrons(float EtThr, float EtaThr, float ElectronRelIso, TRootVertex* vertex, float rho, vector<TRootJet*>& selJets) const{
-  std::vector<TRootElectron*> init_electrons = GetSelectedElectrons(EtThr,EtaThr,ElectronRelIso,vertex,rho);
+std::vector<TRootElectron*> Selection::GetSelectedElectrons(float EtThr, float EtaThr, float ElectronRelIso, float rho, vector<TRootJet*>& selJets) const{
+  std::vector<TRootElectron*> init_electrons = GetSelectedElectrons(EtThr,EtaThr,ElectronRelIso,rho);
   std::vector<TRootElectron*> selectedElectrons;
   for(unsigned int i=0;i<init_electrons.size();i++){
     float mindRElJet = 999999.;
@@ -965,10 +923,6 @@ std::vector<TRootElectron*> Selection::GetSelectedLooseElectrons(float PtThr, fl
   return selectedElectrons;
 }
 
-std::vector<TRootElectron*> Selection::GetSelectedLooseElectrons() const {
-  return GetSelectedLooseElectrons(ElectronLooseEtThreshold_, ElectronLooseEtaThreshold_, ElectronLooseRelIso_);
-}
-
 std::vector<TRootElectron*> Selection::GetSelectedLooseDiElectrons(float PtThr, float EtaThr, float ElectronRelIso) const {
   std::vector<TRootElectron*> selectedElectrons;
   for(unsigned int i=0;i<electrons.size();i++){
@@ -1022,13 +976,13 @@ std::vector<TRootElectron*> Selection::GetSelectedLooseDiElectrons() const{
 }
 
 
-std::vector<TRootElectron*> Selection::GetSelectedElectronsInvIso(float ElectronRelIso, TRootVertex* vertex) const
+std::vector<TRootElectron*> Selection::GetSelectedElectronsInvIso(float ElectronRelIso) const
 {
   std::vector<TRootJet*> empty;
-  return GetSelectedElectronsInvIso(ElectronRelIso, vertex, empty);
+  return GetSelectedElectronsInvIso(ElectronRelIso, empty);
 }
 
-std::vector<TRootElectron*> Selection::GetSelectedElectronsInvIso(float ElectronRelIso, TRootVertex* vertex, vector<TRootJet*>& selJets) const
+std::vector<TRootElectron*> Selection::GetSelectedElectronsInvIso(float ElectronRelIso, vector<TRootJet*>& selJets) const
 {
   std::vector<TRootElectron*> init_electrons = GetSelectedElectrons(ElectronEtThreshold_,ElectronEtaThreshold_,99999.);
   std::vector<TRootElectron*> selectedElectrons;
@@ -1074,7 +1028,7 @@ std::vector<TRootElectron*> Selection::GetSelectedElectronsInvIso(float Electron
     // Compute the relative isolation
     float RelIso = (init_electrons[i]->chargedHadronIso() + max( init_electrons[i]->neutralHadronIso() + init_electrons[i]->photonIso()  - isocorr, 0.) )/ init_electrons[i]->Pt();
 
-    if( fabs(init_electrons[i]->vz() - vertex->Z()) < ElectronDistVzPVz_ && mindRElJet > ElectronDRJetsCut_ && RelIso > ElectronRelIso )
+    if( mindRElJet > ElectronDRJetsCut_ && RelIso > ElectronRelIso )
       selectedElectrons.push_back(init_electrons[i]);
   }
   std::sort(selectedElectrons.begin(),selectedElectrons.end(),HighestPt());
