@@ -30,17 +30,17 @@ class ResolutionFit {
     ResolutionFit(string label);
     ResolutionFit(const ResolutionFit &r);
     ~ResolutionFit();
-    void FillPFJets(TRootPFJet *jet, TLorentzVector *mcParticle);
-    void Fill(TLorentzVector *lorentzVector, TLorentzVector *mcParticle);
+    void FillPFJets(TRootPFJet *jet, TLorentzVector *mcParticle, float weight=1.);
+    void Fill(TLorentzVector *lorentzVector, TLorentzVector *mcParticle, float weight=1.);
     void CalculateResolutions();
     void WritePlots(TFile *fout, bool savePNG = false, string pathPNG = string(""));
     void WriteResolutions(string file);
     void LoadResolutions(string file);
     
-    float EtResolution(TLorentzVector* jet);
-    float EtaResolution(TLorentzVector* jet);
-    float ThetaResolution(TLorentzVector* jet);
-    float PhiResolution(TLorentzVector* jet);
+    float EtResolution(TLorentzVector* jet, bool protect = false);
+    float EtaResolution(TLorentzVector* jet, bool protect = false);
+    float ThetaResolution(TLorentzVector* jet, bool protect = false);
+    float PhiResolution(TLorentzVector* jet, bool protect = false);
     float EtCorrection(TLorentzVector* jet);
     
     vector<double> ExtractSigmaMean(TH1* theHisto);

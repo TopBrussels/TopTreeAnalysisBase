@@ -29,7 +29,8 @@ ResolutionFit::ResolutionFit(string label)
     Float_t towerBinning[] = {0.0, 0.174, 0.348, 0.522, 0.696, 0.87, 1.044, 1.218, 1.392, 1.566, 1.74, 2.5};
     for(unsigned int i=0; i < nEtaBins_+1; i++)
       towerBinning_[i] = towerBinning[i];
-    Float_t jetPtBinning[] = {20.,30.,40.,50.,60.,70.,80.,90.,100.,120.,150.,1800.};
+    Float_t jetPtBinning[] = {20.,30.,40.,50.,60.,70.,80.,90.,100.,120.,150.,250.,1800.};
+    nPtBins_ = 12;
     for(unsigned int i=0; i < nPtBins_+1; i++)
       jetPtBinning_[i] = jetPtBinning[i];
   }
@@ -37,7 +38,8 @@ ResolutionFit::ResolutionFit(string label)
     Float_t towerBinning[] = {0.0, 0.174, 0.348, 0.522, 0.696, 0.87, 1.044, 1.218, 1.392, 1.566, 1.74, 2.5};
     for(unsigned int i=0; i < nEtaBins_+1; i++)
       towerBinning_[i] = towerBinning[i];
-    Float_t jetPtBinning[] = {20.,30.,40.,50.,60.,70.,80.,90.,100.,120.,150.,1800.};
+    Float_t jetPtBinning[] = {20.,30.,40.,50.,60.,70.,80.,90.,100.,120.,150.,250.,1800.};
+    nPtBins_ = 12;
     for(unsigned int i=0; i < nPtBins_+1; i++)
       jetPtBinning_[i] = jetPtBinning[i];
   }
@@ -276,24 +278,24 @@ ResolutionFit::~ResolutionFit()
   }
 }
 
-void ResolutionFit::FillPFJets(TRootPFJet *jet, TLorentzVector *mcParticle)
+void ResolutionFit::FillPFJets(TRootPFJet *jet, TLorentzVector *mcParticle, float weight)
 {
   for(unsigned int iEta=0; iEta<nEtaBins_; iEta++)
   {
     if( fabs(jet->Eta()) >= towerBinning_[iEta] && fabs(jet->Eta()) < towerBinning_[iEta+1] )
     {
-      chfHisto_[iEta]->Fill(jet->Pt(), jet->chargedHadronEnergyFraction());
-      nhfHisto_[iEta]->Fill(jet->Pt(), jet->neutralHadronEnergyFraction());
-      cefHisto_[iEta]->Fill(jet->Pt(), jet->chargedEmEnergyFraction());
-      nefHisto_[iEta]->Fill(jet->Pt(), jet->neutralEmEnergyFraction());
-      cmfHisto_[iEta]->Fill(jet->Pt(), jet->chargedMuEnergyFraction());
-      ptHisto_[iEta]->Fill(jet->Pt());
+      chfHisto_[iEta]->Fill(jet->Pt(), jet->chargedHadronEnergyFraction()*weight);
+      nhfHisto_[iEta]->Fill(jet->Pt(), jet->neutralHadronEnergyFraction()*weight);
+      cefHisto_[iEta]->Fill(jet->Pt(), jet->chargedEmEnergyFraction()*weight);
+      nefHisto_[iEta]->Fill(jet->Pt(), jet->neutralEmEnergyFraction()*weight);
+      cmfHisto_[iEta]->Fill(jet->Pt(), jet->chargedMuEnergyFraction()*weight);
+      ptHisto_[iEta]->Fill(jet->Pt(), weight);
     }
   }
-  if(mcParticle) Fill(jet, mcParticle);
+  if(mcParticle) Fill(jet, mcParticle, weight);
 }
 
-void ResolutionFit::Fill(TLorentzVector *lorentzVector, TLorentzVector *mcParticle)
+void ResolutionFit::Fill(TLorentzVector *lorentzVector, TLorentzVector *mcParticle, float weight)
 {
   TLorentzVector tmpJet = *lorentzVector;
   float correction = 1;
@@ -310,17 +312,17 @@ void ResolutionFit::Fill(TLorentzVector *lorentzVector, TLorentzVector *mcPartic
       {
 	      if(iEta == 0)
 	      {
-	        StijnFlavorJES_ ? binCenterHistoIncl_[iSel]->Fill( mcParticle->Pt() ) : binCenterHistoIncl_[iSel]->Fill( tmpJet.Pt() );
-	        StijnFlavorJES_ ? resRelHistoIncl_[iSel]->Fill( tmpJet.Pt() / mcParticle->Pt() ) : resRelHistoIncl_[iSel]->Fill( (tmpJet.Et() - mcParticle->Et()) / tmpJet.Et() );
+	        StijnFlavorJES_ ? binCenterHistoIncl_[iSel]->Fill(mcParticle->Pt(), weight) : binCenterHistoIncl_[iSel]->Fill(tmpJet.Pt(), weight);
+	        StijnFlavorJES_ ? resRelHistoIncl_[iSel]->Fill(tmpJet.Pt()/mcParticle->Pt(), weight) : resRelHistoIncl_[iSel]->Fill((tmpJet.Et()-mcParticle->Et())/tmpJet.Et(), weight);
 	      }
 	      if( fabs(tmpJet.Eta()) >= towerBinning_[iEta] && fabs(tmpJet.Eta()) < towerBinning_[iEta+1] )
 	      {
-	        StijnFlavorJES_ ? binCenterHisto_[(iEta*nPtBins_)+iSel]->Fill( mcParticle->Pt() ) : binCenterHisto_[(iEta*nPtBins_)+iSel]->Fill( tmpJet.Pt() );
-          StijnFlavorJES_ ? resHisto_[(iEta*nPtBins_)+iSel]->Fill( tmpJet.Pt() - mcParticle->Pt() ) : resHisto_[(iEta*nPtBins_)+iSel]->Fill( tmpJet.Et() - mcParticle->Et() );
-	        resHistoEta_[(iEta*nPtBins_)+iSel]->Fill( tmpJet.Eta() - mcParticle->Eta() );
-	        resHistoTheta_[(iEta*nPtBins_)+iSel]->Fill( tmpJet.Theta() - mcParticle->Theta() );
-	        resHistoPhi_[(iEta*nPtBins_)+iSel]->Fill( tmpJet.DeltaPhi(*mcParticle) );
-          StijnFlavorJES_ ? resRelHisto_[(iEta*nPtBins_)+iSel]->Fill( tmpJet.Pt() / mcParticle->Pt() ) : resRelHisto_[(iEta*nPtBins_)+iSel]->Fill( (tmpJet.Et() - mcParticle->Et()) / tmpJet.Et() );
+	        StijnFlavorJES_ ? binCenterHisto_[(iEta*nPtBins_)+iSel]->Fill(mcParticle->Pt(), weight) : binCenterHisto_[(iEta*nPtBins_)+iSel]->Fill(tmpJet.Pt(), weight);
+          StijnFlavorJES_ ? resHisto_[(iEta*nPtBins_)+iSel]->Fill(tmpJet.Pt()-mcParticle->Pt(), weight) : resHisto_[(iEta*nPtBins_)+iSel]->Fill(tmpJet.Et()-mcParticle->Et(), weight);
+	        resHistoEta_[(iEta*nPtBins_)+iSel]->Fill(tmpJet.Eta()-mcParticle->Eta(), weight);
+	        resHistoTheta_[(iEta*nPtBins_)+iSel]->Fill(tmpJet.Theta()-mcParticle->Theta(), weight);
+	        resHistoPhi_[(iEta*nPtBins_)+iSel]->Fill(tmpJet.DeltaPhi(*mcParticle), weight);
+          StijnFlavorJES_ ? resRelHisto_[(iEta*nPtBins_)+iSel]->Fill(tmpJet.Pt()/mcParticle->Pt(), weight) : resRelHisto_[(iEta*nPtBins_)+iSel]->Fill((tmpJet.Et()-mcParticle->Et())/tmpJet.Et(), weight);
 	      }
       }
     } //loop over pTbins
@@ -590,7 +592,7 @@ void ResolutionFit::CalculateResolutions()
   	      bGraphMean_[iEta]->GetYaxis()->SetTitle("Mean(E_{T}^{reco} - E_{T}^{parton})");
 	        bGraphMean_[iEta]->GetXaxis()->SetTitle("p_{T}^{reco} [GeV]");
 	        if( label_.find("LightJet") == 0 || label_.find("BJet") == 0 ){
-	          bGraphMean_[iEta]->GetXaxis()->SetLimits(0.,250);
+	          bGraphMean_[iEta]->GetXaxis()->SetLimits(0.,300);
 	          bGraphMean_[iEta]->GetYaxis()->SetRangeUser(-7,12);
 	        }
 	        else if(label_.find("Muon") == 0){
@@ -652,7 +654,7 @@ void ResolutionFit::CalculateResolutions()
 	      bGraphEtaMean_[iEta]->GetXaxis()->SetTitle("p_{T}^{reco} [GeV]");
 
 	      if( label_.find("LightJet") == 0 || label_.find("BJet") == 0 ){
-	        bGraphEtaMean_[iEta]->GetXaxis()->SetLimits(0.,250);        
+	        bGraphEtaMean_[iEta]->GetXaxis()->SetLimits(0.,300);        
 	        bGraphEtaMean_[iEta]->GetYaxis()->SetRangeUser(-0.01,0.01);
 	      }
 	      else if(label_.find("Muon") == 0){
@@ -678,7 +680,7 @@ void ResolutionFit::CalculateResolutions()
 	      bGraphEtaSigma_[iEta]->GetXaxis()->SetTitle("p_{T}^{reco} [GeV]");
 
 	      if( label_.find("LightJet") == 0 || label_.find("BJet") == 0 ){
-	        bGraphEtaSigma_[iEta]->GetXaxis()->SetLimits(0.,250);        
+	        bGraphEtaSigma_[iEta]->GetXaxis()->SetLimits(0.,300);        
 	        bGraphEtaSigma_[iEta]->GetYaxis()->SetRangeUser(0,0.06);
 	      }
 	      else if(label_.find("Muon") == 0){
@@ -708,7 +710,7 @@ void ResolutionFit::CalculateResolutions()
 	      bGraphThetaMean_[iEta]->GetYaxis()->SetTitle("Mean(#theta^{reco} - #theta^{parton})");
 
 	      if( label_.find("LightJet") == 0 || label_.find("BJet") == 0 ){
-	        bGraphThetaMean_[iEta]->GetXaxis()->SetLimits(0.,250);        
+	        bGraphThetaMean_[iEta]->GetXaxis()->SetLimits(0.,300);        
 	        bGraphThetaMean_[iEta]->GetYaxis()->SetRangeUser(-0.01,0.01);
 	      }
 	      else if(label_.find("Muon") == 0){
@@ -734,7 +736,7 @@ void ResolutionFit::CalculateResolutions()
 	      bGraphThetaSigma_[iEta]->GetYaxis()->SetTitle("#sigma(#theta^{reco} - #theta^{parton})");
 
 	      if( label_.find("LightJet") == 0 || label_.find("BJet") == 0 ){
-	        bGraphThetaSigma_[iEta]->GetXaxis()->SetLimits(0.,250);        
+	        bGraphThetaSigma_[iEta]->GetXaxis()->SetLimits(0.,300);        
 	        bGraphThetaSigma_[iEta]->GetYaxis()->SetRangeUser(0,0.05);
 	      }
 	      else if(label_.find("Muon") == 0){
@@ -764,7 +766,7 @@ void ResolutionFit::CalculateResolutions()
 	      bGraphPhiMean_[iEta]->GetYaxis()->SetTitle("Mean(#phi^{reco} - #phi^{parton})");
 
 	      if( label_.find("LightJet") == 0 || label_.find("BJet") == 0 ){
-	        bGraphPhiMean_[iEta]->GetXaxis()->SetLimits(0.,250);        
+	        bGraphPhiMean_[iEta]->GetXaxis()->SetLimits(0.,300);        
 	        bGraphPhiMean_[iEta]->GetYaxis()->SetRangeUser(-0.01,0.01);
 	      }
 	      else if(label_.find("Muon") == 0){
@@ -790,7 +792,7 @@ void ResolutionFit::CalculateResolutions()
 	      bGraphPhiSigma_[iEta]->GetYaxis()->SetTitle("#sigma(#phi^{reco} - #phi^{parton})");
 
 	      if( label_.find("LightJet") == 0 || label_.find("BJet") == 0 ){
-	        bGraphPhiSigma_[iEta]->GetXaxis()->SetLimits(0.,250);        
+	        bGraphPhiSigma_[iEta]->GetXaxis()->SetLimits(0.,300);        
 	        bGraphPhiSigma_[iEta]->GetYaxis()->SetRangeUser(0,0.07);
 	      }
 	      else if(label_.find("Muon") == 0){
@@ -828,7 +830,7 @@ void ResolutionFit::CalculateResolutions()
             bGraphRelMeanIncl_->GetXaxis()->SetTitle("p_{T}^{reco} [GeV]");
 
             if( label_.find("LightJet") == 0 || label_.find("BJet") == 0 ){
-              bGraphRelMeanIncl_->GetXaxis()->SetLimits(0.,250);        
+              bGraphRelMeanIncl_->GetXaxis()->SetLimits(0.,300);        
               bGraphRelMeanIncl_->GetYaxis()->SetRangeUser(-0.3,0.3);
             }
             else if(label_.find("Muon") == 0){
@@ -863,7 +865,7 @@ void ResolutionFit::CalculateResolutions()
 	        bGraphRelMean_[iEta]->GetXaxis()->SetTitle("p_{T}^{reco} [GeV]");
 
 	        if( label_.find("LightJet") == 0 || label_.find("BJet") == 0 ){
-	          bGraphRelMean_[iEta]->GetXaxis()->SetLimits(0.,250);        
+	          bGraphRelMean_[iEta]->GetXaxis()->SetLimits(0.,300);        
 	          bGraphRelMean_[iEta]->GetYaxis()->SetRangeUser(-0.3,0.3);
 	        }
 	        else if(label_.find("Muon") == 0){
@@ -893,7 +895,7 @@ void ResolutionFit::CalculateResolutions()
 	      bGraphRelSigma_[iEta]->GetXaxis()->SetTitle("p_{T}^{reco} [GeV]");
 
 	      if( label_.find("LightJet") == 0 || label_.find("BJet") == 0 ){
-	        bGraphRelSigma_[iEta]->GetXaxis()->SetLimits(0.,250);        
+	        bGraphRelSigma_[iEta]->GetXaxis()->SetLimits(0.,300);        
 	        bGraphRelSigma_[iEta]->GetYaxis()->SetRangeUser(0,0.26);
 	      }
 	      else if(label_.find("Muon") == 0){
@@ -1143,7 +1145,7 @@ void ResolutionFit::LoadResolutions(string file)
   fin->Close();
 }
 
-float ResolutionFit::EtResolution(TLorentzVector* jet)
+float ResolutionFit::EtResolution(TLorentzVector* jet, bool protect)
 {
   if( ! ( calculatedResolutions_ || loadedResolutions_ ) ){
     cout << "Resolutions are not loaded and/or calculated. returning -1"<<endl;
@@ -1153,15 +1155,17 @@ float ResolutionFit::EtResolution(TLorentzVector* jet)
   Float_t res = -1;
   for(UInt_t iEta = 0; iEta < nEtaBins_; iEta++)
     if(fabs(jet->Eta()) >= towerBinning_[iEta] && fabs(jet->Eta()) < towerBinning_[iEta+1])
-      {
-	res = bFuncSigma_[iEta]->Eval( jet->Pt() );
-	if( jet->Pt() > bFuncSigma_[iEta]->GetMaximumX() )
-	  res = bFuncSigma_[iEta]->GetMaximum();
-      }
+    {
+	    res = bFuncSigma_[iEta]->Eval( jet->Pt() );
+	    if( protect && jet->Pt() > 300. && res < bFuncSigma_[iEta]->Eval( 300. ) )
+	      res = bFuncSigma_[iEta]->Eval( 300. );
+	    if( jet->Pt() > bFuncSigma_[iEta]->GetMaximumX() )
+	      res = bFuncSigma_[iEta]->GetMaximum();
+    }
   return res;
 }
 
-float ResolutionFit::EtaResolution(TLorentzVector* jet)
+float ResolutionFit::EtaResolution(TLorentzVector* jet, bool protect)
 {
   if( ! ( calculatedResolutions_ || loadedResolutions_ ) )
     {
@@ -1172,11 +1176,15 @@ float ResolutionFit::EtaResolution(TLorentzVector* jet)
   Float_t res = -1;
   for(UInt_t iEta = 0; iEta < nEtaBins_; iEta++)
     if(fabs(jet->Eta()) >= towerBinning_[iEta] && fabs(jet->Eta()) < towerBinning_[iEta+1])
+    {
       res = bFuncEtaSigma_[iEta]->Eval( jet->Pt() );
+      if( protect && jet->Pt() > 300. && res < bFuncEtaSigma_[iEta]->Eval( 300. ) )
+        res = bFuncEtaSigma_[iEta]->Eval( 300. );
+    }
   return res;
 }
 
-float ResolutionFit::ThetaResolution(TLorentzVector* jet)
+float ResolutionFit::ThetaResolution(TLorentzVector* jet, bool protect)
 {
   if( ! ( calculatedResolutions_ || loadedResolutions_ ) )
     {
@@ -1187,11 +1195,15 @@ float ResolutionFit::ThetaResolution(TLorentzVector* jet)
   Float_t res = -1;
   for(UInt_t iEta = 0; iEta < nEtaBins_; iEta++)
     if(fabs(jet->Eta()) >= towerBinning_[iEta] && fabs(jet->Eta()) < towerBinning_[iEta+1])
+    {
       res = bFuncThetaSigma_[iEta]->Eval( jet->Pt() );
+      if( protect && jet->Pt() > 300. && res < bFuncThetaSigma_[iEta]->Eval( 300. ) )
+        res = bFuncThetaSigma_[iEta]->Eval( 300. );
+    }
   return res;
 }
 
-float ResolutionFit::PhiResolution(TLorentzVector* jet)
+float ResolutionFit::PhiResolution(TLorentzVector* jet, bool protect)
 {
   if( ! ( calculatedResolutions_ || loadedResolutions_ ) )
     {
@@ -1202,7 +1214,11 @@ float ResolutionFit::PhiResolution(TLorentzVector* jet)
   Float_t res = -1;
   for(UInt_t iEta = 0; iEta < nEtaBins_; iEta++)
     if(fabs(jet->Eta()) >= towerBinning_[iEta] && fabs(jet->Eta()) < towerBinning_[iEta+1])
+    {
       res = bFuncPhiSigma_[iEta]->Eval( jet->Pt() );
+      if( protect && jet->Pt() > 300. && res < bFuncPhiSigma_[iEta]->Eval( 300. ) )
+        res = bFuncPhiSigma_[iEta]->Eval( 300. );
+    }
   return res;
 }
 
