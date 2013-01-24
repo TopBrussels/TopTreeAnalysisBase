@@ -419,7 +419,7 @@ std::vector<TRootMuon*> Selection::GetSelectedMuons(float PtThr, float EtaThr,fl
     //    cout << "mu d0:  " << fabs(muons[i]->d0()) << "  cutValue: " << Muond0Cut_ << endl;
     //    cout << "mu nMatches:  " << muons[i]->nofMatches() << "  cutValue: " << MuonNMatches_ << endl;
     //    cout << "mu nPixLayers:  " << muons[i]->nofValidPixelHits() << "  cutValue: " << MuonNTrackerLayersWithMeasurement_ << endl;
-    if(muons[i]->idGlobalMuonPromptTight() && muons[i]->isPFMuon()
+    if(muons[i]->idGlobalMuonPromptTight() //&& muons[i]->isPFMuon()
        && muons[i]->Pt()>PtThr 
        && fabs(muons[i]->Eta())<EtaThr 
        && reliso < MuonRelIso 
