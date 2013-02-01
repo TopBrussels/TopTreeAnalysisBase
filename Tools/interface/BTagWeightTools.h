@@ -15,7 +15,7 @@ Unfortunately the BTV POG does not give the parameterizations in a parsable form
 //
 // Original Author:  "fblekman"
 //         Created:  Fri Feb  1 12:10:50 CET 2013
-// $Id$
+// $Id: BTagWeightTools.h,v 1.1.2.1 2013/02/01 17:17:58 fblekman Exp $
 //
 //
 #ifndef BTagWeightTools_h
@@ -68,10 +68,10 @@ class BTagWeightTools
 
   // various workers
 
-  void clear();
-  void setNewTextFile(std::string filename);
+  //  void clear(){;}
+  //  void setNewTextFile(std::string filename){}
 
-  void printContent(void);
+  //    void printContent(void){;}
   
   // private workers
  private:
