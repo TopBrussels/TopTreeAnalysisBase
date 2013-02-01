@@ -15,7 +15,7 @@ Unfortunately the BTV POG does not give the parameterizations in a parsable form
 //
 // Original Author:  "fblekman"
 //         Created:  Fri Feb  1 12:10:50 CET 2013
-// $Id$
+// $Id: BTagWeightTools.cc,v 1.1.2.1 2013/02/01 17:17:59 fblekman Exp $
 //
 //
 
@@ -143,7 +143,7 @@ void BTagWeightTools::parsefile(){
 	  string cleanstring = lineread.substr(lineread.find(" "),lineread.find(","));
 	  cleanstring = cleanstring.substr(0,cleanstring.find("}"));
 	  float value = atof(cleanstring.c_str());
-	  cout  << lineread << " ---> " << cleanstring << " ---> "  << value << endl;
+	  //	  cout  << lineread << " ---> " << cleanstring << " ---> "  << value << endl;
 
 	  _weightsUp[taggername].push_back(value);
 	  _weightsDown[taggername].push_back(value*-1.);
