@@ -1,0 +1,7 @@
+nom=$(for i in $(cat files); do echo $i/*m.root; done | tr '\n' ' ')
+up=$(for i in $(cat files); do echo $i/*_Up_*.root; done | tr '\n' ' ')
+down=$(for i in $(cat files); do echo $i/*_Down_*.root; done | tr '\n' ' ')
+
+hadd nominal.root $nom
+hadd sys_up.root $up
+hadd sys_down.root $down
