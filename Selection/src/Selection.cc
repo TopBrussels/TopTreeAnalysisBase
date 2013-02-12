@@ -410,7 +410,6 @@ std::vector<TRootMuon*> Selection::GetSelectedMuons(float PtThr, float EtaThr,fl
     float reliso = (muons[i]->chargedHadronIso() + max( 0.0, muons[i]->neutralHadronIso() + muons[i]->photonIso() - 0.5*muons[i]->puChargedHadronIso() ) ) / muons[i]->Pt(); // dBeta corrected
 
     //    cout << "mu global:  " << muons[i]->isGlobalMuon() << endl;
-    //    cout << "mu PF:  " << muons[i]->isPFMuon() << endl;
     //    cout << "mu globalMuPromptTight:  " << muons[i]->idGlobalMuonPromptTight() << endl;
     //    cout << "mu pT:  " << muons[i]->Pt() << "  cutValue: " << PtThr << endl;
     //    cout << "mu Eta:  " << fabs(muons[i]->Eta()) << "  cutValue: " << EtaThr << endl;
@@ -670,7 +669,7 @@ bool Selection::foundZCandidate(std::vector<TRootMuon*>& muons1, std::vector<TRo
   return foundZ;
 }
 
-std::vector<TRootElectron*> Selection::GetSelectedElectrons(float PtThr, float EtaThr, float ElectronRelIso) const {
+std::vector<TRootElectron*> Selection::GetSelectedElectrons(float PtThr, float EtaThr, float ElectronRelIso, bool invertIdCut) const {
   std::vector<TRootElectron*> selectedElectrons;
   //cout << ElectronRelIso << endl;
   for(unsigned int i=0;i<electrons.size();i++)
@@ -715,9 +714,9 @@ std::vector<TRootElectron*> Selection::GetSelectedElectrons(float PtThr, float E
       if(fabs(el->superClusterEta()) < 1.4442 || fabs(el->superClusterEta()) > 1.5660)
         if(fabs(el->d0()) < Electrond0Cut_)
           if(el->passConversion())
-            if(el->mvaTrigId() > ElectronMVAId_)
+            if( (!invertIdCut && el->mvaTrigId() > ElectronMVAId_) || (invertIdCut && el->mvaTrigId() < ElectronMVAId_) )
               if(el->missingHits() <=  ElectronMaxMissingHitsCut_)
-                if(RelIso < ElectronRelIso_)
+                if(RelIso < ElectronRelIso)
                   selectedElectrons.push_back(electrons[i]);
   }
   std::sort(selectedElectrons.begin(),selectedElectrons.end(),HighestPt());
@@ -986,7 +985,7 @@ std::vector<TRootElectron*> Selection::GetSelectedElectronsInvIso(float Electron
 
 std::vector<TRootElectron*> Selection::GetSelectedElectronsInvIso(float ElectronRelIso, vector<TRootJet*>& selJets) const
 {
-  std::vector<TRootElectron*> init_electrons = GetSelectedElectrons(ElectronEtThreshold_,ElectronEtaThreshold_,99999.);
+  std::vector<TRootElectron*> init_electrons = GetSelectedElectrons(ElectronEtThreshold_,ElectronEtaThreshold_,99999.,true);
   std::vector<TRootElectron*> selectedElectrons;
   for(unsigned int i=0; i<init_electrons.size(); i++)
   {
@@ -1029,7 +1028,9 @@ std::vector<TRootElectron*> Selection::GetSelectedElectronsInvIso(float Electron
     }
     // Compute the relative isolation
     float RelIso = (init_electrons[i]->chargedHadronIso() + max( init_electrons[i]->neutralHadronIso() + init_electrons[i]->photonIso()  - isocorr, 0.) )/ init_electrons[i]->Pt();
-
+    
+//    cout << "reliso = " << RelIso << "  minDR = " << mindRElJet << endl;
+    
     if( mindRElJet > ElectronDRJetsCut_ && RelIso > ElectronRelIso )
       selectedElectrons.push_back(init_electrons[i]);
   }
