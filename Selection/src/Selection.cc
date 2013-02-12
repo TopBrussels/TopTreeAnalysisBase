@@ -543,7 +543,8 @@ std::vector<TRootMuon*> Selection::GetSelectedMuonsInvIso(float MuonRelIso, TRoo
       float dRMuJet = init_muons[i]->DeltaR(*selJets.at(j));
       if(dRMuJet < mindRMuJet) mindRMuJet = dRMuJet;
     }
-    float reliso = (init_muons[i]->chargedHadronIso()+init_muons[i]->neutralHadronIso()+init_muons[i]->photonIso())/init_muons[i]->Pt();
+    float reliso = (init_muons[i]->chargedHadronIso() + max( 0.0, init_muons[i]->neutralHadronIso() + init_muons[i]->photonIso() - 0.5*init_muons[i]->puChargedHadronIso() ) ) / init_muons[i]->Pt(); // dBeta corrected
+//    float reliso = (init_muons[i]->chargedHadronIso()+init_muons[i]->neutralHadronIso()+init_muons[i]->photonIso())/init_muons[i]->Pt();
     if ( fabs(init_muons[i]->dz()) < MuonDz_ && mindRMuJet > MuonDRJetsCut_ && reliso > MuonRelIso )
       selectedMuons.push_back(init_muons[i]);
   }
@@ -564,7 +565,8 @@ std::vector<TRootMuon*> Selection::GetSelectedMuonsIsoRange(float PtThr, float E
   std::vector<TRootMuon*> selectedMuons;
   for(unsigned int i=0;i<init_muons.size();i++){
     //Compute isolation
-    if( MuonRelIsoMin < init_muons[i]->relativeIso03() && init_muons[i]->relativeIso03() < MuonRelIsoMax )
+    float reliso = (init_muons[i]->chargedHadronIso() + max( 0.0, init_muons[i]->neutralHadronIso() + init_muons[i]->photonIso() - 0.5*init_muons[i]->puChargedHadronIso() ) ) / init_muons[i]->Pt(); // dBeta corrected
+    if( MuonRelIsoMin < reliso && reliso < MuonRelIsoMax )
       selectedMuons.push_back(muons[i]);
   }
   std::sort(selectedMuons.begin(),selectedMuons.end(),HighestPt());
