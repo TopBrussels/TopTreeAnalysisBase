@@ -25,7 +25,7 @@ class LeptonTools
     void readMuonSF(string IdIsoFile, string trigFileAB, string trigFileC, string trigFileD);
     double getMuonSF(double eta, double pt, string syst = "Nominal");
     
-    void readSelectronSF(); // hard-coded SF's
+    void readElectronSF(); // hard-coded SF's
     double getElectronSF(double eta, double pt, string syst = "Nominal");
     
   private:

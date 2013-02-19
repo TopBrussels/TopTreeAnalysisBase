@@ -169,7 +169,7 @@ double LeptonTools::getMuonSF(double eta, double pt, string syst)
   return 1.;
 }
 
-void LeptonTools::readSelectronSF()
+void LeptonTools::readElectronSF()
 {
   electronPt.push_back(35);
   electronPt.push_back(45);
