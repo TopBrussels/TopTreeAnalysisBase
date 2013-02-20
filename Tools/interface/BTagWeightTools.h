@@ -9,13 +9,20 @@
 
 Unfortunately the BTV POG does not give the parameterizations in a parsable format that is consistent even per measurements, so you need to edit the files yourself to the level that they are usable. THe parsing code currently is tuned for the Moriond 2012 parameterizations from ttbar+mujet file
 
+Fake rates: Now also using the Fake Rate parameterizations that are documented (for Moriond 2013) here: https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFlightFuncs_Moriond2013.C
+As this is a bare Root Macro this has been c++ized into a separate set of functions.
+
+
+
  Implementation:
-     Loads a text file. Accessors return weights as a function of jet eta,pt for multiple options (central value, syst up, syst down, etc.)
+  Efficiencies:  Loads a text file. Accessors return weights as a function of jet eta,pt for multiple options (central value, syst up, syst down, etc.)
+   Fake rates: Contains hard-coded functions that are supplied in example code by BTV group
+
 */
 //
 // Original Author:  "fblekman"
 //         Created:  Fri Feb  1 12:10:50 CET 2013
-// $Id: BTagWeightTools.h,v 1.1.2.1 2013/02/01 17:17:58 fblekman Exp $
+// $Id: BTagWeightTools.h,v 1.1.2.2 2013/02/01 17:29:44 fblekman Exp $
 //
 //
 #ifndef BTagWeightTools_h
@@ -33,6 +40,7 @@ Unfortunately the BTV POG does not give the parameterizations in a parsable form
 #include <cmath>
 
 #include <TF1.h>
+#include <TString.h>
 
 using namespace std;
 using namespace TopTree;
@@ -52,6 +60,9 @@ class BTagWeightTools
   // useful setters
   void setDefaultAlgo(std::string defaultalgo){_defaultalgo=defaultalgo;}
   
+  float getSFlight(float pt, float eta, string algo, int syst);
+  void setABCDRangeFakeRates(TString range){_abcdrange=range;} // set to "ABCD" for default. Consult BTV documentation for options (essentially "ABCD","AB","C","D")
+
   // useful getters
   float getWeight(float pt, float eta, int flavor,int syst);
   float getWeight(float pt, float eta, int flavor,string algo,int syst);
@@ -87,11 +98,20 @@ class BTagWeightTools
   std::map<string,std::vector<float> > _weightsDown;
   int findindex(string algo, float pt, float eta,int flavor);
   void parsefile();
+ 
   std::string _filename;
   float _ptmin;
   float _ptmax;
   float _etamax;
   std::string _defaultalgo;
+
+  TString _abcdrange;
+
+  TF1* fillfakerates(TString meanminmax, TString tagger, TString TaggerStrength, Float_t Etamin, Float_t Etamax, TString DataPeriod);
+  std::pair<float,float> getfakeraterange(TString tagger, float eta);
+  TString makefakeratename(TString meanminmax, TString tagger, TString TaggerStrength, Float_t Etamin, Float_t Etamax, TString DataPeriod);
+  std::map<TString,TF1*> _fakeratesfunctions;
+
 };
 
 #endif
