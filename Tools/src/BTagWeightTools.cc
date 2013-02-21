@@ -20,7 +20,7 @@ As this is a bare Root Macro this has been c++ized into a separate set of functi
 //
 // Original Author:  "fblekman"
 //         Created:  Fri Feb  1 12:10:50 CET 2013
-// $Id: BTagWeightTools.cc,v 1.1.2.3 2013/02/20 20:54:38 fblekman Exp $
+// $Id: BTagWeightTools.cc,v 1.1.2.4 2013/02/21 09:36:35 fblekman Exp $
 //
 //
 
@@ -175,30 +175,30 @@ float  BTagWeightTools::getWeight(float pt, float eta,int flavor,string algo,int
     cout << "BTagWeightTools::WARNING retrieving for pT value (" << pt << ") outside range of " << _ptmin << ","<< _ptmax << " which is fine but tread with caution..." << endl;
   if(fabs(eta)>_etamax)
     cout << "BTagWeightTools::WARNING retrieving for eta value (" << eta << ") outside range of " << _etamax  << " which is fine but tread with caution..." << endl;
-  if(syst==0){
-    if(abs(flavor)==5 ||abs(flavor)==4)
+ 
+  if(abs(flavor)==5 ||abs(flavor)==4){
+    if(syst==0){
       if(_functions.find(algo)!=_functions.end())
 	return _functions[algo].Eval(pt);
-  }
-  else{
+    }
+    else{
     // get the uncertainty:
-    float err = getUncertainty(pt,eta, flavor, algo,syst);
-    // and do the multiplication and check if above 1:
-    if(abs(flavor)==5 ||abs(flavor)==4){
+      float err = getUncertainty(pt,eta, flavor, algo,syst);
+      // and do the multiplication and check if above 1:
       if(_functions.find(algo)!=_functions.end()){
 	float multiplyer = 1. + err;
 	if(multiplyer*_functions[algo].Eval(pt)>1.0)
 	  return 1.0;
 	else
 	  return multiplyer*_functions[algo].Eval(pt);
-	
       }
     }
-    else{
-      return getSFlight(pt,eta,algo,syst);
-    }
+  } 
+  else {
+    getSFlight(pt,eta,algo,syst);
   }
-  
+
+	
   cout << "BTagWeightTools:: WARNING retrieving unphysical BTV scale factor central value for algo: " << algo << ", jet(pt,eta)="<< pt << "," << eta << " with flavor " << flavor << endl;
   return -1;
 }
