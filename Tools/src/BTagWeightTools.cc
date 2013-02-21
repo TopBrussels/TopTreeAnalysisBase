@@ -20,7 +20,7 @@ As this is a bare Root Macro this has been c++ized into a separate set of functi
 //
 // Original Author:  "fblekman"
 //         Created:  Fri Feb  1 12:10:50 CET 2013
-// $Id: BTagWeightTools.cc,v 1.1.2.2 2013/02/01 17:23:57 fblekman Exp $
+// $Id: BTagWeightTools.cc,v 1.1.2.3 2013/02/20 20:54:38 fblekman Exp $
 //
 //
 
@@ -184,14 +184,19 @@ float  BTagWeightTools::getWeight(float pt, float eta,int flavor,string algo,int
     // get the uncertainty:
     float err = getUncertainty(pt,eta, flavor, algo,syst);
     // and do the multiplication and check if above 1:
-    if(abs(flavor)==5 ||abs(flavor)==4)
+    if(abs(flavor)==5 ||abs(flavor)==4){
       if(_functions.find(algo)!=_functions.end()){
 	float multiplyer = 1. + err;
 	if(multiplyer*_functions[algo].Eval(pt)>1.0)
 	  return 1.0;
 	else
 	  return multiplyer*_functions[algo].Eval(pt);
+	
       }
+    }
+    else{
+      return getSFlight(pt,eta,algo,syst);
+    }
   }
   
   cout << "BTagWeightTools:: WARNING retrieving unphysical BTV scale factor central value for algo: " << algo << ", jet(pt,eta)="<< pt << "," << eta << " with flavor " << flavor << endl;
@@ -247,16 +252,18 @@ float BTagWeightTools::getUncertainty(float pt, float eta, int flavor, string al
     multip*=2;
     size_t ii=_ptrangesysts.size()-1;
     if(syst>0){
-     if(_weightsUp.find(algo)!=_weightsUp.end())
+      if(_weightsUp.find(algo)!=_weightsUp.end()){
 	return multip*_weightsUp[algo][ii];
+      }
     }
     else if(syst<0){
-      if(_weightsDown.find(algo)!=_weightsDown.end())
+      if(_weightsDown.find(algo)!=_weightsDown.end()){
 	return multip*_weightsDown[algo][ii];
+      }
     }
-
   }
-  else return 0;
+  
+  return 0;
 }
 
 // constructor with text file:
@@ -336,6 +343,7 @@ TString BTagWeightTools::makefakeratename(TString meanminmax, TString tagger, TS
   result+="_";
   result+=DataPeriod;
 
+  return result;
 }
 
 std::pair<float,float> BTagWeightTools::getfakeraterange(TString tagger,float eta){
