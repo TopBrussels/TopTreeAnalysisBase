@@ -20,7 +20,7 @@ As this is a bare Root Macro this has been c++ized into a separate set of functi
 //
 // Original Author:  "fblekman"
 //         Created:  Fri Feb  1 12:10:50 CET 2013
-// $Id: BTagWeightTools.cc,v 1.1.2.4 2013/02/21 09:36:35 fblekman Exp $
+// $Id: BTagWeightTools.cc,v 1.1.2.5 2013/02/21 09:46:52 fblekman Exp $
 //
 //
 
@@ -195,7 +195,7 @@ float  BTagWeightTools::getWeight(float pt, float eta,int flavor,string algo,int
     }
   } 
   else {
-    getSFlight(pt,eta,algo,syst);
+   return getSFlight(pt,eta,algo,syst);
   }
 
 	
@@ -270,12 +270,13 @@ float BTagWeightTools::getUncertainty(float pt, float eta, int flavor, string al
 BTagWeightTools::BTagWeightTools(){
   _filename="";
   _defaultalgo="none";
-  
+  _abcdrange="ABCD";
 }
 
 BTagWeightTools::BTagWeightTools(string filename){
   _filename=filename;
   _defaultalgo="none";
+  _abcdrange="ABCD";
   parsefile();
 
 }
@@ -283,6 +284,7 @@ BTagWeightTools::BTagWeightTools(string filename){
 BTagWeightTools::BTagWeightTools(std::string filename, std::string defaultalgo){
   _defaultalgo=defaultalgo;
   _filename=filename;
+  _abcdrange="ABCD";
   parsefile();
 
 }
@@ -306,7 +308,6 @@ BTagWeightTools::~BTagWeightTools(){
 
 
 float BTagWeightTools::getSFlight(float pt, float eta, string algo, int syst){
-
   std::pair<float,float> etarange = getfakeraterange((TString)algo,eta);
   
   TString meanminmax="mean";
@@ -316,16 +317,17 @@ float BTagWeightTools::getSFlight(float pt, float eta, string algo, int syst){
     meanminmax="max";
   TString tagger = algo;
   TString taggerstrength="";
-  
   TString workname = makefakeratename(meanminmax,tagger,taggerstrength,etarange.first,etarange.second,_abcdrange); // default is to run over ABCD range, change via setABCDRangeFakeRates
-  
-  if(_fakeratesfunctions.find(workname)==_fakeratesfunctions.end()){ 
+  if(_fakeratesfunctions.find(workname)==_fakeratesfunctions.end()){
+        //   cout <<"meanminmax "<< meanminmax <<"  tagger "<< tagger <<  taggerstrength << "  etarangef  "<< etarange.first << " etarange s  "<<etarange.second  << "  _abcdrange  "<< _abcdrange <<endl;
+      
     TF1 *newfunc = fillfakerates(meanminmax,tagger,taggerstrength,etarange.first,etarange.second,_abcdrange);
-    newfunc->SetName(workname);
+      newfunc->SetName(workname);
     _fakeratesfunctions[workname]=newfunc;
-    
-  }
 
+  }
+//    cout <<" fake rate func "<< _fakeratesfunctions[workname]->GetExpFormula("")  << endl;
+    
   return _fakeratesfunctions[workname]->Eval(pt);
 }
 
@@ -403,8 +405,8 @@ TF1* BTagWeightTools::fillfakerates(TString meanminmax, TString tagger, TString 
   TString Atagger = tagger+TaggerStrength;
   TString sEtamin = Form("%1.1f",Etamin);
   TString sEtamax = Form("%1.1f",Etamax);
-  cout << sEtamin << endl;
-  cout << sEtamax << endl;
+ // cout << sEtamin << endl;
+  //cout << sEtamax << endl;
 
   if (DataPeriod=="ABCD") {
 
