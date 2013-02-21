@@ -20,7 +20,7 @@ As this is a bare Root Macro this has been c++ized into a separate set of functi
 //
 // Original Author:  "fblekman"
 //         Created:  Fri Feb  1 12:10:50 CET 2013
-// $Id: BTagWeightTools.cc,v 1.1.2.5 2013/02/21 09:46:52 fblekman Exp $
+// $Id: BTagWeightTools.cc,v 1.1.2.6 2013/02/21 10:42:00 fblekman Exp $
 //
 //
 
@@ -48,9 +48,6 @@ void BTagWeightTools::parsefile(){
   std::string lineread;
 
   bool startinglines=true;
-  bool formula=false;
-  bool parsingarray=false;
-  bool findtagger=false;
 
   _etamax=2.4;// hardcoded
   _ptmin=100000;
@@ -187,10 +184,7 @@ float  BTagWeightTools::getWeight(float pt, float eta,int flavor,string algo,int
       // and do the multiplication and check if above 1:
       if(_functions.find(algo)!=_functions.end()){
 	float multiplyer = 1. + err;
-	if(multiplyer*_functions[algo].Eval(pt)>1.0)
-	  return 1.0;
-	else
-	  return multiplyer*_functions[algo].Eval(pt);
+	return multiplyer*_functions[algo].Eval(pt);
       }
     }
   } 
