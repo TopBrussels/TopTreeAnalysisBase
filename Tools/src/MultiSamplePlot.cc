@@ -32,6 +32,7 @@ vector<Dataset*> datasets, string PlotName, int Nbins, float Min, float Max, str
 	hStack_ = 0;
  	hStackAreaNorm_ = 0;
 	maxY_ = -1;
+	minLogY_ = 1.;
 	text_ = "";
 	showNumberEntries_ = true;
 }
@@ -67,6 +68,7 @@ MultiSamplePlot::MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int
 	hStack_ = 0;
 	hStackAreaNorm_ = 0;
 	maxY_ = -1;
+	minLogY_ = 1.;
 	text_ = "";
 	showNumberEntries_ = true;
 }
@@ -88,6 +90,7 @@ MultiSamplePlot::MultiSamplePlot(vector<pair<TH1F*,Dataset*> > vec){
 	hStack_ = 0;
 	hStackAreaNorm_ = 0;
 	maxY_ = -1;
+	minLogY_ = 1.;
 	text_ = "";
 	showNumberEntries_ = true;
 	for(unsigned int i=0;i<vec.size();i++)
@@ -458,7 +461,7 @@ void MultiSamplePlot::Draw(bool addRandomPseudoData, string label, bool mergeTT,
 		hStack_->GetXaxis()->SetTitle(histosForHStack[0]->GetXaxis()->GetTitle());
 		hStack_->GetYaxis()->SetTitle(histosForHStack[0]->GetYaxis()->GetTitle());
 		hStack_->GetYaxis()->SetTitleOffset(1.1);
-		if (hData_) text.DrawLatex(0.13,0.967,("CMS, "+s.str()+" fb^{-1} at #sqrt{s} = 8 TeV").c_str());
+		if (hData_) text.DrawLatex(0.13,0.967,("CMS Preliminary, "+s.str()+" fb^{-1} at #sqrt{s} = 8 TeV").c_str());
 		if(!text_.IsNull()) text2.DrawLatex(0.5,0.86,text_);
 		
 		for(unsigned int i=0;i<histosForOverlay.size();i++){
@@ -499,7 +502,7 @@ void MultiSamplePlot::Draw(bool addRandomPseudoData, string label, bool mergeTT,
 		hStack_->Draw("HIST");
 		hStack_->GetXaxis()->SetTitle(histosForHStack[0]->GetXaxis()->GetTitle());
 		hStack_->GetYaxis()->SetTitle(histosForHStack[0]->GetYaxis()->GetTitle());
-  	if (hData_) text.DrawLatex(0.13,0.967,("CMS, "+s.str()+" fb^{-1} at #sqrt{s} = 8 TeV").c_str());
+  	if (hData_) text.DrawLatex(0.13,0.967,("CMS Preliminary, "+s.str()+" fb^{-1} at #sqrt{s} = 8 TeV").c_str());
   	if(!text_.IsNull()) text2.DrawLatex(0.5,0.86,text_);
     for(unsigned int i=0;i<histosForOverlay.size();i++){
 	    histosForOverlay[i]->Draw("HIST SAME");
@@ -529,7 +532,7 @@ void MultiSamplePlot::Draw(bool addRandomPseudoData, string label, bool mergeTT,
 		hStackAreaNorm_->GetXaxis()->SetTitle(histosForHStackAreaNorm[0]->GetXaxis()->GetTitle());
 		hStackAreaNorm_->GetYaxis()->SetTitle(histosForHStackAreaNorm[0]->GetYaxis()->GetTitle());
 		hStackAreaNorm_->GetYaxis()->SetTitleOffset(1.1);
-		if (hData_) text.DrawLatex(0.13,0.967,("CMS, "+s.str()+" fb^{-1} at #sqrt{s} = 8 TeV").c_str());
+		if (hData_) text.DrawLatex(0.13,0.967,("CMS Preliminary, "+s.str()+" fb^{-1} at #sqrt{s} = 8 TeV").c_str());
 		if(!text_.IsNull()) text2.DrawLatex(0.5,0.86,text_);
 		for(unsigned int i=0;i<histosForOverlayAreaNorm.size();i++){
 		   histosForOverlayAreaNorm[i]->Draw("HIST SAME");
@@ -540,7 +543,7 @@ void MultiSamplePlot::Draw(bool addRandomPseudoData, string label, bool mergeTT,
 		hStackAreaNorm_->Draw("HIST");
 		hStackAreaNorm_->GetXaxis()->SetTitle(histosForHStackAreaNorm[0]->GetXaxis()->GetTitle());
 		hStackAreaNorm_->GetYaxis()->SetTitle(histosForHStackAreaNorm[0]->GetYaxis()->GetTitle());
-    if (hData_) text.DrawLatex(0.13,0.967,("CMS, "+s.str()+" fb^{-1} at #sqrt{s} = 8 TeV").c_str());
+    if (hData_) text.DrawLatex(0.13,0.967,("CMS Preliminary, "+s.str()+" fb^{-1} at #sqrt{s} = 8 TeV").c_str());
     if(!text_.IsNull()) text2.DrawLatex(0.5,0.86,text_);
 		for(unsigned int i=0;i<histosForOverlayAreaNorm.size();i++){
 		   histosForOverlayAreaNorm[i]->Draw("HIST SAME");
@@ -678,6 +681,7 @@ void MultiSamplePlot::Draw(bool addRandomPseudoData, string label, bool mergeTT,
 		}
 		else hData_->Draw("E");
 		char legDataTitle[100];
+		hData_->SetTitle("Data");
 		if (showNumberEntries_){
 			sprintf (legDataTitle, "%s (%.1f entries)", hData_->GetTitle(), hData_->Integral(0,hData_->GetNbinsX()+1) );
 		}
@@ -755,7 +759,7 @@ void MultiSamplePlot::Write(TFile* fout, string label, bool savePNG, string path
 	}
   
 	if(hCanvasStackLogY_) {
-	  if(hStack_) hStack_->SetMinimum(1.);
+	  if(hStack_) hStack_->SetMinimum(minLogY_);
 	  hCanvasStackLogY_->Write();
 	  if(savePNG)
 	  {
@@ -775,7 +779,7 @@ void MultiSamplePlot::Write(TFile* fout, string label, bool savePNG, string path
 	}
   
 	if(hCanvasStackAreaNormLogY_) {
-	  if(hStackAreaNorm_) hStackAreaNorm_->SetMinimum(1.);
+	  if(hStackAreaNorm_) hStackAreaNorm_->SetMinimum(minLogY_);
 	  hCanvasStackAreaNormLogY_->Write();
 	  if(savePNG)
 	  {

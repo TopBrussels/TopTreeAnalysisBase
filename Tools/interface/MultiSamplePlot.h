@@ -40,6 +40,7 @@ class MultiSamplePlot{
 		void setDataLumi(float lum) { lumi_ = lum; }
 		void showNumberEntries(bool a) { showNumberEntries_ = a; }
 		void setMaxY(float y) { maxY_ = y; }
+		void setMinLogY(float y) { minLogY_ = y; }
 		void addText(string text) { text_ = text; }
 	
 	private:
@@ -61,6 +62,7 @@ class MultiSamplePlot{
 		float lumi_;
 		bool showNumberEntries_;
 		float maxY_;
+		float minLogY_;
 		TString text_;
 		string plotName_;
 };
