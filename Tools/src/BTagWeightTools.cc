@@ -20,7 +20,7 @@ As this is a bare Root Macro this has been c++ized into a separate set of functi
 //
 // Original Author:  "fblekman"
 //         Created:  Fri Feb  1 12:10:50 CET 2013
-// $Id: BTagWeightTools.cc,v 1.1.2.6 2013/02/21 10:42:00 fblekman Exp $
+// $Id: BTagWeightTools.cc,v 1.1.2.7 2013/02/21 10:46:28 fblekman Exp $
 //
 //
 
@@ -49,7 +49,7 @@ void BTagWeightTools::parsefile(){
 
   bool startinglines=true;
 
-  _etamax=2.4;// hardcoded
+  _etamax=2.5;// hardcoded
   _ptmin=100000;
   _ptmax=0;
   size_t p0=0; //workers
@@ -856,7 +856,14 @@ TF1* BTagWeightTools::fillfakerates(TString meanminmax, TString tagger, TString 
     
   } 
   
-  if( tmpSFl == NULL ) cout << "NULL pointer returned... Function seems not to exist" << endl;
+  if( tmpSFl == NULL ) {cout << "NULL pointer returned... Function seems not to exist" << endl;
+  cout << "meanminmax: " << meanminmax << " tagger: " << tagger << " TaggerStrength: " << TaggerStrength << " Etamin: " <<  Etamin  << " Etamax: " << Etamax << " DataPeriod: " <<
+  DataPeriod << endl; 
+  
+  tmpSFl = new TF1("dummy","-1",20.,1000);
+  }
+  
+  
 
   return tmpSFl;
 
