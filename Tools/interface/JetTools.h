@@ -7,6 +7,8 @@
 #include <cmath>
 
 //TopTreeProducer classes
+#include "TopTreeProducer/interface/TRootMuon.h"
+#include "TopTreeProducer/interface/TRootElectron.h"
 #include "TopTreeProducer/interface/TRootJet.h"
 #include "TopTreeProducer/interface/TRootGenJet.h"
 #include "TopTreeProducer/interface/TRootCaloJet.h"
@@ -56,11 +58,16 @@ class JetTools
     // Jet scalers (with a fixed factor)
     void scaleJet(TRootJet* inJet, float scale=1);
     void scaleJets(vector<TRootJet*> inJets, float scale=1);    
+    void scaleJets(vector<TRootJet*> inJets, TRootMET* inMET, float scale=1);    
     
     // Type I MET corrections
     void correctMETTypeOne(TRootJet* inJet, TRootMET* inMET, bool isData = false);
     void correctMETTypeOne(vector<TRootJet*> inJets, TRootMET* inMET, bool isData = false);
-        
+    
+    // MET Systematics
+
+    void correctMETUnclusteredEnergy(TRootMET* inMET, vector<TRootJet*> inJets, vector<TRootMuon*> inMuons, vector<TRootElectron*> inElectrons, string direction);
+
     // Jet convertors
     vector<TRootCaloJet*> convertToCaloJets(vector<TRootJet*> init_jets);
     vector<TRootPFJet*> convertToPFJets(vector<TRootJet*> init_jets);

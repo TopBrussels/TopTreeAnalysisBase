@@ -125,12 +125,14 @@ void JetTools::correctJetJESUnc(vector<TRootJet*> inJets, string direction, floa
 
 void JetTools::correctJetJESUnc(TRootJet* inJet, TRootMET* inMET, string direction,float nSigma) // direction = plus or minus
 { 
-  inMET->SetPx(inMET->Px() + inJet->Px()); 
-  inMET->SetPy(inMET->Py() + inJet->Py());  
-  correctJetJESUnc(inJet,direction, nSigma);  
-  inMET->SetPx(inMET->Px() - nSigma*inJet->Px());
-  inMET->SetPy(inMET->Py() - nSigma*inJet->Py());
-  inMET->SetE(sqrt(pow(inMET->Px(),2) + pow(inMET->Py(),2)));
+  if (inJet->Pt() > 10) {
+    inMET->SetPx(inMET->Px() + inJet->Px()); 
+    inMET->SetPy(inMET->Py() + inJet->Py());  
+    correctJetJESUnc(inJet,direction, nSigma);  
+    inMET->SetPx(inMET->Px() - nSigma*inJet->Px());
+    inMET->SetPy(inMET->Py() - nSigma*inJet->Py());
+    inMET->SetE(sqrt(pow(inMET->Px(),2) + pow(inMET->Py(),2)));
+  }
 }
 
 void JetTools::correctJetJESUnc(vector<TRootJet*> inJets, TRootMET* inMET, string direction, float nSigma)
@@ -285,6 +287,22 @@ void JetTools::scaleJets(vector<TRootJet*> inJets, float scale)
     scaleJet(inJets[i],scale);
 }
 
+void JetTools::scaleJets(vector<TRootJet*> inJets, TRootMET* inMET, float scale)
+{
+  for(unsigned int i=0; i<inJets.size(); i++) {
+        
+    inMET->SetPx(inMET->Px() + inJets[i]->Px());
+    inMET->SetPy(inMET->Py() + inJets[i]->Py());
+
+    scaleJet(inJets[i],scale);
+
+    inMET->SetPx(inMET->Px() - inJets[i]->Px());
+    inMET->SetPy(inMET->Py() - inJets[i]->Py());
+    inMET->SetE(sqrt(pow(inMET->Px(),2) + pow(inMET->Py(),2)));
+
+  }
+}
+
 void JetTools::correctMETTypeOne(TRootJet* inJet, TRootMET* inMET, bool isData)  //Do not apply for |eta| > 4.7
 {
   float corr = -9999;
@@ -301,6 +319,56 @@ void JetTools::correctMETTypeOne(vector<TRootJet*> inJets, TRootMET* inMET, bool
       correctMETTypeOne(inJets[i],inMET, isData);
       
   }
+}
+
+void JetTools::correctMETUnclusteredEnergy(TRootMET* inMET, vector<TRootJet*> inJets, vector<TRootMuon*> inMuons, vector<TRootElectron*> inElectrons, string direction) {
+  
+  double factor=1.;
+
+  //Use all jets stored in the event, with no additional pt (>10 GeV standard) or eta or Id requirement
+  double met_x = inMET->Px();
+  double met_y = inMET->Py();
+  for (unsigned int i=0; i<inJets.size(); i++){
+    if(inJets[i]->Pt() > 10.){
+      met_x += inJets[i]->Px();
+      met_y += inJets[i]->Py();
+    }
+  }
+  for(unsigned int i=0; i<inMuons.size(); i++){
+    met_x += inMuons[i]->Px();
+    met_y += inMuons[i]->Py();
+  }
+  for(unsigned int i=0; i<inElectrons.size(); i++){
+    met_x += inElectrons[i]->Px();
+    met_y += inElectrons[i]->Py();
+  }
+  
+  if (direction == "minus")
+    factor = 0.9;
+  else if (direction == "plus")
+    factor = 1.1;
+  
+  met_x *= factor;
+  met_y *= factor;
+  
+  //Go back to original MET, but with unclustered energy scaled up and down:
+  for (unsigned int i=0; i<inJets.size(); i++){
+    if(inJets[i]->Pt() > 10.){
+      met_x -= inJets[i]->Px();
+      met_y -= inJets[i]->Py();
+    }
+  }
+  for(unsigned int i=0; i<inMuons.size(); i++){
+    met_x -= inMuons[i]->Px();
+    met_y -= inMuons[i]->Py();
+  }
+  for(unsigned int i=0; i<inElectrons.size(); i++){
+    met_x -= inElectrons[i]->Px();
+    met_y -= inElectrons[i]->Py();
+  }
+  inMET->SetPx(met_x);
+  inMET->SetPy(met_y);
+
 }
     
 //_____Jet convertors________________________________________
