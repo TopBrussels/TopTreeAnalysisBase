@@ -44,7 +44,8 @@ class ObservablesRanker{
   ObservablesRanker();
   ObservablesRanker(const Observables & obs);
   ObservablesRanker(TTree *  tSignal_, TTree *tBkg_, string & merged_file, string & np_file, string &sm_file, bool &tbl_overlap_, bool &tbl_correlation_, bool &tbl_overlap_sorted_cleaned_, bool & DoCorrs_,vector <float> Cor_Cut_);
-  ObservablesRanker( string & merged_file, string & np_file, string &sm_file, bool &tbl_overlap_, bool &tbl_correlation_, bool &tbl_overlap_sorted_cleaned_, float & Cor_Cut);
+  ObservablesRanker(string & merged_file, string & np_file, string &sm_file, bool &tbl_overlap_, bool &tbl_correlation_, bool &tbl_overlap_sorted_cleaned_, float & Cor_Cut);
+  ObservablesRanker(string & sm_file, bool &tbl_correlation_,  bool & DoCorrs_);
  ~ObservablesRanker();
 
   void ComputeOverlap(string &fout, string &merged_file,string &np_file);
@@ -53,6 +54,7 @@ class ObservablesRanker{
   void PrintOverlapTable(bool & table_overlap_);
   void PrintCorrelationTable(bool &table_correlation_ , float & Cor_Cut);
   void DoOnlyCorrelation(bool &table_correlation_ );
+  void CorrelationBasedOnOverlap(bool &table_correlation_ );
   void DoCorrelation(bool &table_correlation_ ,  float &Cor_Cut);
   void PrintOnlyCorrelation(bool &table_correlation_ , float & Cor_Cut);
   void PrintOverlapSortedCleanedTable(bool &table_overlap_sorted_cleaned_, string & fin, string & fout);
@@ -60,10 +62,14 @@ class ObservablesRanker{
   void SaveBestObservablesList(string &fout, float & Cor);
   void SaveCorrelanceObservablesList(string &fout);
   void Read(string & fout, float & Cor);
+
   TAxis * getBinningStatisticsRequirement(TH1F *h1_, Int_t mnEntries);
 
 struct sort_pred {
     bool operator()(const std::pair<string,float> &left, const std::pair<string,float> &right) {
+	    //if(left.second!=right.second)
+	//	return left.second < right.second;
+	//        return left.first < right.first;
         return left.second < right.second;
     }
 };
@@ -81,6 +87,14 @@ struct sort_two_int {
     bool operator()(const std::pair<int,int> &left, const std::pair<int,int> &right) {
         return left.second < right.second;
     }
+
+
+bool cmp(const pair<string, long> &p1, const pair<string, long> &p2)
+{
+	    if(p1.second!=p2.second)
+		            return p1.second < p2.second;
+	        return p1.first < p2.first;
+}
 
 
 };

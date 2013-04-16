@@ -1,6 +1,6 @@
 #ifndef MakeBinning_h
 #define MakeBinning_h
-#include "TopTreeAnalysisBase/Reconstruction/interface/Observables.h"
+#include "../../Reconstruction/interface/Observables.h"
 
 #include <iostream>
 #include <iomanip>
@@ -41,7 +41,7 @@ struct sort_string_double {
  void Fill(string &var_, float &val_,  float & weight_);
 void Binning(string & decision_, int nbins_, int evtsperbin_);
 void Binning(string & decision_,  vector < pair <string,float > > & contents_,int nbins_, int evtsperbin_, float & weight_);
-void Binning_forTprimeAnalysis(string myxvariable, string myyvariable, map<string,vector<float > > VariableValuesMap, map<string,int> nbinsMap, vector<float> eventweightvector, string outputfilename);
+void Binning_forTprimeAnalysis(map<string,vector<float > > VariableValuesMap, map<string,int> nbinsMap, vector<float> eventweightvector, string outputfilename);
 
 
 private:

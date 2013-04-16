@@ -1,6 +1,6 @@
 #ifndef PlotObservables_h
 #define PlotObservables_h
-#include "TopTreeAnalysisBase/Reconstruction/interface/Observables.h"
+#include "../../Reconstruction/interface/Observables.h"
 
 #include <iostream>
 #include <iomanip>
@@ -39,10 +39,16 @@ struct sort_string_double {
 
   void Normalized();
   void Fill(const Observables& obs, float & weight_,bool & fill);
+  void Fill (string name_ , float & value_,float & weight,int & pos_);
   void Write(string &dset, bool normalized = false);
+  void Write(string &dset, float &weight_,bool normalized = false);
+  void Write(TString &dset, bool normalized = false);
   
+  void Write(TString &dset, string &decision_,const vector<pair<string,float> > & BinContentObsAll,int evtsPerBin_, int NBins_,float & weight_,bool normalized = false, bool Write_=false);
   void Write(TString &dset, string &decision_,const vector<pair<string,float> > & BinContentObsAll,int evtsPerBin_, int NBins_,float & weight_,bool normalized = false);
   
+  void WriteEvtsPerBin(TString &dset,const vector<pair<string,float> > & BinContentObsAll,int evtsPerBin_, float & weight_,bool normalized = false,bool write=true);
+  void WriteNBins(TString &dset,const vector<pair<string,float> > & BinContentObsAll,int NBins_,float & weight_,bool normalized = false,bool write=true); 
   void WriteEvtsPerBin(TString &dset,const vector<pair<string,float> > & BinContentObsAll,int evtsPerBin_, float & weight_,bool normalized = false);
   void WriteNBins(TString &dset,const vector<pair<string,float> > & BinContentObsAll,int NBins_,float & weight_,bool normalized = false);
   

@@ -2,7 +2,7 @@
 #include "../interface/Observables.h"
 #include "TCut.h"
 #include "math.h"
-
+#include <algorithm>
 
 using namespace std;
 //using namespace TopTree;
@@ -22,16 +22,39 @@ ObservablesRanker::ObservablesRanker (const Observables & obs)
 }
 
 
+ObservablesRanker::ObservablesRanker (string & sm_file_, bool &tbl_correlation,  bool & DoCorrs)
+{
+	if (DoCorrs){
+	DoOnlyCorrelation(tbl_correlation);
+	SaveCorrelanceObservablesList(sm_file_);
+	}
+}
+
+
 ObservablesRanker::ObservablesRanker (TTree * treeSignal, TTree * treeBkg, string & merged_file_, string & np_file_, string & sm_file_, bool &tbl_overlap, bool &tbl_correlation, bool &tbl_overlap_sorted_cleaned , bool & DoCorrs,vector <float> cor_cut_)
 {
+/*
+ treeBkg->SetBranchStatus("*Had*",0);
+ treeBkg->SetBranchStatus("*Lep*",0);
+ treeBkg->SetBranchStatus("*BTag*",0);
+ treeBkg->SetBranchStatus("*Boosted*",0);
+ treeBkg->SetBranchStatus("*Chi2*",0);
+ treeBkg->SetBranchStatus("*Ttbar*",0);
+ 
+ treeSignal->SetBranchStatus("*Had*",0);
+ treeSignal->SetBranchStatus("*Lep*",0);
+ treeSignal->SetBranchStatus("*BTag*",0);
+ treeSignal->SetBranchStatus("*Boosted*",0);
+ treeSignal->SetBranchStatus("*Chi2*",0);
+ treeSignal->SetBranchStatus("*Ttbar*",0);
+*/
 
-  ComputeOverlap (merged_file_, np_file_, sm_file_);
-
-  
+ ComputeOverlap (merged_file_, np_file_, sm_file_);
   tree_Signal = treeSignal;
   tree_Bkg = treeBkg;
 	if (DoCorrs){
-	DoOnlyCorrelation(tbl_correlation);
+	//DoOnlyCorrelation(tbl_correlation);
+	CorrelationBasedOnOverlap(tbl_correlation);
 	SaveCorrelanceObservablesList(sm_file_);
 	}
 for (unsigned int i=0;i<cor_cut_.size();i++){
@@ -125,6 +148,7 @@ ObservablesRanker::SaveBestObservablesList(string & fout, float & cor){
   target->Close();
   delete target;
 }
+
 	    
 void
 ObservablesRanker::Read(string &fout,float & cor){
@@ -201,6 +225,7 @@ overlaps_sorted_.clear();
   TChain *globChain = 0;
   TIter nextkey (current_sourcedir->GetListOfKeys ());
   TKey *key, *oldkey = 0;
+    TCanvas *c1 = new TCanvas ("c1", "c1", 500, 500);
   while ((key = (TKey *) nextkey ())) {
 
     //keep only the highest cycle number for each key
@@ -210,8 +235,7 @@ overlaps_sorted_.clear();
     // read object from first source file and create a canvas
     first_source->cd (path);
     TObject *obj = key->ReadObj ();
-    TCanvas *c1 = new TCanvas ("c1", obj->GetName (), 500, 500);
-    TLegend *legend_c1 = new TLegend (0.65, 0.80, 0.89, 0.70);
+  c1->SetName(obj->GetName ());
 
     if (obj->IsA ()->InheritsFrom ("TH1F")) {
       // descendant of TH1F -> prepare the histograms to be superimposed
@@ -231,40 +255,44 @@ overlaps_sorted_.clear();
 	if (key2) {
 	  TH1F *h2 = (TH1F *) key2->ReadObj ();
 	  ModifyHist (h2, kBlue);
+	TH1F* htest;
+	double maxh1;
+	double maxh2;
 
 
 
-	  double maxh1;
-	  double maxh2;
 	  CS = 0;
-	  TH1F* htest;
-	  if (h1->GetNbinsX()>h2->GetNbinsX()) htest=h1;
+	  if (h1->GetNbinsX()>h2->GetNbinsX() || (h1->GetNbinsX()==h2->GetNbinsX()) ) htest=h1;
 	  else htest=h2;
 	  // overlaps_.clear();overlaps_sorted_.clear();
 	  for (Int_t b = 1; b <= htest->GetNbinsX () + 1; b++) {
 	    bincontS = h2->GetBinContent (b);
 	    bincontB = h1->GetBinContent (b);
-	    // cout<<" BIN CONTENT "<<h1->GetName()<<"  "<<bincontS<<"  "<<bincontB<<"  "<<b<<"  "<<h1->GetNbinsX()<<"  "<<h2->GetNbinsX()<<"  "<<h1->GetBinCenter(h1->GetNbinsX()+1)<<"  "<<h2->GetBinCenter(h2->GetNbinsX()+1)<<"  "<<h1->GetBinCenter(h1->GetNbinsX()+1)<<"  "<<h2->GetBinCenter(h2->GetNbinsX()+1)<<endl;
-
+            if (bincontS >0 && bincontB>0){
+	    
 	    if (bincontS <= bincontB)
 	      CS += bincontS;
 	    else
 	      CS += bincontB;
+	    //cout<<" ========================================================================    BIN CONTENT "<<h1->GetName()<<"  "<<bincontS<<"  "<<bincontB<<"  "<<b<<"  "<<h1->GetNbinsX()<<"  "<<h2->GetNbinsX()<<" CS  "<<CS<<"  "<<endl; 
+	    }
 	  }
 	
+
 	  //if (CS>0)
 	  overlaps_.push_back (pair < string, float >((htest->GetName ()), CS));
+	  overlaps_.erase( unique( overlaps_.begin(), overlaps_.end() ), overlaps_.end() );
 	  //if (CS>0)
 	  overlaps_sorted_.push_back (pair < string, float >((htest->GetName ()), CS));
+	  overlaps_sorted_.erase( unique( overlaps_sorted_.begin(), overlaps_sorted_.end() ), overlaps_sorted_.end() );
 	  // overlaps_sorted_cleaned_.push_back(pair< string, float> ((h1->GetName()), CS));
 	  maxh1 = h1->GetMaximum (10000.);
 	  maxh2 = h2->GetMaximum (10000.);
 	  //maxh1 = h1->GetBinCenter(h1->GetNbinsX()+1);
           //maxh2 = h2->GetBinCenter(h2->GetNbinsX()+1);
-	  if (maxh1 > maxh2) {
+	  if (maxh1 > maxh2 ) {
 	    h1->Draw ();
 	    h2->Draw ("SAME");
-
 	  }
 	  else {
 	    h2->Draw ();
@@ -272,17 +300,21 @@ overlaps_sorted_.clear();
 
 	  }
 
-
-
+    TLegend *legend_c1 = new TLegend (0.65, 0.80, 0.89, 0.70);
 	  legend_c1->SetTextFont (70);
 	  legend_c1->SetTextSize (0.03);
-	  legend_c1->AddEntry (h1, np_title_.c_str (), "L");	// change this aBranch_Bkg_ording to first source file
-	  legend_c1->AddEntry (h2, "TTJets", "L");	// change this aBranch_Bkg_ording to second source file
-	  legend_c1->Draw ("SAME");
-	}
 
+	string new_np_title = np_title_.substr(0, np_title_.find("Skimmed/"));
+	  
+	  legend_c1->AddEntry (h1, new_np_title.c_str(), "L");	// change this aBranch_Bkg_ording to first source file
+	  
+	  legend_c1->AddEntry (h2, "SM", "L");	// change this aBranch_Bkg_ording to second source file
+	  legend_c1->Draw ("SAME");
+
+	}
 	nextsource = (TFile *) sourcelist->After (nextsource);
-      }				// while ( nextsource )
+      }
+      // while ( nextsource )
     }
     else if (obj->IsA ()->InheritsFrom ("TTree")) {	// not tested
 
@@ -301,7 +333,7 @@ overlaps_sorted_.clear();
       }
 
     }
-    else if (obj->IsA ()->InheritsFrom ("TDirectory")) {	// not tested
+    /*else if (obj->IsA ()->InheritsFrom ("TDirectory")) {	// not tested
       // it's a subdirectory
 
       cout << "Found subdirectory " << obj->GetName () << endl;
@@ -315,7 +347,7 @@ overlaps_sorted_.clear();
       // GetPath(), so we can still figure out where we are in the recursion
       // Impose( newdir, sourcelist );
 
-    }
+    }*/
     else {
 
       // object is of no type that we know or can handle
@@ -337,10 +369,12 @@ overlaps_sorted_.clear();
     }
 
 
-    delete obj;
-    delete c1;
-    delete legend_c1;
-  }				// while ( ( TKey *key = (TKey*)nextkey() ) )
+ // delete first_source;
+//   delete obj;
+//    delete legend_c1;
+//    delete c1;
+ 
+    }				// while ( ( TKey *key = (TKey*)nextkey() ) )
 
   // save modifications to target file
   target->SaveSelf (kTRUE);
@@ -370,8 +404,26 @@ ObservablesRanker::ModifyHist (TH1F * &h, Color_t lcolor)
   double temp_integral;
 
   h->SetLineColor (lcolor);
+  int nbins=h->GetNbinsX();
+  int nn=1;
+  
+  /*if (  nbins==50)  nn=2.5;
+  if (  nbins==100)  nn=4;
+  if (  nbins==150)  nn=4;
+  if (  nbins>150)  nn=5;
+  if (  nbins>200)  nn=5;
+  if (  nbins<30)  nn=1;
+  if (  nbins==70)  nn=3.5;
+  if (  nbins==80)  nn=4;
+  if (  nbins>249)  {nn=5;*/
+   if (nbins>30){
+	   h->Rebin(5);
+   }
+
   temp_integral = h->Integral ();
   //cout << temp_integral << endl;
+  //float lumi_scale=5000;
+ // h->Scale (pow (lumi_scale, -1));
   if (temp_integral != 0)
     h->Scale (pow (temp_integral, -1));
 }
@@ -482,14 +534,14 @@ ObservablesRanker::PrintOverlapSortedCleanedTable (bool & cout_table_srt_cln)
 
 }
 
-
 void
 ObservablesRanker::DoOnlyCorrelation ( bool &cout_table_corr_srt_cln )
 {
 
 
-  TObjArray *Branches_Bkg = tree_Bkg->GetListOfBranches ();
 
+   TObjArray *Branches_Bkg = tree_Bkg->GetListOfBranches ();
+ 
 
   Int_t Entries_Bkg = Branches_Bkg->GetEntries ();
   
@@ -504,7 +556,67 @@ ObservablesRanker::DoOnlyCorrelation ( bool &cout_table_corr_srt_cln )
     sprintf (Name_Bkg_, "%s", Branch_Sgnl_->GetName ());
 
 
-    for (Int_t j = 0; j < Entries_Bkg; j++) {
+   
+	     for (Int_t j = 0; j < Entries_Bkg; j++) {
+
+
+      TBranch *Branch_Bkg_ = (TBranch *) Branches_Bkg->At (j);
+
+
+      char Name_Bkg2_[30];
+      sprintf (Name_Bkg2_, "%s", Branch_Bkg_->GetName ());
+      tree_Bkg->Draw (Form ("%s:%s>>hcorr", Name_Bkg_, Name_Bkg2_, "", "goff"));
+      TH2 *hcorr = (TH2 *) gDirectory->Get ("hcorr");
+   //         cout << "The correlation from TTJets " << Name_Bkg_ << " with " << Name_Bkg2_ << "   correl factor =   " << '\t' << hcorr->GetCorrelationFactor () << "  " << endl;
+
+      float hCorr = hcorr->GetCorrelationFactor ();
+      //   correlation_sorted_.push_back (hCorr);
+    string name =  Name_Bkg_; 
+
+      	all_correlation_table_.push_back(pair <string, float > (Name_Bkg_,hCorr));
+
+    }
+  }
+
+}
+
+void
+ObservablesRanker::CorrelationBasedOnOverlap ( bool &cout_table_corr_srt_cln )
+{
+
+
+for (unsigned int h=0;h<overlaps_sorted_.size();h++){
+	if (overlaps_sorted_[h].first=="hweight")overlaps_sorted_.erase (overlaps_sorted_.begin()+h);}
+
+sort (overlaps_sorted_.begin (), overlaps_sorted_.end (), sort_pred ());
+for (unsigned int h=0;h<overlaps_sorted_.size();h++){
+
+	//cout<<"  Here we are... "<<h<<"  "<<overlaps_sorted_[h].first<<"   "<<overlaps_sorted_[h].second<<endl;
+}
+
+
+   TObjArray *Branches_Bkg = tree_Bkg->GetListOfBranches ();
+ 
+
+  //Int_t Entries_Bkg = Branches_Bkg->GetEntries ();
+  Int_t Entries_Bkg = overlaps_sorted_.size();
+  
+
+//  for (Int_t i = 0; i < Entries_Bkg; i++) {
+for ( unsigned int i=0;i<overlaps_sorted_.size();i++){
+//for ( unsigned int i=0;i<5;i++){
+
+    TBranch *Branch_Sgnl_ = (TBranch *) Branches_Bkg->At (i);
+
+
+    char Name_Bkg_[30];
+
+    sprintf (Name_Bkg_, "%s", Branch_Sgnl_->GetName ());
+
+   
+//	     for (Int_t j = 0; j < Entries_Bkg; j++) {
+for ( unsigned int j=0;j<overlaps_sorted_.size();j++){
+//for ( unsigned int j=0;j<5;j++){
 
 
       TBranch *Branch_Bkg_ = (TBranch *) Branches_Bkg->At (j);
@@ -514,15 +626,19 @@ ObservablesRanker::DoOnlyCorrelation ( bool &cout_table_corr_srt_cln )
 
 
       sprintf (Name_Bkg2_, "%s", Branch_Bkg_->GetName ());
+	
+
 
       tree_Bkg->Draw (Form ("%s:%s>>hcorr", Name_Bkg_, Name_Bkg2_, "", "goff"));
       TH2 *hcorr = (TH2 *) gDirectory->Get ("hcorr");
-      //      cout << "The correlation from TTJets " << Name_Bkg_ << " with " << Name_Bkg2_ << "   correl factor =   " << '\t' << hcorr->GetCorrelationFactor () << "  " << endl;
+         //   cout << "The correlation from TTJets " << Name_Bkg_ << " with " << Name_Bkg2_ << "   correl factor =   " << '\t' << hcorr->GetCorrelationFactor () << "  " << endl;
 
       float hCorr = hcorr->GetCorrelationFactor ();
       //   correlation_sorted_.push_back (hCorr);
- all_correlation_table_.push_back(pair <string, float > (Name_Bkg_,hCorr));
+    string name =  Name_Bkg_; 
 
+      	all_correlation_table_.push_back(pair <string, float > (Name_Bkg_,hCorr));
+	//cout<<"  all correl  "<<all_correlation_table_[all_correlation_table_.size()-1].first<<"   "<<all_correlation_table_[all_correlation_table_.size()-1].second<<endl;
     }
   }
 
@@ -541,7 +657,6 @@ ObservablesRanker::DoCorrelation ( bool &cout_table_corr_srt_cln , float & cor_c
 
   Int_t Entries_Bkg = Branches_Bkg->GetEntries ();
   
-
   for (Int_t i = 0; i < Entries_Bkg; i++) {
 
     TBranch *Branch_Sgnl_ = (TBranch *) Branches_Bkg->At (i);
@@ -565,7 +680,7 @@ ObservablesRanker::DoCorrelation ( bool &cout_table_corr_srt_cln , float & cor_c
 
       tree_Bkg->Draw (Form ("%s:%s>>hcorr", Name_Bkg_, Name_Bkg2_, "", "goff"));
       TH2 *hcorr = (TH2 *) gDirectory->Get ("hcorr");
-      //      cout << "The correlation from TTJets " << Name_Bkg_ << " with " << Name_Bkg2_ << "   correl factor =   " << '\t' << hcorr->GetCorrelationFactor () << "  " << endl;
+     //       cout << "The correlation from TTJets again..." << Name_Bkg_ << " with " << Name_Bkg2_ << "   correl factor =   " << '\t' << hcorr->GetCorrelationFactor () << "  " << endl;
 
       float hCorr = hcorr->GetCorrelationFactor ();
       if (fabs (hCorr) > cor_cut && Name_Bkg_ != Name_Bkg2_ && j > i) {
@@ -576,8 +691,8 @@ ObservablesRanker::DoCorrelation ( bool &cout_table_corr_srt_cln , float & cor_c
 
     }
   }
-
 }
+
 
 
 void

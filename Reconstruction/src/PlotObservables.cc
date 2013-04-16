@@ -19,13 +19,9 @@ PlotObservables::PlotObservables (const vector < string > &vec, const vector < p
 
   for (unsigned int i = 0; i < vec.size (); i++)
     {
-      h_variables.
-	push_back (TH1F
-		   (vec[i].c_str (), vec[i].c_str (), 200, range[i].first,
-		    range[i].second));
+      h_variables.push_back (TH1F   (vec[i].c_str (), vec[i].c_str (), 200, range[i].first,   range[i].second));
       variable_string_.push_back (vec[i].c_str ());
       var_[i] = -8888.;
-
 
     }
 
@@ -57,14 +53,27 @@ PlotObservables::Fill (const Observables & obs, float & weight,bool &fill_)
 if (fill_){
   for (unsigned int i = 0; i < h_variables.size (); i++)
     {
-      h_variables[i].Fill ((obs.Variables ()[i]).second);
+	if (  (obs.Variables ()[i]).second > -9999) {  
+      h_variables[i].Fill ((obs.Variables ()[i]).second,weight);
 
       //PlotContent_.push_back( pair< string,float > ( (obs.Variables ()[i]).first , (obs.Variables ()[i]).second) );
-      //cout<<"  "<<i<<"  "<<PlotContent_[i].first<<"  "<<obs.Variables()[i].first<<"  "<<PlotContent_[i].second<<"  "<<(obs.Variables()[i]).second<<endl;
-
+	}
     }
 }
+}
+void
+PlotObservables::Fill (string name_ , float & value_,float & weight,int & pos)
+{
 
+
+	if (  weight > 0) {  
+        //char name[100];
+	//sprintf(name,"%s",name_);
+	h_variables[pos].Fill (value_, weight);
+	
+	}
+	if (name_=="MET" && value_<50)
+	cout<<" histo while filling "<<h_variables[pos].GetName()<<"  "<<name_<<"  "<<value_<<endl;
 }
 
 void
@@ -77,6 +86,14 @@ PlotObservables::Normalized ()
 
 
 void
+PlotObservables::Write(TString  & setname,  string & decision,const vector < pair < string,float > >&PlotContent_, int NBins, int evtsPerBin,float & weight,bool normalized,bool Write)
+{
+if (decision=="Bins" && Write) void WriteNBins(TString  & setname,  const vector < pair < string,float > >&PlotContent_, int NBins,float & weight,bool normalized);
+else if (decision=="Events" && Write) void  WriteEvtsPerBin(TString  & setname,  const vector < pair < string,float > >&PlotContent_, int evtsPerBin,float & weight,bool normalized);
+
+}
+
+void
 PlotObservables::Write(TString  & setname,  string & decision,const vector < pair < string,float > >&PlotContent_, int NBins, int evtsPerBin,float & weight,bool normalized)
 {
 if (decision=="Bins") void WriteNBins(TString  & setname,  const vector < pair < string,float > >&PlotContent_, int NBins,float & weight,bool normalized);
@@ -86,11 +103,11 @@ else if (decision=="Events") void  WriteEvtsPerBin(TString  & setname,  const ve
 
 
 void
-PlotObservables::WriteEvtsPerBin(TString  & setname,  const vector < pair < string,float > >&PlotContent_, int evtsPerBin,float & weight,bool normalized)
+PlotObservables::WriteEvtsPerBin(TString  & setname,  const vector < pair < string,float > >&PlotContent_, int evtsPerBin,float & weight,bool normalized,bool write)
 {
 
 
-
+if (!write) setname="dummy";
 vector < double >values_;
   TString file_nobins = setname + "_nobins.root";
   TString file_binned = setname + ".root";
@@ -107,7 +124,7 @@ sprintf(binfile,"../config/Binning.root");
 
   sort (variable_string_.begin (), variable_string_.end ());
   variable_string_.erase (unique (variable_string_.begin (), variable_string_.end ()),variable_string_.end ());
-  PlotContentFraction_.clear ();
+ // PlotContentFraction_.clear ();
 
     map < string, TAxis * >mapAxis;
  
@@ -142,12 +159,11 @@ TH1F *hnew[variable_string_.size()];
      ////Loop over variables
   for (unsigned int i = 0; i < variable_string_.size (); i++)
     {
-      double valsContent[PlotContent_.size ()];
 
  TAxis *axis = mapAxis[variable_string_[i]];
     
  //     TAxis *axisrange = mapAxis[variable_string_[i].c_str()];
-      PlotContentFraction_.clear ();
+    //  PlotContentFraction_.clear ();
       values_.clear ();
    
       for (unsigned int j = 0; j < PlotContent_.size (); j++)
@@ -198,7 +214,8 @@ TH1F *hnew[variable_string_.size()];
 //		hnew[i]->SetBinContent(hnew[i]->GetNbinsX(),0);
 		
       values_.clear ();
-
+/*
+       double valsContent[ PlotContentFraction_.size ()];
       for (unsigned int l = 0; l < PlotContentFraction_.size (); l++)
 	{
 	  // cout<<" now will clear ... "<<l<<"  "<<valsContent[l]<<"  "<<PlotContent_.size()<<endl;
@@ -206,7 +223,7 @@ TH1F *hnew[variable_string_.size()];
 	}
 
       PlotContentFraction_.clear ();
-
+*/
 
 
     }				/////////////end of loop in variables
@@ -250,11 +267,11 @@ TH1F *hnew[variable_string_.size()];
 
 }
 
-
 void
-PlotObservables::WriteNBins (TString & setname, const vector < pair < string,float > >&PlotContent_, int NBins,float & weight,bool normalized)
+PlotObservables::WriteNBins (TString & setname, const vector < pair < string,float > >&PlotContent_, int NBins,float & weight,bool normalized,bool write)
 {
 
+if (!write) setname="dummy";
 //cout<<"  ------------------------------------->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> BINS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! "<<setname<<endl;
   vector < double >values_;
 
@@ -276,7 +293,7 @@ sprintf(binfile,"../config/Binning.root");
 
   sort (variable_string_.begin (), variable_string_.end ());
   variable_string_.erase (unique (variable_string_.begin (), variable_string_.end ()),variable_string_.end ());
-  PlotContentFraction_.clear ();
+  //PlotContentFraction_.clear ();
 
     map < string, TAxis * >mapAxis;
  
@@ -308,12 +325,11 @@ TH1F *hnew[variable_string_.size()];
      ////Loop over variables
   for (unsigned int i = 0; i < variable_string_.size (); i++)
     {
-      double valsContent[PlotContent_.size ()];
 
  TAxis *axis = mapAxis[variable_string_[i]];
     
  //     TAxis *axisrange = mapAxis[variable_string_[i].c_str()];
-      PlotContentFraction_.clear ();
+    //  PlotContentFraction_.clear ();
       values_.clear ();
    
       for (unsigned int j = 0; j < PlotContent_.size (); j++)
@@ -343,20 +359,21 @@ TH1F *hnew[variable_string_.size()];
 	bin_conn = hnew[i]->GetBinContent(n+1);
 	 hnew[i]->SetBinContent(n,bin_conn);
 
- cout<<"hnew[i]  set new bincontents"<<hnew[i]->GetName()<<" nbins "<<hnew[i]->GetNbinsX()<<" h cont "<<hnew[i]->GetBinContent(n)<<" <-- equal ?   "<<bin_conn<<" n  "<<n<<endl;
+ //cout<<"hnew[i]  set new bincontents"<<hnew[i]->GetName()<<" nbins "<<hnew[i]->GetNbinsX()<<" h cont "<<hnew[i]->GetBinContent(n)<<" <-- equal ?   "<<bin_conn<<" n  "<<n<<endl;
  
  }
 		
       values_.clear ();
 
+       /*double valsContent[ PlotContentFraction_.size ()];
       for (unsigned int l = 0; l < PlotContentFraction_.size (); l++)
 	{
-	  // cout<<" now will clear ... "<<l<<"  "<<valsContent[l]<<"  "<<PlotContent_.size()<<endl;
+	 //  cout<<" now will clear ... "<<l<<"  "<<valsContent[l]<<"  "<<PlotContent_.size()<<endl;
 	  valsContent[l] = 0;
 	}
 
       PlotContentFraction_.clear ();
-
+*/
 
 
     }				/////////////end of loop in variables
@@ -402,26 +419,23 @@ TH1F *hnew[variable_string_.size()];
 }
 
 
-
-
-
-
-
-
-
 void
-PlotObservables::Write (string & setname, bool normalized)
+PlotObservables::Write (string & setname,float & weightToData_, bool normalized)
 {
 
 
-  if (normalized)
-    Normalized ();
+  //  Normalized ();
   //char dirname[50];
   
 
   string file_nobins = setname + ".root";
+  string file_nobins_norm = setname + "_Norm.root";
+  string file_nobins_normLumi = setname + "_NormToData.root";
   //sprintf(file_nobins,"%s",setname.c_str());
   TFile *root_nobins = new TFile (file_nobins.c_str (), "recreate");
+  
+  TFile *root_nobins_norm = new TFile (file_nobins_norm.c_str (), "recreate");
+  TFile *root_nobins_normLumi = new TFile (file_nobins_normLumi.c_str (), "recreate");
 
   //TDirectory *cddirs;
 
@@ -434,8 +448,135 @@ PlotObservables::Write (string & setname, bool normalized)
   for (unsigned int i = 0; i < h_variables.size (); i++)
     {
       h_variables[i].Write ();
+  
+
     }
 
   root_nobins->Close ();
+ 
+  root_nobins_normLumi->cd ();
+  
+  for (unsigned int i = 0; i < h_variables.size (); i++)
+    {
+  
+    if (normalized){
+    h_variables[i].SetBinContent(0,0);
+    h_variables[i].Scale(double(weightToData_) );
+    //h_variables[i].Scale(1/h_variables[i].Integral());
+    //char namee[100] ;
+    //sprintf(namee,"%s_Normalized",h_variables[i].GetName());
+    //h_variables[i].SetName(namee);
+    //sprintf(namee,"%s_Normalized",h_variables[i].GetTitle());
+    //h_variables[i].SetTitle(namee);
+    h_variables[i].Write ();
+     h_variables[i].Scale(double(1/weightToData_) );
+    }
+
+    }
+
+  root_nobins_normLumi->Close ();
+ 
+ 
+  root_nobins_norm->cd ();
+  
+  for (unsigned int i = 0; i < h_variables.size (); i++)
+    {
+  
+    if (normalized){
+    h_variables[i].Scale(1/h_variables[i].Integral());
+    //char namee[100] ;
+    //sprintf(namee,"%s_Normalized",h_variables[i].GetName());
+    //h_variables[i].SetName(namee);
+    //sprintf(namee,"%s_Normalized",h_variables[i].GetTitle());
+    //h_variables[i].SetTitle(namee);
+    h_variables[i].Write ();
+    }
+
+    }
+
+  root_nobins_norm->Close ();
+
+
+
+
+
+}
+
+
+void
+PlotObservables::Write (string & setname, bool normalized)
+{
+
+
+  //  Normalized ();
+  //char dirname[50];
+  
+
+  string file_nobins = setname + ".root";
+  string file_nobins_norm = setname + "_Norm.root";
+  string file_nobins_normLumi = setname + "_Norm5fb.root";
+  //sprintf(file_nobins,"%s",setname.c_str());
+  TFile *root_nobins = new TFile (file_nobins.c_str (), "recreate");
+  
+  TFile *root_nobins_norm = new TFile (file_nobins_norm.c_str (), "recreate");
+  TFile *root_nobins_normLumi = new TFile (file_nobins_normLumi.c_str (), "recreate");
+
+  //TDirectory *cddirs;
+
+  root_nobins->cd ();
+
+  // sprintf(dirname,"%s",setname.c_str());
+  //cddirs = fout->mkdir(dirname);
+  //cddirs=root_nobins->mkdir("Observables");
+  //cddirs=root_nobins->cd();
+  for (unsigned int i = 0; i < h_variables.size (); i++)
+    {
+      h_variables[i].Write ();
+  
+
+    }
+
+  root_nobins->Close ();
+  root_nobins_norm->cd ();
+  
+  for (unsigned int i = 0; i < h_variables.size (); i++)
+    {
+  
+    if (normalized){
+    h_variables[i].Scale(1/h_variables[i].Integral());
+    //char namee[100] ;
+    //sprintf(namee,"%s_Normalized",h_variables[i].GetName());
+    //h_variables[i].SetName(namee);
+    //sprintf(namee,"%s_Normalized",h_variables[i].GetTitle());
+    //h_variables[i].SetTitle(namee);
+    h_variables[i].Write ();
+    }
+
+    }
+
+  root_nobins_norm->Close ();
+
+
+  root_nobins_normLumi->cd ();
+  
+  for (unsigned int i = 0; i < h_variables.size (); i++)
+    {
+  
+    if (normalized){
+    h_variables[i].Scale(float(5000) / float(h_variables[i].Integral()) );
+    //h_variables[i].Scale(1/h_variables[i].Integral());
+    //char namee[100] ;
+    //sprintf(namee,"%s_Normalized",h_variables[i].GetName());
+    //h_variables[i].SetName(namee);
+    //sprintf(namee,"%s_Normalized",h_variables[i].GetTitle());
+    //h_variables[i].SetTitle(namee);
+    h_variables[i].Write ();
+    }
+
+    }
+
+  root_nobins_normLumi->Close ();
+
+
 
 }

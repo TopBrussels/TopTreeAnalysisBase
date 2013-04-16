@@ -45,8 +45,9 @@ class TTreeObservables {
   int NofVarr_;
   float* var_;
   float* varr_;
-  TFile* f1;
+  TFile* f1,*f2;
   TTree* tree;
+  TTree* tree2;
   vector<string> vecc;
   vector<pair<string, float > >  vector_;
   

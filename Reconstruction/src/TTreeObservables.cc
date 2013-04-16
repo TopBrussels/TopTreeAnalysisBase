@@ -4,7 +4,8 @@ using namespace std;
 TTreeObservables::TTreeObservables ()
 {
   label_.clear ();
-  tree = new TTree ("OBS", "list of observables");
+  tree = new TTree ("OBS_full", "list of observables");
+  tree2 = new TTree ("OBS", "list of observables");
 }
 
 TTreeObservables::TTreeObservables (string & setname)
@@ -12,15 +13,19 @@ TTreeObservables::TTreeObservables (string & setname)
   label_.clear ();
   string filename = setname + "_tree.root";
   f1 = new TFile (filename.c_str (), "recreate"); //FIRST 'creating' file... //caveat... is it really created first?
-  tree = new TTree ("OBS", "list of observables"); //THEN 'declaring' TTree...
+  
+  tree = new TTree ("OBS_full", "list of observables"); //THEN 'declaring' TTree...
+  tree2 = new TTree ("OBS", "list of observables"); //THEN 'declaring' TTree...
 }
 TTreeObservables::TTreeObservables (string & setname, bool CREATE)
 {
   label_.clear ();
   string filename = setname + "_tree.root";
-if (CREATE)  f1 = new TFile (filename.c_str (), "recreate"); //FIRST 'creating' file... //caveat... is it really created first?
-if (!CREATE)  f1 = new TFile ("dummy.root", "recreate"); //FIRST 'creating' file... //caveat... is it really created first?
-             tree = new TTree ("OBS", "list of observables"); //THEN 'declaring' TTree...
+if (CREATE){  f1 = new TFile (filename.c_str (), "recreate");  }
+if (!CREATE) { f1 = new TFile ("dummy.root", "recreate");  }
+
+             tree = new TTree ("OBS_full", "list of observables"); //THEN 'declaring' TTree...
+             tree2 = new TTree ("OBS", "list of observables"); //THEN 'declaring' TTree...
 }
 
 TTreeObservables::TTreeObservables (const vector < string > &vec, string & setname,bool CREATE)
@@ -36,8 +41,9 @@ TTreeObservables::TTreeObservables (const vector < string > &vec, string & setna
       //string name = vec[i].c_str()+"_"+ds;
       sprintf (arg, "%s/F", vec[i].c_str ());
       tree->Branch (vec[i].c_str (), &var_[i], arg);
+      tree2->Branch (vec[i].c_str (), &var_[i], arg);
  
-      cout << " creating the TTree. " << vec[i].c_str () << "  "<<NofVar_<<endl;
+    //  cout << " creating the TTree. " << vec[i].c_str () << "  "<<NofVar_<<endl;
     }
 
   vector <string > more_vars;
@@ -75,23 +81,8 @@ TTreeObservables::TTreeObservables (const vector < string > &vec, string & setna
       //string name = vec[i].c_str()+"_"+ds;
       sprintf (arg, "%s/F", vec[i].c_str ());
       tree->Branch (vec[i].c_str (), &var_[i], arg);
-/*           
-        tree->Branch ("stop", &stop, "stop/F");
-	tree->Branch ("n1", &n1, "n1/F");
-	tree->Branch ("Xsection", &Xsection, "Xsection/F");
-	tree->Branch ("TotalNofEvts", &TotalNofEvts, "TotalNofEvts/F");
-	tree->Branch ("NofSelEvts", &NofSelEvts, "NofSelEvts/F");
-	tree->Branch ("Efficiency", &Efficiency, "Efficiency/F");
-	tree->Branch ("MuonEfficiency", &Efficiency, "MuonEfficiency/F");
-	tree->Branch ("SecondLeptonVetoEfficiency", &Efficiency, "SecondLeptonVetoEfficiency/F");
-	tree->Branch ("JetSelEfficiency", &JetSelEfficiency, "JetSelEfficiency/F");
-	TClonesArray *tcObsMean = new TClonesArray ("Container", 1000);
-	TClonesArray *tcObsRMS = new TClonesArray ("Container", 1000);
-	tree->Branch ("ObsMean", "TClonesArray", &tcObsMean);
-*/
+      tree2->Branch (vec[i].c_str (), &var_[i], arg);
 
- 
- 
       // cout << " creating the TTree. " << vec[i].c_str () << "  "<<NofVar_<<endl;
     }
 	}
@@ -109,6 +100,7 @@ TTreeObservables::TTreeObservables (const vector < string > &vec)
       //string name = vec[i].c_str()+"_"+ds;
       sprintf (arg, "%s/F", vec[i].c_str ());
       tree->Branch (vec[i].c_str (), &var_[i], arg);
+      tree2->Branch (vec[i].c_str (), &var_[i], arg);
       // cout << " creating the TTree. " << vec[i].c_str () << "  "<<NofVar_<<endl;
     }
 }
@@ -120,6 +112,7 @@ TTreeObservables::TTreeObservables (const vector < string > &vec)
 TTreeObservables::TTreeObservables (const TTreeObservables & pobs)
 {
   tree = pobs.tree;
+  tree2 = pobs.tree;
   label_ = pobs.label_;
 }
 
@@ -133,6 +126,7 @@ void
 TTreeObservables::FillTtree ()
 {
   tree->Fill ();
+  tree2->Fill ();
 
 
 }
@@ -152,9 +146,10 @@ TTreeObservables::Fill (const Observables & obs,float weight, int &btagL,  int &
     varr_[2]=btagM;
     varr_[3]=btagT;
 
-if (bfill)
+if (bfill){
   tree->Fill ();
-
+  tree2->Fill ();
+}
   //cout<<" DONE WITH FILLING THE TREE "<<endl;
 
 }
@@ -169,9 +164,10 @@ TTreeObservables::Fill (const Observables & obs,bool bfill)
              cout<<" NOW JUST FILLED THE "<<obs.Variables()[i].second<<"   "<<obs.Variables()[i].first<<"  "<<i<<"  "<<obs.Variables().size()<<endl;
 
     }
-if (bfill)
+if (bfill){
   tree->Fill ();
-
+  tree2->Fill ();
+}
   //cout<<" DONE WITH FILLING THE TREE "<<endl;
 
 }
@@ -185,16 +181,33 @@ TTreeObservables::Write (TFile * fout, bool normalized)
   fout->cd ();
   tree->Write ();
   fout->Close();
+ 
   
+
+
 }
 
 
 void
 TTreeObservables::Write (bool normalized)
 {
+ // tree2->SetBranchStatus("btag*",0);
+//  tree2->SetBranchStatus("weight",0);
+  //f2->cd ();
+
+  //tree2->Write ();
+  //f2->Close ();
+  
+  
   f1->cd ();
   tree->Write ();
+
+  tree2->SetBranchStatus("btag*",0);
+  tree2->SetBranchStatus("weight",0);
+
+  tree2->Write ();
   f1->Close ();
+
 
 }
 
@@ -207,11 +220,11 @@ TTreeObservables::SaveInfo(string & fout, const vector <pair< string, float > > 
 	cout<<" THE NAME OF THE TREEEEEE IS ==============================   "<<filename.c_str()<<endl;
 	target = TFile::Open(filename.c_str(),"update");
 	target->cd();
-	char tree_name[50];
-	sprintf(tree_name,"Info");
-	TTree *t = new TTree("Info","Additional_Info");
+	//char tree_name[50];
+	//sprintf(tree_name,"Info");
+	TTree *t = new TTree("Event Yields Info","Event Yields Info");
        
-	t->Branch("info_",&vectest);
+	t->Branch("selection_table_",&vectest);
 	t->Fill();
 	target->Write();
 	//target->Close();

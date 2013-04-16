@@ -1,12 +1,12 @@
 #ifndef Observables_h
 #define Observables_h
-//#include "TopTreeProducer/interface/TRootHemisphere.h"
+//#include "../../../../TopBrussels/TopTreeProducer/interface/TRootHemisphere.h"
 
-#include "TopTreeProducer/interface/TRootJet.h"
-#include "TopTreeProducer/interface/TRootMuon.h"
-#include "TopTreeProducer/interface/TRootGenEvent.h"
-#include "TopTreeProducer/interface/TRootNPGenEvent.h"
-#include "TopTreeAnalysisBase/Reconstruction/interface/MEzCalculator.h"
+#include "../../../TopTreeProducer/interface/TRootJet.h"
+#include "../../../TopTreeProducer/interface/TRootMuon.h"
+#include "../../../TopTreeProducer/interface/TRootGenEvent.h"
+#include "../../../TopTreeProducer/interface/TRootNPGenEvent.h"
+#include "../../Reconstruction/interface/MEzCalculator.h"
 
 
 #include <iostream>
@@ -57,25 +57,31 @@ class Observables {
   Observables(const TRootMuon& lepton, const TRootJet& qFromW1, const TRootJet& qFromW2, const TRootJet& bFromHadTop, const TRootJet& bFromLepTop, const TRootMET& MET);
   
   Observables(const TRootMuon& lepton, const TRootJet& qFromW1, const TRootJet& qFromW2, const TRootJet& bFromHadTop, const TRootJet& bFromLepTop, const TRootMET& MET,float & ChiSquare_);
-
   Observables(const TRootMuon& lepton, const TRootJet& qFromW1, const TRootJet& qFromW2, const TRootJet& bFromHadTop, const TRootMET& MET, const vector<TRootJet>& jets);
 
  
   Observables(const TRootMuon& lepton, const TRootJet& qFromW1, const TRootJet& qFromW2, const TRootJet& bFromHadTop, const TRootJet& bFromLepTop, const TRootMET& MET, const vector<TRootJet>& jets);
   
+
+  Observables(const TRootMuon& lepton, const TRootJet& qFromW1, const TRootJet& qFromW2, const TRootJet& bFromHadTop, const TRootJet& bFromLepTop, const TRootMET& MET, const vector<TRootJet*>& jets,float & ChiSquare_,int & chi2_max_);
+  
   Observables(const TRootMuon& lepton, const TRootJet& qFromW1, const TRootJet& qFromW2, const TRootJet& bFromHadTop, const TRootJet& bFromLepTop, const TRootMET& MET, const vector<TRootJet*>& jets,float & ChiSquare_);
-  //Observables(const TRootMuon& lepton, const TRootJet& qFromW1, const TRootJet& qFromW2, const TRootJet& bFromHadTop, const TRootMET& MET, const vector<TRootJet>& jets, const TRootHemisphere& hemisphere);
+  
+  Observables(const TRootMuon& lepton, const TRootJet& qFromW1, const TRootJet& qFromW2, const TRootJet& bFromHadTop, const TRootJet& bFromLepTop, const TRootMET& MET, const vector<TRootJet*>& jets,vector <float> values_,float & ChiSquare_); 
+
 
  
 
   Observables(const TRootMuon& lepton, const vector <TRootJet> & chijets,const vector <TRootJet> & jets_,const TRootMET& MET, string & dsname , float & ChiSquare_);
 
 
+  Observables (const TRootMuon & lepton, const TRootJet & qFromW1, const TRootJet & qFromW2, const TRootJet & bFromHadTop, const TRootJet & bFromLepTop, const vector < TRootJet > &jets,vector<float> values_,const TRootMET & MET, float &ChiSq);
 
   Observables(const TRootMuon& lepton, const TRootJet& qFromW1, const TRootJet& qFromW2, const TRootJet& bFromHadTop, const TRootJet& bFromLepTop, const vector <TRootJet> & jets_,const TRootMET& MET);
 
-
-
+  Observables(const TRootMuon& lepton, const TRootJet& qFromW1, const TRootJet& qFromW2, const TRootJet& bFromHadTop, const TRootJet& bFromLepTop, const vector <TRootJet> & jets_,const TRootMET& MET,float & ChiSquare_);
+  
+  Observables(const TRootMuon& lepton, const TRootJet& qFromW1, const TRootJet& qFromW2, const TRootJet& bFromHadTop, const TRootJet& bFromLepTop, const vector <TRootJet> & jets_,const TRootMET& MET,float & ChiSquare_,bool GoodChi2_);
   Observables (const TRootMuon & lept, const vector < TRootJet > &jets_, const TRootMET & MET_, string & dsname);
 
   ~Observables();
@@ -140,7 +146,8 @@ void ComputeVariables (const TRootMuon &selmuons_,  const TRootJet& qFromW1, con
   vector<string> ListOfVariables() ;
   
   vector<string> ListOfVariablesMC() ;
-
+  //map<string,TH1F*> Histo1D;
+  //map<string,TH2F*> Histo2D;
   /**
   Returns the variables for which the information for MC and RECO is available, at the same time. 
   Result should be the same as ListOfVariablesMC().
@@ -173,7 +180,10 @@ void ComputeVariables (const TRootMuon &selmuons_,  const TRootJet& qFromW1, con
 
    float ChiSquare_;
    float ChiSquareHadTop_;
- 
+   float btaggerLepB;
+   float btaggerHadB;
+   float  CombBtagInfo ;
+   int chi2_max;
 };
 
 #endif
