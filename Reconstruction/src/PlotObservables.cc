@@ -61,7 +61,26 @@ if (fill_){
     }
 }
 }
+
+	
 void
+PlotObservables::Fill (const ObservablesEl & obs, float & weight,bool &fill_)
+{
+
+
+if (fill_){
+  for (unsigned int i = 0; i < h_variables.size (); i++)
+    {
+	if (  (obs.Variables ()[i]).second > -9999) {  
+      h_variables[i].Fill ((obs.Variables ()[i]).second,weight);
+
+      //PlotContent_.push_back( pair< string,float > ( (obs.Variables ()[i]).first , (obs.Variables ()[i]).second) );
+	}
+    }
+}
+}
+	
+	void
 PlotObservables::Fill (string name_ , float & value_,float & weight,int & pos)
 {
 

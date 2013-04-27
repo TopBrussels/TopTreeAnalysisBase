@@ -173,6 +173,54 @@ if (bfill){
 }
 
 
+
+void
+TTreeObservables::Fill (const ObservablesEl & obs,float weight, int &btagL,  int &btagM, int  & btagT,bool bfill)
+{
+  // if((int) obs.Variables().size()!= NofVar_) {cerr<<"Warning: TTreeObservables ... size are not correct in the Fill() method"<<" NofVar "<<NofVar_<<" Variables "<<obs.Variables().size()<<endl; return;}
+  for (int i = 0; i < NofVar_; i++)
+    {
+    if ( (obs.Variables ()[i]).second > -9999 )  var_[i] = (obs.Variables ()[i]).second;
+
+         //cout<<" NOW JUST FILLED THE "<<obs.Variables()[i].second<<"   "<<obs.Variables()[i].first<<"  "<<i<<"  "<<obs.Variables().size()<<" weight  "<<weight<<endl;
+    }
+
+    varr_[0]=weight;
+    varr_[1]=btagL;
+    varr_[2]=btagM;
+    varr_[3]=btagT;
+
+if (bfill){
+  tree->Fill ();
+  tree2->Fill ();
+}
+  //cout<<" DONE WITH FILLING THE TREE "<<endl;
+
+}
+void
+TTreeObservables::Fill (const ObservablesEl & obs,bool bfill)
+{
+  // if((int) obs.Variables().size()!= NofVar_) {cerr<<"Warning: TTreeObservables ... size are not correct in the Fill() method"<<" NofVar "<<NofVar_<<" Variables "<<obs.Variables().size()<<endl; return;}
+  for (int i = 0; i < NofVar_; i++)
+    {
+      var_[i] = (obs.Variables ()[i]).second;
+      
+             cout<<" NOW JUST FILLED THE "<<obs.Variables()[i].second<<"   "<<obs.Variables()[i].first<<"  "<<i<<"  "<<obs.Variables().size()<<endl;
+
+    }
+if (bfill){
+  tree->Fill ();
+  tree2->Fill ();
+}
+  //cout<<" DONE WITH FILLING THE TREE "<<endl;
+
+}
+
+
+
+
+
+
 void
 TTreeObservables::Write (TFile * fout, bool normalized)
 {

@@ -1,6 +1,7 @@
 #ifndef PlotObservables_h
 #define PlotObservables_h
 #include "../../Reconstruction/interface/Observables.h"
+#include "../../Reconstruction/interface/ObservablesEl.h"
 
 #include <iostream>
 #include <iomanip>
@@ -39,6 +40,7 @@ struct sort_string_double {
 
   void Normalized();
   void Fill(const Observables& obs, float & weight_,bool & fill);
+  void Fill(const ObservablesEl& obs, float & weight_,bool & fill);
   void Fill (string name_ , float & value_,float & weight,int & pos_);
   void Write(string &dset, bool normalized = false);
   void Write(string &dset, float &weight_,bool normalized = false);

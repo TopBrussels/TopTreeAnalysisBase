@@ -1,6 +1,7 @@
 #ifndef TTreeObservables_h
 #define TTreeObservables_h
 #include "Observables.h"
+#include "ObservablesEl.h"
 
 #include <iostream>
 #include <iomanip>
@@ -31,6 +32,9 @@ class TTreeObservables {
   void Fill(const Observables& obs);
   void Fill(const Observables& obs,bool fill_);
   void Fill(const Observables& obs,float weight_, int &btagL_, int  &btagM_, int & btagT_,bool fill_);
+  void Fill(const ObservablesEl& obs);
+  void Fill(const ObservablesEl& obs,bool fill_);
+  void Fill(const ObservablesEl& obs,float weight_, int &btagL_, int  &btagM_, int & btagT_,bool fill_);
   void FillTtree();
   void SaveInfo(string & fout, const vector<pair< string, float > > & vector_);
   void Write(TFile* f1, bool normalized = false);

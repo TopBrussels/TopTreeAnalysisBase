@@ -4,6 +4,7 @@
 
 #include "TopTreeProducer/interface/TRootMET.h"
 #include "TopTreeProducer/interface/TRootMuon.h"
+#include "TopTreeProducer/interface/TRootElectron.h"
 #include "TopTreeProducer/interface/TRootJet.h"
 
 using namespace TopTree;
@@ -21,6 +22,8 @@ class MEzCalculator {
   /// Set Muon
   void SetMuon(const TRootMuon& lepton) { lepton_ = lepton; };
   void SetMuon(const TLorentzVector& lepton) { lepton_ = lepton; };
+  void SetEl(const TRootElectron& lepton) { lepton_ = lepton; };
+  void SetEl(const TLorentzVector& lepton) { lepton_ = lepton; };
   /// Calculate MEz
   /// options to choose roots from quadratic equation:
   /// type = 0 (defalut): if real roots, pick the one nearest to
