@@ -34,7 +34,7 @@ class MultiSamplePlot{
 
  		void AddDataHisto(TH1F* histo);/** Consider an additional histo as coming from data or pseudo-data*/
 		void Fill(float value, Dataset* data, bool scale = false, float Lumi = 1.);/** if scale==true: histo are scaled by data.NormFactor()*Lumi */
-		void Draw(bool addRandomPseudoData = false, string label = string("CMSPlot"), bool mergeTT = false, bool mergeQCD = false, bool mergeW = false, bool mergeZ = false, bool mergeST = false, int scaleNPSignal = 1, bool addRatio = false, bool mergeVV = false, bool mergeTTV = false);/** addRandomPseudoData will add a histo on top of the summed histograms which randomised according to a Poisson distribution. mergeTT/QCD/W/Z/ST/VV/TTV will merge all the ttbar/QCD/W/Z/single-top/diboson/ttW-Z together. */
+		void Draw(bool addRandomPseudoData = false, string label = string("CMSPlot"), bool mergeTT = false, bool mergeQCD = false, bool mergeW = false, bool mergeZ = false, bool mergeST = false, int scaleNPSignal = 1, bool addRatio = false, bool mergeVV = false, bool mergeTTV = false, bool mergeVVV = false, bool mergeSameSignWW = false);/** addRandomPseudoData will add a histo on top of the summed histograms which randomised according to a Poisson distribution. mergeTT/QCD/W/Z/ST/VV/TTV will merge all the ttbar/QCD/W/Z/single-top/diboson/ttW-Z together. */
 		void Write(TFile* file, string label = string(""), bool savePNG = false, string pathPNG = string(""), string ext = string("png"));
 
 		void setDataLumi(float lum) { lumi_ = lum; }

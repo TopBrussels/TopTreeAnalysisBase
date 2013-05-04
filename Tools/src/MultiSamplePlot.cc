@@ -130,7 +130,7 @@ void MultiSamplePlot::Fill(float value, Dataset* data, bool scale, float Lumi){
 	}
 }
 
-void MultiSamplePlot::Draw(bool addRandomPseudoData, string label, bool mergeTT, bool mergeQCD, bool mergeW, bool mergeZ, bool mergeST, int scaleNPSignal, bool addRatio, bool mergeVV, bool mergeTTV)
+void MultiSamplePlot::Draw(bool addRandomPseudoData, string label, bool mergeTT, bool mergeQCD, bool mergeW, bool mergeZ, bool mergeST, int scaleNPSignal, bool addRatio, bool mergeVV, bool mergeTTV, bool mergeVVV, bool mergeSameSignWW)
 {
 	vector<TH1F*> histos;
 	vector<TH1F*> histos2;
@@ -189,8 +189,12 @@ void MultiSamplePlot::Draw(bool addRandomPseudoData, string label, bool mergeTT,
 	TH1F* vvHisto = 0;
 	//Dataset tempTTVDataset  = Dataset();
 	TH1F* ttvHisto = 0;
+	//Dataset tempVVVDataset  = Dataset();
+	TH1F* vvvHisto = 0;
+	//Dataset tempSameSignWWDataset  = Dataset();
+	TH1F* samesignwwHisto = 0;
 
-  if(mergeTT || mergeQCD || mergeW || mergeZ || mergeST || mergeVV || mergeTTV){
+  if(mergeTT || mergeQCD || mergeW || mergeZ || mergeST || mergeVV || mergeTTV || mergeVVV || mergeSameSignWW){
 	  for(unsigned int i=0; i<plots_.size();i++){
 		  string datasetName = plots_[i].second->Name();
         
@@ -219,7 +223,7 @@ void MultiSamplePlot::Draw(bool addRandomPseudoData, string label, bool mergeTT,
 			  else stHisto->Add(plots_[i].first);
 			  //tempSTDataset = Dataset("ST_Merged","st+jets, merged",true,plots_[i].second->Color(),plots_[i].second->LineStyle(),plots_[i].second->LineWidth(),1.,1.);
 		  }
-		  if(mergeVV && ( datasetName.find("WW") == 0 || datasetName.find("WZ") == 0 || datasetName.find("ZZ") == 0) ){
+		  if(mergeVV && ( datasetName.find("WW") == 0 || datasetName.find("WZ") == 0 || datasetName.find("ZZ") == 0) &&  !( datasetName.find("WWW") == 0 || datasetName.find("WWZ") == 0 || datasetName.find("WZZ") == 0 || datasetName.find("ZZZ") == 0) ){
 			  if(!vvHisto) vvHisto = (TH1F*) plots_[i].first->Clone();
 			  else vvHisto->Add(plots_[i].first);
 			  //tempVVDataset = Dataset("VV_Merged","VV, merged",true,plots_[i].second->Color(),plots_[i].second->LineStyle(),plots_[i].second->LineWidth(),1.,1.);
@@ -229,6 +233,18 @@ void MultiSamplePlot::Draw(bool addRandomPseudoData, string label, bool mergeTT,
 			  else ttvHisto->Add(plots_[i].first);
 			  //tempTTVDataset = Dataset("ttV_Merged","ttV, merged",true,plots_[i].second->Color(),plots_[i].second->LineStyle(),plots_[i].second->LineWidth(),1.,1.);
 		  }
+			if(mergeVVV && ( datasetName.find("WWW") == 0 || datasetName.find("WWZ") == 0 || datasetName.find("WZZ") == 0 || datasetName.find("ZZZ") == 0) ){
+			  if(!vvvHisto) vvvHisto = (TH1F*) plots_[i].first->Clone();
+			  else vvvHisto->Add(plots_[i].first);
+			  //tempVVVDataset = Dataset("VVV_Merged","VVV, merged",true,plots_[i].second->Color(),plots_[i].second->LineStyle(),plots_[i].second->LineWidth(),1.,1.);
+		  }
+			if(mergeSameSignWW && ( datasetName.find("WpWp") == 0 || datasetName.find("WmWm") == 0) ){
+			  if(!samesignwwHisto) samesignwwHisto = (TH1F*) plots_[i].first->Clone();
+			  else samesignwwHisto->Add(plots_[i].first);
+			  //tempSameSignWWDataset = Dataset("SameSignWW_Merged","W^{#pm}W^{#pm}",true,plots_[i].second->Color(),plots_[i].second->LineStyle(),plots_[i].second->LineWidth(),1.,1.);
+		  }
+			
+			
 	  }
   }
   //cout<<"So far, so good : 2"<<endl;
@@ -280,7 +296,7 @@ void MultiSamplePlot::Draw(bool addRandomPseudoData, string label, bool mergeTT,
 			}
 			else continue;
 		}
-		if(mergeVV && ( datasetName.find("WW") == 0 || datasetName.find("WZ") == 0 || datasetName.find("ZZ") == 0) )
+		if(mergeVV && ( datasetName.find("WW") == 0 || datasetName.find("WZ") == 0 || datasetName.find("ZZ") == 0) && !( datasetName.find("WWW") == 0 || datasetName.find("WWZ") == 0 || datasetName.find("WZZ") == 0 || datasetName.find("ZZZ") == 0) )
 		{
 			if(vvHisto){
 				histo = (TH1F*) vvHisto->Clone();
@@ -298,6 +314,25 @@ void MultiSamplePlot::Draw(bool addRandomPseudoData, string label, bool mergeTT,
 			}
 			else continue;
 		}
+		if(mergeVVV && ( datasetName.find("WWW") == 0 || datasetName.find("WWZ") == 0 || datasetName.find("WZZ") == 0 || datasetName.find("ZZZ") == 0)  )
+		{
+			if(vvvHisto){
+				histo = (TH1F*) vvvHisto->Clone();
+				dataSet = new Dataset("VVV_Merged","VVV",true,plots_[i].second->Color(),plots_[i].second->LineStyle(),plots_[i].second->LineWidth(),1.,1.);
+				vvvHisto = 0;
+			}
+			else continue;
+		}
+		if(mergeSameSignWW && ( datasetName.find("WpWp") == 0 || datasetName.find("WmWm") == 0) )
+		{
+			if(samesignwwHisto){
+				histo = (TH1F*) samesignwwHisto->Clone();
+				dataSet = new Dataset("SameSignWW_Merged","W^{#pm}W^{#pm}",true,plots_[i].second->Color(),plots_[i].second->LineStyle(),plots_[i].second->LineWidth(),1.,1.);
+				samesignwwHisto = 0;
+			}
+			else continue;
+		}
+		
 	  
 		int N = histo->GetNbinsX();
 		histo->SetBinContent(N,histo->GetBinContent(N)+histo->GetBinContent(N+1));
