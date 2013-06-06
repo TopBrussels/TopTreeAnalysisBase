@@ -20,7 +20,7 @@ void JetTools::unCorrectJet(TRootJet* inJet, bool isData)
 	  corr = inJet->getJetCorrFactor("L1FastJetL2L3");
 	else
 	  corr = inJet->getJetCorrFactor("L1FastJetL2L3L23Residual");
-  //cout << "uncorrecting!" << endl;
+//  cout << "Uncorrecting!  With factor: " << corr << endl;
   inJet->SetPxPyPzE(inJet->Px()/corr, inJet->Py()/corr, inJet->Pz()/corr, inJet->E()/corr);
 }
 
@@ -83,6 +83,7 @@ void JetTools::correctJet(TRootJet* inJet, float rhoPU, bool isData)
  
   //float corr = JEC_->getCorrection(); //strangely enough, this starts complaining when JEC_->getSubCorrections() is called first
 	float corr = SubCorrections[SubCorrections.size()-1]; //this is the correction UP TO the last level; so the complete correction
+//	cout << "Apply new JES correction:  " << corr << endl;
   inJet->SetPxPyPzE(inJet->Px()*corr, inJet->Py()*corr, inJet->Pz()*corr, inJet->E()*corr);
 }
 
@@ -303,6 +304,22 @@ void JetTools::scaleJets(vector<TRootJet*> inJets, TRootMET* inMET, float scale)
   }
 }
 
+void JetTools::unCorrectMETTypeOne(TRootJet* inJet, TRootMET* inMET, bool isData)
+{
+  float corr = -9999;
+  if(!isData) corr = inJet->getJetCorrFactor("L1FastJetL2L3");
+  else corr = inJet->getJetCorrFactor("L1FastJetL2L3L23Residual"); //see JetAnalyzer.cc in TopTreeProducer
+  float L1corr = inJet->getJetCorrFactor("L1FastJet");
+  inMET->SetPxPyPzE(inMET->Px()+(inJet->Px()-inJet->Px()*L1corr/corr), inMET->Py()+(inJet->Py()-inJet->Py()*L1corr/corr), 0, sqrt(pow(inMET->Px()+(inJet->Px()-inJet->Px()*L1corr/corr),2) + pow(inMET->Py()+(inJet->Py()-inJet->Py()*L1corr/corr),2)) ); //METx_raw = METx_raw + Px_raw - Px_corr    
+}
+
+void JetTools::unCorrectMETTypeOne(vector<TRootJet*> inJets, TRootMET* inMET, bool isData)
+{
+  for(unsigned int i=0; i<inJets.size();i++)
+    if(inJets[i]->Pt() > 10)
+      unCorrectMETTypeOne(inJets[i], inMET, isData);
+}
+
 void JetTools::correctMETTypeOne(TRootJet* inJet, TRootMET* inMET, bool isData)  //Do not apply for |eta| > 4.7
 {
   float corr = -9999;
@@ -314,11 +331,9 @@ void JetTools::correctMETTypeOne(TRootJet* inJet, TRootMET* inMET, bool isData) 
 
 void JetTools::correctMETTypeOne(vector<TRootJet*> inJets, TRootMET* inMET, bool isData)
 {
-  for(unsigned int i=0; i<inJets.size();i++){
-    if(fabs(inJets[i]->Eta()) <=4.7)  //EtaValuesAbs already contains the absolute value of the Eta values.
-      correctMETTypeOne(inJets[i],inMET, isData);
-      
-  }
+  for(unsigned int i=0; i<inJets.size();i++)
+    if(inJets[i]->Pt() > 10)
+      correctMETTypeOne(inJets[i], inMET, isData);
 }
 
 void JetTools::correctMETUnclusteredEnergy(TRootMET* inMET, vector<TRootJet*> inJets, vector<TRootMuon*> inMuons, vector<TRootElectron*> inElectrons, string direction) {

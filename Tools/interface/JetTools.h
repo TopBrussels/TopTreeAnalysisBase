@@ -61,11 +61,13 @@ class JetTools
     void scaleJets(vector<TRootJet*> inJets, TRootMET* inMET, float scale=1);    
     
     // Type I MET corrections
+    void unCorrectMETTypeOne(TRootJet* inJet, TRootMET* inMET, bool isData = false);
+    void unCorrectMETTypeOne(vector<TRootJet*> inJets, TRootMET* inMET, bool isData = false);
+    
     void correctMETTypeOne(TRootJet* inJet, TRootMET* inMET, bool isData = false);
     void correctMETTypeOne(vector<TRootJet*> inJets, TRootMET* inMET, bool isData = false);
     
     // MET Systematics
-
     void correctMETUnclusteredEnergy(TRootMET* inMET, vector<TRootJet*> inJets, vector<TRootMuon*> inMuons, vector<TRootElectron*> inElectrons, string direction);
 
     // Jet convertors
