@@ -989,6 +989,8 @@ std::vector<TRootElectron*> Selection::GetSelectedElectronsInvIso(float Electron
   std::vector<TRootElectron*> selectedElectrons;
   for(unsigned int i=0; i<init_electrons.size(); i++)
   {
+    if(init_electrons[i]->mvaTrigId() > 0.5) continue;
+    
     float mindRElJet = 999.;
     for(unsigned int j=0; j<selJets.size(); j++)
     {
