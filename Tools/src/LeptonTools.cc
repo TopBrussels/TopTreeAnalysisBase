@@ -178,11 +178,13 @@ void LeptonTools::readElectronSF()
   electronPtErr.push_back(5);
   electronPtErr.push_back(75);
   
+  // SF taken from AN_2012_429_v4
+  
   vector<double> sfId, uncId, sfTrig, uncTrig;
-  sfId.push_back(0.950);    sfId.push_back(0.966);    sfId.push_back(0.961);
-  uncId.push_back(0.003);   uncId.push_back(0.001);   uncId.push_back(0.002);
-  sfTrig.push_back(0.984);  sfTrig.push_back(0.999);  sfTrig.push_back(0.999);
-  uncTrig.push_back(0.002); uncTrig.push_back(0.003); uncTrig.push_back(0.002);
+  sfId.push_back(0.939);    sfId.push_back(0.950);    sfId.push_back(0.957);
+  uncId.push_back(0.003);   uncId.push_back(0.001);   uncId.push_back(0.001);
+  sfTrig.push_back(0.987);  sfTrig.push_back(0.997);  sfTrig.push_back(0.998);
+  uncTrig.push_back(0.017); uncTrig.push_back(0.001); uncTrig.push_back(0.002);
   for(unsigned int i=0; i<sfId.size(); i++)
   {
     electronSFEtaLow.push_back(sfId[i]*sfTrig[i]);
@@ -190,10 +192,10 @@ void LeptonTools::readElectronSF()
   }
   sfId.clear();   uncId.clear();    sfTrig.clear();   uncTrig.clear();
   
-  sfId.push_back(0.957);    sfId.push_back(0.961);    sfId.push_back(0.963);
+  sfId.push_back(0.920);    sfId.push_back(0.949);    sfId.push_back(0.959);
   uncId.push_back(0.002);   uncId.push_back(0.002);   uncId.push_back(0.003);
-  sfTrig.push_back(0.967);  sfTrig.push_back(0.983);  sfTrig.push_back(0.988);
-  uncTrig.push_back(0.002); uncTrig.push_back(0.002); uncTrig.push_back(0.003);
+  sfTrig.push_back(0.964);  sfTrig.push_back(0.980);  sfTrig.push_back(0.988);
+  uncTrig.push_back(0.002); uncTrig.push_back(0.001); uncTrig.push_back(0.002);
   for(unsigned int i=0; i<sfId.size(); i++)
   {
     electronSFEtaMed.push_back(sfId[i]*sfTrig[i]);
@@ -201,10 +203,10 @@ void LeptonTools::readElectronSF()
   }
   sfId.clear();   uncId.clear();    sfTrig.clear();   uncTrig.clear();
   
-  sfId.push_back(0.922);    sfId.push_back(0.941);    sfId.push_back(0.971);
-  uncId.push_back(0.004);   uncId.push_back(0.007);   uncId.push_back(0.000);
-  sfTrig.push_back(0.991);  sfTrig.push_back(1.018);  sfTrig.push_back(0.977);
-  uncTrig.push_back(0.007); uncTrig.push_back(0.012); uncTrig.push_back(0.015);
+  sfId.push_back(0.907);    sfId.push_back(0.937);    sfId.push_back(0.954);
+  uncId.push_back(0.005);   uncId.push_back(0.008);   uncId.push_back(0.011);
+  sfTrig.push_back(1.004);  sfTrig.push_back(1.033);  sfTrig.push_back(0.976);
+  uncTrig.push_back(0.006); uncTrig.push_back(0.007); uncTrig.push_back(0.015);
   for(unsigned int i=0; i<sfId.size(); i++)
   {
     electronSFEtaHigh.push_back(sfId[i]*sfTrig[i]);
@@ -241,14 +243,14 @@ double LeptonTools::getElectronSF(double eta, double pt, string syst)
         else if(syst == "Minus") return electronSFEtaLow[i]-electronSFEtaLowUnc[i];
         else cout << "LeptonTools::getElectronSF :  unknown systematic: " << syst << endl;
       }
-      else if( fabs(eta) >= 0.8 && fabs(eta) < 1.48 )
+      else if( fabs(eta) >= 0.8 && fabs(eta) < 1.478 )
       {
         if(syst == "Nominal") return electronSFEtaMed[i];
         else if(syst == "Plus") return electronSFEtaMed[i]+electronSFEtaMedUnc[i];
         else if(syst == "Minus") return electronSFEtaMed[i]-electronSFEtaMedUnc[i];
         else cout << "LeptonTools::getElectronSF :  unknown systematic: " << syst << endl;
       }
-      else if( fabs(eta) >= 1.48 && fabs(eta) < 2.5 )
+      else if( fabs(eta) >= 1.478 && fabs(eta) < 2.5 )
       {
         if(syst == "Nominal") return electronSFEtaHigh[i];
         else if(syst == "Plus") return electronSFEtaHigh[i]+electronSFEtaHighUnc[i];
