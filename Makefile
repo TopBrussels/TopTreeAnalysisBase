@@ -34,8 +34,8 @@ SOFLAGS         = -shared
 endif
 
 CXXFLAGS	     += $(ROOTCFLAGS)
-LIBS		        = -I./TMVA/include -L./TMVA/lib $(ROOTLIBS) -lEG -I.. -L. -L../TopTreeProducer/src 
-LIBS_NoTMVA     = $(ROOTLIBS_NoTMVA) -lEG -I.. -L. -L../TopTreeProducer/src 
+LIBS		        = -I./TMVA/include -L./TMVA/lib $(ROOTLIBS) -lEG -I.. -L. -L../TopTreeProducer/src
+LIBS_NoTMVA     = $(ROOTLIBS_NoTMVA) -lEG -I.. -L. -L../TopTreeProducer/src
 ifeq ($(UNAME), Darwin)
 LIBS           += -I/opt/local/include
 endif
@@ -70,12 +70,12 @@ HEADERSMTOP   = $(wildcard JESMeasurement/interface/MonsterTools.h JESMeasuremen
 OBJECTSMTOP		= $(SOURCESMTOP:.$(SrcSuf)=.$(ObjSuf))
 
 # headers and sources for top fcnc analysis lib
-SOURCESTOPFCNC   = $(wildcard Content/src/AnalysisEnvironment.cc Content/src/Dataset.cc KinFitter/src/*.cc MCInformation/src/JetPartonMatching.cc MCInformation/src/LumiReWeighting.cc MCInformation/src/ResolutionFit.cc Reconstruction/src/*JetCorr*.cc Reconstruction/src/MEzCalculator.cc Reconstruction/src/Observables.cc Selection/src/Selection*.cc Tools/src/AnalysisEnvironmentLoader.cc Tools/src/JetTools.cc Tools/src/MultiSamplePlot.cc Tools/src/PlottingTools.cc Tools/src/TTreeLoader.cc TopFCNC/src/TopFCNC_*.cc tinyxml/*.cc)
-HEADERSTOPFCNC   = $(wildcard Content/interface/AnalysisEnvironment.h Content/interface/Dataset.h KinFitter/interface/*.h MCInformation/interface/JetPartonMatching.h MCInformation/interface/LumiReWeighting.h MCInformation/interface/ResolutionFit.h  Reconstruction/interface/*JetCorr*.h Reconstruction/interface/MEzCalculator.h Reconstruction/interface/Observables.h Selection/interface/Selection*.h Tools/interface/AnalysisEnvironmentLoader.h Tools/interface/JetTools.h Tools/interface/MultiSamplePlot.h Tools/interface/PlottingTools.h Tools/interface/TTreeLoader.h TopFCNC/interface/TopFCNC_*.h tinyxml/*.h)
+SOURCESTOPFCNC   = $(wildcard Content/src/AnalysisEnvironment.cc Content/src/Dataset.cc KinFitter/src/*.cc MCInformation/src/JetPartonMatching.cc MCInformation/src/LumiReWeighting.cc MCInformation/src/ResolutionFit.cc Reconstruction/src/*JetCorr*.cc Reconstruction/src/MEzCalculator.cc Reconstruction/src/Observables.cc Selection/src/Selection*.cc Tools/src/AnalysisEnvironmentLoader.cc Tools/src/JetTools.cc Tools/src/MultiSamplePlot.cc Tools/src/PlottingTools.cc Tools/src/TTreeLoader.cc ../TopTreeAnalysis/TopFCNC/src/TopFCNC_*.cc tinyxml/*.cc)
+HEADERSTOPFCNC   = $(wildcard Content/interface/AnalysisEnvironment.h Content/interface/Dataset.h KinFitter/interface/*.h MCInformation/interface/JetPartonMatching.h MCInformation/interface/LumiReWeighting.h MCInformation/interface/ResolutionFit.h  Reconstruction/interface/*JetCorr*.h Reconstruction/interface/MEzCalculator.h Reconstruction/interface/Observables.h Selection/interface/Selection*.h Tools/interface/AnalysisEnvironmentLoader.h Tools/interface/JetTools.h Tools/interface/MultiSamplePlot.h Tools/interface/PlottingTools.h Tools/interface/TTreeLoader.h ../TopTreeAnalysis/TopFCNC/interface/TopFCNC_*.h tinyxml/*.h)
 OBJECTSTOPFCNC	 = $(SOURCESTOPFCNC:.$(SrcSuf)=.$(ObjSuf))
 
-SOURCESTOPFCNCDIC	= $(wildcard TopFCNC/src/TopFCNC_Evt.cc Content/src/Dataset.cc ../TopTreeProducer/src/TRoot*.cc)
-HEADERSTOPFCNCDIC	= $(wildcard TopFCNC/interface/TopFCNC_Evt.h Content/interface/Dataset.h ../TopTreeProducer/interface/TRoot*.h)
+SOURCESTOPFCNCDIC	= $(wildcard ../TopTreeAnalysis/TopFCNC/src/TopFCNC_Evt.cc Content/src/Dataset.cc ../TopTreeProducer/src/TRoot*.cc)
+HEADERSTOPFCNCDIC	= $(wildcard ../TopTreeAnalysis/TopFCNC/interface/TopFCNC_Evt.h Content/interface/Dataset.h ../TopTreeProducer/interface/TRoot*.h)
 OBJECTSTOPFCNCDIC	= $(SOURCESTOPFCNCDIC:.$(SrcSuf)=.$(ObjSuf))
 
 all:  libTopTreeAna53.$(DllSuf) libTopTreeAnaContent53.$(DllSuf)
