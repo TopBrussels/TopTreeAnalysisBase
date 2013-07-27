@@ -222,8 +222,8 @@ void JetTools::correctJetJESUnc(TRootJet* inJet, string direction, float nSigma)
 {
   if (fabs(inJet->Eta()) < 4.7)
   {
-    float corr=calculateJESUnc(inJet->Eta(), inJet->Pt(), direction);
-    float unc=0;
+    float corr=0;
+    float unc=calculateJESUnc(inJet->Eta(), inJet->Pt(), direction);
     if(direction == "plus") corr = 1 + unc*nSigma;
     else if(direction == "minus") corr = 1 - unc*nSigma;
     else cout << "JetTools::correctJetJESUnc  unknown direction: " << direction << endl;
