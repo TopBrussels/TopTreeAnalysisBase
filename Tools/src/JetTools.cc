@@ -5,6 +5,48 @@ JetTools::JetTools(vector<JetCorrectorParameters> vCorrParam, JetCorrectionUncer
   JEC_ = new FactorizedJetCorrector(vCorrParam);
   jecUnc_ = jecUnc;
   startFromRaw_ = startFromRaw;
+  redoFlavorJecUnc_ = false;
+}
+
+JetTools::JetTools(vector<JetCorrectorParameters> vCorrParam, string jecUncSourcesFile, string flavorFractionsFile, bool startFromRaw, bool useSubTotalMC)
+{
+  JEC_ = new FactorizedJetCorrector(vCorrParam);
+  startFromRaw_ = startFromRaw;
+  redoFlavorJecUnc_ = true;
+  
+  // Now read in everything for the special JES uncertainty, with alternative Flavor-JES
+  cout << "Starting the new Flavor-JES calculation.\n ===> Only implemented for jet |eta| < 2.5 !!!!" << endl;
+  
+  if(useSubTotalMC) // To be used when only sensitive to Data/MC ratio!!!
+    jecUnc_ = new JetCorrectionUncertainty(*(new JetCorrectorParameters(jecUncSourcesFile, "SubTotalMC")));
+  else
+    jecUnc_ = new JetCorrectionUncertainty(*(new JetCorrectorParameters(jecUncSourcesFile, "Total")));
+  
+  jecUncQCD_ = new JetCorrectionUncertainty(*(new JetCorrectorParameters(jecUncSourcesFile, "FlavorQCD")));
+  jecUncGluon_ = new JetCorrectionUncertainty(*(new JetCorrectorParameters(jecUncSourcesFile, "FlavorPureGluon")));
+  jecUncUDS_ = new JetCorrectionUncertainty(*(new JetCorrectorParameters(jecUncSourcesFile, "FlavorPureQuark")));
+  jecUncC_ = new JetCorrectionUncertainty(*(new JetCorrectorParameters(jecUncSourcesFile, "FlavorPureCharm")));
+  jecUncB_ = new JetCorrectionUncertainty(*(new JetCorrectorParameters(jecUncSourcesFile, "FlavorPureBottom")));
+  
+  TFile* inFile = new TFile(flavorFractionsFile.c_str(),"READ");
+  
+  flavFrac_lowEta_Gluon = (TF1*) inFile->Get("Fg_smallEta")->Clone();
+  flavFrac_lowEta_UDS = (TF1*) inFile->Get("Fuds_smallEta")->Clone();
+  flavFrac_lowEta_C = (TF1*) inFile->Get("Fc_smallEta")->Clone();
+  flavFrac_lowEta_B = (TF1*) inFile->Get("Fb_smallEta")->Clone();
+  
+  flavFrac_medEta_Gluon = (TF1*) inFile->Get("Fg_mediumEta")->Clone();
+  flavFrac_medEta_UDS = (TF1*) inFile->Get("Fuds_mediumEta")->Clone();
+  flavFrac_medEta_C = (TF1*) inFile->Get("Fc_mediumEta")->Clone();
+  flavFrac_medEta_B = (TF1*) inFile->Get("Fb_mediumEta")->Clone();
+  
+  flavFrac_highEta_Gluon = (TF1*) inFile->Get("Fg_largeEta")->Clone();
+  flavFrac_highEta_UDS = (TF1*) inFile->Get("Fuds_largeEta")->Clone();
+  flavFrac_highEta_C = (TF1*) inFile->Get("Fc_largeEta")->Clone();
+  flavFrac_highEta_B = (TF1*) inFile->Get("Fb_largeEta")->Clone();
+  
+  inFile->Close();
+  delete inFile;
 }
 
 JetTools::~JetTools()
@@ -93,24 +135,97 @@ void JetTools::correctJets(vector<TRootJet*> inJets, float rhoPU, bool isData)
     correctJet(inJets[j],rhoPU,isData);
 }
 
+float JetTools::calculateJESUnc(float eta, float pt, string direction)
+{
+  jecUnc_->setJetEta(eta);
+  jecUnc_->setJetPt(pt);
+  float gFrac = 0, udsFrac = 0, cFrac = 0, bFrac = 0;
+  if(redoFlavorJecUnc_) // prepare everything...
+  {
+    jecUncQCD_->setJetEta(eta);
+    jecUncQCD_->setJetPt(pt);
+    jecUncGluon_->setJetEta(eta);
+    jecUncGluon_->setJetPt(pt);
+    jecUncUDS_->setJetEta(eta);
+    jecUncUDS_->setJetPt(pt);
+    jecUncC_->setJetEta(eta);
+    jecUncC_->setJetPt(pt);
+    jecUncB_->setJetEta(eta);
+    jecUncB_->setJetPt(pt);
+    
+    if(fabs(eta) < 1.305)
+    {
+      gFrac = flavFrac_lowEta_Gluon->Eval(pt);
+      udsFrac = flavFrac_lowEta_UDS->Eval(pt);
+      cFrac = flavFrac_lowEta_C->Eval(pt);
+      bFrac = flavFrac_lowEta_B->Eval(pt);
+    }
+    else if(fabs(eta) < 1.93)
+    {
+      gFrac = flavFrac_medEta_Gluon->Eval(pt);
+      udsFrac = flavFrac_medEta_UDS->Eval(pt);
+      cFrac = flavFrac_medEta_C->Eval(pt);
+      bFrac = flavFrac_medEta_B->Eval(pt);
+    }
+    else if(fabs(eta) < 2.5)
+    {
+      gFrac = flavFrac_highEta_Gluon->Eval(pt);
+      udsFrac = flavFrac_highEta_UDS->Eval(pt);
+      cFrac = flavFrac_highEta_C->Eval(pt);
+      bFrac = flavFrac_highEta_B->Eval(pt);
+    }
+    
+    gFrac = gFrac / (gFrac+udsFrac+cFrac+bFrac);
+    udsFrac = udsFrac / (gFrac+udsFrac+cFrac+bFrac);
+    cFrac = cFrac / (gFrac+udsFrac+cFrac+bFrac);
+    bFrac = bFrac / (gFrac+udsFrac+cFrac+bFrac);
+  }
+  
+  float unc =0;
+  if(direction == "plus"){
+    if(redoFlavorJecUnc_ && fabs(eta) < 2.5)
+    {
+      float totalUnc = jecUnc_->getUncertainty(true);
+      float qcdUnc = jecUncQCD_->getUncertainty(true);
+      float gUnc = jecUncGluon_->getUncertainty(true);
+      float udsUnc = jecUncUDS_->getUncertainty(true);
+      float cUnc = jecUncC_->getUncertainty(true);
+      float bUnc = jecUncB_->getUncertainty(true);
+      
+      unc = totalUnc*totalUnc - qcdUnc*qcdUnc; // first subtract the 'standard' FlavorQCD part
+      unc = unc + gFrac*gFrac*gUnc*gUnc + udsFrac*udsFrac*udsUnc*udsUnc + cFrac*cFrac*cUnc*cUnc + bFrac*bFrac*bUnc*bUnc;
+      unc = sqrt(unc);
+    }
+    else unc  = jecUnc_->getUncertainty(true);
+  }
+  else if(direction == "minus"){
+    if(redoFlavorJecUnc_ && fabs(eta) < 2.5)
+    {
+      float totalUnc = jecUnc_->getUncertainty(false);
+      float qcdUnc = jecUncQCD_->getUncertainty(false);
+      float gUnc = jecUncGluon_->getUncertainty(false);
+      float udsUnc = jecUncUDS_->getUncertainty(false);
+      float cUnc = jecUncC_->getUncertainty(false);
+      float bUnc = jecUncB_->getUncertainty(false);
+      
+      unc = totalUnc*totalUnc - qcdUnc*qcdUnc; // first subtract the 'standard' FlavorQCD part
+      unc = unc + gFrac*gFrac*gUnc*gUnc + udsFrac*udsFrac*udsUnc*udsUnc + cFrac*cFrac*cUnc*cUnc + bFrac*bFrac*bUnc*bUnc;
+      unc = sqrt(unc);
+    }
+    else unc  = jecUnc_->getUncertainty(false);
+  }
+  else cout << "JetTools::correctJetJESUnc  unknown direction: " << direction << endl;
+  return unc;
+}
 
 void JetTools::correctJetJESUnc(TRootJet* inJet, string direction, float nSigma) // direction = plus or minus
 {
-  if (fabs(inJet->Eta()) < 4.7) {
-    jecUnc_->setJetEta(inJet->Eta());
-    jecUnc_->setJetPt(inJet->Pt());
-//  float unc = jecUnc_->getUncertainty(true);  
-//  unc = sqrt((unc*unc) + (0.025*0.025) + ((0.2*0.8*5.62)/inJet->Pt()));
-    float corr=1;
-    float unc =0;
-    if(direction == "plus"){
-      unc  = jecUnc_->getUncertainty(true);
-      corr = 1 + unc*nSigma;
-    }
-    else if(direction == "minus"){
-      unc  = jecUnc_->getUncertainty(false);
-      corr = 1 - unc*nSigma;
-    }
+  if (fabs(inJet->Eta()) < 4.7)
+  {
+    float corr=calculateJESUnc(inJet->Eta(), inJet->Pt(), direction);
+    float unc=0;
+    if(direction == "plus") corr = 1 + unc*nSigma;
+    else if(direction == "minus") corr = 1 - unc*nSigma;
     else cout << "JetTools::correctJetJESUnc  unknown direction: " << direction << endl;
 //  cout << "jet:  Pt: " << inJet->Pt() << "  Eta: " << inJet->Eta() << "  unc: " << unc;
     inJet->SetPxPyPzE(inJet->Px()*corr, inJet->Py()*corr, inJet->Pz()*corr, inJet->E()*corr);

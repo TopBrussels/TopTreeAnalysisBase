@@ -21,6 +21,10 @@
 #include "TopTreeAnalysisBase/Reconstruction/interface/JetCorrectorParameters.h"
 #include "TopTreeAnalysisBase/Reconstruction/interface/JetCorrectionUncertainty.h"
 
+//ROOT stuff
+#include "TF1.h"
+#include "TFile.h"
+
 using namespace std;
 using namespace TopTree;
 
@@ -28,6 +32,7 @@ class JetTools
 {
   public:
     JetTools(vector<JetCorrectorParameters> vCorrParam, JetCorrectionUncertainty* jecUnc, bool startFromRaw = true);
+    JetTools(vector<JetCorrectorParameters> vCorrParam, string jecUncSourcesFile, string flavorFractionsFile, bool startFromRaw = true, bool useSubTotalMC = false);
     ~JetTools();
     
     // Jet uncorrectors (back from L2L3 corrected jets to raw jets), input is assumed to be L1L2L3 corrected!!!
@@ -41,7 +46,8 @@ class JetTools
     void correctJet(TRootJet* inJet, float rhoPU, bool isData = false);
     void correctJets(vector<TRootJet*> inJets, float rhoPU, bool isData = false);
 
-    
+    // Calculate JES uncertainty
+    float calculateJESUnc(float eta, float pt, string direction);
     // Jet correctors for JES systematic
     void correctJetJESUnc(TRootJet* inJet, string direction, float nSigma = 1); // direction = plus or minus
     void correctJetJESUnc(vector<TRootJet*> inJets, string direction, float nSigma = 1);
@@ -80,8 +86,32 @@ class JetTools
     
   private:
     FactorizedJetCorrector *JEC_;
+    
     JetCorrectionUncertainty* jecUnc_;
+    
+    JetCorrectionUncertainty* jecUncQCD_; // flavor-JES uncertainty for the QCD flavor mixture
+    JetCorrectionUncertainty* jecUncGluon_; // flavor-JES uncertainty for gluons
+    JetCorrectionUncertainty* jecUncUDS_; // flavor-JES uncertainty for uds quarks
+    JetCorrectionUncertainty* jecUncC_; // flavor-JES uncertainty for c quarks
+    JetCorrectionUncertainty* jecUncB_; // flavor-JES uncertainty for b quarks
+    
+    TF1* flavFrac_lowEta_Gluon; // |eta| < 1.305
+    TF1* flavFrac_lowEta_UDS;
+    TF1* flavFrac_lowEta_C;
+    TF1* flavFrac_lowEta_B;
+    
+    TF1* flavFrac_medEta_Gluon; // 1.305 < |eta| < 1.93
+    TF1* flavFrac_medEta_UDS;
+    TF1* flavFrac_medEta_C;
+    TF1* flavFrac_medEta_B;
+    
+    TF1* flavFrac_highEta_Gluon; // 1.93 < |eta| < 2.5
+    TF1* flavFrac_highEta_UDS;
+    TF1* flavFrac_highEta_C;
+    TF1* flavFrac_highEta_B;
+    
     bool startFromRaw_; // true: first correct to raw en then apply the necessary corrections
+    bool redoFlavorJecUnc_; // true: recalculate 
 };
 
 #endif
