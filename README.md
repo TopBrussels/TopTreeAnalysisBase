@@ -21,3 +21,4 @@ git checkout CMSSW_53X
 make
 ~~~
 
+compiling the package independently from CMSSW
