@@ -74,7 +74,9 @@ class Selection{
 // JET SELECTION CUTS ========================================
 
   void setJetCuts();
-  void setJetCuts(float Pt, float Eta, float EMF, float n90Hits, float fHPD, float dRJetElectron, float dRJetMuon);  
+  void setJetCuts(float Pt, float Eta, float EMF, float n90Hits, float fHPD, float dRJetElectron, float dRJetMuon);
+	void cutHFHadronEnergyFraction(){cutHFHadronEnergyFraction_ = true;}; //jets in 53X_v5 toptrees have a HFHadronEnergyFraction function, absent in older toptrees
+	
   
 // ELECTRON SELECTION CUTS ========================================
   void setElectronIsoCorrType(int corrType = 1);
@@ -174,6 +176,7 @@ class Selection{
   float n90HitsThreshold_;
   float fHPDThreshold_;
   float DRJetElectron_;
+	bool cutHFHadronEnergyFraction_;
 
   //muon
   float MuonPtThreshold_;
