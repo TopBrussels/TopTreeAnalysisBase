@@ -302,8 +302,18 @@ BTagWeightTools::BTagWeightTools(std::string filename, std::string defaultalgo, 
 
 }
 
-// destructor:
+BTagWeightTools::BTagWeightTools(std::string filename, std::string algo_L, std::string algo_T, std::string sflightprescription){
+  _algo_L=algo_L;
+	_algo_T=algo_T;
+  _filename=filename;
+  _abcdrange="ABCD";
+	_sflightprescription=sflightprescription;
+  setalgoWPcut(algo_L,algo_T);
+	parsefile();
 
+}
+
+// destructor:
 BTagWeightTools::~BTagWeightTools(){
 
   _functions.clear();
@@ -351,6 +361,66 @@ void BTagWeightTools::setalgoWPcut(std::string algo)
 		
 }
 
+void BTagWeightTools::setalgoWPcut(std::string algo_L, std::string algo_T)
+{
+	//working points from https://twiki.cern.ch/twiki/bin/viewauth/CMS/BTagPerformanceOP
+	if(algo_L=="CSVL")
+	  _algoWPcut_L = 0.244;
+  else if(algo_L=="CSVM")
+	  _algoWPcut_L = 0.679;
+  else if(algo_L=="CSVT")
+	  _algoWPcut_L = 0.898;
+	else if(algo_L=="CSVV1L")
+	  _algoWPcut_L = 0.405;
+  else if(algo_L=="CSVV1M")
+	  _algoWPcut_L = 0.783;
+	else if(algo_L=="CSVV1T")
+	  _algoWPcut_L = 0.920;
+  else if(algo_L=="CSVSLV1L")
+	  _algoWPcut_L = 0.527;
+	else if(algo_L=="CSVSLV1M")
+	  _algoWPcut_L = 0.756; 
+	else if(algo_L=="CSVSLV1T")
+	  _algoWPcut_L = 0.859;
+	else if(algo_L=="TCHPT")
+	  _algoWPcut_L = 3.41;
+	else if(algo_L=="JPL")
+	  _algoWPcut_L = 0.275;
+	else if(algo_L=="JPM")
+	  _algoWPcut_L =	0.545;
+	else if(algo_L=="JPT")
+	  _algoWPcut_L = 0.790;
+	else std::cout<<" BTagWeightTools::BTagWeightTools WARNING: Working Point for algorithm not found!"<<std::endl;
+	
+	if(algo_T=="CSVL")
+	  _algoWPcut_T = 0.244;
+  else if(algo_T=="CSVM")
+	  _algoWPcut_T = 0.679;
+  else if(algo_T=="CSVT")
+	  _algoWPcut_T = 0.898;
+	else if(algo_T=="CSVV1L")
+	  _algoWPcut_T = 0.405;
+  else if(algo_T=="CSVV1M")
+	  _algoWPcut_T = 0.783;
+	else if(algo_T=="CSVV1T")
+	  _algoWPcut_T = 0.920;
+  else if(algo_T=="CSVSLV1L")
+	  _algoWPcut_T = 0.527;
+	else if(algo_T=="CSVSLV1M")
+	  _algoWPcut_T = 0.756; 
+	else if(algo_T=="CSVSLV1T")
+	  _algoWPcut_T = 0.859;
+	else if(algo_T=="TCHPT")
+	  _algoWPcut_T = 3.41;
+	else if(algo_T=="JPL")
+	  _algoWPcut_T = 0.275;
+	else if(algo_T=="JPM")
+	  _algoWPcut_T =	0.545;
+	else if(algo_T=="JPT")
+	  _algoWPcut_T = 0.790;
+	else std::cout<<" BTagWeightTools::BTagWeightTools WARNING: Working Point for algorithm not found!"<<std::endl;	
+		
+}
 
 float BTagWeightTools::getSFlight(float pt, float eta, string algo, int syst){
   std::pair<float,float> etarange = getfakeraterange((TString)algo,eta);
@@ -1304,6 +1374,29 @@ void BTagWeightTools::ReadMCEfficiencyHistos(std::string infilename)
 			inTotalNofLightJets = (TH2F*) infile->Get("TotalNofLightJets");
 }
 
+void BTagWeightTools::ReadMCEfficiencyHistos(std::string infilename_L,std::string infilename_T)
+{
+			TFile *infile_L = new TFile(infilename_L.c_str(),"READ");
+			infile_L->cd();
+			inBtaggedJets  = (TH2F*) infile_L->Get("BtaggedJets");
+			inBtaggedBJets = (TH2F*) infile_L->Get("BtaggedBJets");
+			inBtaggedCJets = (TH2F*) infile_L->Get("BtaggedCJets");
+			inBtaggedLightJets = (TH2F*) infile_L->Get("BtaggedLightJets");
+			inTotalNofBJets = (TH2F*) infile_L->Get("TotalNofBJets");
+			inTotalNofCJets = (TH2F*) infile_L->Get("TotalNofCJets");
+			inTotalNofLightJets = (TH2F*) infile_L->Get("TotalNofLightJets");
+			
+			TFile *infile_T = new TFile(infilename_T.c_str(),"READ");
+			infile_T->cd();
+			inBtaggedJets_T  = (TH2F*) infile_T->Get("BtaggedJets");
+			inBtaggedBJets_T = (TH2F*) infile_T->Get("BtaggedBJets");
+			inBtaggedCJets_T = (TH2F*) infile_T->Get("BtaggedCJets");
+			inBtaggedLightJets_T = (TH2F*) infile_T->Get("BtaggedLightJets");
+			inTotalNofBJets_T = (TH2F*) infile_T->Get("TotalNofBJets");
+			inTotalNofCJets_T = (TH2F*) infile_T->Get("TotalNofCJets");
+			inTotalNofLightJets_T = (TH2F*) infile_T->Get("TotalNofLightJets");
+}
+
 float BTagWeightTools::getMCEventWeight(vector< TRootJet* >& selectedJets, int syst)
 {
       float probMC = 1.;
@@ -1312,80 +1405,9 @@ float BTagWeightTools::getMCEventWeight(vector< TRootJet* >& selectedJets, int s
 			float btagSF = 1.;
 			for (unsigned int i=0; i < selectedJets.size(); i++) 
 			{
-					int xBin = 0, yBin = 0;
-					float PtMax = inTotalNofBJets->GetXaxis()->GetBinUpEdge( inTotalNofBJets->GetXaxis()->GetNbins() );
-					if (selectedJets[i]->Pt() < PtMax)
-							xBin = inTotalNofBJets->GetXaxis()->FindBin(selectedJets[i]->Pt());		//Histograms have same binning.
-					else if (selectedJets[i]->Pt() >= PtMax)
-							xBin = inTotalNofBJets->GetXaxis()->FindBin(PtMax-1);
-					if (fabs(selectedJets[i]->Eta()) < 2.4)
-							yBin = inTotalNofBJets->GetYaxis()->FindBin(fabs(selectedJets[i]->Eta()));
-					else if (fabs(selectedJets[i]->Eta()) == 2.4)
-							yBin = inTotalNofBJets->GetYaxis()->FindBin(2.4-0.01);
-														
-					btagSF = getSF(selectedJets[i]->Pt(), selectedJets[i]->Eta(), selectedJets[i]->partonFlavour(), _defaultalgo, syst);			
-					if (fabs(selectedJets[i]->partonFlavour()) == 5.) 
-					{
-							float NofBJets = inTotalNofBJets->GetBinContent(xBin,yBin);
-							if (NofBJets == 0.)
-							{
-									cout << "BTagWeightTools::getMCEventWeight WARNING: No b jets for bin (" << xBin << "," << yBin << ")!" << endl;
-									continue;
-							}
-							float NofTaggedBJets = inBtaggedBJets->GetBinContent(xBin,yBin);
-							tagEff = NofTaggedBJets/NofBJets;
-					}
-					else if (fabs(selectedJets[i]->partonFlavour()) == 4.)
-					{
-							float NofCJets = inTotalNofCJets->GetBinContent(xBin,yBin);
-							if (NofCJets == 0.)
-							{
-							    cout << "BTagWeightTools::getMCEventWeight WARNING: No c jets for bin (" << xBin << "," << yBin << ")." << endl;
-									continue;
-							}
-							float NofTaggedCJets = inBtaggedCJets->GetBinContent(xBin,yBin);
-							tagEff = NofTaggedCJets/NofCJets;
-					 }
-					 else if (fabs(selectedJets[i]->partonFlavour()) == 1. || fabs(selectedJets[i]->partonFlavour()) == 2. || fabs(selectedJets[i]->partonFlavour()) == 3. || fabs(selectedJets[i]->partonFlavour()) == 21.)
-					 {
-							float NofLightJets = inTotalNofLightJets->GetBinContent(xBin,yBin);
-							if (NofLightJets == 0.)
-							{
-							    cout << "BTagWeightTools::getMCEventWeight WARNING: No light jets for bin (" << xBin << "," << yBin << ")." << endl;
-									continue;
-							}
-							float NofTaggedLightJets = inBtaggedLightJets->GetBinContent(xBin,yBin);
-							tagEff = NofTaggedLightJets/NofLightJets;
-					 }
-					 else if (fabs(selectedJets[i]->partonFlavour()) == 0.)
-					 {
-							//cout << "Eventnr.: " << ievt << ", Jetnr.: " << i << ", pdgId: " << selectedJets[i]->partonFlavour() << ". Is pileup jet -> consider as light jet." << endl;
-							float NofLightJets = inTotalNofLightJets->GetBinContent(xBin,yBin);
-							if (NofLightJets == 0.)
-							{
-									cout << "BTagWeightTools::getMCEventWeight WARNING: No light jets for bin (" << xBin << "," << yBin << ")." << endl;
-									continue;
-							}
-							float NofTaggedLightJets = inBtaggedLightJets->GetBinContent(xBin,yBin);
-							tagEff = NofTaggedLightJets/NofLightJets;
-					 }
-					 else if (fabs(selectedJets[i]->partonFlavour()) > 100.)
-					 {
-							 //cout << "Eventnr.: " << ievt << ", Jetnr.: " << i << ", pdgId: " << selectedJets[i]->partonFlavour() << ". Is hadron -> consider as light jet." << endl;
-							 float NofLightJets = inTotalNofLightJets->GetBinContent(xBin,yBin);
-							 if (NofLightJets == 0.)
-							 {
-								  cout << "BTagWeightTools::getMCEventWeight WARNING: No light jets for bin (" << xBin << "," << yBin << ")." << endl;
-									continue;
-							 }
-							 float NofTaggedLightJets = inBtaggedLightJets->GetBinContent(xBin,yBin);
-							 tagEff = NofTaggedLightJets/NofLightJets;
-						}
-						else
-						{
-							 cout << endl << "BTagWeightTools::getMCEventWeight WARNING: Jet not identified! PdgId: " << selectedJets[i]->partonFlavour() << endl;
-							 continue;
-						}														
+						tagEff = getTagEff(selectedJets[i]->Pt(), selectedJets[i]->Eta(), selectedJets[i]->partonFlavour());											
+						btagSF = getSF(selectedJets[i]->Pt(), selectedJets[i]->Eta(), selectedJets[i]->partonFlavour(), _defaultalgo, syst);
+						//cout<<"  btagSF = "<<btagSF<<", tagEff = "<<tagEff<<", syst = "<<syst<<endl;	
 														
 						if (tagEff == 0.)
 						{
@@ -1397,10 +1419,10 @@ float BTagWeightTools::getMCEventWeight(vector< TRootJet* >& selectedJets, int s
 								cout << endl << "BTagWeightTools::getMCEventWeight WARNING: Btag scalefactor is zero!" << endl;
 								continue;
 						}
-						else if (btagSF*tagEff >= 1.)
-						{
+						//else if (btagSF*tagEff >= 1.)
+						//{
 								//cout << endl << "BTagWeightTools::getMCEventWeight WARNING:	BtagSF*tagEff is larger than 1!" << endl; //but this is not a problem?
-						}	
+						//}	
 																			
 						float btagValue = -100.;
 					  if(_defaultalgo=="CSVL" || _defaultalgo=="CSVM" || _defaultalgo=="CSVT") btagValue = selectedJets[i]->btag_combinedSecondaryVertexBJetTags();
@@ -1433,85 +1455,9 @@ float BTagWeightTools::getMCEventWeight(vector< TLorentzVector >& selectedJets, 
 			float btagSF = 1.;
 			for (unsigned int i=0; i < selectedJets.size(); i++) 
 			{
-					int xBin = 0, yBin = 0;
-					float PtMax = inTotalNofBJets->GetXaxis()->GetBinUpEdge( inTotalNofBJets->GetXaxis()->GetNbins() );
-					if (selectedJets[i].Pt() < PtMax)
-							xBin = inTotalNofBJets->GetXaxis()->FindBin(selectedJets[i].Pt());		//Histograms have same binning.
-					else if (selectedJets[i].Pt() >= PtMax)
-							xBin = inTotalNofBJets->GetXaxis()->FindBin(PtMax-1);
-					if (fabs(selectedJets[i].Eta()) < 2.4)
-							yBin = inTotalNofBJets->GetYaxis()->FindBin(fabs(selectedJets[i].Eta()));
-					else if (fabs(selectedJets[i].Eta()) == 2.4)
-							yBin = inTotalNofBJets->GetYaxis()->FindBin(2.4-0.01);
-									
-					//cout<<" selectedJets["<<i<<"].Pt() ="<<selectedJets[i].Pt()<<",	selectedJets["<<i<<"].Eta() = "<<selectedJets[i].Eta()<<endl;		
-					if (fabs(selectedJets_partonFlavour[i]) == 5.) 
-					{
-					    //cout<<" B"<<endl;
-							float NofBJets = inTotalNofBJets->GetBinContent(xBin,yBin);
-							if (NofBJets == 0.)
-							{
-									cout << "BTagWeightTools::getMCEventWeight WARNING: No b jets for bin (" << xBin << "," << yBin << ")!" << endl;
-									continue;
-							}
-							float NofTaggedBJets = inBtaggedBJets->GetBinContent(xBin,yBin);
-							tagEff = NofTaggedBJets/NofBJets;
-					}
-					else if (fabs(selectedJets_partonFlavour[i]) == 4.)
-					{
-					    //cout<<" C"<<endl;
-							float NofCJets = inTotalNofCJets->GetBinContent(xBin,yBin);
-							if (NofCJets == 0.)
-							{
-							    cout << "BTagWeightTools::getMCEventWeight WARNING: No c jets for bin (" << xBin << "," << yBin << ")." << endl;
-									continue;
-							}
-							float NofTaggedCJets = inBtaggedCJets->GetBinContent(xBin,yBin);
-							tagEff = NofTaggedCJets/NofCJets;
-					 }
-					 else if (fabs(selectedJets_partonFlavour[i]) == 1. || fabs(selectedJets_partonFlavour[i]) == 2. || fabs(selectedJets_partonFlavour[i]) == 3. || fabs(selectedJets_partonFlavour[i]) == 21.)
-					 {
-					    //cout<<" DUSG"<<endl;
-							float NofLightJets = inTotalNofLightJets->GetBinContent(xBin,yBin);
-							if (NofLightJets == 0.)
-							{
-							    cout << "BTagWeightTools::getMCEventWeight WARNING: No light jets for bin (" << xBin << "," << yBin << ")." << endl;
-									continue;
-							}
-							float NofTaggedLightJets = inBtaggedLightJets->GetBinContent(xBin,yBin);
-							tagEff = NofTaggedLightJets/NofLightJets;
-					 }
-					 else if (fabs(selectedJets_partonFlavour[i]) == 0.)
-					 {
-					    //cout<<" PU?"<<endl;
-							//cout << "Eventnr.: " << ievt << ", Jetnr.: " << i << ", pdgId: " << selectedJets_partonFlavour[i] << ". Is pileup jet -> consider as light jet." << endl;
-							float NofLightJets = inTotalNofLightJets->GetBinContent(xBin,yBin);
-							if (NofLightJets == 0.)
-							{
-									cout << "BTagWeightTools::getMCEventWeight WARNING: No light jets for bin (" << xBin << "," << yBin << ")." << endl;
-									continue;
-							}
-							float NofTaggedLightJets = inBtaggedLightJets->GetBinContent(xBin,yBin);
-							tagEff = NofTaggedLightJets/NofLightJets;
-					 }
-					 else if (fabs(selectedJets_partonFlavour[i]) > 100.)
-					 {
-					     //cout<<" hadron?"<<endl;
-							 //cout << "Eventnr.: " << ievt << ", Jetnr.: " << i << ", pdgId: " << selectedJets_partonFlavour[i] << ". Is hadron -> consider as light jet." << endl;
-							 float NofLightJets = inTotalNofLightJets->GetBinContent(xBin,yBin);
-							 if (NofLightJets == 0.)
-							 {
-								  cout << "BTagWeightTools::getMCEventWeight WARNING: No light jets for bin (" << xBin << "," << yBin << ")." << endl;
-									continue;
-							 }
-							 float NofTaggedLightJets = inBtaggedLightJets->GetBinContent(xBin,yBin);
-							 tagEff = NofTaggedLightJets/NofLightJets;
-						}
-						else
-						{
-							 cout << endl << "BTagWeightTools::getMCEventWeight WARNING: Jet not identified! PdgId: " << selectedJets_partonFlavour[i] << endl;
-							 continue;
-						}														
+					  tagEff = getTagEff(selectedJets[i].Pt(), selectedJets[i].Eta(), selectedJets_partonFlavour[i]);											
+						btagSF = getSF(selectedJets[i].Pt(), selectedJets[i].Eta(), selectedJets_partonFlavour[i], _defaultalgo, syst);
+						//cout<<"  btagSF = "<<btagSF<<", tagEff = "<<tagEff<<", syst = "<<syst<<endl;
 														
 						if (tagEff == 0.)
 						{
@@ -1523,13 +1469,11 @@ float BTagWeightTools::getMCEventWeight(vector< TLorentzVector >& selectedJets, 
 								cout << endl << "BTagWeightTools::getMCEventWeight WARNING: Btag scalefactor is zero!" << endl;
 								continue;
 						}
-						else if (btagSF*tagEff >= 1.)
-						{
+						//else if (btagSF*tagEff >= 1.)
+						//{
 								//cout << endl << "BTagWeightTools::getMCEventWeight WARNING:	BtagSF*tagEff is larger than 1!" << endl; //but this is not a problem?
-						}
-						
-						btagSF = getSF(selectedJets[i].Pt(), selectedJets[i].Eta(), selectedJets_partonFlavour[i], _defaultalgo, syst);							
-						//cout<<"  btagSF = "<<btagSF<<", tagEff = "<<tagEff<<", syst = "<<syst<<endl;						
+						//}
+												
 						if (selectedJets_bTagValues[i] > _algoWPcut) //tagged
 						{	
 						    probMC = probMC*tagEff;
@@ -1544,3 +1488,228 @@ float BTagWeightTools::getMCEventWeight(vector< TLorentzVector >& selectedJets, 
 			float Weight = probData/probMC;
 			return Weight;
 }
+
+float BTagWeightTools::getMCEventWeight_LT(vector< TLorentzVector >& selectedJets, vector<int>& selectedJets_partonFlavour, vector<float>& selectedJets_bTagValues, int syst)
+{
+      float probMC = 1.;
+			float probData = 1.;
+			float tagEff_L = 1., tagEff_T = 1.;
+			float btagSF_L = 1., btagSF_T = 1.;
+			for (unsigned int i=0; i < selectedJets.size(); i++) 
+			{
+					  tagEff_L = getTagEff(selectedJets[i].Pt(), selectedJets[i].Eta(), selectedJets_partonFlavour[i]);
+						tagEff_T = getTagEff_T(selectedJets[i].Pt(), selectedJets[i].Eta(), selectedJets_partonFlavour[i]);				
+						btagSF_L = getSF(selectedJets[i].Pt(), selectedJets[i].Eta(), selectedJets_partonFlavour[i], _algo_L, syst);
+						btagSF_T = getSF(selectedJets[i].Pt(), selectedJets[i].Eta(), selectedJets_partonFlavour[i], _algo_T, syst);
+						//cout<<"  btagSF_L = "<<btagSF_L<<", tagEff_L = "<<tagEff_L<<", syst = "<<syst<<endl;
+						//cout<<"  btagSF_T = "<<btagSF_T<<", tagEff_T = "<<tagEff_T<<", syst = "<<syst<<endl;
+						
+						if (tagEff_L == 0. || tagEff_T == 0.)
+						{
+								cout << endl << "BTagWeightTools::getMCEventWeight WARNING: Tag efficiency is zero!" << endl;
+								continue;
+						}
+						if (btagSF_L == 0. || btagSF_T == 0.)
+						{
+								cout << endl << "BTagWeightTools::getMCEventWeight WARNING: Btag scalefactor is zero!" << endl;
+								continue;
+						}
+						//else if (btagSF*tagEff >= 1.)
+						//{
+								//cout << endl << "BTagWeightTools::getMCEventWeight WARNING:	BtagSF*tagEff is larger than 1!" << endl; //but this is not a problem?
+						//}
+																
+						if (selectedJets_bTagValues[i] > _algoWPcut_T) //tagged tight
+						{	
+						    probMC = probMC*tagEff_T;
+								probData = probData*btagSF_T*tagEff_T;
+						}
+						else if(selectedJets_bTagValues[i] < _algoWPcut_L) //not tagged loose
+						{
+								probMC = probMC*(1.-tagEff_L);
+								probData = probData*(1.-btagSF_L*tagEff_L);
+						}
+						else if(selectedJets_bTagValues[i] > _algoWPcut_L && selectedJets_bTagValues[i] < _algoWPcut_T) //tagged loose but not tagged tight
+						{
+								probMC = probMC*(tagEff_L - tagEff_T);
+								probData = probData*(btagSF_L*tagEff_L - btagSF_T*tagEff_T);
+						}
+			}
+			float Weight = probData/probMC;
+			return Weight;
+}
+
+float BTagWeightTools::getTagEff(float pt, float eta, int flavor)
+{
+          float tagEff = 1.;
+          int xBin = 0, yBin = 0;
+					float PtMax = inTotalNofBJets->GetXaxis()->GetBinUpEdge( inTotalNofBJets->GetXaxis()->GetNbins() );
+					if (pt < PtMax)
+							xBin = inTotalNofBJets->GetXaxis()->FindBin(pt);		//Histograms have same binning.
+					else if (pt >= PtMax)
+							xBin = inTotalNofBJets->GetXaxis()->FindBin(PtMax-1);
+					if (fabs(eta) < 2.4)
+							yBin = inTotalNofBJets->GetYaxis()->FindBin(fabs(eta));
+					else if (fabs(eta) == 2.4)
+							yBin = inTotalNofBJets->GetYaxis()->FindBin(2.4-0.01);
+									
+					//cout<<" pt ="<<pt<<",	eta = "<<eta<<endl;		
+					if (fabs(flavor) == 5.) 
+					{
+					    //cout<<" B"<<endl;
+							float NofBJets = inTotalNofBJets->GetBinContent(xBin,yBin);
+							if (NofBJets == 0.)
+							{
+									cout << "BTagWeightTools::getMCEventWeight WARNING: No b jets for bin (" << xBin << "," << yBin << ")!" << endl;
+									return -1;
+							}
+							float NofTaggedBJets = inBtaggedBJets->GetBinContent(xBin,yBin);
+							tagEff = NofTaggedBJets/NofBJets;
+					}
+					else if (fabs(flavor) == 4.)
+					{
+					    //cout<<" C"<<endl;
+							float NofCJets = inTotalNofCJets->GetBinContent(xBin,yBin);
+							if (NofCJets == 0.)
+							{
+							    cout << "BTagWeightTools::getMCEventWeight WARNING: No c jets for bin (" << xBin << "," << yBin << ")." << endl;
+									return -1;
+							}
+							float NofTaggedCJets = inBtaggedCJets->GetBinContent(xBin,yBin);
+							tagEff = NofTaggedCJets/NofCJets;
+					 }
+					 else if (fabs(flavor) == 1. || fabs(flavor) == 2. || fabs(flavor) == 3. || fabs(flavor) == 21.)
+					 {
+					    //cout<<" DUSG"<<endl;
+							float NofLightJets = inTotalNofLightJets->GetBinContent(xBin,yBin);
+							if (NofLightJets == 0.)
+							{
+							    cout << "BTagWeightTools::getMCEventWeight WARNING: No light jets for bin (" << xBin << "," << yBin << ")." << endl;
+									return -1;
+							}
+							float NofTaggedLightJets = inBtaggedLightJets->GetBinContent(xBin,yBin);
+							tagEff = NofTaggedLightJets/NofLightJets;
+					 }
+					 else if (fabs(flavor) == 0.)
+					 {
+					    //cout<<" PU?"<<endl;
+							//cout << "Eventnr.: " << ievt << ", Jetnr.: " << i << ", pdgId: " << flavor << ". Is pileup jet -> consider as light jet." << endl;
+							float NofLightJets = inTotalNofLightJets->GetBinContent(xBin,yBin);
+							if (NofLightJets == 0.)
+							{
+									cout << "BTagWeightTools::getMCEventWeight WARNING: No light jets for bin (" << xBin << "," << yBin << ")." << endl;
+									return -1;
+							}
+							float NofTaggedLightJets = inBtaggedLightJets->GetBinContent(xBin,yBin);
+							tagEff = NofTaggedLightJets/NofLightJets;
+					 }
+					 else if (fabs(flavor) > 100.)
+					 {
+					     //cout<<" hadron?"<<endl;
+							 //cout << "Eventnr.: " << ievt << ", Jetnr.: " << i << ", pdgId: " << flavor << ". Is hadron -> consider as light jet." << endl;
+							 float NofLightJets = inTotalNofLightJets->GetBinContent(xBin,yBin);
+							 if (NofLightJets == 0.)
+							 {
+								  cout << "BTagWeightTools::getMCEventWeight WARNING: No light jets for bin (" << xBin << "," << yBin << ")." << endl;
+									return -1;
+							 }
+							 float NofTaggedLightJets = inBtaggedLightJets->GetBinContent(xBin,yBin);
+							 tagEff = NofTaggedLightJets/NofLightJets;
+						}
+						else
+						{
+							 cout << endl << "BTagWeightTools::getMCEventWeight WARNING: Jet not identified! PdgId: " << flavor << endl;
+							 return -1;
+						}
+						
+						return tagEff;
+
+}
+
+float BTagWeightTools::getTagEff_T(float pt, float eta, int flavor)
+{
+          float tagEff = 1.;
+          int xBin = 0, yBin = 0;
+					float PtMax = inTotalNofBJets_T->GetXaxis()->GetBinUpEdge( inTotalNofBJets_T->GetXaxis()->GetNbins() );
+					if (pt < PtMax)
+							xBin = inTotalNofBJets_T->GetXaxis()->FindBin(pt);		//Histograms have same binning.
+					else if (pt >= PtMax)
+							xBin = inTotalNofBJets_T->GetXaxis()->FindBin(PtMax-1);
+					if (fabs(eta) < 2.4)
+							yBin = inTotalNofBJets_T->GetYaxis()->FindBin(fabs(eta));
+					else if (fabs(eta) == 2.4)
+							yBin = inTotalNofBJets_T->GetYaxis()->FindBin(2.4-0.01);
+									
+					//cout<<" pt ="<<pt<<",	eta = "<<eta<<endl;		
+					if (fabs(flavor) == 5.) 
+					{
+					    //cout<<" B"<<endl;
+							float NofBJets = inTotalNofBJets_T->GetBinContent(xBin,yBin);
+							if (NofBJets == 0.)
+							{
+									cout << "BTagWeightTools::getMCEventWeight WARNING: No b jets for bin (" << xBin << "," << yBin << ")!" << endl;
+									return -1;
+							}
+							float NofTaggedBJets = inBtaggedBJets_T->GetBinContent(xBin,yBin);
+							tagEff = NofTaggedBJets/NofBJets;
+					}
+					else if (fabs(flavor) == 4.)
+					{
+					    //cout<<" C"<<endl;
+							float NofCJets = inTotalNofCJets_T->GetBinContent(xBin,yBin);
+							if (NofCJets == 0.)
+							{
+							    cout << "BTagWeightTools::getMCEventWeight WARNING: No c jets for bin (" << xBin << "," << yBin << ")." << endl;
+									return -1;
+							}
+							float NofTaggedCJets = inBtaggedCJets_T->GetBinContent(xBin,yBin);
+							tagEff = NofTaggedCJets/NofCJets;
+					 }
+					 else if (fabs(flavor) == 1. || fabs(flavor) == 2. || fabs(flavor) == 3. || fabs(flavor) == 21.)
+					 {
+					    //cout<<" DUSG"<<endl;
+							float NofLightJets = inTotalNofLightJets_T->GetBinContent(xBin,yBin);
+							if (NofLightJets == 0.)
+							{
+							    cout << "BTagWeightTools::getMCEventWeight WARNING: No light jets for bin (" << xBin << "," << yBin << ")." << endl;
+									return -1;
+							}
+							float NofTaggedLightJets = inBtaggedLightJets_T->GetBinContent(xBin,yBin);
+							tagEff = NofTaggedLightJets/NofLightJets;
+					 }
+					 else if (fabs(flavor) == 0.)
+					 {
+					    //cout<<" PU?"<<endl;
+							//cout << "Eventnr.: " << ievt << ", Jetnr.: " << i << ", pdgId: " << flavor << ". Is pileup jet -> consider as light jet." << endl;
+							float NofLightJets = inTotalNofLightJets_T->GetBinContent(xBin,yBin);
+							if (NofLightJets == 0.)
+							{
+									cout << "BTagWeightTools::getMCEventWeight WARNING: No light jets for bin (" << xBin << "," << yBin << ")." << endl;
+									return -1;
+							}
+							float NofTaggedLightJets = inBtaggedLightJets_T->GetBinContent(xBin,yBin);
+							tagEff = NofTaggedLightJets/NofLightJets;
+					 }
+					 else if (fabs(flavor) > 100.)
+					 {
+					     //cout<<" hadron?"<<endl;
+							 //cout << "Eventnr.: " << ievt << ", Jetnr.: " << i << ", pdgId: " << flavor << ". Is hadron -> consider as light jet." << endl;
+							 float NofLightJets = inTotalNofLightJets_T->GetBinContent(xBin,yBin);
+							 if (NofLightJets == 0.)
+							 {
+								  cout << "BTagWeightTools::getMCEventWeight WARNING: No light jets for bin (" << xBin << "," << yBin << ")." << endl;
+									return -1;
+							 }
+							 float NofTaggedLightJets = inBtaggedLightJets_T->GetBinContent(xBin,yBin);
+							 tagEff = NofTaggedLightJets/NofLightJets;
+						}
+						else
+						{
+							 cout << endl << "BTagWeightTools::getMCEventWeight WARNING: Jet not identified! PdgId: " << flavor << endl;
+							 return -1;
+						}
+						
+						return tagEff;
+
+}
+
