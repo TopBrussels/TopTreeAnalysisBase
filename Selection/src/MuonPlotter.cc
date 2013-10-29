@@ -133,7 +133,7 @@ MuonPlotter::Fill (vector < TRootMuon > muons, vector < TRootJet > selJets)
     h_HPTMuon_NHits_   ->Fill (muons[0].nofValidHits ());
     h_HPTMuon_NChiSq_  ->Fill (muons[0].chi2());
     h_HPTMuon_d0_      ->Fill (muons[0].d0 ());
-    h_HPTMuon_d0Sig_   ->Fill((muons[0].d0error ()>0 ? fabs(muons[0].d0 ())/muons[0].d0error () : -1));
+    h_HPTMuon_d0Sig_   ->Fill((muons[0].d0Error ()>0 ? fabs(muons[0].d0 ())/muons[0].d0Error () : -1));
     //h_HPTMuon_dB_      ->Fill (muons[0].dB ());
     if(muons[0].isStandAloneMuon()){
 	h_HPTMuon_Type_->Fill(0);
@@ -153,7 +153,7 @@ MuonPlotter::Fill (vector < TRootMuon > muons, vector < TRootJet > selJets)
 	if(muons[0].isTrackerMuon())    h_HPTMuon_Type_vs_Type_->Fill(2.,1.);
 					h_HPTMuon_Type_vs_Type_->Fill(2.,2.);
     }
-    h_HPTMuon_RelIso_->Fill(muons[0].relativeIso03());
+    h_HPTMuon_RelIso_->Fill(muons[0].relPfIso(3));
     float mindRMuJet = 999.;
     TRootJet jet;
     for(unsigned int j=0;j<selJets.size();j++)
@@ -172,7 +172,7 @@ MuonPlotter::Fill (vector < TRootMuon > muons, vector < TRootJet > selJets)
     h_AllMuons_NHits_  ->Fill (muons[i].nofValidHits ());
     h_AllMuons_NChiSq_ ->Fill (muons[i].chi2());
     h_AllMuons_d0_     ->Fill (muons[i].d0 ());
-    h_AllMuons_d0Sig_  ->Fill((muons[i].d0error ()>0 ? fabs(muons[i].d0 ())/muons[i].d0error () : -1));
+    h_AllMuons_d0Sig_  ->Fill((muons[i].d0Error ()>0 ? fabs(muons[i].d0 ())/muons[i].d0Error () : -1));
     //h_AllMuons_dB_     ->Fill (muons[i].dB ());
     if(muons[i].isStandAloneMuon()){
 	h_AllMuons_Type_->Fill(0);
@@ -192,7 +192,7 @@ MuonPlotter::Fill (vector < TRootMuon > muons, vector < TRootJet > selJets)
 	if(muons[i].isTrackerMuon())    h_AllMuons_Type_vs_Type_->Fill(2.,1.);
 					h_AllMuons_Type_vs_Type_->Fill(2.,2.);
     }
-    h_AllMuons_RelIso_->Fill(muons[i].relativeIso03());
+    h_AllMuons_RelIso_->Fill(muons[i].relPfIso(3));
     float mindRMuJet = 999.;
     TRootJet jet;
     for(unsigned int j=0;j<selJets.size();j++)
