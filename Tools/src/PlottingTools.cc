@@ -264,7 +264,7 @@ THStack* THStackCreator(vector<TH1F*> listOfHistos, vector<Dataset*> datasets, T
 		}
 		else{
 			char legDataTitle[100];
-			sprintf (legDataTitle, "%s (%.1f entries)", ( datasets[i]->Title() ).c_str(), listOfHistos[i]->Integral(1, listOfHistos[i]->GetNbinsX() ) );
+			sprintf (legDataTitle, "%s (%.1f entries)", ( datasets[i]->Title() ).c_str(), listOfHistos[i]->Integral(0, listOfHistos[i]->GetNbinsX() ) );
 			if(listOfHistos[i]->Integral()>0) leg->AddEntry(listOfHistos[i], legDataTitle, "F");
 		}
 	}
@@ -286,7 +286,7 @@ THStack* THStackCreator(vector<TH1D*> listOfHistos, vector<Dataset*> datasets, T
 		}
 		else{
 			char legDataTitle[100];
-			sprintf (legDataTitle, "%s (%.1f entries)", ( datasets[i]->Title() ).c_str(), listOfHistos[i]->Integral(1, listOfHistos[i]->GetNbinsX() ) );
+			sprintf (legDataTitle, "%s (%.1f entries)", ( datasets[i]->Title() ).c_str(), listOfHistos[i]->Integral(0, listOfHistos[i]->GetNbinsX() ) );
 			if(listOfHistos[i]->Integral()>0) leg->AddEntry(listOfHistos[i], legDataTitle, "F");
 		}
 	}

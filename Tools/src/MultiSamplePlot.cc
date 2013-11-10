@@ -1,11 +1,13 @@
 #include "../interface/MultiSamplePlot.h"
 
-MultiSamplePlot::MultiSamplePlot(
-vector<Dataset*> datasets, string PlotName, int Nbins, float Min, float Max, string XaxisLabel, string YaxisLabel){
+MultiSamplePlot::MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int Nbins, float Min, float Max, string XaxisLabel, string YaxisLabel, string Text)
+{
 	Nbins_ = Nbins;
 	string histoName = "";
 	string histoTitle = "";
 	plotName_ = PlotName;
+	text_ = TString(Text);
+	lumi_ = 1.;
 	for(unsigned int i=0;i<datasets.size();i++){
 		histoName  = PlotName+"_"+datasets[i]->Name();
 		histoTitle = datasets[i]->Title();
@@ -18,30 +20,17 @@ vector<Dataset*> datasets, string PlotName, int Nbins, float Min, float Max, str
     if(datasets[i]->Name().find("data") == 0 || datasets[i]->Name().find("Data") == 0 || datasets[i]->Name().find("DATA") == 0 )
       lumi_ = datasets[i]->EquivalentLumi();
 	}
-	histoName  = "hRandomPseudoData_"+PlotName;
-	histoTitle = "Pseudo-data";
-	hRandomPseudoData_ = new TH1F(histoName.c_str(),histoTitle.c_str(),Nbins,Min,Max);
-	hData_ = 0;
-	hCanvas_ = 0;
-	hCanvasStack_ = 0;
-	hCanvasStackLogY_ = 0;
-	hCanvasStackAreaNorm_ = 0;
-	hCanvasStackAreaNormLogY_ = 0;
-  hErrorPlus_ = 0;
-  hErrorMinus_ = 0;
-	hStack_ = 0;
- 	hStackAreaNorm_ = 0;
-	maxY_ = -1;
-	minLogY_ = 1.;
-	text_ = "";
-	showNumberEntries_ = true;
+	Initialize();
 }
 
-MultiSamplePlot::MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int Nbins, float* binsX, string XaxisLabel, string YaxisLabel){
+MultiSamplePlot::MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int Nbins, float* binsX, string XaxisLabel, string YaxisLabel, string Text)
+{
 	Nbins_ = Nbins;
 	string histoName = "";
 	string histoTitle = "";
 	plotName_ = PlotName;
+	text_ = TString(Text);
+	lumi_ = 1.;
 	for(unsigned int i=0;i<datasets.size();i++){
 		histoName = PlotName+"_"+datasets[i]->Name();
 		histoTitle = datasets[i]->Title();
@@ -54,53 +43,48 @@ MultiSamplePlot::MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int
 		if(datasets[i]->Name().find("data") == 0 || datasets[i]->Name().find("Data") == 0 || datasets[i]->Name().find("DATA") == 0 )
       lumi_ = datasets[i]->EquivalentLumi();
 	}
-	histoName = "hRandomPseudoData_"+PlotName;
-	histoTitle = "Pseudo-data";
-	hRandomPseudoData_ = new TH1F(histoName.c_str(),histoTitle.c_str(),Nbins,binsX);
-	hData_ = 0;
-	hCanvas_ = 0;
-	hCanvasStack_ = 0;
-	hCanvasStackLogY_ = 0;
-	hCanvasStackAreaNorm_ = 0;
-	hCanvasStackAreaNormLogY_ = 0;
-  hErrorPlus_ = 0;
-  hErrorMinus_ = 0;
-	hStack_ = 0;
-	hStackAreaNorm_ = 0;
-	maxY_ = -1;
-	minLogY_ = 1.;
-	text_ = "";
-	showNumberEntries_ = true;
+	Initialize();
 }
 
-MultiSamplePlot::MultiSamplePlot(vector<pair<TH1F*,Dataset*> > vec){
+MultiSamplePlot::MultiSamplePlot(vector<pair<TH1F*,Dataset*> > vec, string PlotName, string XaxisLabel, string YaxisLabel, string Text)
+{
 	plots_ = vec;
 	Nbins_ = (vec[0].first)->GetNbinsX();
-	string histoName = "";
-	string histoTitle = "";
-	hRandomPseudoData_ = 0;
-	hData_ = 0;
-	hCanvas_ = 0;
-	hCanvasStack_ = 0;
-	hCanvasStackLogY_ = 0;
-	hCanvasStackAreaNorm_ = 0;
-	hCanvasStackAreaNormLogY_ = 0;
-  hErrorPlus_ = 0;
-  hErrorMinus_ = 0;
-	hStack_ = 0;
-	hStackAreaNorm_ = 0;
-	maxY_ = -1;
-	minLogY_ = 1.;
-	text_ = "";
-	showNumberEntries_ = true;
+	plotName_ = PlotName;
+	text_ = TString(Text);
+	lumi_ = 1.;
 	for(unsigned int i=0;i<vec.size();i++)
 	{
 	  if(vec[i].second->Name().find("data") == 0 || vec[i].second->Name().find("Data") == 0 || vec[i].second->Name().find("DATA") == 0 )
 	    lumi_ = vec[i].second->EquivalentLumi();
-  }	
+		(vec[i].first)->GetXaxis()->SetTitle(XaxisLabel.c_str());
+		(vec[i].first)->GetYaxis()->SetTitle(YaxisLabel.c_str());
+  }
+	Initialize();
 }
 
-MultiSamplePlot::~MultiSamplePlot(){
+void MultiSamplePlot::Initialize()
+{
+	hData_ = 0;
+	hCanvas_ = 0;
+	hCanvasStack_ = 0;
+	hCanvasStackLogY_ = 0;
+	hCanvasStackAreaNorm_ = 0;
+	hCanvasStackAreaNormLogY_ = 0;
+	hStack_ = 0;
+ 	hStackAreaNorm_ = 0;
+	StackErrorGraph_ = 0;
+	RatioErrorGraph_ = 0;
+	maxY_ = -1;
+	minLogY_ = 1.;
+	showNumberEntries_ = true;
+	errorbandfile_ = "";
+	sqrts_ = 8;
+	prelim_=true;
+}
+
+MultiSamplePlot::~MultiSamplePlot()
+{
 	if(hStack_)      delete hStack_;
 	if(hStackAreaNorm_)      delete hStackAreaNorm_;
 	if(hCanvas_)     delete hCanvas_;
@@ -108,640 +92,646 @@ MultiSamplePlot::~MultiSamplePlot(){
 	if(hCanvasStackAreaNorm_)     delete hCanvasStackAreaNorm_;
 	if(hCanvasStackLogY_)     delete hCanvasStackLogY_;
 	if(hCanvasStackAreaNormLogY_)     delete hCanvasStackAreaNormLogY_;
-	if(hRandomPseudoData_) delete hRandomPseudoData_;
-	if(hData_) delete hData_;
+	if(hData_) delete hData_;	
+	if(StackErrorGraph_) delete StackErrorGraph_;
+	if(RatioErrorGraph_) delete RatioErrorGraph_;
 }
 
-void MultiSamplePlot::AddDataHisto(TH1F* histo){
+void MultiSamplePlot::AddDataHisto(TH1F* histo)
+{
 	hData_ = (TH1F*) histo->Clone();
 }
 
-void MultiSamplePlot::Fill(float value, Dataset* data, bool scale, float Lumi){
-	if(scale){
-		for(unsigned int i=0;i<plots_.size();i++){
+void MultiSamplePlot::Fill(float value, Dataset* data, bool scale, float Lumi)
+{
+	if(scale)
+	{
+		for(unsigned int i=0;i<plots_.size();i++)
+		{
 			if(data->Name()==plots_[i].second->Name()) plots_[i].first->Fill(value, data->NormFactor()*Lumi);
 //			if(data->Name()==plots_[i].second->Name()) cout << "NormFactor for " << data->Name() << " = " <<  data->NormFactor()*Lumi << endl;
 		}
 	}
-	else{
-		for(unsigned int i=0;i<plots_.size();i++){
+	else
+	{
+		for(unsigned int i=0;i<plots_.size();i++)
+		{
 			if(data->Name()==plots_[i].second->Name()) plots_[i].first->Fill(value);
 		}
 	}
 }
 
-void MultiSamplePlot::Draw(bool addRandomPseudoData, string label, bool mergeTT, bool mergeQCD, bool mergeW, bool mergeZ, bool mergeST, int scaleNPSignal, bool addRatio, bool mergeVV, bool mergeTTV, bool mergeVVV, bool mergeSameSignWW)
+void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioErrorBand, bool addErrorBand, bool ErrorBandAroundTotalInput, int scaleNPSignal)
 {
-	vector<TH1F*> histos;
-	vector<TH1F*> histos2;
-	vector<Dataset*> datasets;
+	vector<TH1F*> normalizedhistos;
+	vector<Dataset*> mergeddatasets;
 	
-	double* SummedBins = new double[Nbins_];
-	for(int i=0;i<Nbins_;i++) SummedBins[i]=0;
-  
-  if(addRatio)
-  {
-    string filename = "ErrorBands/Error_"+plotName_+".root";
-    TFile* tmpInfile = new TFile(filename.c_str(),"READ");
-    if( ! tmpInfile->IsZombie() )
-    {
-		  TH1F* hErrorPlus = (TH1F*) tmpInfile->Get("Plus")->Clone();
-		  TH1F* hErrorMinus = (TH1F*) tmpInfile->Get("Minus")->Clone();
-	  	hErrorPlus_ = new TGraph(hErrorPlus->GetNbinsX());
-	  	hErrorPlus_->SetNameTitle("hErrorPlus","hErrorPlus");
-	  	hErrorPlus_->SetLineWidth(2);
-	  	hErrorPlus_->SetLineColor(30);
-	    hErrorMinus_ = new TGraph(hErrorMinus->GetNbinsX());
-	  	hErrorMinus_->SetNameTitle("hErrorMinus","hErrorMinus");
-	  	hErrorMinus_->SetLineWidth(2);
-	  	hErrorMinus_->SetLineColor(30);
-		  for (int iBin=1; iBin < hErrorPlus->GetNbinsX()+1; iBin++)
-		  {
-        hErrorPlus_->SetPoint(iBin-1, hErrorPlus->GetBinCenter(iBin), hErrorPlus->GetBinContent(iBin));
-        hErrorMinus_->SetPoint(iBin-1, hErrorMinus->GetBinCenter(iBin), hErrorMinus->GetBinContent(iBin));
-      }
-		  tmpInfile->Close();
-    }
-	  delete tmpInfile;
+  if(RatioType==0 && addRatioErrorBand)
+	{
+		cout<<"[MultiSamplePlot::Draw] WARNING: addRatioErrorBand set to true but RatioType to 0 (i.e. no ratio) -> resetting addRatioErrorBand to false now."<<endl;
+		addRatioErrorBand = false;
+	}	
+	
+	TFile* tmpInfile = 0;
+	if(addRatioErrorBand || addErrorBand)
+	{
+	   tmpInfile = new TFile(errorbandfile_.c_str(),"READ");
+		 if(tmpInfile->IsZombie())
+		 {
+		    cout<<"[MultiSamplePlot::Draw] WARNING: '"<<errorbandfile_<<"' is no valid error band file -> will not draw error bands. Please set a valid file with the MultiSamplePlot::setErrorBandFile method."<<endl;
+		    addErrorBand = false;
+		    addRatioErrorBand = false;
+		 }
+	}
+	
+	TH1F* hErrorPlus = 0;
+	TH1F* hErrorMinus = 0;
+	TH1F* hNominal = 0;
+  if(addRatioErrorBand || addErrorBand)
+	{
+		   TDirectory* subdir = (TDirectory*) tmpInfile->Get(("MultiSamplePlot_"+label).c_str());
+			 if(subdir)
+			 {
+			    hErrorPlus = (TH1F*) subdir->Get("Plus")->Clone();
+			    hErrorMinus = (TH1F*) subdir->Get("Minus")->Clone();
+					hNominal = (TH1F*) subdir->Get("Nominal")->Clone();
+					//cout << "Integrals for plot " << label << " ->   hErrorPlus: " << hErrorPlus->Integral(1,hErrorPlus->GetNbinsX()) << ",  hNominal: " << hNominal->Integral(1,hNominal->GetNbinsX()) << ",  hErrorMinus: " << hErrorMinus->Integral(1,hErrorMinus->GetNbinsX()) << endl;
+			 }
+			 else
+			 {
+			    cout << "[MultiSamplePlot::Draw] ERROR: errorband file '"<<errorbandfile_<<"' has unknown structure! (Histograms should be in directories with MultiSamplePlot names) -> will not draw error bands." <<endl;
+			    addErrorBand = false;
+		      addRatioErrorBand = false;
+			 }
   }
-  //cout<<"So far, so good : 1"<<endl;
-
+	
+		
+  //loop over the processes and create one new histogram per set of processes to merge. Whether or not processes will be merged, will be based on their title in the xml config; same title -> same merged histogram.
 	int dataPlotID=-1;
-	float integralData = 0;
-	float integralMC = 0;
-
-	for(unsigned int i=0;i<plots_.size();i++){
+	unsigned int nDataPlots = 0;
+	vector<pair<TH1F*,Dataset*> > SetsOfMergedProcesses; //the dataset will correspond to a set of merged processes (e.g. "TTbar+jets", "W+jets", ...)
+	for(unsigned int i=0;i<plots_.size();i++)
+	{
 	  if(plots_[i].second->Name().find("data") == 0 || plots_[i].second->Name().find("Data") == 0 || plots_[i].second->Name().find("DATA") == 0 )
+		{
 	    dataPlotID = i;
-	}
+			nDataPlots++;
+		}
 
-	//Dataset tempTTDataset  = Dataset();
-	TH1F* ttHisto = 0;
-	//Dataset tempQCDDataset = Dataset();
-	TH1F* qcdHisto = 0;
-	//Dataset tempWDataset   = Dataset();
-	TH1F* wHisto = 0;
-	//Dataset tempZDataset   = Dataset();
-	TH1F* zHisto = 0;
-	//Dataset tempSTDataset  = Dataset();
-	TH1F* stHisto = 0;
-	//Dataset tempVVDataset  = Dataset();
-	TH1F* vvHisto = 0;
-	//Dataset tempTTVDataset  = Dataset();
-	TH1F* ttvHisto = 0;
-	//Dataset tempVVVDataset  = Dataset();
-	TH1F* vvvHisto = 0;
-	//Dataset tempSameSignWWDataset  = Dataset();
-	TH1F* samesignwwHisto = 0;
-
-  if(mergeTT || mergeQCD || mergeW || mergeZ || mergeST || mergeVV || mergeTTV || mergeVVV || mergeSameSignWW){
-	  for(unsigned int i=0; i<plots_.size();i++){
-		  string datasetName = plots_[i].second->Name();
-        
-		  if(mergeTT && ( datasetName.find("TT_") == 0 || datasetName.find("TTbarJets") == 0 ) ){
-			  if(!ttHisto) ttHisto = (TH1F*) plots_[i].first->Clone();
-			  else ttHisto->Add(plots_[i].first);
-			  //tempTTDataset = Dataset("TT_Merged","t#bar{t}+jets, merged",true,plots_[i].second->Color(),plots_[i].second->LineStyle(),plots_[i].second->LineWidth(),1.,1.);
-		  }
-		  if(mergeQCD && datasetName.find("QCD_") == 0){
-			  if(!qcdHisto) qcdHisto = (TH1F*) plots_[i].first->Clone();
-			  else qcdHisto->Add(plots_[i].first);
-			  //tempQCDDataset = Dataset("QCD_Merged","Multi-jets, merged",true,plots_[i].second->Color(),plots_[i].second->LineStyle(),plots_[i].second->LineWidth(),1.,1.);
-		  }
-		  if(mergeW && datasetName.find("W_") == 0){
-			  if(!wHisto) wHisto = (TH1F*) plots_[i].first->Clone();
-			  else wHisto->Add(plots_[i].first);
-			  //tempWDataset = Dataset("WJets_Merged","W+jets, merged",true,plots_[i].second->Color(),plots_[i].second->LineStyle(),plots_[i].second->LineWidth(),1.,1.);
-		  }
-		  if(mergeZ && datasetName.find("Z_") == 0){
-			  if(!zHisto) zHisto = (TH1F*) plots_[i].first->Clone();
-			  else zHisto->Add(plots_[i].first);
-			  //tempZDataset = Dataset("ZJets_Merged","Z+jets, merged",true,plots_[i].second->Color(),plots_[i].second->LineStyle(),plots_[i].second->LineWidth(),1.,1.);
-		  }
-		  if(mergeST && ( datasetName.find("ST_") == 0 || datasetName.find("SingleTop_") == 0 ) ){
-			  if(!stHisto) stHisto = (TH1F*) plots_[i].first->Clone();
-			  else stHisto->Add(plots_[i].first);
-			  //tempSTDataset = Dataset("ST_Merged","st+jets, merged",true,plots_[i].second->Color(),plots_[i].second->LineStyle(),plots_[i].second->LineWidth(),1.,1.);
-		  }
-		  if(mergeVV && ( datasetName.find("WW") == 0 || datasetName.find("WZ") == 0 || datasetName.find("ZZ") == 0) &&  !( datasetName.find("WWW") == 0 || datasetName.find("WWZ") == 0 || datasetName.find("WZZ") == 0 || datasetName.find("ZZZ") == 0) ){
-			  if(!vvHisto) vvHisto = (TH1F*) plots_[i].first->Clone();
-			  else vvHisto->Add(plots_[i].first);
-			  //tempVVDataset = Dataset("VV_Merged","VV, merged",true,plots_[i].second->Color(),plots_[i].second->LineStyle(),plots_[i].second->LineWidth(),1.,1.);
-		  }
-		  if(mergeTTV && ( datasetName.find("ttW") == 0 || datasetName.find("ttZ") == 0 ) ){
-			  if(!ttvHisto) ttvHisto = (TH1F*) plots_[i].first->Clone();
-			  else ttvHisto->Add(plots_[i].first);
-			  //tempTTVDataset = Dataset("ttV_Merged","ttV, merged",true,plots_[i].second->Color(),plots_[i].second->LineStyle(),plots_[i].second->LineWidth(),1.,1.);
-		  }
-			if(mergeVVV && ( datasetName.find("WWW") == 0 || datasetName.find("WWZ") == 0 || datasetName.find("WZZ") == 0 || datasetName.find("ZZZ") == 0) ){
-			  if(!vvvHisto) vvvHisto = (TH1F*) plots_[i].first->Clone();
-			  else vvvHisto->Add(plots_[i].first);
-			  //tempVVVDataset = Dataset("VVV_Merged","VVV, merged",true,plots_[i].second->Color(),plots_[i].second->LineStyle(),plots_[i].second->LineWidth(),1.,1.);
-		  }
-			if(mergeSameSignWW && ( datasetName.find("WpWp") == 0 || datasetName.find("WmWm") == 0) ){
-			  if(!samesignwwHisto) samesignwwHisto = (TH1F*) plots_[i].first->Clone();
-			  else samesignwwHisto->Add(plots_[i].first);
-			  //tempSameSignWWDataset = Dataset("SameSignWW_Merged","W^{#pm}W^{#pm}",true,plots_[i].second->Color(),plots_[i].second->LineStyle(),plots_[i].second->LineWidth(),1.,1.);
-		  }
-			
-			
-	  }
-  }
-  //cout<<"So far, so good : 2"<<endl;
-
-	for(unsigned int i=0;i<plots_.size();i++){
-		TH1F* histo = (TH1F*) plots_[i].first->Clone();
-		Dataset* dataSet = plots_[i].second;
-		string datasetName = plots_[i].second->Name();
-	  
-		if(mergeTT && ( datasetName.find("TT_") == 0 || datasetName.find("TTbarJets") == 0 ) ){
-			if(ttHisto){
-				histo = (TH1F*) ttHisto->Clone();
-//				dataSet = new Dataset("TT_Merged","t#bar{t}+jets",true,plots_[i].second->Color(),plots_[i].second->LineStyle(),plots_[i].second->LineWidth(),1.,1.);
-				dataSet = new Dataset("TT_Merged","t#bar{t}",true,plots_[i].second->Color(),plots_[i].second->LineStyle(),plots_[i].second->LineWidth(),1.,1.);
-				ttHisto = 0;
-			}
-			else continue;
-		}
-		if(mergeQCD && datasetName.find("QCD_") == 0){
-			if(qcdHisto){
-				histo = (TH1F*) qcdHisto->Clone();
-				dataSet = new Dataset("QCD_Merged","QCD",true,plots_[i].second->Color(),plots_[i].second->LineStyle(),plots_[i].second->LineWidth(),1.,1.);
-				qcdHisto = 0;
-			}
-			else continue;
-		}
-		if(mergeW && datasetName.find("W_") == 0){
-			if(wHisto){
-				histo = (TH1F*) wHisto->Clone();
-				dataSet = new Dataset("WJets_Merged","W+jets",true,plots_[i].second->Color(),plots_[i].second->LineStyle(),plots_[i].second->LineWidth(),1.,1.);
-				wHisto = 0;
-			}
-			else continue;
-		}
-		if(mergeZ && datasetName.find("Z_") == 0){
-			if(zHisto){
-				histo = (TH1F*) zHisto->Clone();
-				dataSet = new Dataset("ZJets_Merged","Z+jets",true,plots_[i].second->Color(),plots_[i].second->LineStyle(),plots_[i].second->LineWidth(),1.,1.);
-				zHisto = 0;
-			}
-			else continue;
-		}
-		if(mergeST && ( datasetName.find("ST_") == 0 || datasetName.find("SingleTop_") == 0 ) )
-		{
-			if(stHisto){
-				histo = (TH1F*) stHisto->Clone();
-				dataSet = new Dataset("ST_Merged","Single-Top",true,plots_[i].second->Color(),plots_[i].second->LineStyle(),plots_[i].second->LineWidth(),1.,1.);
-				stHisto = 0;
-			}
-			else continue;
-		}
-		if(mergeVV && ( datasetName.find("WW") == 0 || datasetName.find("WZ") == 0 || datasetName.find("ZZ") == 0) && !( datasetName.find("WWW") == 0 || datasetName.find("WWZ") == 0 || datasetName.find("WZZ") == 0 || datasetName.find("ZZZ") == 0) )
-		{
-			if(vvHisto){
-				histo = (TH1F*) vvHisto->Clone();
-				dataSet = new Dataset("VV_Merged","VV",true,plots_[i].second->Color(),plots_[i].second->LineStyle(),plots_[i].second->LineWidth(),1.,1.);
-				vvHisto = 0;
-			}
-			else continue;
-		}
-		if(mergeTTV && ( datasetName.find("ttZ") == 0 || datasetName.find("ttW") == 0 ) )
-		{
-			if(ttvHisto){
-				histo = (TH1F*) ttvHisto->Clone();
-				dataSet = new Dataset("ttV_Merged","ttV",true,plots_[i].second->Color(),plots_[i].second->LineStyle(),plots_[i].second->LineWidth(),1.,1.);
-				ttvHisto = 0;
-			}
-			else continue;
-		}
-		if(mergeVVV && ( datasetName.find("WWW") == 0 || datasetName.find("WWZ") == 0 || datasetName.find("WZZ") == 0 || datasetName.find("ZZZ") == 0)  )
-		{
-			if(vvvHisto){
-				histo = (TH1F*) vvvHisto->Clone();
-				dataSet = new Dataset("VVV_Merged","VVV",true,plots_[i].second->Color(),plots_[i].second->LineStyle(),plots_[i].second->LineWidth(),1.,1.);
-				vvvHisto = 0;
-			}
-			else continue;
-		}
-		if(mergeSameSignWW && ( datasetName.find("WpWp") == 0 || datasetName.find("WmWm") == 0) )
-		{
-			if(samesignwwHisto){
-				histo = (TH1F*) samesignwwHisto->Clone();
-				dataSet = new Dataset("SameSignWW_Merged","W^{#pm}W^{#pm}",true,plots_[i].second->Color(),plots_[i].second->LineStyle(),plots_[i].second->LineWidth(),1.,1.);
-				samesignwwHisto = 0;
-			}
-			else continue;
+		string datasetTitle = plots_[i].second->Title();
+	  bool histocreated = false;
+		//check if the histogram corresponding to this title is already created
+		for(unsigned int j=0;j<SetsOfMergedProcesses.size();j++)
+	  {
+			   if(SetsOfMergedProcesses[j].second->Title() == datasetTitle) histocreated = true;			
 		}
 		
-	  
-		int N = histo->GetNbinsX();
-		histo->SetBinContent(N,histo->GetBinContent(N)+histo->GetBinContent(N+1));
-		histo->SetBinContent(N+1,0);
-		
-		TH1F* clone = (TH1F*) histo->Clone();
-		for(int j=0;j<Nbins_;j++) SummedBins[j] += clone->GetBinContent(j+1);
-		clone->Scale(1/clone->Integral(1,clone->GetNbinsX()+1));
-		//clone->SetFillColor(10);
-		clone->SetFillStyle(1001);
-		clone->GetYaxis()->SetTitle( ( "Normalized " + (string) histo->GetYaxis()->GetTitle() ).c_str() );
-    
-		histos.push_back(clone);
-		datasets.push_back(dataSet);
-		histos2.push_back(histo);
-	}
-  //cout<<"So far, so good : 3"<<endl;
-  
-	if ( dataPlotID != -1 ){
-		//integralData = plots_[dataPlotID].first->Integral(1,plots_[dataPlotID].first->GetNbinsX());
-		integralData = plots_[dataPlotID].first->Integral(0,plots_[dataPlotID].first->GetNbinsX()+1);
-		for(unsigned int i=0;i<plots_.size();i++){
-			if (dataPlotID != (int)i) integralMC += plots_[i].first->Integral(1,plots_[i].first->GetNbinsX());
+		(plots_[i].first)->SetLineColor((plots_[i].second)->Color()); //especially relevant for the overlay processes, the stacked histograms get their fill color later on. However, all seperate processes are also saved in MSPlot, so these will get the color specified in the xml too.
+    (plots_[i].first)->SetMarkerColor((plots_[i].second)->Color());
+		(plots_[i].first)->SetLineStyle((plots_[i].second)->LineStyle());
+		(plots_[i].first)->SetLineWidth((plots_[i].second)->LineWidth());
+			
+		if(!histocreated)
+		{
+		    TH1F* MergedProcesses = (TH1F*) plots_[i].first->Clone();
+				string datasetName = plots_[i].second->Title()+"_Merged";
+				if(plots_[i].second->Name().find("NP_overlay_")==0) datasetName = "NP_overlay_"+datasetName;
+				else if(plots_[i].second->Name().find("NP_")==0) datasetName = "NP_"+datasetName;
+				Dataset* dataSet = new Dataset(datasetName,datasetTitle,true,plots_[i].second->Color(),plots_[i].second->LineStyle(),plots_[i].second->LineWidth(),1.,1.);
+				//making sure that the overflow is transferred to the last 'visible' bin; analogously for underflow...
+		    MergedProcesses->SetBinContent(Nbins_,MergedProcesses->GetBinContent(Nbins_)+MergedProcesses->GetBinContent(Nbins_+1));
+		    MergedProcesses->SetBinContent(Nbins_+1,0);
+				MergedProcesses->SetBinContent(1,MergedProcesses->GetBinContent(0)+MergedProcesses->GetBinContent(1));
+		    MergedProcesses->SetBinContent(0,0);
+				MergedProcesses->GetXaxis()->SetTitle(plots_[i].first->GetXaxis()->GetTitle());
+				MergedProcesses->GetYaxis()->SetTitle(plots_[i].first->GetYaxis()->GetTitle());
+			  SetsOfMergedProcesses.push_back(pair<TH1F*,Dataset*>(MergedProcesses,dataSet));
+		}
+		else
+		{		
+			  //add the process to the histogram corresponding to its title
+			  for(unsigned int j=0;j<SetsOfMergedProcesses.size();j++)
+	      {
+			    if(SetsOfMergedProcesses[j].second->Title() == datasetTitle)
+				  {
+				    SetsOfMergedProcesses[j].first->Add(plots_[i].first);				 
+				  }		
+			  }			
 		}
 	}
-  //cout<<"So far, so good : 4"<<endl;
-  
-	//Fill the first canvas
-	string name;
-	name = "Canvas_"+label;
-	hCanvas_ = TCanvasCreator(histos, datasets, leg_, string("l"), name);
+	
+	if(nDataPlots>1) cout<<"[MultiSamplePlot::Draw] ERROR: you are not allowed to superimpose two data histograms on the same plot!"<<endl;
+	else if(nDataPlots==0)
+	{
+	   //cout<<"[MultiSamplePlot::Draw] WARNING: not running on data, ratio plots will not be drawn
+	   RatioType=0;
+		 addRatioErrorBand = false;
+	}
 
-	//THStack	
-	vector<TH1F*> histosForHStack;
-	TH1F* addedMC = 0;
-	vector<TH1F*> histosForHStackAreaNorm;
-	TH1F* addedMCAreaNorm = 0;
+	//NOTE: in this stage, the SetsOfMergedProcesses vector is basically the same as the plots_ vector, but with the processes merged that have the same title in the xml config.
+	for(unsigned int i=0;i<SetsOfMergedProcesses.size();i++)
+	{
+	  TH1F* histo = (TH1F*) SetsOfMergedProcesses[i].first->Clone();
+		Dataset* mergeddataSet = SetsOfMergedProcesses[i].second;		
+		TH1F* normalizedclone = (TH1F*) histo->Clone();
+		normalizedclone->Scale(1/normalizedclone->Integral(1,normalizedclone->GetNbinsX()+1));
+		//normalizedclone->SetFillColor(10);
+		normalizedclone->SetFillStyle(1001);
+		normalizedclone->GetYaxis()->SetTitle( ( "Normalized " + (string) histo->GetYaxis()->GetTitle() ).c_str() );    
+		normalizedhistos.push_back(normalizedclone);
+		mergeddatasets.push_back(mergeddataSet);		
+	}
+	
+	//Make the first canvas; to plot distributions normalized to unity
+	string name = "Canvas_"+label;
+	hCanvas_ = TCanvasCreator(normalizedhistos, mergeddatasets, leg_, string("l"), name);
+
+
+	//calculating data and MC integrals
+	float integralData = 0;
+	float integralSM = 0;
+	if ( dataPlotID != -1 )
+	{
+		integralData = plots_[dataPlotID].first->Integral(0,plots_[dataPlotID].first->GetNbinsX()+1); //first argument 0 means you include the underflow bin too
+		for(unsigned int i=0;i<plots_.size();i++)
+		{
+			if ((dataPlotID != (int)i) && (plots_[i].second->Name().find("NP_")!=0))
+			   integralSM += plots_[i].first->Integral(0,plots_[i].first->GetNbinsX());
+		}
+	}
+	
+
+  //For histograms to be stacked
+	vector<TH1F*> histosForHStack, histosForHStackAreaNorm;
+	TH1F* totalSM = 0;
+	TH1F* totalSMAreaNorm = 0;
 	vector<Dataset*> datasetsForHStack;
-	//Overlay
-	vector<TH1F*> histosForOverlay; //overlaying (new physics) signal
-	vector<TH1F*> histosForOverlayAreaNorm;
-	vector<Dataset*> datasetsForOverlay;
+  //For histograms (e.g. new-physics signal) to be overlayed
+	vector<TH1F*> histosForOverlay, histosForOverlayAreaNorm;
+	vector<Dataset*> datasetsForOverlay;	
 	
-	for(int i=histos2.size()-1;i>=0;i--) {
-		if(datasets[i]->Name().find("Data")<datasets[i]->Name().size() || datasets[i]->Name().find("data")<datasets[i]->Name().size() || datasets[i]->Name().find("DATA")<datasets[i]->Name().size()) {
-			AddDataHisto( histos2[i] );
+	//Loop from back to front because of the way THStack is used later on (related to order as appearing in xml config compared to order in histogram stack)...
+	for(int i=SetsOfMergedProcesses.size()-1;i>=0;i--)
+	{
+		Dataset* mergeddataSet = SetsOfMergedProcesses[i].second;
+	  if(SetsOfMergedProcesses[i].second->Name().find("data") == 0 || SetsOfMergedProcesses[i].second->Name().find("Data") == 0 || SetsOfMergedProcesses[i].second->Name().find("DATA") == 0 )
+		{
+       AddDataHisto( SetsOfMergedProcesses[i].first );
 		}
-		else {
-			TH1F* clone = (TH1F*) histos2[i]->Clone();			  
-			clone->GetXaxis()->SetTitle(histos2[i]->GetXaxis()->GetTitle());
-			clone->GetYaxis()->SetTitle(histos2[i]->GetYaxis()->GetTitle());
-			if(datasets[i]->Name().find("NP_")!=0){
-			   histosForHStack.push_back(clone);
-         datasetsForHStack.push_back(datasets[i]);
-         if( ! addedMC ) addedMC = (TH1F*) clone->Clone();			  
-        else addedMC->Add( clone );
-			}
-			else if (datasets[i]->Name().find("NP_overlay_")==0){
-			  histosForOverlay.push_back(clone);
-			  datasetsForOverlay.push_back(datasets[i]);			
-			}
-			
-			TH1F* cloneNorm = (TH1F*) histos2[i]->Clone();			  
-			cloneNorm->GetXaxis()->SetTitle(histos2[i]->GetXaxis()->GetTitle());
-			cloneNorm->GetYaxis()->SetTitle(histos2[i]->GetYaxis()->GetTitle());
-			if (i != dataPlotID && dataPlotID != -1 && integralData > 0) {
-			  cloneNorm->Scale(integralData/integralMC);
-			}
-			  
-			if(datasets[i]->Name().find("NP_")!=0){
-				histosForHStackAreaNorm.push_back(cloneNorm);
-				if( ! addedMCAreaNorm ) addedMCAreaNorm = (TH1F*) cloneNorm->Clone();			  
-        else addedMCAreaNorm->Add( cloneNorm );
-			}
-			else if (datasets[i]->Name().find("NP_overlay_")==0){
-				histosForOverlayAreaNorm.push_back(cloneNorm);
-			}
+		else
+		{
+		   TH1F* clone = (TH1F*) SetsOfMergedProcesses[i].first->Clone();
+			 if(mergeddataSet->Name().find("NP_")!=0)
+			 {
+			    histosForHStack.push_back(clone);
+          datasetsForHStack.push_back(mergeddataSet);
+          if( ! totalSM ) totalSM = (TH1F*) clone->Clone();			  
+          else totalSM->Add( clone );
+			 }
+			 else if (mergeddatasets[i]->Name().find("NP_overlay_")==0)
+			 {
+			    histosForOverlay.push_back(clone);
+			    datasetsForOverlay.push_back(mergeddatasets[i]);			
+			 }
+			 
+			 TH1F* cloneAreaNorm = (TH1F*) SetsOfMergedProcesses[i].first->Clone();			  
+			 if (dataPlotID != -1 && integralData > 0)
+			 {
+			   cloneAreaNorm->Scale(integralData/integralSM);
+			 }			  
+			 if(mergeddataSet->Name().find("NP_")!=0)
+			 {
+				 histosForHStackAreaNorm.push_back(cloneAreaNorm);
+				 if( ! totalSMAreaNorm ) totalSMAreaNorm = (TH1F*) cloneAreaNorm->Clone();			  
+         else totalSMAreaNorm->Add( cloneAreaNorm );
+			 }
+			 else if (mergeddataSet->Name().find("NP_overlay_")==0)
+			 {
+				 histosForOverlayAreaNorm.push_back(cloneAreaNorm);
+			 }	 				
 		}
 	}
-  //cout<<"So far, so good : 5"<<endl;
-	
-	//Fill the first canvas
-	//hStack_ = THStackCreator(histos2, datasets, leg_);
-	
-//    L[id]->SetBorderSize(0);
-    //L[id]->SetFillColor(0);
-    //L[id]->SetLineColor(1);
-//    L[id]->SetLineStyle(0);
-//    L[id]->SetTextFont(42);
-//    L[id]->SetFillStyle(0);
-	
-	leg_ = new TLegend(0.65,0.68,0.99,0.99);
+
+
+	leg_ = new TLegend(0.45,0.63,0.97,0.94);
 	leg_->SetFillColor(0);
 	leg_->SetTextFont(42);
 	leg_->SetLineColor(1);
 	leg_->SetLineWidth(1);
 	leg_->SetLineStyle(0);
-	leg_->SetBorderSize(1);
+	leg_->SetBorderSize(1);	
 	if( ! showNumberEntries_ ) leg_->SetX1(0.76);
-	leg2_ = new TLegend(0.65,0.68,0.99,0.99);
-	leg2_->SetFillColor(0);
-	leg2_->SetTextFont(42);
-	leg2_->SetLineColor(1);
-	leg2_->SetLineWidth(1);
-	leg2_->SetLineStyle(1);
-	leg2_->SetBorderSize(1);
-	if( ! showNumberEntries_ ) leg2_->SetX1(0.76);
+	
+	//a second legend is needed because otherwise it will add the datasets two times to the same legend...
+	legAreaNorm_ = new TLegend(0.45,0.63,0.97,0.94);
+	legAreaNorm_->SetFillColor(0);
+	legAreaNorm_->SetTextFont(42);
+	legAreaNorm_->SetLineColor(1);
+	legAreaNorm_->SetLineWidth(1);
+	legAreaNorm_->SetLineStyle(0);
+	legAreaNorm_->SetBorderSize(1);	
+	if( ! showNumberEntries_ ) legAreaNorm_->SetX1(0.76);
+
+  //if running over data, add this one first in the legend
+  if(hData_)
+	{
+		char legDataTitle[100];
+		//hData_->SetTitle("Observed");
+		hData_->SetTitle("Data");
+		if (showNumberEntries_)
+			sprintf (legDataTitle, "%s (%.1f entries)", hData_->GetTitle(), hData_->Integral(0,hData_->GetNbinsX()+1) );
+		else
+			sprintf (legDataTitle, "%s", hData_->GetTitle());
+		leg_->AddEntry(hData_, legDataTitle ,"L E P");
+		legAreaNorm_->AddEntry(hData_, legDataTitle ,"L E P");
+	}
+
 
 	if( histosForHStack.size() > 0 )
   	  hStack_ = THStackCreator(histosForHStack, datasetsForHStack, leg_, showNumberEntries_);
 	name = "Stack_"+label;
-	if(hStack_){
+	if(hStack_)
+	{
 		hStack_->SetName(name.c_str());
-		//hStack_->SetTitle(name.c_str());
+		hStack_->SetTitle(""); //hStackAreaNorm_->SetTitle(name.c_str()) gives problem: title and the CMS text get mixed on the canvas...
 	}
 
 	if( histosForHStackAreaNorm.size() > 0 )
-  	  hStackAreaNorm_ = THStackCreator(histosForHStackAreaNorm, datasetsForHStack, leg2_, showNumberEntries_);
+  	  hStackAreaNorm_ = THStackCreator(histosForHStackAreaNorm, datasetsForHStack, legAreaNorm_, showNumberEntries_);
 	name = "StackAreaNorm_"+label;
-	if(hStackAreaNorm_){
+	if(hStackAreaNorm_)
+	{
 		hStackAreaNorm_->SetName(name.c_str());
-		hStackAreaNorm_->SetTitle(name.c_str());
+		hStackAreaNorm_->SetTitle(""); //hStackAreaNorm_->SetTitle(name.c_str()) gives problem: title and the CMS text get mixed on the canvas...
 	}
-  
-	name = "CanvasStack_"+label;
+	
+	
+	//just adding the overlay histograms to the legend and calculating if we have to change the y-axis range
+	float ymaxoverlay = 0, ymaxoverlayAreaNorm = 0;
+  for(unsigned int i=0;i<histosForOverlay.size();i++)
+	{
+		 char legTitle[100];
+		 if (showNumberEntries_)
+		 {
+		    float scalednentries = scaleNPSignal * histosForOverlay[i]->Integral(0,histosForOverlay[i]->GetNbinsX()+1);
+		    sprintf (legTitle, "%s (%.1f entries) (X %i)", ( datasetsForOverlay[i]->Title() ).c_str(), scalednentries, scaleNPSignal);
+		 }
+		 else
+		    sprintf (legTitle, "%s (X %i)", ( datasetsForOverlay[i]->Title() ).c_str(), scaleNPSignal);
+		 leg_->AddEntry(histosForOverlay[i],legTitle,"F");
+		 legAreaNorm_->AddEntry(histosForOverlay[i],legTitle,"F");
+		 if(histosForOverlay[i]->GetMaximum()*scaleNPSignal > ymaxoverlay) ymaxoverlay = histosForOverlay[i]->GetMaximum()*scaleNPSignal;
+		 if(histosForOverlayAreaNorm[i]->GetMaximum() > ymaxoverlayAreaNorm) ymaxoverlayAreaNorm = histosForOverlayAreaNorm[i]->GetMaximum()*scaleNPSignal;
+	}
+
+
+  //regular 'luminosity normalized'
+  name = "CanvasStack_"+label;
 	hCanvasStack_ = new TCanvas(name.c_str(), name.c_str(), 1000, 700);
 	hCanvasStackLogY_ = new TCanvas((name+"_LogY").c_str(), (name+"_LogY").c_str(), 1000, 700);
-	if(addRatio)
+	float ymax = 0;
+	if(hStack_)
 	{
-	  hCanvasStack_->SetCanvasSize(1000, 800);
-	  hCanvasStack_->SetBottomMargin(0.3);
-	  hCanvasStackLogY_->SetCanvasSize(1000, 800);
-	  hCanvasStackLogY_->SetBottomMargin(0.3);
-  }
-  //cout<<"So far, so good : 6"<<endl;
-  
-	stringstream s; s.precision(2); s << lumi_/1000;
-	TLatex text;
-  text.SetNDC(true);
-  text.SetTextAlign(12);
-  text.SetTextFont(42);
-	text.SetTextSize(0.05);
-	
-	TLatex text2;
-	text2.SetNDC(true);
-	text2.SetTextAlign(12);
-	text2.SetTextFont(42);
-	text2.SetTextSize(0.075);
-	text2.SetTextColor(kBlue);
-
-	if(hStack_){
-		hCanvasStack_->cd();
-		hStack_->Draw("HIST");
-    if(addRatio)
-    {
-      hStack_->GetXaxis()->SetLabelSize(0);
-      hStack_->GetXaxis()->SetTitleSize(0);
-    }
-    //cout<<"So far, so good : 7"<<endl;
-
-		hStack_->GetXaxis()->SetTitle(histosForHStack[0]->GetXaxis()->GetTitle());
-		hStack_->GetYaxis()->SetTitle(histosForHStack[0]->GetYaxis()->GetTitle());
-		hStack_->GetYaxis()->SetTitleOffset(1.1);
-		if (hData_) text.DrawLatex(0.13,0.967,("CMS Preliminary, "+s.str()+" fb^{-1} at #sqrt{s} = 8 TeV").c_str());
-		if(!text_.IsNull()) text2.DrawLatex(0.5,0.86,text_);
+	   if(RatioType>0)
+	   {
+	     hCanvasStack_->SetCanvasSize(1000, 800);
+	     hCanvasStack_->SetBottomMargin(0.3);
+	     hCanvasStackLogY_->SetCanvasSize(1000, 800);
+	     hCanvasStackLogY_->SetBottomMargin(0.3);
+     }
 		
-		for(unsigned int i=0;i<histosForOverlay.size();i++){
-		   char legTitle[100];
-		   sprintf (legTitle, "%s (X %i)", ( datasetsForOverlay[i]->Title() ).c_str(), scaleNPSignal);
-		   leg_->AddEntry(histosForOverlay[i],legTitle,"F");
-		   histosForOverlay[i]->Scale(scaleNPSignal); //scale by factor scaleup...
-		   if(i==0){		   
-		     histosForOverlay[i]->SetLineStyle(1);
-		     histosForOverlay[i]->SetLineColor(1);
-		   }
-		   else if(i==1){
-		      histosForOverlay[i]->SetLineStyle(2);
-		      histosForOverlay[i]->SetLineColor(1);
-		   }
-		   else if(i==2){
-		      histosForOverlay[i]->SetLineStyle(1);
-		      histosForOverlay[i]->SetLineColor(2);
-		   }
-		   else if(i==3){
-		      histosForOverlay[i]->SetLineStyle(2);
-		      histosForOverlay[i]->SetLineColor(2);
-		   } 
-		   else{
-		      histosForOverlay[i]->SetLineStyle(3);
-		      histosForOverlay[i]->SetLineColor(i); //before: 4+40 (light pink), but e.g. 4 (blue) should be more visible
-		   }
-		   histosForOverlay[i]->SetFillColor(0);
-		   histosForOverlay[i]->SetLineWidth(3);
-		   //histosForNoHStack[i]->GetYaxis()->SetTitle(histosForNoHStack[i]->GetYaxis()->GetTitle());
-		   histosForOverlay[i]->Draw("HIST SAME");
-		}
-		//histo_errors->Draw("E3SAME");
-    //cout<<"So far, so good : 8"<<endl;
-
-		hCanvasStackLogY_->cd();
-		hCanvasStackLogY_->SetLogy();
-		hStack_->Draw("HIST");
-		hStack_->GetXaxis()->SetTitle(histosForHStack[0]->GetXaxis()->GetTitle());
-		hStack_->GetYaxis()->SetTitle(histosForHStack[0]->GetYaxis()->GetTitle());
-  	if (hData_) text.DrawLatex(0.13,0.967,("CMS Preliminary, "+s.str()+" fb^{-1} at #sqrt{s} = 8 TeV").c_str());
-  	if(!text_.IsNull()) text2.DrawLatex(0.5,0.86,text_);
-    for(unsigned int i=0;i<histosForOverlay.size();i++){
-	    histosForOverlay[i]->Draw("HIST SAME");
-		}
-  }
-
+		 DrawStackedPlot(hCanvasStack_,hCanvasStackLogY_,hStack_,histosForOverlay,scaleNPSignal,histosForHStack[0]->GetXaxis()->GetTitle(),histosForHStack[0]->GetYaxis()->GetTitle(),RatioType);	
+		 ymax = 1.3*hStack_->GetMaximum();
+		 if(ymaxoverlay > ymax) ymax = ymaxoverlay;
+	}
+	
+  //'area normalized'
 	name = "CanvasStackAreaNorm_"+label;
 	hCanvasStackAreaNorm_ = new TCanvas(name.c_str(), name.c_str(), 1000, 700);
 	hCanvasStackAreaNormLogY_ = new TCanvas((name+"_LogY").c_str(), (name+"_LogY").c_str(), 1000, 700);
-	if(addRatio)
-	{
-	  hCanvasStackAreaNorm_->SetCanvasSize(1000, 800);
-	  hCanvasStackAreaNorm_->SetBottomMargin(0.3);
-	  hCanvasStackAreaNormLogY_->SetCanvasSize(1000, 800);
-    hCanvasStackAreaNormLogY_->SetBottomMargin(0.3);
-  }
-  //cout<<"So far, so good : 9"<<endl;
-
-	if(hStackAreaNorm_){
-		hCanvasStackAreaNorm_->cd();
-		hStackAreaNorm_->Draw("HIST");
-    if(addRatio)
-    {
-      hStackAreaNorm_->GetXaxis()->SetTitleSize(0);
-      hStackAreaNorm_->GetXaxis()->SetLabelSize(0);
-    }
-		hStackAreaNorm_->GetXaxis()->SetTitle(histosForHStackAreaNorm[0]->GetXaxis()->GetTitle());
-		hStackAreaNorm_->GetYaxis()->SetTitle(histosForHStackAreaNorm[0]->GetYaxis()->GetTitle());
-		hStackAreaNorm_->GetYaxis()->SetTitleOffset(1.1);
-		if (hData_) text.DrawLatex(0.13,0.967,("CMS Preliminary, "+s.str()+" fb^{-1} at #sqrt{s} = 8 TeV").c_str());
-		if(!text_.IsNull()) text2.DrawLatex(0.5,0.86,text_);
-		for(unsigned int i=0;i<histosForOverlayAreaNorm.size();i++){
-		   histosForOverlayAreaNorm[i]->Draw("HIST SAME");
-		}
-			
-		hCanvasStackAreaNormLogY_->cd();
-		hCanvasStackAreaNormLogY_->SetLogy();
-		hStackAreaNorm_->Draw("HIST");
-		hStackAreaNorm_->GetXaxis()->SetTitle(histosForHStackAreaNorm[0]->GetXaxis()->GetTitle());
-		hStackAreaNorm_->GetYaxis()->SetTitle(histosForHStackAreaNorm[0]->GetYaxis()->GetTitle());
-    if (hData_) text.DrawLatex(0.13,0.967,("CMS Preliminary, "+s.str()+" fb^{-1} at #sqrt{s} = 8 TeV").c_str());
-    if(!text_.IsNull()) text2.DrawLatex(0.5,0.86,text_);
-		for(unsigned int i=0;i<histosForOverlayAreaNorm.size();i++){
-		   histosForOverlayAreaNorm[i]->Draw("HIST SAME");
-		}
-	}
-  //cout<<"So far, so good : 10"<<endl;
-
-	float ymax = 0;
-	if(hStack_) ymax = 1.3*hStack_->GetMaximum();
 	float ymaxAreaNorm = 0;
-	if(hStackAreaNorm_) ymaxAreaNorm = 1.3*hStackAreaNorm_->GetMaximum();
+	if(hStackAreaNorm_)
+	{
+	  if(RatioType>0)
+	  {	
+	    hCanvasStackAreaNorm_->SetCanvasSize(1000, 800);
+	    hCanvasStackAreaNorm_->SetBottomMargin(0.3);
+	    hCanvasStackAreaNormLogY_->SetCanvasSize(1000, 800);
+      hCanvasStackAreaNormLogY_->SetBottomMargin(0.3);
+    }
+		
+	  DrawStackedPlot(hCanvasStackAreaNorm_,hCanvasStackAreaNormLogY_,hStackAreaNorm_,histosForOverlayAreaNorm,scaleNPSignal,histosForHStackAreaNorm[0]->GetXaxis()->GetTitle(),histosForHStackAreaNorm[0]->GetYaxis()->GetTitle(),RatioType);
+		ymaxAreaNorm = 1.3*hStackAreaNorm_->GetMaximum();
+		if(ymaxoverlayAreaNorm > ymaxAreaNorm) ymaxAreaNorm = ymaxoverlayAreaNorm;
+	}
 
-	if(hData_){
+
+  //Now superimpose data to the plots + draw ratio plots + draw error bands
+	TH1F* ratio = 0;
+	TPad* pad = 0;
+	TPad* padLogY = 0;
+	if(hData_)
+	{
 		hData_->SetLineColor(1);
-//		hData_->SetLineWidth(2);
 		hData_->SetMarkerStyle(20);
-//		hData_->SetFillStyle(1001);
-    TH1F* ratio = (TH1F*) hData_->Clone();
-    if(hStack_)	ratio->Divide(addedMC);
-//    ratio->SetMarkerStyle(20);
-    ratio->SetMaximum( 1.5 );
-    ratio->SetMinimum(0.5);
+					
+    ratio = (TH1F*) hData_->Clone();
+    if(hStack_)
+		{
+		   if(RatioType==1)
+			 {
+			    ratio->Divide(totalSM); //ratio = data/MC
+			    ratio->GetYaxis()->SetTitle("Data/MC");
+					ratio->SetMaximum(1.5);
+          ratio->SetMinimum(0.5);
+			 }
+			 else if(RatioType==2)
+			 {
+			    ratio->Add(totalSM,-1);
+			    ratio->Divide(totalSM); //ratio = (data-MC)/MC
+					ratio->GetYaxis()->SetTitle("(Data-MC)/MC");
+					ratio->SetMaximum(0.5);
+          ratio->SetMinimum(-0.5);					
+			 }
+		}
+    ratio->SetMarkerStyle(20);
     ratio->GetXaxis()->SetLabelSize(0.04);
     ratio->GetYaxis()->SetLabelSize(0.04);
-//    ratio->GetXaxis()->SetTitle(stack->GetXaxis()->GetTitle());
-    ratio->GetYaxis()->SetTitle("Data/MC");
     ratio->GetYaxis()->SetTitleSize(0.045);
     ratio->GetYaxis()->SetTitleOffset(1.15);
     ratio->SetMarkerSize(1.);
-    ratio->GetYaxis()->SetNdivisions(5);
-
-    //cout<<"So far, so good : 11"<<endl;
-    
-    TPad* pad = new TPad("pad", "pad", 0.0, 0.0, 1.0, 1.0);
+    ratio->GetYaxis()->SetNdivisions(5);    
+		ratio->SetTitle("");
+		
+    pad = new TPad("pad", "pad", 0.0, 0.0, 1.0, 1.0);
     pad->SetTopMargin(0.7);
-    pad->SetFillColor(1);
-    pad->SetFillStyle(1);
+    pad->SetFillColor(0); // was 1 but could have been related to the problem of black canvases
+    pad->SetFillStyle(0); // was 1 but could have been related to the problem of black canvases
     pad->SetGridy(1);
-    TPad* padLogY = (TPad*) pad->Clone();
-    
-		hCanvasStack_->cd();
-		if(hStack_)	
-	  {
-	    hData_->Draw("same E");
-//      cout<<"So far, so good : 11-1"<<endl;
-	    if(addRatio)
-	    {
-        pad->Draw();
-        pad->cd(0);
-        ratio->Draw("e");
-//        cout<<"So far, so good : 11-2"<<endl;
-        if(hErrorPlus_)
-        {
-          hErrorPlus_->Draw("C");
-          hErrorMinus_->Draw("C");
-        }
-      }
-//      cout<<"So far, so good : 11-3"<<endl;
-    }
-		else hData_->Draw("E");
-		hCanvasStackLogY_->cd();
-		hCanvasStackLogY_->SetLogy();
-		if(hStack_)
-		{
-		  hData_->Draw("same E");
-		  if(addRatio)
-		  {
-        padLogY->Draw();
-        padLogY->cd(0);
-        ratio->Draw("e");
-        if(hErrorPlus_)
-        {
-          hErrorPlus_->Draw("C");
-          hErrorMinus_->Draw("C");
-        }
-      }
-    }
-		else hData_->Draw("E");
-//    cout<<"So far, so good : 12"<<endl;
+    padLogY = (TPad*) pad->Clone();
+  } 
 		
-    TH1F* ratioAreaNorm = (TH1F*) hData_->Clone();
-    if(hStackAreaNorm_)	ratioAreaNorm->Divide(addedMCAreaNorm);
-    ratioAreaNorm->SetMarkerStyle(20);
-    ratioAreaNorm->SetMaximum( 1.5 );
-    ratioAreaNorm->SetMinimum(0.5);
-    ratioAreaNorm->GetXaxis()->SetLabelSize(0.04);
-    ratioAreaNorm->GetYaxis()->SetLabelSize(0.04);
-//    ratioAreaNorm->GetXaxis()->SetTitle(stack->GetXaxis()->GetTitle());
-    ratioAreaNorm->GetYaxis()->SetTitle("Data/MC");
-    ratioAreaNorm->GetYaxis()->SetTitleSize(0.045);
-    ratioAreaNorm->GetYaxis()->SetTitleOffset(1.15);
-    ratioAreaNorm->SetMarkerSize(1.);
-    ratioAreaNorm->GetYaxis()->SetNdivisions(5);
-    
-    TPad* padAreaNorm = new TPad("padAreaNorm", "padAreaNorm", 0.0, 0.0, 1.0, 1.0);
-    padAreaNorm->SetTopMargin(0.7);
-    padAreaNorm->SetFillColor(0);
-    padAreaNorm->SetFillStyle(0);
-    padAreaNorm->SetGridy(1);
-    TPad* padAreaNormLogY = (TPad*) padAreaNorm->Clone();
+	hCanvasStack_->cd();
+	if(hStack_)	
+	{		  
+			if(addErrorBand)
+				DrawErrorBand(totalSM,hErrorPlus,hErrorMinus,hNominal,StackErrorGraph_,ErrorBandAroundTotalInput);
+			
+			if(hData_)
+			{
+			  hData_->Draw("same E");		
+						
+	      if(RatioType>0)
+	      {   			  
+          pad->Draw();
+          pad->cd(0);
+          ratio->Draw("e");
+          if(addRatioErrorBand)
+          {           
+					   TH1F* totalSMRatio = (TH1F*) totalSM->Clone();
+					   TH1F* hErrorPlusRatio = (TH1F*) hErrorPlus->Clone();
+					   TH1F* hErrorMinusRatio = (TH1F*) hErrorMinus->Clone();
+					   TH1F* hNominalRatio = (TH1F*) hNominal->Clone();
+					   if(RatioType==1)
+					   {
+					      totalSMRatio->Divide(totalSM);
+							  hErrorPlusRatio->Divide(totalSM);
+							  hErrorMinusRatio->Divide(totalSM);
+					      hNominalRatio->Divide(totalSM);
+					   }
+					   else if(RatioType==2)
+			       {
+			          totalSMRatio->Add(totalSM,-1);
+			          totalSMRatio->Divide(totalSM);
+							  hErrorPlusRatio->Add(totalSM,-1);
+							  hErrorPlusRatio->Divide(totalSM);
+							  hErrorMinusRatio->Add(totalSM,-1);
+							  hErrorMinusRatio->Divide(totalSM);
+							  hNominalRatio->Add(totalSM,-1);
+							  hNominalRatio->Divide(totalSM);
+			       }
+					   DrawErrorBand(totalSMRatio,hErrorPlusRatio,hErrorMinusRatio,hNominalRatio,RatioErrorGraph_,ErrorBandAroundTotalInput);
+          }
+				}
+      }
+  }
+  else
+	{
+	   if(hData_) hData_->Draw("E");
+	}
 		
-		hCanvasStackAreaNorm_->cd();
-		if(hStackAreaNorm_)
-		{
-		  hData_->Draw("same E");
-		  if(addRatio)
-		  {
-        padAreaNorm->Draw();
-        padAreaNorm->cd(0);
-        ratioAreaNorm->Draw("e");
-        if(hErrorPlus_)
-        {
-          hErrorPlus_->Draw("C");
-          hErrorMinus_->Draw("C");
+		
+	//log-scale plots
+	hCanvasStackLogY_->cd();
+	hCanvasStackLogY_->SetLogy();
+	if(hStack_)
+	{
+		  if(addErrorBand)
+				DrawErrorBand(totalSM,hErrorPlus,hErrorMinus,hNominal,StackErrorGraph_,ErrorBandAroundTotalInput);
+			
+			if(hData_)
+			{				
+			  hData_->Draw("same E");
+		  
+			  if(RatioType>0)
+		    {		  
+          padLogY->Draw();
+          padLogY->cd(0);
+          ratio->Draw("e");
+          if(addRatioErrorBand)
+          {
+             TH1F* totalSMRatio = (TH1F*) totalSM->Clone();
+					   TH1F* hErrorPlusRatio = (TH1F*) hErrorPlus->Clone();
+					   TH1F* hErrorMinusRatio = (TH1F*) hErrorMinus->Clone();
+					   TH1F* hNominalRatio = (TH1F*) hNominal->Clone();
+					   if(RatioType==1)
+					   {
+					      totalSMRatio->Divide(totalSM);
+						  	hErrorPlusRatio->Divide(totalSM);
+							  hErrorMinusRatio->Divide(totalSM);
+					      hNominalRatio->Divide(totalSM);
+					   }
+					   else if(RatioType==2)
+			       {
+			          totalSMRatio->Add(totalSM,-1);
+			          totalSMRatio->Divide(totalSM);
+							  hErrorPlusRatio->Add(totalSM,-1);
+							  hErrorPlusRatio->Divide(totalSM);
+							  hErrorMinusRatio->Add(totalSM,-1);
+						  	hErrorMinusRatio->Divide(totalSM);
+							  hNominalRatio->Add(totalSM,-1);
+						  	hNominalRatio->Divide(totalSM);
+			       }
+					   DrawErrorBand(totalSMRatio,hErrorPlusRatio,hErrorMinusRatio,hNominalRatio,RatioErrorGraph_,ErrorBandAroundTotalInput);
+          }
         }
-      }
-		}
-		else hData_->Draw("E");
-		hCanvasStackAreaNormLogY_->cd();
-		hCanvasStackAreaNormLogY_->SetLogy();
-		if(hStackAreaNorm_)
-		{
-		  hData_->Draw("same E");
-		  if(addRatio)
+			}			
+  }
+	else
+	{
+		  if(hData_) hData_->Draw("E");
+	}
+			
+	//Now area-normalized plots...
+	TH1F* ratioAreaNorm = 0;
+	TPad* padAreaNorm = 0;
+	TPad* padAreaNormLogY = 0;
+	if(hData_)
+	{
+		  ratioAreaNorm = (TH1F*) hData_->Clone();
+      if(hStackAreaNorm_)
 		  {
-  		  padAreaNormLogY->Draw();
-        padAreaNormLogY->cd(0);
-        ratioAreaNorm->Draw("e");
-        if(hErrorPlus_)
-        {
-          hErrorPlus_->Draw("C");
-          hErrorMinus_->Draw("C");
+		     if(RatioType==1)
+			   {
+			      ratioAreaNorm->Divide(totalSMAreaNorm); //ratio = data/MC
+					  ratioAreaNorm->GetYaxis()->SetTitle("Data/MC");
+					  ratioAreaNorm->SetMaximum(1.5);
+            ratioAreaNorm->SetMinimum(0.5);
+			   }
+			   else if(RatioType==2)
+			   {
+			      ratioAreaNorm->Add(totalSMAreaNorm,-1);
+			      ratioAreaNorm->Divide(totalSMAreaNorm); //ratio = (data-MC)/MC
+					  ratioAreaNorm->GetYaxis()->SetTitle("(Data-MC)/MC");
+				  	ratioAreaNorm->SetMaximum(0.5);
+            ratioAreaNorm->SetMinimum(-0.5);
+			   }
+		  }
+      ratioAreaNorm->SetMarkerStyle(20);
+      ratioAreaNorm->GetXaxis()->SetLabelSize(0.04);
+      ratioAreaNorm->GetYaxis()->SetLabelSize(0.04);
+  //    ratioAreaNorm->GetXaxis()->SetTitle(stack->GetXaxis()->GetTitle());
+      ratioAreaNorm->GetYaxis()->SetTitleSize(0.045);
+      ratioAreaNorm->GetYaxis()->SetTitleOffset(1.15);
+      ratioAreaNorm->SetMarkerSize(1.);
+      ratioAreaNorm->GetYaxis()->SetNdivisions(5);
+	  	ratioAreaNorm->SetTitle("");
+    
+      padAreaNorm = new TPad("padAreaNorm", "padAreaNorm", 0.0, 0.0, 1.0, 1.0);
+      padAreaNorm->SetTopMargin(0.7);
+      padAreaNorm->SetFillColor(0);
+      padAreaNorm->SetFillStyle(0);
+      padAreaNorm->SetGridy(1);
+      padAreaNormLogY = (TPad*) padAreaNorm->Clone();
+	}
+		
+	hCanvasStackAreaNorm_->cd();
+	if(hStackAreaNorm_)
+	{
+		  if(addErrorBand)
+				DrawErrorBand(totalSMAreaNorm,hErrorPlus,hErrorMinus,hNominal,StackErrorGraph_,ErrorBandAroundTotalInput); //warning: error band around area-normalized plot may not make sense
+			
+			if(hData_)
+			{
+			  hData_->Draw("same E");					
+			
+		    if(RatioType>0)
+		    {			
+          padAreaNorm->Draw();
+          padAreaNorm->cd(0);
+          ratioAreaNorm->Draw("e");
+          if(addRatioErrorBand)
+          {       
+				           TH1F* totalSMAreaNormRatio = (TH1F*) totalSM->Clone();
+			  		       TH1F* hErrorPlusRatio = (TH1F*) hErrorPlus->Clone();
+				  	       TH1F* hErrorMinusRatio = (TH1F*) hErrorMinus->Clone();
+				  	       TH1F* hNominalRatio = (TH1F*) hNominal->Clone();
+				  	       if(RatioType==1)
+				  	       {
+				  	         totalSMAreaNormRatio->Divide(totalSMAreaNorm);
+				  			     hErrorPlusRatio->Divide(totalSMAreaNorm);
+				  			     hErrorMinusRatio->Divide(totalSMAreaNorm);
+				  	         hNominalRatio->Divide(totalSMAreaNorm);
+				  	       }
+				  	       else if(RatioType==2)
+			             {
+			               totalSMAreaNormRatio->Add(totalSMAreaNorm,-1);
+			               totalSMAreaNormRatio->Divide(totalSMAreaNorm);
+			  				     hErrorPlusRatio->Add(totalSMAreaNorm,-1);
+				  			     hErrorPlusRatio->Divide(totalSMAreaNorm);
+				  			     hErrorMinusRatio->Add(totalSMAreaNorm,-1);
+				  			     hErrorMinusRatio->Divide(totalSMAreaNorm);
+				  			     hNominalRatio->Add(totalSMAreaNorm,-1);
+				  			     hNominalRatio->Divide(totalSMAreaNorm);
+			            }     
+			  		      DrawErrorBand(totalSMAreaNormRatio,hErrorPlusRatio,hErrorMinusRatio,hNominalRatio,RatioErrorGraph_,ErrorBandAroundTotalInput); //warning: error band around area-normalized plot may not make sense
+          }
         }
-      }
-		}
-		else hData_->Draw("E");
-		char legDataTitle[100];
-		hData_->SetTitle("Data");
-		if (showNumberEntries_){
-			sprintf (legDataTitle, "%s (%.1f entries)", hData_->GetTitle(), hData_->Integral(0,hData_->GetNbinsX()+1) );
-		}
-		else
-			sprintf (legDataTitle, "%s", hData_->GetTitle());
-		leg_->AddEntry(hData_, legDataTitle ,"L E");
-		leg2_->AddEntry(hData_, legDataTitle ,"L E");
-		if(hStack_ && ymax < 1.3*(hData_->GetMaximum())) ymax = 1.3*(hData_->GetMaximum());
-		if(hStackAreaNorm_ && ymaxAreaNorm < 1.3*(hData_->GetMaximum())) ymaxAreaNorm = 1.3*(hData_->GetMaximum());
+			}
 	}
-//  cout<<"So far, so good : 13"<<endl;
-	if(addRandomPseudoData){
-		ROOT::Math::Random<ROOT::Math::GSLRngMT> *rand = new ROOT::Math::Random<ROOT::Math::GSLRngMT>();
-		for(int i=0;i<Nbins_;i++) hRandomPseudoData_->SetBinContent(i+1,rand->Poisson(SummedBins[i]));
-		hRandomPseudoData_->SetLineColor(1);
-		hRandomPseudoData_->SetLineWidth(2);
-		hRandomPseudoData_->SetFillStyle(1001);
-		hCanvasStack_->cd(); 	               
-		hRandomPseudoData_->Draw("same E"); 	 
-		hCanvasStackLogY_->cd(); 	 
-		hRandomPseudoData_->Draw("same E");
-		leg_->AddEntry(hRandomPseudoData_,"Pseudo-data","l");
-		if(ymax < 1.3*(hRandomPseudoData_->GetMaximum())) ymax = 1.3*(hRandomPseudoData_->GetMaximum());
-		delete rand;
+	else 
+	{
+		   if(hData_) hData_->Draw("E");
 	}
+	
+	//Now area-normalized log-scale plots...
+	hCanvasStackAreaNormLogY_->cd();
+	hCanvasStackAreaNormLogY_->SetLogy();
+	if(hStackAreaNorm_)
+	{		  
+			if(addErrorBand)
+				DrawErrorBand(totalSMAreaNorm,hErrorPlus,hErrorMinus,hNominal,StackErrorGraph_,ErrorBandAroundTotalInput); //warning: error band around area-normalized plot may not make sense	    
+			
+			if(hData_)
+			{
+			  hData_->Draw("same E");
+			
+		    if(RatioType)
+		    {	
+  		    padAreaNormLogY->Draw();
+          padAreaNormLogY->cd(0);
+          ratioAreaNorm->Draw("e");
+          if(addRatioErrorBand)
+          {       
+				         TH1F* totalSMAreaNormRatio = (TH1F*) totalSM->Clone();
+					       TH1F* hErrorPlusRatio = (TH1F*) hErrorPlus->Clone();
+					       TH1F* hErrorMinusRatio = (TH1F*) hErrorMinus->Clone();
+					       TH1F* hNominalRatio = (TH1F*) hNominal->Clone();
+					       if(RatioType==1)
+					       {
+					         totalSMAreaNormRatio->Divide(totalSMAreaNorm);
+							     hErrorPlusRatio->Divide(totalSMAreaNorm);
+							     hErrorMinusRatio->Divide(totalSMAreaNorm);
+					         hNominalRatio->Divide(totalSMAreaNorm);
+					       }
+					       else if(RatioType==2)
+			           {
+			             totalSMAreaNormRatio->Add(totalSMAreaNorm,-1);
+			             totalSMAreaNormRatio->Divide(totalSMAreaNorm);
+							     hErrorPlusRatio->Add(totalSMAreaNorm,-1);
+							     hErrorPlusRatio->Divide(totalSMAreaNorm);
+							     hErrorMinusRatio->Add(totalSMAreaNorm,-1);
+							     hErrorMinusRatio->Divide(totalSMAreaNorm);
+							     hNominalRatio->Add(totalSMAreaNorm,-1);
+							     hNominalRatio->Divide(totalSMAreaNorm);
+			          }     
+					      DrawErrorBand(totalSMAreaNormRatio,hErrorPlusRatio,hErrorMinusRatio,hNominalRatio,RatioErrorGraph_,ErrorBandAroundTotalInput); //warning: error band around area-normalized plot may not make sense
+          }
+        }
+			}
+	}
+	else 
+	{
+		   if(hData_) hData_->Draw("E");
+	}
+				
+	if(addErrorBand)
+	{
+		   //make dummy graph for legend; dirty because color/style parameters of the error band now configured in 2 places...
+		   TGraphAsymmErrors* ErrorGraph = new TGraphAsymmErrors();
+		   ErrorGraph->SetFillStyle(3004);//3005 diagonal dashed //3001 ~plain //3013 double diagonal dashed 
+			 ErrorGraph->SetFillColor(kRed);
+	     ErrorGraph->SetLineColor(kRed);
+	     ErrorGraph->SetLineWidth(1);
+			 leg_->AddEntry(ErrorGraph,"Systematic Uncertainty","F");
+	}
+	
+	if(hData_)
+	{
+	  if(hStack_ && ymax < 1.3*(hData_->GetMaximum())) ymax = 1.3*(hData_->GetMaximum());
+	  if(hStackAreaNorm_ && ymaxAreaNorm < 1.3*(hData_->GetMaximum())) ymaxAreaNorm = 1.3*(hData_->GetMaximum());
+	}
+
 	if(maxY_ > 0)
 	{
 	  ymax = maxY_;
@@ -750,81 +740,171 @@ void MultiSamplePlot::Draw(bool addRandomPseudoData, string label, bool mergeTT,
 	if(hStack_)	hStack_->SetMaximum(ymax);
 	if(hStackAreaNorm_) hStackAreaNorm_->SetMaximum(ymaxAreaNorm);
 
-	hCanvasStack_->cd();
+	hCanvasStack_->cd(0);
 	leg_->Draw();
-	hCanvasStackLogY_->cd();
+	hCanvasStackLogY_->cd(0);
 	leg_->Draw();
-	hCanvasStackAreaNorm_->cd();			
-	leg2_->Draw();
-	hCanvasStackAreaNormLogY_->cd();			
-	leg2_->Draw();
-
-	delete SummedBins;
+	hCanvasStackAreaNorm_->cd(0);			
+	legAreaNorm_->Draw();
+	hCanvasStackAreaNormLogY_->cd(0);			
+	legAreaNorm_->Draw();
+	
+  //if(tmpInfile) tmpInfile->Close(); //causes a crash when trying to write hData_ in the Write method...?
 }
 
-void MultiSamplePlot::Write(TFile* fout, string label, bool savePNG, string pathPNG, string ext) {
+void MultiSamplePlot::DrawStackedPlot(TCanvas* canvas, TCanvas* canvasLogY, THStack* hstack, vector<TH1F*> histosForOverlay, int scaleNPSignal, const char* xaxistitle, const char* yaxistitle, unsigned int RatioType)
+{ 
+	stringstream slumi; slumi.precision(3); slumi << lumi_/1000; //luminosity given in picobarns, but will be displayed in femtobarns, because this in not 2010 anymore.
+	stringstream ssqrts; ssqrts << sqrts_; //sqrt(s) given in TeV
+	TLatex cmstext;
+  cmstext.SetNDC(true);
+  cmstext.SetTextAlign(12);
+  cmstext.SetTextFont(42);
+	cmstext.SetTextSize(0.05);
+	
+	TLatex text;
+	text.SetNDC(true);
+	text.SetTextAlign(12);
+	text.SetTextFont(42);
+	text.SetTextSize(0.04);
+	text.SetTextColor(kBlack);
+
+	canvas->cd();
+	hstack->Draw("HIST");
+	hstack->GetXaxis()->SetTitle(xaxistitle);
+	hstack->GetYaxis()->SetTitle(yaxistitle);
+	hstack->GetYaxis()->SetTitleOffset(1.1);
+	
+  if(RatioType>0)
+	{
+	   hstack->GetXaxis()->SetLabelSize(0);
+     hstack->GetXaxis()->SetTitleSize(0);
+  }
+		 
+	if(hData_)
+	{
+		 if(prelim_) cmstext.DrawLatex(0.16,0.975,("CMS Preliminary, "+slumi.str()+" fb^{-1} at #sqrt{s} = "+ssqrts.str()+" TeV").c_str());
+		 else cmstext.DrawLatex(0.16,0.975,("CMS, "+slumi.str()+" fb^{-1} at #sqrt{s} = "+ssqrts.str()+" TeV").c_str());
+	}
+	else cmstext.DrawLatex(0.16,0.975,("CMS simulation, "+slumi.str()+" fb^{-1} at #sqrt{s} = "+ssqrts.str()+" TeV").c_str());
+	
+  if(!text_.IsNull()) text.DrawLatex(0.2,0.9,text_);
+		
+  for(unsigned int i=0;i<histosForOverlay.size();i++)
+  {
+	   histosForOverlay[i]->Scale(scaleNPSignal);
+		 histosForOverlay[i]->SetFillColor(0);
+		 histosForOverlay[i]->Draw("HIST SAME");
+	}
+
+	canvasLogY->cd();
+	canvasLogY->SetLogy();
+	hstack->Draw("HIST");
+	if(hData_)
+	{
+		   if(prelim_) cmstext.DrawLatex(0.16,0.975,("CMS Preliminary, "+slumi.str()+" fb^{-1} at #sqrt{s} = "+ssqrts.str()+" TeV").c_str());
+			 else cmstext.DrawLatex(0.16,0.975,("CMS, "+slumi.str()+" fb^{-1} at #sqrt{s} = "+ssqrts.str()+" TeV").c_str());
+	}
+	else cmstext.DrawLatex(0.16,0.975,("CMS simulation, "+slumi.str()+" fb^{-1} at #sqrt{s} = "+ssqrts.str()+" TeV").c_str());
+	
+  if(!text_.IsNull()) text.DrawLatex(0.5,0.86,text_);
+	
+  for(unsigned int i=0;i<histosForOverlay.size();i++)
+	{
+	       histosForOverlay[i]->Draw("HIST SAME");
+	}
+
+}
+
+void MultiSamplePlot::DrawErrorBand(TH1F* totalSM, TH1F* hErrorPlus, TH1F* hErrorMinus, TH1F* hNominal, TGraphAsymmErrors*  ErrorGraph, bool ErrorBandAroundTotalInput)
+{
+  int nbins = totalSM->GetNbinsX()+1;
+	float bins[nbins];
+	float bincontents[nbins];
+	float dummy[nbins];
+	float erroryplus[nbins]; //will be the errors relative to the total histo
+	float erroryminus[nbins]; //will be the errors relative to the total histo
+  float binwidth = totalSM->GetBinCenter(2) - totalSM->GetBinCenter(1); //assumes a fixed bin width...!
+	
+  if((totalSM->GetNbinsX() != hErrorPlus->GetNbinsX()) || (totalSM->GetNbinsX() != hErrorMinus->GetNbinsX()))
+			cout<<"[MultiSamplePlot::DrawErrorBand] ERROR: error histograms have different binning than total SM histogram!"<<endl;
+
+	for(int iBin=0; iBin < totalSM->GetNbinsX()+1; iBin++)
+	{
+			bins[iBin] = totalSM->GetBinCenter(iBin);
+			if(ErrorBandAroundTotalInput)
+			   bincontents[iBin] = totalSM->GetBinContent(iBin); //meaning an error band around whatever is the total MC SM input (can be 'post-fit' (as in the profile likelihood method), the input is then not the 'nominal' expectation anymore w.r.t which the error band is intrinsically defined)
+			else 
+			   bincontents[iBin] = hNominal->GetBinContent(iBin);
+			erroryplus[iBin] = hErrorPlus->GetBinContent(iBin) - hNominal->GetBinContent(iBin);
+			erroryminus[iBin] = hNominal->GetBinContent(iBin) - hErrorMinus->GetBinContent(iBin);
+      dummy[iBin] = binwidth/2;
+	}	
+	
+	ErrorGraph = new TGraphAsymmErrors(nbins,bins,bincontents,dummy,dummy,erroryplus,erroryminus);					
+	ErrorGraph->SetFillStyle(3004);//3005 diagonal dashed //3001 ~plain //3013 double diagonal dashed 
+	ErrorGraph->SetFillColor(kRed);
+	ErrorGraph->SetLineColor(kRed);
+	ErrorGraph->SetLineWidth(1);
+	ErrorGraph->Draw("2"); 
+}
+
+void MultiSamplePlot::Write(TFile* fout, string label, bool savePNG, string pathPNG, string ext) 
+{
 	fout->cd();
 	string dirname = "MultiSamplePlot_"+label;
 	if(fout->Get(dirname.c_str())==0)
 		fout->mkdir(dirname.c_str());
+
 	fout->cd(dirname.c_str());
-  
-	if(hStack_) hStack_->Write();
+
+	if(hStack_) hStack_->Write(); 
 	if(hStackAreaNorm_) hStackAreaNorm_->Write();
-	if(hRandomPseudoData_) hRandomPseudoData_->Write();
-	if(hData_) hData_->Write();
-  
-	if(hCanvas_) {
+	if(hData_) hData_->Write();		 
+
+	if(hCanvas_)
+	{
 	  if(savePNG)
-	  {
 	    hCanvas_->SaveAs( (pathPNG+label+"_Normalized."+ext).c_str() );
-//	    hCanvas_->SaveAs( (pathPNG+label+"_Normalized.pdf").c_str() );
-	  }
 	  hCanvas_->Write();
 	}
   
-	if(hCanvasStack_) {
+	if(hCanvasStack_)
+	{
 	  if(hStack_) hStack_->SetMinimum(0.001);
 	  hCanvasStack_->Write();
 	  if(savePNG)
-	  {
 	    hCanvasStack_->SaveAs( (pathPNG+label+"_Stack."+ext).c_str() );
-//	    hCanvasStack_->SaveAs( (pathPNG+label+"_Stack.pdf").c_str() );
-	  }
 	}
   
-	if(hCanvasStackLogY_) {
+	if(hCanvasStackLogY_)
+	{
 	  if(hStack_) hStack_->SetMinimum(minLogY_);
 	  hCanvasStackLogY_->Write();
 	  if(savePNG)
-	  {
 	    hCanvasStackLogY_->SaveAs( (pathPNG+label+"_StackLogY."+ext).c_str() );
-//	    hCanvasStackLogY_->SaveAs( (pathPNG+label+"_StackLogY.pdf").c_str() );
-	  }
 	}
   
-	if(hCanvasStackAreaNorm_) {
+	if(hCanvasStackAreaNorm_ && hData_)
+	{
 	  if(hStackAreaNorm_) hStackAreaNorm_->SetMinimum(0.001);
 	  hCanvasStackAreaNorm_->Write();
 	  if(savePNG)
-	  {
 	    hCanvasStackAreaNorm_->SaveAs( (pathPNG+label+"_StackAreaNorm."+ext).c_str() );
-//	    hCanvasStackAreaNorm_->SaveAs( (pathPNG+label+"_StackAreaNorm.pdf").c_str() );
-	  }
 	}
   
-	if(hCanvasStackAreaNormLogY_) {
+	if(hCanvasStackAreaNormLogY_ && hData_)
+	{
 	  if(hStackAreaNorm_) hStackAreaNorm_->SetMinimum(minLogY_);
 	  hCanvasStackAreaNormLogY_->Write();
 	  if(savePNG)
-	  {
 	    hCanvasStackAreaNormLogY_->SaveAs( (pathPNG+label+"_StackAreaNormLogY."+ext).c_str() );
-//	    hCanvasStackAreaNormLogY_->SaveAs( (pathPNG+label+"_StackAreaNormLogY.pdf").c_str() );
-	  }
 	}
   
 	for(unsigned int i=0; i<plots_.size(); i++)
 	  if(plots_[i].second->Name().find("data") != 0 && plots_[i].second->Name().find("Data") != 0 && plots_[i].second->Name().find("DATA") != 0 )
+		{
+		  plots_[i].first->SetMarkerSize(0.5);			
       plots_[i].first->Write();
+		} 
 }
-
