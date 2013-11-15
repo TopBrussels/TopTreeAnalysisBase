@@ -13,9 +13,9 @@ OutPutOpt     = -o
 HeadSuf       = h
 
 ROOTCFLAGS      = $(shell root-config --cflags)
-ROOTLIBS        = $(shell root-config --libs) -lMinuit -lMathMore -lMinuit2 #-lRooFitCore -lRooFit -lRooStats -lFoam -lTMVA
-ROOTLIBS_NoTMVA = $(shell root-config --libs) -lMinuit -lMathMore -lMinuit2 #-lRooFitCore -lRooFit -lRooStats -lFoam
-ROOTGLIBS       = $(shell root-config --glibs) -lMinuit -lMathMore -lMinuit2 #-lRooFitCore -lRooFit -lRooStats -lFoam -lTMVA
+ROOTLIBS        = $(shell root-config --libs) -lMinuit -lMathMore -lMinuit2 -lRooFitCore -lRooFit -lRooStats -lFoam -lTMVA
+ROOTLIBS_NoTMVA = $(shell root-config --libs) -lMinuit -lMathMore -lMinuit2 -lRooFitCore -lRooFit -lRooStats -lFoam
+ROOTGLIBS       = $(shell root-config --glibs) -lMinuit -lMathMore -lMinuit2 -lRooFitCore -lRooFit -lRooStats -lFoam -lTMVA
 
 # Linux with egcs
 DEFINES       = -DNO_ORCA_CLASSES -I..
