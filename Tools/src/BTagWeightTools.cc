@@ -10,7 +10,7 @@
 Unfortunately the BTV POG does not give the parameterizations in a parsable format that is consistent even per measurements, so you need to edit the files yourself to the level that they are usable. THe parsing code currently is tuned for the Moriond 2012 parameterizations from ttbar+mujet file
 
 
-Fake rates: Now also using the Fake Rate parameterizations that are documented (for Moriond 2013) here: https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFlightFuncs_Moriond2013.C
+Fake rates: Now also using the Fake Rate parameterizations that are documented (for Moriond 2013) here: https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFlightFuncs_Moriond2013.C or (for EPS 2013) here: https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFlightFuncs_EPS2013.C
 As this is a bare Root Macro this has been c++ized into a separate set of functions.
 
  Implementation:
@@ -57,20 +57,20 @@ void BTagWeightTools::parsefile(){
   while(std::getline(file, lineread)) // Read line by line
     {
       // and manipulate the lines to get what you want
-      //      cout << lineread << std::endl;
+//            cout << lineread << std::endl;
      
       if(lineread.size()<1) // non-empty
 	continue;
-      //      cout << "non-empty " << endl;
-      //      cout << lineread << std::endl;
+//            cout << "non-empty " << endl;
+//            cout << lineread << std::endl;
 
       if(startinglines){
-	//	cout << "parsing startinglines" << endl;
+		cout << "parsing startinglines" << endl;
 	p0=0;
 	p1 = lineread.find_first_of("{",p0);
 	p2 = lineread.find_first_of("}",p0);
 	string rest1 = lineread.substr(p1+1,p2-p1-1);
-	//	cout << rest1 << endl;
+//		cout << rest1 << endl;
 	std::getline(file, lineread); // expect this to be two lines!
 	
 	p1 = lineread.find_first_of("{",p0);
@@ -78,14 +78,14 @@ void BTagWeightTools::parsefile(){
 
 	string rest2 = lineread.substr(p1+1,p2-p1-1);
 
-	///	cout << rest2 << endl;
+//		cout << rest2 << endl;
 	// now start pushing these back and parsing them:
 	p0=0;
 	while(p0 != string::npos){
 	  p1 = rest1.find_first_of(",",p0);
 	  if(p1!=p0){
 	    string number=rest1.substr(p0,p1-p0);
-	    //	    cout <<"__" << number << "__" << endl;
+//	    	    cout <<"__" << number << "__" << endl;
 	    float value = atof(number.c_str()); 
 	    if(value<_ptmin)
 	      _ptmin=value;
@@ -100,7 +100,7 @@ void BTagWeightTools::parsefile(){
 	  p1 = rest2.find_first_of(",",p0);
 	  if(p1!=p0){
 	    string number=rest2.substr(p0,p1-p0);
-	    //	    cout <<"__" << number << "__" << endl;
+//	    	    cout <<"__" << number << "__" << endl;
 
 	    float value = atof(number.c_str());
 	    if(value<_ptmin)
@@ -139,13 +139,15 @@ void BTagWeightTools::parsefile(){
 	_weightsUp[taggername]=std::vector<float>(0);
 	_weightsDown[taggername]=std::vector<float>(0);
 	std::getline(file, lineread);// not interesting
-	//	cout << lineread << endl;
+//		cout << lineread << endl;
+//		cout<<" _ptrangesysts.size() = "<<_ptrangesysts.size()<<endl;
 	for(size_t ibin=0; ibin<_ptrangesysts.size(); ibin++){
+//	cout<<"   ibin = "<<ibin<<endl;
 	  std::getline(file, lineread);
-	  string cleanstring = lineread.substr(lineread.find(" "),lineread.find(","));
+	  string cleanstring = lineread.substr(lineread.find(" "),lineread.find(","));   //NOTE: there should be a fix in the CSVSL case, since this contains less uncertainty bins than the other taggers.
 	  cleanstring = cleanstring.substr(0,cleanstring.find("}"));
 	  float value = atof(cleanstring.c_str());
-	  //	  cout  << lineread << " ---> " << cleanstring << " ---> "  << value << endl;
+//	  	  cout  << lineread << " ---> " << cleanstring << " ---> "  << value << endl;
 
 	  _weightsUp[taggername].push_back(value);
 	  _weightsDown[taggername].push_back(value*-1.);
@@ -162,16 +164,16 @@ void BTagWeightTools::parsefile(){
 
 
 // various getters:
-float BTagWeightTools::getWeight(float pt, float eta, int flavor, int syst=0){
+float BTagWeightTools::getSF(float pt, float eta, int flavor, int syst=0){
 
-  return getWeight(pt,eta,flavor,_defaultalgo,syst);
+  return getSF(pt,eta,flavor,_defaultalgo,syst);
 }
 
-float  BTagWeightTools::getWeight(float pt, float eta,int flavor,string algo,int syst=0){
+float  BTagWeightTools::getSF(float pt, float eta,int flavor,string algo,int syst=0){
   if(pt<_ptmin || pt>_ptmax)
-    cout << "BTagWeightTools::WARNING retrieving for pT value (" << pt << ") outside range of " << _ptmin << ","<< _ptmax << " which is fine but tread with caution..." << endl;
+    cout << "BTagWeightTools::getSF WARNING retrieving for pT value (" << pt << ") outside range of " << _ptmin << ","<< _ptmax << " which is fine but tread with caution..." << endl;
   if(fabs(eta)>_etamax)
-    cout << "BTagWeightTools::WARNING retrieving for eta value (" << eta << ") outside range of " << _etamax  << " which is fine but tread with caution..." << endl;
+    cout << "BTagWeightTools::getSF WARNING retrieving for eta value (" << eta << ") outside range of " << _etamax  << " which is fine but tread with caution..." << endl;
  
   if(abs(flavor)==5 ||abs(flavor)==4){
     if(syst==0){
@@ -265,12 +267,16 @@ BTagWeightTools::BTagWeightTools(){
   _filename="";
   _defaultalgo="none";
   _abcdrange="ABCD";
+	_sflightprescription="EPS2013";
+	MCEfficiencyHistosInitialized = false;
 }
 
 BTagWeightTools::BTagWeightTools(string filename){
   _filename=filename;
   _defaultalgo="none";
   _abcdrange="ABCD";
+	_sflightprescription="EPS2013";
+	MCEfficiencyHistosInitialized = false;
   parsefile();
 
 }
@@ -279,13 +285,35 @@ BTagWeightTools::BTagWeightTools(std::string filename, std::string defaultalgo){
   _defaultalgo=defaultalgo;
   _filename=filename;
   _abcdrange="ABCD";
+	_sflightprescription="EPS2013";
+	setalgoWPcut(defaultalgo);
+	MCEfficiencyHistosInitialized = false;	
   parsefile();
 
 }
 
+BTagWeightTools::BTagWeightTools(std::string filename, std::string defaultalgo, std::string sflightprescription){
+  _defaultalgo=defaultalgo;
+  _filename=filename;
+  _abcdrange="ABCD";
+	_sflightprescription=sflightprescription;
+  setalgoWPcut(defaultalgo);
+	parsefile();
+
+}
+
+BTagWeightTools::BTagWeightTools(std::string filename, std::string algo_L, std::string algo_T, std::string sflightprescription){
+  _algo_L=algo_L;
+	_algo_T=algo_T;
+  _filename=filename;
+  _abcdrange="ABCD";
+	_sflightprescription=sflightprescription;
+  setalgoWPcut(algo_L,algo_T);
+	parsefile();
+
+}
 
 // destructor:
-
 BTagWeightTools::~BTagWeightTools(){
 
   _functions.clear();
@@ -300,6 +328,99 @@ BTagWeightTools::~BTagWeightTools(){
   
 }
 
+void BTagWeightTools::setalgoWPcut(std::string algo)
+{
+	//working points from https://twiki.cern.ch/twiki/bin/viewauth/CMS/BTagPerformanceOP
+	if(algo=="CSVL")
+	  _algoWPcut = 0.244;
+  else if(algo=="CSVM")
+	  _algoWPcut = 0.679;
+  else if(algo=="CSVT")
+	  _algoWPcut = 0.898;
+	else if(algo=="CSVV1L")
+	  _algoWPcut = 0.405;
+  else if(algo=="CSVV1M")
+	  _algoWPcut = 0.783;
+	else if(algo=="CSVV1T")
+	  _algoWPcut = 0.920;
+  else if(algo=="CSVSLV1L")
+	  _algoWPcut = 0.527;
+	else if(algo=="CSVSLV1M")
+	  _algoWPcut = 0.756; 
+	else if(algo=="CSVSLV1T")
+	  _algoWPcut = 0.859;
+	else if(algo=="TCHPT")
+	  _algoWPcut = 3.41;
+	else if(algo=="JPL")
+	  _algoWPcut = 0.275;
+	else if(algo=="JPM")
+	  _algoWPcut =	0.545;
+	else if(algo=="JPT")
+	  _algoWPcut = 0.790;
+	else std::cout<<" BTagWeightTools::BTagWeightTools WARNING: Working Point for algorithm not found!"<<std::endl;
+		
+}
+
+void BTagWeightTools::setalgoWPcut(std::string algo_L, std::string algo_T)
+{
+	//working points from https://twiki.cern.ch/twiki/bin/viewauth/CMS/BTagPerformanceOP
+	if(algo_L=="CSVL")
+	  _algoWPcut_L = 0.244;
+  else if(algo_L=="CSVM")
+	  _algoWPcut_L = 0.679;
+  else if(algo_L=="CSVT")
+	  _algoWPcut_L = 0.898;
+	else if(algo_L=="CSVV1L")
+	  _algoWPcut_L = 0.405;
+  else if(algo_L=="CSVV1M")
+	  _algoWPcut_L = 0.783;
+	else if(algo_L=="CSVV1T")
+	  _algoWPcut_L = 0.920;
+  else if(algo_L=="CSVSLV1L")
+	  _algoWPcut_L = 0.527;
+	else if(algo_L=="CSVSLV1M")
+	  _algoWPcut_L = 0.756; 
+	else if(algo_L=="CSVSLV1T")
+	  _algoWPcut_L = 0.859;
+	else if(algo_L=="TCHPT")
+	  _algoWPcut_L = 3.41;
+	else if(algo_L=="JPL")
+	  _algoWPcut_L = 0.275;
+	else if(algo_L=="JPM")
+	  _algoWPcut_L =	0.545;
+	else if(algo_L=="JPT")
+	  _algoWPcut_L = 0.790;
+	else std::cout<<" BTagWeightTools::BTagWeightTools WARNING: Working Point for algorithm not found!"<<std::endl;
+	
+	if(algo_T=="CSVL")
+	  _algoWPcut_T = 0.244;
+  else if(algo_T=="CSVM")
+	  _algoWPcut_T = 0.679;
+  else if(algo_T=="CSVT")
+	  _algoWPcut_T = 0.898;
+	else if(algo_T=="CSVV1L")
+	  _algoWPcut_T = 0.405;
+  else if(algo_T=="CSVV1M")
+	  _algoWPcut_T = 0.783;
+	else if(algo_T=="CSVV1T")
+	  _algoWPcut_T = 0.920;
+  else if(algo_T=="CSVSLV1L")
+	  _algoWPcut_T = 0.527;
+	else if(algo_T=="CSVSLV1M")
+	  _algoWPcut_T = 0.756; 
+	else if(algo_T=="CSVSLV1T")
+	  _algoWPcut_T = 0.859;
+	else if(algo_T=="TCHPT")
+	  _algoWPcut_T = 3.41;
+	else if(algo_T=="JPL")
+	  _algoWPcut_T = 0.275;
+	else if(algo_T=="JPM")
+	  _algoWPcut_T =	0.545;
+	else if(algo_T=="JPT")
+	  _algoWPcut_T = 0.790;
+	else std::cout<<" BTagWeightTools::BTagWeightTools WARNING: Working Point for algorithm not found!"<<std::endl;	
+		
+}
 
 float BTagWeightTools::getSFlight(float pt, float eta, string algo, int syst){
   std::pair<float,float> etarange = getfakeraterange((TString)algo,eta);
@@ -311,11 +432,11 @@ float BTagWeightTools::getSFlight(float pt, float eta, string algo, int syst){
     meanminmax="max";
   TString tagger = algo;
   TString taggerstrength="";
-  TString workname = makefakeratename(meanminmax,tagger,taggerstrength,etarange.first,etarange.second,_abcdrange); // default is to run over ABCD range, change via setABCDRangeFakeRates
+  TString workname = makefakeratename(meanminmax,tagger,taggerstrength,etarange.first,etarange.second,_abcdrange,_sflightprescription); // default is to run over ABCD range, change via setABCDRangeFakeRates
   if(_fakeratesfunctions.find(workname)==_fakeratesfunctions.end()){
-        //   cout <<"meanminmax "<< meanminmax <<"  tagger "<< tagger <<  taggerstrength << "  etarangef  "<< etarange.first << " etarange s  "<<etarange.second  << "  _abcdrange  "<< _abcdrange <<endl;
+        //   cout <<"meanminmax "<< meanminmax <<"  tagger "<< tagger <<  taggerstrength << "  etarangef  "<< etarange.first << " etarange s  "<<etarange.second  << "  _abcdrange  "<< _abcdrange << "  _sflightprescription  "<< _sflightprescription <<endl;
       
-    TF1 *newfunc = fillfakerates(meanminmax,tagger,taggerstrength,etarange.first,etarange.second,_abcdrange);
+    TF1 *newfunc = fillfakerates(meanminmax,tagger,taggerstrength,etarange.first,etarange.second,_abcdrange,_sflightprescription);
       newfunc->SetName(workname);
     _fakeratesfunctions[workname]=newfunc;
 
@@ -325,7 +446,7 @@ float BTagWeightTools::getSFlight(float pt, float eta, string algo, int syst){
   return _fakeratesfunctions[workname]->Eval(pt);
 }
 
-TString BTagWeightTools::makefakeratename(TString meanminmax, TString tagger, TString TaggerStrength, Float_t Etamin, Float_t Etamax, TString DataPeriod){
+TString BTagWeightTools::makefakeratename(TString meanminmax, TString tagger, TString TaggerStrength, Float_t Etamin, Float_t Etamax, TString DataPeriod, TString Prescription){
   TString result="";
   result+=meanminmax;
   result+="_";
@@ -338,6 +459,8 @@ TString BTagWeightTools::makefakeratename(TString meanminmax, TString tagger, TS
   result+=Etamax;
   result+="_";
   result+=DataPeriod;
+	result+="_";
+  result+=Prescription;
 
   return result;
 }
@@ -349,7 +472,7 @@ std::pair<float,float> BTagWeightTools::getfakeraterange(TString tagger,float et
   result.first=0.;
   result.second=2.4;
   
-  if(tagger=="CSVL" || tagger=="JPL"){
+  if(tagger=="CSVL" || tagger=="JPL" || tagger=="CSVV1L" || tagger=="CSVSLV1L"){
     if(fabs(eta)<0.5){
       result.first=0.;
       result.second=0.5;
@@ -365,13 +488,13 @@ std::pair<float,float> BTagWeightTools::getfakeraterange(TString tagger,float et
       result.second=1.5;
       return result;
     }
-    else if(fabs(eta)<2.4){
+    else if(fabs(eta)<=2.4){
       result.first=1.5;
       result.second=2.4;
       return result;
     }
   }
-  else if(tagger=="CSVM" || tagger=="JPM"){
+  else if(tagger=="CSVM" || tagger=="JPM" || tagger=="CSVV1M" || tagger=="CSVSLV1M"){
    if(fabs(eta)<0.8){
       result.first=0.;
       result.second=0.8;
@@ -382,11 +505,12 @@ std::pair<float,float> BTagWeightTools::getfakeraterange(TString tagger,float et
       result.second=1.6;
       return result;
     }
-    else if(fabs(eta)<2.4){
+    else if(fabs(eta)<=2.4){
       result.first=1.6;
       result.second=2.4;
       return result;
     }
+		else cout<<"BTagWeightTools::getfakeraterange WARNING: jet eta = "<<eta<<endl;
   }
   return result;
 }
@@ -394,7 +518,7 @@ std::pair<float,float> BTagWeightTools::getfakeraterange(TString tagger,float et
 //// monster function copied from BTV group:
 
 
-TF1* BTagWeightTools::fillfakerates(TString meanminmax, TString tagger, TString TaggerStrength, Float_t Etamin, Float_t Etamax, TString DataPeriod){
+TF1* BTagWeightTools::fillfakerates(TString meanminmax, TString tagger, TString TaggerStrength, Float_t Etamin, Float_t Etamax, TString DataPeriod, TString Prescription){
  TF1 *tmpSFl = NULL;
   TString Atagger = tagger+TaggerStrength;
   TString sEtamin = Form("%1.1f",Etamin);
@@ -402,6 +526,8 @@ TF1* BTagWeightTools::fillfakerates(TString meanminmax, TString tagger, TString 
  // cout << sEtamin << endl;
   //cout << sEtamax << endl;
 
+ if(Prescription == "Moriond2013")
+ { 
   if (DataPeriod=="ABCD") {
 
     // Begin of definition of functions from SF_12ABCD ---------------
@@ -856,15 +982,734 @@ TF1* BTagWeightTools::fillfakerates(TString meanminmax, TString tagger, TString 
     
   } 
   
-  if( tmpSFl == NULL ) {cout << "NULL pointer returned... Function seems not to exist" << endl;
-  cout << "meanminmax: " << meanminmax << " tagger: " << tagger << " TaggerStrength: " << TaggerStrength << " Etamin: " <<  Etamin  << " Etamax: " << Etamax << " DataPeriod: " <<
-  DataPeriod << endl; 
-  
-  tmpSFl = new TF1("dummy","-1",20.,1000);
-  }
-  
-  
+ }   //end "Moriond2013" prescription
+ else if(Prescription == "EPS2013")
+ { 
+	  if( (TaggerStrength == "L" || TaggerStrength == "M") && sEtamin == "0.0" && sEtamax == "2.4" ) //to be adapted: taggerstrength currently not really used in class...
+  	{
+    	cout << "For L and M taggers, the function is not provided integrated over eta. Only eta subranges are provided " << endl;
+    	return tmpSFl;
+  	}
+
+  	Double_t ptmax;
+  	if( sEtamin == "1.5" || sEtamin == "1.6" ) ptmax = 850;
+  	else ptmax = 1000;
+
+	// Insert function def below here =====================================
+
+	if( Atagger == "CSVL" && sEtamin == "0.0" && sEtamax == "0.5")
+	{
+	if( meanminmax == "mean" ) tmpSFl = new TF1("SFlight","((1.01177+(0.0023066*x))+(-4.56052e-06*(x*x)))+(2.57917e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "min" ) tmpSFl = new TF1("SFlightMin","((0.977761+(0.00170704*x))+(-3.2197e-06*(x*x)))+(1.78139e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "max" ) tmpSFl = new TF1("SFlightMax","((1.04582+(0.00290226*x))+(-5.89124e-06*(x*x)))+(3.37128e-09*(x*(x*x)))", 20.,ptmax);
+	}
+	if( Atagger == "CSVL" && sEtamin == "0.5" && sEtamax == "1.0")
+	{
+	if( meanminmax == "mean" ) tmpSFl = new TF1("SFlight","((0.975966+(0.00196354*x))+(-3.83768e-06*(x*x)))+(2.17466e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "min" ) tmpSFl = new TF1("SFlightMin","((0.945135+(0.00146006*x))+(-2.70048e-06*(x*x)))+(1.4883e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "max" ) tmpSFl = new TF1("SFlightMax","((1.00683+(0.00246404*x))+(-4.96729e-06*(x*x)))+(2.85697e-09*(x*(x*x)))", 20.,ptmax);
+	}
+	if( Atagger == "CSVL" && sEtamin == "1.0" && sEtamax == "1.5")
+	{
+	if( meanminmax == "mean" ) tmpSFl = new TF1("SFlight","((0.93821+(0.00180935*x))+(-3.86937e-06*(x*x)))+(2.43222e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "min" ) tmpSFl = new TF1("SFlightMin","((0.911657+(0.00142008*x))+(-2.87569e-06*(x*x)))+(1.76619e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "max" ) tmpSFl = new TF1("SFlightMax","((0.964787+(0.00219574*x))+(-4.85552e-06*(x*x)))+(3.09457e-09*(x*(x*x)))", 20.,ptmax);
+	}
+	if( Atagger == "CSVL" && sEtamin == "1.5" && sEtamax == "2.4")
+	{
+	if( meanminmax == "mean" ) tmpSFl = new TF1("SFlight","((1.00022+(0.0010998*x))+(-3.10672e-06*(x*x)))+(2.35006e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "min" ) tmpSFl = new TF1("SFlightMin","((0.970045+(0.000862284*x))+(-2.31714e-06*(x*x)))+(1.68866e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "max" ) tmpSFl = new TF1("SFlightMax","((1.03039+(0.0013358*x))+(-3.89284e-06*(x*x)))+(3.01155e-09*(x*(x*x)))", 20.,ptmax);
+	}
+	if( Atagger == "CSVM" && sEtamin == "0.0" && sEtamax == "0.8")
+	{
+	if( meanminmax == "mean" ) tmpSFl = new TF1("SFlight","((1.07541+(0.00231827*x))+(-4.74249e-06*(x*x)))+(2.70862e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "min" ) tmpSFl = new TF1("SFlightMin","((0.964527+(0.00149055*x))+(-2.78338e-06*(x*x)))+(1.51771e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "max" ) tmpSFl = new TF1("SFlightMax","((1.18638+(0.00314148*x))+(-6.68993e-06*(x*x)))+(3.89288e-09*(x*(x*x)))", 20.,ptmax);
+	}
+	if( Atagger == "CSVM" && sEtamin == "0.8" && sEtamax == "1.6")
+	{
+	if( meanminmax == "mean" ) tmpSFl = new TF1("SFlight","((1.05613+(0.00114031*x))+(-2.56066e-06*(x*x)))+(1.67792e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "min" ) tmpSFl = new TF1("SFlightMin","((0.946051+(0.000759584*x))+(-1.52491e-06*(x*x)))+(9.65822e-10*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "max" ) tmpSFl = new TF1("SFlightMax","((1.16624+(0.00151884*x))+(-3.59041e-06*(x*x)))+(2.38681e-09*(x*(x*x)))", 20.,ptmax);
+	}
+	if( Atagger == "CSVM" && sEtamin == "1.6" && sEtamax == "2.4")
+	{
+	if( meanminmax == "mean" ) tmpSFl = new TF1("SFlight","((1.05625+(0.000487231*x))+(-2.22792e-06*(x*x)))+(1.70262e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "min" ) tmpSFl = new TF1("SFlightMin","((0.956736+(0.000280197*x))+(-1.42739e-06*(x*x)))+(1.0085e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "max" ) tmpSFl = new TF1("SFlightMax","((1.15575+(0.000693344*x))+(-3.02661e-06*(x*x)))+(2.39752e-09*(x*(x*x)))", 20.,ptmax);
+	}
+	if( Atagger == "CSVT" && sEtamin == "0.0" && sEtamax == "2.4")
+	{
+	if( meanminmax == "mean" ) tmpSFl = new TF1("SFlight","((1.00462+(0.00325971*x))+(-7.79184e-06*(x*x)))+(5.22506e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "min" ) tmpSFl = new TF1("SFlightMin","((0.845757+(0.00186422*x))+(-4.6133e-06*(x*x)))+(3.21723e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "max" ) tmpSFl = new TF1("SFlightMax","((1.16361+(0.00464695*x))+(-1.09467e-05*(x*x)))+(7.21896e-09*(x*(x*x)))", 20.,ptmax);
+	}
+	if( Atagger == "CSVV1L" && sEtamin == "0.0" && sEtamax == "0.5")
+	{
+	if( meanminmax == "mean" ) tmpSFl = new TF1("SFlight","((1.03599+(0.00187708*x))+(-3.73001e-06*(x*x)))+(2.09649e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "min" ) tmpSFl = new TF1("SFlightMin","((0.995735+(0.00146811*x))+(-2.83906e-06*(x*x)))+(1.5717e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "max" ) tmpSFl = new TF1("SFlightMax","((1.0763+(0.00228243*x))+(-4.61169e-06*(x*x)))+(2.61601e-09*(x*(x*x)))", 20.,ptmax);
+	}
+	if( Atagger == "CSVV1L" && sEtamin == "0.5" && sEtamax == "1.0")
+	{
+	if( meanminmax == "mean" ) tmpSFl = new TF1("SFlight","((0.987393+(0.00162718*x))+(-3.21869e-06*(x*x)))+(1.84615e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "min" ) tmpSFl = new TF1("SFlightMin","((0.947416+(0.00130297*x))+(-2.50427e-06*(x*x)))+(1.41682e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "max" ) tmpSFl = new TF1("SFlightMax","((1.02741+(0.00194855*x))+(-3.92587e-06*(x*x)))+(2.27149e-09*(x*(x*x)))", 20.,ptmax);
+	}
+	if( Atagger == "CSVV1L" && sEtamin == "1.0" && sEtamax == "1.5")
+	{
+	if( meanminmax == "mean" ) tmpSFl = new TF1("SFlight","((0.950146+(0.00150932*x))+(-3.28136e-06*(x*x)))+(2.06196e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "min" ) tmpSFl = new TF1("SFlightMin","((0.91407+(0.00123525*x))+(-2.61966e-06*(x*x)))+(1.63016e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "max" ) tmpSFl = new TF1("SFlightMax","((0.986259+(0.00178067*x))+(-3.93596e-06*(x*x)))+(2.49014e-09*(x*(x*x)))", 20.,ptmax);
+	}
+	if( Atagger == "CSVV1L" && sEtamin == "1.5" && sEtamax == "2.4")
+	{
+	if( meanminmax == "mean" ) tmpSFl = new TF1("SFlight","((1.01923+(0.000898874*x))+(-2.57986e-06*(x*x)))+(1.8149e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "min" ) tmpSFl = new TF1("SFlightMin","((0.979782+(0.000743807*x))+(-2.14927e-06*(x*x)))+(1.49486e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "max" ) tmpSFl = new TF1("SFlightMax","((1.05868+(0.00105264*x))+(-3.00767e-06*(x*x)))+(2.13498e-09*(x*(x*x)))", 20.,ptmax);
+	}
+	if( Atagger == "CSVV1M" && sEtamin == "0.0" && sEtamax == "0.8")
+	{
+	if( meanminmax == "mean" ) tmpSFl = new TF1("SFlight","((1.06383+(0.00279657*x))+(-5.75405e-06*(x*x)))+(3.4302e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "min" ) tmpSFl = new TF1("SFlightMin","((0.971686+(0.00195242*x))+(-3.98756e-06*(x*x)))+(2.38991e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "max" ) tmpSFl = new TF1("SFlightMax","((1.15605+(0.00363538*x))+(-7.50634e-06*(x*x)))+(4.4624e-09*(x*(x*x)))", 20.,ptmax);
+	}
+	if( Atagger == "CSVV1M" && sEtamin == "0.8" && sEtamax == "1.6")
+	{
+	if( meanminmax == "mean" ) tmpSFl = new TF1("SFlight","((1.03709+(0.00169762*x))+(-3.52511e-06*(x*x)))+(2.25975e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "min" ) tmpSFl = new TF1("SFlightMin","((0.947328+(0.00117422*x))+(-2.32363e-06*(x*x)))+(1.46136e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "max" ) tmpSFl = new TF1("SFlightMax","((1.12687+(0.00221834*x))+(-4.71949e-06*(x*x)))+(3.05456e-09*(x*(x*x)))", 20.,ptmax);
+	}
+	if( Atagger == "CSVV1M" && sEtamin == "1.6" && sEtamax == "2.4")
+	{
+	if( meanminmax == "mean" ) tmpSFl = new TF1("SFlight","((1.01679+(0.00211998*x))+(-6.26097e-06*(x*x)))+(4.53843e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "min" ) tmpSFl = new TF1("SFlightMin","((0.922527+(0.00176245*x))+(-5.14169e-06*(x*x)))+(3.61532e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "max" ) tmpSFl = new TF1("SFlightMax","((1.11102+(0.00247531*x))+(-7.37745e-06*(x*x)))+(5.46589e-09*(x*(x*x)))", 20.,ptmax);
+	}
+	if( Atagger == "CSVV1T" && sEtamin == "0.0" && sEtamax == "2.4")
+	{
+	if( meanminmax == "mean" ) tmpSFl = new TF1("SFlight","((1.15047+(0.00220948*x))+(-5.17912e-06*(x*x)))+(3.39216e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "min" ) tmpSFl = new TF1("SFlightMin","((0.936862+(0.00149618*x))+(-3.64924e-06*(x*x)))+(2.43883e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "max" ) tmpSFl = new TF1("SFlightMax","((1.36418+(0.00291794*x))+(-6.6956e-06*(x*x)))+(4.33793e-09*(x*(x*x)))", 20.,ptmax);
+	}
+	if( Atagger == "CSVSLV1L" && sEtamin == "0.0" && sEtamax == "0.5")
+	{
+	if( meanminmax == "mean" ) tmpSFl = new TF1("SFlight","((1.06344+(0.0014539*x))+(-2.72328e-06*(x*x)))+(1.47643e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "min" ) tmpSFl = new TF1("SFlightMin","((1.01168+(0.000950951*x))+(-1.58947e-06*(x*x)))+(7.96543e-10*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "max" ) tmpSFl = new TF1("SFlightMax","((1.11523+(0.00195443*x))+(-3.85115e-06*(x*x)))+(2.15307e-09*(x*(x*x)))", 20.,ptmax);
+	}
+	if( Atagger == "CSVSLV1L" && sEtamin == "0.5" && sEtamax == "1.0")
+	{
+	if( meanminmax == "mean" ) tmpSFl = new TF1("SFlight","((1.0123+(0.00151734*x))+(-2.99087e-06*(x*x)))+(1.73428e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "min" ) tmpSFl = new TF1("SFlightMin","((0.960377+(0.00109821*x))+(-2.01652e-06*(x*x)))+(1.13076e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "max" ) tmpSFl = new TF1("SFlightMax","((1.06426+(0.0019339*x))+(-3.95863e-06*(x*x)))+(2.3342e-09*(x*(x*x)))", 20.,ptmax);
+	}
+	if( Atagger == "CSVSLV1L" && sEtamin == "1.0" && sEtamax == "1.5")
+	{
+	if( meanminmax == "mean" ) tmpSFl = new TF1("SFlight","((0.975277+(0.00146932*x))+(-3.17563e-06*(x*x)))+(2.03698e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "min" ) tmpSFl = new TF1("SFlightMin","((0.931687+(0.00110971*x))+(-2.29681e-06*(x*x)))+(1.45867e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "max" ) tmpSFl = new TF1("SFlightMax","((1.0189+(0.00182641*x))+(-4.04782e-06*(x*x)))+(2.61199e-09*(x*(x*x)))", 20.,ptmax);
+	}
+	if( Atagger == "CSVSLV1L" && sEtamin == "1.5" && sEtamax == "2.4")
+	{
+	if( meanminmax == "mean" ) tmpSFl = new TF1("SFlight","((1.04201+(0.000827388*x))+(-2.31261e-06*(x*x)))+(1.62629e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "min" ) tmpSFl = new TF1("SFlightMin","((0.992838+(0.000660673*x))+(-1.84971e-06*(x*x)))+(1.2758e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "max" ) tmpSFl = new TF1("SFlightMax","((1.09118+(0.000992959*x))+(-2.77313e-06*(x*x)))+(1.9769e-09*(x*(x*x)))", 20.,ptmax);
+	}
+	if( Atagger == "CSVSLV1M" && sEtamin == "0.0" && sEtamax == "0.8")
+	{
+	if( meanminmax == "mean" ) tmpSFl = new TF1("SFlight","((1.06212+(0.00223614*x))+(-4.25167e-06*(x*x)))+(2.42728e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "min" ) tmpSFl = new TF1("SFlightMin","((0.903956+(0.00121678*x))+(-2.04383e-06*(x*x)))+(1.10727e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "max" ) tmpSFl = new TF1("SFlightMax","((1.22035+(0.00325183*x))+(-6.45023e-06*(x*x)))+(3.74225e-09*(x*(x*x)))", 20.,ptmax);
+	}
+	if( Atagger == "CSVSLV1M" && sEtamin == "0.8" && sEtamax == "1.6")
+	{
+	if( meanminmax == "mean" ) tmpSFl = new TF1("SFlight","((1.04547+(0.00216995*x))+(-4.579e-06*(x*x)))+(2.91791e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "min" ) tmpSFl = new TF1("SFlightMin","((0.900637+(0.00120088*x))+(-2.27069e-06*(x*x)))+(1.40609e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "max" ) tmpSFl = new TF1("SFlightMax","((1.19034+(0.00313562*x))+(-6.87854e-06*(x*x)))+(4.42546e-09*(x*(x*x)))", 20.,ptmax);
+	}
+	if( Atagger == "CSVSLV1M" && sEtamin == "1.6" && sEtamax == "2.4")
+	{
+	if( meanminmax == "mean" ) tmpSFl = new TF1("SFlight","((0.991865+(0.00324957*x))+(-9.65897e-06*(x*x)))+(7.13694e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "min" ) tmpSFl = new TF1("SFlightMin","((0.868875+(0.00222761*x))+(-6.44897e-06*(x*x)))+(4.53261e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "max" ) tmpSFl = new TF1("SFlightMax","((1.11481+(0.00426745*x))+(-1.28612e-05*(x*x)))+(9.74425e-09*(x*(x*x)))", 20.,ptmax);
+	}
+	if( Atagger == "CSVSLV1T" && sEtamin == "0.0" && sEtamax == "2.4")
+	{
+	if( meanminmax == "mean" ) tmpSFl = new TF1("SFlight","((1.09494+(0.00193966*x))+(-4.35021e-06*(x*x)))+(2.8973e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "min" ) tmpSFl = new TF1("SFlightMin","((0.813331+(0.00139561*x))+(-3.15313e-06*(x*x)))+(2.12173e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "max" ) tmpSFl = new TF1("SFlightMax","((1.37663+(0.00247963*x))+(-5.53583e-06*(x*x)))+(3.66635e-09*(x*(x*x)))", 20.,ptmax);
+	}
+	if( Atagger == "JPL" && sEtamin == "0.0" && sEtamax == "0.5")
+	{
+	if( meanminmax == "mean" ) tmpSFl = new TF1("SFlight","((0.991991+(0.000898777*x))+(-1.88002e-06*(x*x)))+(1.11276e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "min" ) tmpSFl = new TF1("SFlightMin","((0.930838+(0.000687929*x))+(-1.36976e-06*(x*x)))+(7.94486e-10*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "max" ) tmpSFl = new TF1("SFlightMax","((1.05319+(0.00110776*x))+(-2.38542e-06*(x*x)))+(1.42826e-09*(x*(x*x)))", 20.,ptmax);
+	}
+	if( Atagger == "JPL" && sEtamin == "0.5" && sEtamax == "1.0")
+	{
+	if( meanminmax == "mean" ) tmpSFl = new TF1("SFlight","((0.96633+(0.000419215*x))+(-9.8654e-07*(x*x)))+(6.30396e-10*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "min" ) tmpSFl = new TF1("SFlightMin","((0.904781+(0.000324913*x))+(-7.2229e-07*(x*x)))+(4.52185e-10*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "max" ) tmpSFl = new TF1("SFlightMax","((1.0279+(0.00051255*x))+(-1.24815e-06*(x*x)))+(8.07098e-10*(x*(x*x)))", 20.,ptmax);
+	}
+	if( Atagger == "JPL" && sEtamin == "1.0" && sEtamax == "1.5")
+	{
+	if( meanminmax == "mean" ) tmpSFl = new TF1("SFlight","((0.968008+(0.000482491*x))+(-1.2496e-06*(x*x)))+(9.02736e-10*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "min" ) tmpSFl = new TF1("SFlightMin","((0.914619+(0.000330357*x))+(-8.41216e-07*(x*x)))+(6.14504e-10*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "max" ) tmpSFl = new TF1("SFlightMax","((1.02142+(0.000633484*x))+(-1.6547e-06*(x*x)))+(1.18921e-09*(x*(x*x)))", 20.,ptmax);
+	}
+	if( Atagger == "JPL" && sEtamin == "1.5" && sEtamax == "2.4")
+	{
+	if( meanminmax == "mean" ) tmpSFl = new TF1("SFlight","((0.991448+(0.000765746*x))+(-2.26144e-06*(x*x)))+(1.65233e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "min" ) tmpSFl = new TF1("SFlightMin","((0.933947+(0.000668609*x))+(-1.94474e-06*(x*x)))+(1.39774e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "max" ) tmpSFl = new TF1("SFlightMax","((1.04894+(0.000861785*x))+(-2.57573e-06*(x*x)))+(1.90702e-09*(x*(x*x)))", 20.,ptmax);
+	}
+	if( Atagger == "JPM" && sEtamin == "0.0" && sEtamax == "0.8")
+	{
+	if( meanminmax == "mean" ) tmpSFl = new TF1("SFlight","((0.991457+(0.00130778*x))+(-2.98875e-06*(x*x)))+(1.81499e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "min" ) tmpSFl = new TF1("SFlightMin","((0.822012+(0.000908344*x))+(-1.89516e-06*(x*x)))+(1.1163e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "max" ) tmpSFl = new TF1("SFlightMax","((1.16098+(0.00170403*x))+(-4.07382e-06*(x*x)))+(2.50873e-09*(x*(x*x)))", 20.,ptmax);
+	}
+	if( Atagger == "JPM" && sEtamin == "0.8" && sEtamax == "1.6")
+	{
+	if( meanminmax == "mean" ) tmpSFl = new TF1("SFlight","((1.00576+(0.00121353*x))+(-3.20601e-06*(x*x)))+(2.15905e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "min" ) tmpSFl = new TF1("SFlightMin","((0.845597+(0.000734909*x))+(-1.76311e-06*(x*x)))+(1.16104e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "max" ) tmpSFl = new TF1("SFlightMax","((1.16598+(0.00168902*x))+(-4.64013e-06*(x*x)))+(3.15214e-09*(x*(x*x)))", 20.,ptmax);
+	}
+	if( Atagger == "JPM" && sEtamin == "1.6" && sEtamax == "2.4")
+	{
+	if( meanminmax == "mean" ) tmpSFl = new TF1("SFlight","((0.939038+(0.00226026*x))+(-7.38544e-06*(x*x)))+(5.77162e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "min" ) tmpSFl = new TF1("SFlightMin","((0.803867+(0.00165886*x))+(-5.19532e-06*(x*x)))+(3.88441e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "max" ) tmpSFl = new TF1("SFlightMax","((1.07417+(0.00285862*x))+(-9.56945e-06*(x*x)))+(7.66167e-09*(x*(x*x)))", 20.,ptmax);
+	}
+	if( Atagger == "JPT" && sEtamin == "0.0" && sEtamax == "2.4")
+	{
+	if( meanminmax == "mean" ) tmpSFl = new TF1("SFlight","((0.953235+(0.00206692*x))+(-5.21754e-06*(x*x)))+(3.44893e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "min" ) tmpSFl = new TF1("SFlightMin","((0.642947+(0.00180129*x))+(-4.16373e-06*(x*x)))+(2.68061e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "max" ) tmpSFl = new TF1("SFlightMax","((1.26372+(0.0023265*x))+(-6.2548e-06*(x*x)))+(4.20761e-09*(x*(x*x)))", 20.,ptmax);
+	}
+	if( Atagger == "TCHPT" && sEtamin == "0.0" && sEtamax == "2.4")
+	{
+	if( meanminmax == "mean" ) tmpSFl = new TF1("SFlight","((1.20175+(0.000858187*x))+(-1.98726e-06*(x*x)))+(1.31057e-09*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "min" ) tmpSFl = new TF1("SFlightMin","((0.968557+(0.000586877*x))+(-1.34624e-06*(x*x)))+(9.09724e-10*(x*(x*x)))", 20.,ptmax);
+	if( meanminmax == "max" ) tmpSFl = new TF1("SFlightMax","((1.43508+(0.00112666*x))+(-2.62078e-06*(x*x)))+(1.70697e-09*(x*(x*x)))", 20.,ptmax);
+	}
+ } //end "EPS2013" prescription
+
+
+ if( tmpSFl == NULL ) 
+ {
+   cout << "NULL pointer returned... Function seems not to exist" << endl;
+   cout << "meanminmax: " << meanminmax << " tagger: " << tagger << " TaggerStrength: " << TaggerStrength << " Etamin: " <<  Etamin  << " Etamax: " << Etamax << " DataPeriod: " << DataPeriod << endl; 
+   tmpSFl = new TF1("dummy","-1",20.,1000);
+ }
+    
 
   return tmpSFl;
 
 }
+
+void BTagWeightTools::InitializeMCEfficiencyHistos(int NofPtBins,float PtMin,float PtMax,int NofEtaBins)
+{
+  _PtMaxhistos = PtMax;
+  _histo2D["BtaggedJets"] = new TH2F("BtaggedJets", "Total number of btagged jets", NofPtBins, PtMin, PtMax, NofEtaBins, 0, 2.4);
+	_histo2D["BtaggedBJets"] = new TH2F("BtaggedBJets", "Total number of btagged b-jets", NofPtBins, PtMin, PtMax, NofEtaBins, 0, 2.4);
+	_histo2D["BtaggedCJets"] = new TH2F("BtaggedCJets", "Total number of btagged c-jets", NofPtBins, PtMin, PtMax, NofEtaBins, 0, 2.4);
+	_histo2D["BtaggedLightJets"] = new TH2F("BtaggedLightJets", "Total number of btagged light jets", NofPtBins, PtMin, PtMax, NofEtaBins, 0, 2.4);
+	_histo2D["TotalNofBJets"] = new TH2F("TotalNofBJets", "Total number of b-jets", NofPtBins, PtMin, PtMax, NofEtaBins, 0, 2.4);
+	_histo2D["TotalNofCJets"] = new TH2F("TotalNofCJets", "Total number of c-jets", NofPtBins, PtMin, PtMax, NofEtaBins, 0, 2.4);
+	_histo2D["TotalNofLightJets"] = new TH2F("TotalNofLightJets", "Total number of light jets", NofPtBins, PtMin, PtMax, NofEtaBins, 0, 2.4);
+	MCEfficiencyHistosInitialized = true;	
+}
+
+void BTagWeightTools::FillMCEfficiencyHistos(vector< TRootJet* >& selectedJets)
+{
+  if(MCEfficiencyHistosInitialized)
+	{
+	  for (unsigned int i=0; i < selectedJets.size(); i++)
+	  {
+					float localPt = selectedJets[i]->Pt();
+					float localEta = fabs(selectedJets[i]->Eta());
+					if (localPt >= _PtMaxhistos) localPt = _PtMaxhistos-1;
+					if (localEta == 2.4) localEta = 2.4-0.01;
+					
+					if (fabs(selectedJets[i]->partonFlavour()) == 5.) {	//b-jet
+						_histo2D["TotalNofBJets"]->Fill(localPt,localEta);
+					}
+					else if (fabs(selectedJets[i]->partonFlavour()) == 4.) {	//c-jet
+						_histo2D["TotalNofCJets"]->Fill(localPt,localEta);
+					}
+					else if (fabs(selectedJets[i]->partonFlavour()) == 1. || fabs(selectedJets[i]->partonFlavour()) == 2. || fabs(selectedJets[i]->partonFlavour()) == 3. || fabs(selectedJets[i]->partonFlavour()) == 21.) {	//udsg-jet
+						_histo2D["TotalNofLightJets"]->Fill(localPt,localEta);
+					}
+					else if (fabs(selectedJets[i]->partonFlavour()) == 0.) {
+						//cout << "Eventnr.: " << ievt << ", Jetnr.: " << i << ", pdgId: " << selectedJets[i]->partonFlavour() << ". Is pileup jet -> consider as light jet." << endl;
+						_histo2D["TotalNofLightJets"]->Fill(localPt,localEta);
+					}
+					else if (fabs(selectedJets[i]->partonFlavour()) > 100.) {
+						//cout << "Eventnr.: " << ievt << ", Jetnr.: " << i << ", pdgId: " << selectedJets[i]->partonFlavour() << ". Is hadron -> consider as light jet." << endl;
+						_histo2D["TotalNofLightJets"]->Fill(localPt,localEta);
+					}
+					
+					float btagValue = -100.;
+					if(_defaultalgo=="CSVL" || _defaultalgo=="CSVM" || _defaultalgo=="CSVT") btagValue = selectedJets[i]->btag_combinedSecondaryVertexBJetTags();
+					else if(_defaultalgo=="CSVV1L" || _defaultalgo=="CSVV1M" || _defaultalgo=="CSVV1T") btagValue = selectedJets[i]->btag_combinedSecondaryVertexRetrainedBJetTags();
+					else if(_defaultalgo=="CSVSLV1L" || _defaultalgo=="CSVSLV1M" || _defaultalgo=="CSVSLV1T") btagValue = selectedJets[i]->btag_combinedCSVSLBJetTags();
+					else if(_defaultalgo=="JPL" || _defaultalgo=="JPM" || _defaultalgo=="JPT") btagValue = selectedJets[i]->btag_jetProbabilityBJetTags();
+					else if(_defaultalgo=="TCHP") btagValue = selectedJets[i]->btag_trackCountingHighPurBJetTags();
+					else std::cout<<" BTagWeightTools::FillMCEfficiencyHistos WARNING: Working Point for algorithm not found!"<<std::endl;
+					
+					if (btagValue > _algoWPcut) {
+						_histo2D["BtaggedJets"]->Fill(localPt,localEta);
+						
+						if (fabs(selectedJets[i]->partonFlavour()) == 5.) {	//b-jet
+							_histo2D["BtaggedBJets"]->Fill(localPt,localEta);
+						}
+						else if (fabs(selectedJets[i]->partonFlavour()) == 4.) {	//c-jet
+							_histo2D["BtaggedCJets"]->Fill(localPt,localEta);
+						}
+						else if (fabs(selectedJets[i]->partonFlavour()) == 1. || fabs(selectedJets[i]->partonFlavour()) == 2. || fabs(selectedJets[i]->partonFlavour()) == 3. || fabs(selectedJets[i]->partonFlavour()) == 21.) {	//udsg-jet
+							_histo2D["BtaggedLightJets"]->Fill(localPt,localEta);
+						}
+						else if (fabs(selectedJets[i]->partonFlavour()) == 0.) {
+							//cout << "Eventnr.: " << ievt << ", Jetnr.: " << i << ", pdgId: " << selectedJets[i]->partonFlavour() << ". Is pileup jet -> consider as light jet." << endl;
+							_histo2D["BtaggedLightJets"]->Fill(localPt,localEta);
+						}
+						else if (fabs(selectedJets[i]->partonFlavour()) > 100.) {
+							//cout << "Eventnr.: " << ievt << ", Jetnr.: " << i << ", pdgId: " << selectedJets[i]->partonFlavour() << ". Is hadron -> consider as light jet." << endl;
+							_histo2D["BtaggedLightJets"]->Fill(localPt,localEta);
+						}
+					}
+	  }
+	}
+	else std::cout<<"BTagWeightTools::FillMCEfficiencyHistos WARNING: not filling histos because not initialized!"<<std::endl;
+} 
+
+void BTagWeightTools::FillMCEfficiencyHistos(vector<TLorentzVector>& selectedJets, vector<int>& selectedJets_partonFlavour, vector<float>& selectedJets_bTagValues)
+{
+  if(MCEfficiencyHistosInitialized)
+	{
+    for (unsigned int i=0; i < selectedJets.size(); i++)
+	  {
+					float localPt = selectedJets[i].Pt();
+					float localEta = fabs(selectedJets[i].Eta());
+					if (localPt >= _PtMaxhistos) localPt = _PtMaxhistos-1;
+					if (localEta == 2.4) localEta = 2.4-0.01;
+					
+					if (fabs(selectedJets_partonFlavour[i]) == 5.) {	//b-jet
+						_histo2D["TotalNofBJets"]->Fill(localPt,localEta);
+					}
+					else if (fabs(selectedJets_partonFlavour[i]) == 4.) {	//c-jet
+						_histo2D["TotalNofCJets"]->Fill(localPt,localEta);
+					}
+					else if (fabs(selectedJets_partonFlavour[i]) == 1. || fabs(selectedJets_partonFlavour[i]) == 2. || fabs(selectedJets_partonFlavour[i]) == 3. || fabs(selectedJets_partonFlavour[i]) == 21.) {	//udsg-jet
+						_histo2D["TotalNofLightJets"]->Fill(localPt,localEta);
+					}
+					else if (fabs(selectedJets_partonFlavour[i]) == 0.) {
+						//cout << "Eventnr.: " << ievt << ", Jetnr.: " << i << ", pdgId: " << selectedJets[i]->partonFlavour() << ". Is pileup jet -> consider as light jet." << endl;
+						_histo2D["TotalNofLightJets"]->Fill(localPt,localEta);
+					}
+					else if (fabs(selectedJets_partonFlavour[i]) > 100.) {
+						//cout << "Eventnr.: " << ievt << ", Jetnr.: " << i << ", pdgId: " << selectedJets[i]->partonFlavour() << ". Is hadron -> consider as light jet." << endl;
+						_histo2D["TotalNofLightJets"]->Fill(localPt,localEta);
+					}
+										
+					//cout<<"selectedJets_bTagValues["<<i<<"] = "<<selectedJets_bTagValues[i]<<", _algoWPcut = "<<_algoWPcut<<", flavor = "<<selectedJets_partonFlavour[i]<<endl;
+					if (selectedJets_bTagValues[i] > _algoWPcut) {
+						_histo2D["BtaggedJets"]->Fill(localPt,localEta);
+						
+						if (fabs(selectedJets_partonFlavour[i]) == 5.) {	//b-jet
+							_histo2D["BtaggedBJets"]->Fill(localPt,localEta);
+						}
+						else if (fabs(selectedJets_partonFlavour[i]) == 4.) {	//c-jet
+							_histo2D["BtaggedCJets"]->Fill(localPt,localEta);
+						}
+						else if (fabs(selectedJets_partonFlavour[i]) == 1. || fabs(selectedJets_partonFlavour[i]) == 2. || fabs(selectedJets_partonFlavour[i]) == 3. || fabs(selectedJets_partonFlavour[i]) == 21.) {	//udsg-jet
+							_histo2D["BtaggedLightJets"]->Fill(localPt,localEta);
+						}
+						else if (fabs(selectedJets_partonFlavour[i]) == 0.) {
+							//cout << "Eventnr.: " << ievt << ", Jetnr.: " << i << ", pdgId: " << selectedJets_partonFlavour[i] << ". Is pileup jet -> consider as light jet." << endl;
+							_histo2D["BtaggedLightJets"]->Fill(localPt,localEta);
+						}
+						else if (fabs(selectedJets_partonFlavour[i]) > 100.) {
+							//cout << "Eventnr.: " << ievt << ", Jetnr.: " << i << ", pdgId: " << selectedJets_partonFlavour[i] << ". Is hadron -> consider as light jet." << endl;
+							_histo2D["BtaggedLightJets"]->Fill(localPt,localEta);
+						}
+					}
+	  }
+	}
+	else std::cout<<"BTagWeightTools::FillMCEfficiencyHistos WARNING: not filling histos because not initialized!"<<std::endl;
+}
+
+void BTagWeightTools::WriteMCEfficiencyHistos(std::string outfilename)
+{
+  if(MCEfficiencyHistosInitialized)
+	{
+      cout << "BTagWeightTools::WriteMCEfficiencyHistos: Creating output file to store the MC efficiency plots for the btag weights: " << outfilename << endl;			
+			TFile *outfile = new TFile (outfilename.c_str(), "RECREATE");			
+			outfile->cd();			
+			_histo2D["BtaggedJets"]->Write();
+			_histo2D["BtaggedBJets"]->Write();
+			_histo2D["BtaggedCJets"]->Write();
+			_histo2D["BtaggedLightJets"]->Write();
+			_histo2D["TotalNofBJets"]->Write();
+			_histo2D["TotalNofCJets"]->Write();
+			_histo2D["TotalNofLightJets"]->Write();			
+			outfile->Close();
+	}
+	else std::cout<<"BTagWeightTools::WriteMCEfficiencyHistos WARNING: not writing histos because not initialized!"<<std::endl;
+}
+
+void BTagWeightTools::ReadMCEfficiencyHistos(std::string infilename)
+{
+			TFile *infile = new TFile(infilename.c_str(),"READ");
+			infile->cd();
+			inBtaggedJets  = (TH2F*) infile->Get("BtaggedJets");
+			inBtaggedBJets = (TH2F*) infile->Get("BtaggedBJets");
+			inBtaggedCJets = (TH2F*) infile->Get("BtaggedCJets");
+			inBtaggedLightJets = (TH2F*) infile->Get("BtaggedLightJets");
+			inTotalNofBJets = (TH2F*) infile->Get("TotalNofBJets");
+			inTotalNofCJets = (TH2F*) infile->Get("TotalNofCJets");
+			inTotalNofLightJets = (TH2F*) infile->Get("TotalNofLightJets");
+}
+
+void BTagWeightTools::ReadMCEfficiencyHistos(std::string infilename_L,std::string infilename_T)
+{
+			TFile *infile_L = new TFile(infilename_L.c_str(),"READ");
+			infile_L->cd();
+			inBtaggedJets  = (TH2F*) infile_L->Get("BtaggedJets");
+			inBtaggedBJets = (TH2F*) infile_L->Get("BtaggedBJets");
+			inBtaggedCJets = (TH2F*) infile_L->Get("BtaggedCJets");
+			inBtaggedLightJets = (TH2F*) infile_L->Get("BtaggedLightJets");
+			inTotalNofBJets = (TH2F*) infile_L->Get("TotalNofBJets");
+			inTotalNofCJets = (TH2F*) infile_L->Get("TotalNofCJets");
+			inTotalNofLightJets = (TH2F*) infile_L->Get("TotalNofLightJets");
+			
+			TFile *infile_T = new TFile(infilename_T.c_str(),"READ");
+			infile_T->cd();
+			inBtaggedJets_T  = (TH2F*) infile_T->Get("BtaggedJets");
+			inBtaggedBJets_T = (TH2F*) infile_T->Get("BtaggedBJets");
+			inBtaggedCJets_T = (TH2F*) infile_T->Get("BtaggedCJets");
+			inBtaggedLightJets_T = (TH2F*) infile_T->Get("BtaggedLightJets");
+			inTotalNofBJets_T = (TH2F*) infile_T->Get("TotalNofBJets");
+			inTotalNofCJets_T = (TH2F*) infile_T->Get("TotalNofCJets");
+			inTotalNofLightJets_T = (TH2F*) infile_T->Get("TotalNofLightJets");
+}
+
+float BTagWeightTools::getMCEventWeight(vector< TRootJet* >& selectedJets, int syst)
+{
+      float probMC = 1.;
+			float probData = 1.;
+			float tagEff = 1.;
+			float btagSF = 1.;
+			for (unsigned int i=0; i < selectedJets.size(); i++) 
+			{
+						tagEff = getTagEff(selectedJets[i]->Pt(), selectedJets[i]->Eta(), selectedJets[i]->partonFlavour());											
+						btagSF = getSF(selectedJets[i]->Pt(), selectedJets[i]->Eta(), selectedJets[i]->partonFlavour(), _defaultalgo, syst);
+						//cout<<"  btagSF = "<<btagSF<<", tagEff = "<<tagEff<<", syst = "<<syst<<endl;	
+														
+						if (tagEff == 0.)
+						{
+								cout << endl << "BTagWeightTools::getMCEventWeight WARNING: Tag efficiency is zero!" << endl;
+								continue;
+						}
+						if (btagSF == 0.)
+						{
+								cout << endl << "BTagWeightTools::getMCEventWeight WARNING: Btag scalefactor is zero!" << endl;
+								continue;
+						}
+						//else if (btagSF*tagEff >= 1.)
+						//{
+								//cout << endl << "BTagWeightTools::getMCEventWeight WARNING:	BtagSF*tagEff is larger than 1!" << endl; //but this is not a problem?
+						//}	
+																			
+						float btagValue = -100.;
+					  if(_defaultalgo=="CSVL" || _defaultalgo=="CSVM" || _defaultalgo=="CSVT") btagValue = selectedJets[i]->btag_combinedSecondaryVertexBJetTags();
+					  else if(_defaultalgo=="CSVV1L" || _defaultalgo=="CSVV1M" || _defaultalgo=="CSVV1T") btagValue = selectedJets[i]->btag_combinedSecondaryVertexRetrainedBJetTags();
+					  else if(_defaultalgo=="CSVSLV1L" || _defaultalgo=="CSVSLV1M" || _defaultalgo=="CSVSLV1T") btagValue = selectedJets[i]->btag_combinedCSVSLBJetTags();
+					  else if(_defaultalgo=="JPL" || _defaultalgo=="JPM" || _defaultalgo=="JPT") btagValue = selectedJets[i]->btag_jetProbabilityBJetTags();
+					  else if(_defaultalgo=="TCHP") btagValue = selectedJets[i]->btag_trackCountingHighPurBJetTags();
+					  else std::cout<<" BTagWeightTools::getMCEventWeight WARNING: Working Point for algorithm not found!"<<std::endl;							
+						
+						if (btagValue > _algoWPcut) //tagged
+						{	
+						    probMC = probMC*tagEff;
+								probData = probData*btagSF*tagEff;
+						}
+						else
+						{	//not tagged
+								probMC = probMC*(1.-tagEff);
+								probData = probData*(1.-btagSF*tagEff);
+						}
+			}
+			float Weight = probData/probMC;
+			return Weight;
+}
+
+float BTagWeightTools::getMCEventWeight(vector< TLorentzVector >& selectedJets, vector<int>& selectedJets_partonFlavour, vector<float>& selectedJets_bTagValues, int syst)
+{
+      float probMC = 1.;
+			float probData = 1.;
+			float tagEff = 1.;
+			float btagSF = 1.;
+			for (unsigned int i=0; i < selectedJets.size(); i++) 
+			{
+					  tagEff = getTagEff(selectedJets[i].Pt(), selectedJets[i].Eta(), selectedJets_partonFlavour[i]);											
+						btagSF = getSF(selectedJets[i].Pt(), selectedJets[i].Eta(), selectedJets_partonFlavour[i], _defaultalgo, syst);
+						//cout<<"  btagSF = "<<btagSF<<", tagEff = "<<tagEff<<", syst = "<<syst<<endl;
+														
+						if (tagEff == 0.)
+						{
+								cout << endl << "BTagWeightTools::getMCEventWeight WARNING: Tag efficiency is zero!" << endl;
+								continue;
+						}
+						if (btagSF == 0.)
+						{
+								cout << endl << "BTagWeightTools::getMCEventWeight WARNING: Btag scalefactor is zero!" << endl;
+								continue;
+						}
+						//else if (btagSF*tagEff >= 1.)
+						//{
+								//cout << endl << "BTagWeightTools::getMCEventWeight WARNING:	BtagSF*tagEff is larger than 1!" << endl; //but this is not a problem?
+						//}
+												
+						if (selectedJets_bTagValues[i] > _algoWPcut) //tagged
+						{	
+						    probMC = probMC*tagEff;
+								probData = probData*btagSF*tagEff;
+						}
+						else
+						{	//not tagged
+								probMC = probMC*(1.-tagEff);
+								probData = probData*(1.-btagSF*tagEff);
+						}
+			}
+			float Weight = probData/probMC;
+			return Weight;
+}
+
+float BTagWeightTools::getMCEventWeight_LT(vector< TLorentzVector >& selectedJets, vector<int>& selectedJets_partonFlavour, vector<float>& selectedJets_bTagValues, int syst)
+{
+      float probMC = 1.;
+			float probData = 1.;
+			float tagEff_L = 1., tagEff_T = 1.;
+			float btagSF_L = 1., btagSF_T = 1.;
+			for (unsigned int i=0; i < selectedJets.size(); i++) 
+			{
+					  tagEff_L = getTagEff(selectedJets[i].Pt(), selectedJets[i].Eta(), selectedJets_partonFlavour[i]);
+						tagEff_T = getTagEff_T(selectedJets[i].Pt(), selectedJets[i].Eta(), selectedJets_partonFlavour[i]);				
+						btagSF_L = getSF(selectedJets[i].Pt(), selectedJets[i].Eta(), selectedJets_partonFlavour[i], _algo_L, syst);
+						btagSF_T = getSF(selectedJets[i].Pt(), selectedJets[i].Eta(), selectedJets_partonFlavour[i], _algo_T, syst);
+						//cout<<"  btagSF_L = "<<btagSF_L<<", tagEff_L = "<<tagEff_L<<", syst = "<<syst<<endl;
+						//cout<<"  btagSF_T = "<<btagSF_T<<", tagEff_T = "<<tagEff_T<<", syst = "<<syst<<endl;
+						
+						if (tagEff_L == 0. || tagEff_T == 0.)
+						{
+								cout << endl << "BTagWeightTools::getMCEventWeight WARNING: Tag efficiency is zero!" << endl;
+								continue;
+						}
+						if (btagSF_L == 0. || btagSF_T == 0.)
+						{
+								cout << endl << "BTagWeightTools::getMCEventWeight WARNING: Btag scalefactor is zero!" << endl;
+								continue;
+						}
+						//else if (btagSF*tagEff >= 1.)
+						//{
+								//cout << endl << "BTagWeightTools::getMCEventWeight WARNING:	BtagSF*tagEff is larger than 1!" << endl; //but this is not a problem?
+						//}
+																
+						if (selectedJets_bTagValues[i] > _algoWPcut_T) //tagged tight
+						{	
+						    probMC = probMC*tagEff_T;
+								probData = probData*btagSF_T*tagEff_T;
+						}
+						else if(selectedJets_bTagValues[i] < _algoWPcut_L) //not tagged loose
+						{
+								probMC = probMC*(1.-tagEff_L);
+								probData = probData*(1.-btagSF_L*tagEff_L);
+						}
+						else if(selectedJets_bTagValues[i] > _algoWPcut_L && selectedJets_bTagValues[i] < _algoWPcut_T) //tagged loose but not tagged tight
+						{
+								probMC = probMC*(tagEff_L - tagEff_T);
+								probData = probData*(btagSF_L*tagEff_L - btagSF_T*tagEff_T);
+						}
+			}
+			float Weight = probData/probMC;
+			return Weight;
+}
+
+float BTagWeightTools::getTagEff(float pt, float eta, int flavor)
+{
+          float tagEff = 1.;
+          int xBin = 0, yBin = 0;
+					float PtMax = inTotalNofBJets->GetXaxis()->GetBinUpEdge( inTotalNofBJets->GetXaxis()->GetNbins() );
+					if (pt < PtMax)
+							xBin = inTotalNofBJets->GetXaxis()->FindBin(pt);		//Histograms have same binning.
+					else if (pt >= PtMax)
+							xBin = inTotalNofBJets->GetXaxis()->FindBin(PtMax-1);
+					if (fabs(eta) < 2.4)
+							yBin = inTotalNofBJets->GetYaxis()->FindBin(fabs(eta));
+					else if (fabs(eta) == 2.4)
+							yBin = inTotalNofBJets->GetYaxis()->FindBin(2.4-0.01);
+									
+					//cout<<" pt ="<<pt<<",	eta = "<<eta<<endl;		
+					if (fabs(flavor) == 5.) 
+					{
+					    //cout<<" B"<<endl;
+							float NofBJets = inTotalNofBJets->GetBinContent(xBin,yBin);
+							if (NofBJets == 0.)
+							{
+									cout << "BTagWeightTools::getMCEventWeight WARNING: No b jets for bin (" << xBin << "," << yBin << ")!" << endl;
+									return -1;
+							}
+							float NofTaggedBJets = inBtaggedBJets->GetBinContent(xBin,yBin);
+							tagEff = NofTaggedBJets/NofBJets;
+					}
+					else if (fabs(flavor) == 4.)
+					{
+					    //cout<<" C"<<endl;
+							float NofCJets = inTotalNofCJets->GetBinContent(xBin,yBin);
+							if (NofCJets == 0.)
+							{
+							    cout << "BTagWeightTools::getMCEventWeight WARNING: No c jets for bin (" << xBin << "," << yBin << ")." << endl;
+									return -1;
+							}
+							float NofTaggedCJets = inBtaggedCJets->GetBinContent(xBin,yBin);
+							tagEff = NofTaggedCJets/NofCJets;
+					 }
+					 else if (fabs(flavor) == 1. || fabs(flavor) == 2. || fabs(flavor) == 3. || fabs(flavor) == 21.)
+					 {
+					    //cout<<" DUSG"<<endl;
+							float NofLightJets = inTotalNofLightJets->GetBinContent(xBin,yBin);
+							if (NofLightJets == 0.)
+							{
+							    cout << "BTagWeightTools::getMCEventWeight WARNING: No light jets for bin (" << xBin << "," << yBin << ")." << endl;
+									return -1;
+							}
+							float NofTaggedLightJets = inBtaggedLightJets->GetBinContent(xBin,yBin);
+							tagEff = NofTaggedLightJets/NofLightJets;
+					 }
+					 else if (fabs(flavor) == 0.)
+					 {
+					    //cout<<" PU?"<<endl;
+							//cout << "Eventnr.: " << ievt << ", Jetnr.: " << i << ", pdgId: " << flavor << ". Is pileup jet -> consider as light jet." << endl;
+							float NofLightJets = inTotalNofLightJets->GetBinContent(xBin,yBin);
+							if (NofLightJets == 0.)
+							{
+									cout << "BTagWeightTools::getMCEventWeight WARNING: No light jets for bin (" << xBin << "," << yBin << ")." << endl;
+									return -1;
+							}
+							float NofTaggedLightJets = inBtaggedLightJets->GetBinContent(xBin,yBin);
+							tagEff = NofTaggedLightJets/NofLightJets;
+					 }
+					 else if (fabs(flavor) > 100.)
+					 {
+					     //cout<<" hadron?"<<endl;
+							 //cout << "Eventnr.: " << ievt << ", Jetnr.: " << i << ", pdgId: " << flavor << ". Is hadron -> consider as light jet." << endl;
+							 float NofLightJets = inTotalNofLightJets->GetBinContent(xBin,yBin);
+							 if (NofLightJets == 0.)
+							 {
+								  cout << "BTagWeightTools::getMCEventWeight WARNING: No light jets for bin (" << xBin << "," << yBin << ")." << endl;
+									return -1;
+							 }
+							 float NofTaggedLightJets = inBtaggedLightJets->GetBinContent(xBin,yBin);
+							 tagEff = NofTaggedLightJets/NofLightJets;
+						}
+						else
+						{
+							 cout << endl << "BTagWeightTools::getMCEventWeight WARNING: Jet not identified! PdgId: " << flavor << endl;
+							 return -1;
+						}
+						
+						return tagEff;
+
+}
+
+float BTagWeightTools::getTagEff_T(float pt, float eta, int flavor)
+{
+          float tagEff = 1.;
+          int xBin = 0, yBin = 0;
+					float PtMax = inTotalNofBJets_T->GetXaxis()->GetBinUpEdge( inTotalNofBJets_T->GetXaxis()->GetNbins() );
+					if (pt < PtMax)
+							xBin = inTotalNofBJets_T->GetXaxis()->FindBin(pt);		//Histograms have same binning.
+					else if (pt >= PtMax)
+							xBin = inTotalNofBJets_T->GetXaxis()->FindBin(PtMax-1);
+					if (fabs(eta) < 2.4)
+							yBin = inTotalNofBJets_T->GetYaxis()->FindBin(fabs(eta));
+					else if (fabs(eta) == 2.4)
+							yBin = inTotalNofBJets_T->GetYaxis()->FindBin(2.4-0.01);
+									
+					//cout<<" pt ="<<pt<<",	eta = "<<eta<<endl;		
+					if (fabs(flavor) == 5.) 
+					{
+					    //cout<<" B"<<endl;
+							float NofBJets = inTotalNofBJets_T->GetBinContent(xBin,yBin);
+							if (NofBJets == 0.)
+							{
+									cout << "BTagWeightTools::getMCEventWeight WARNING: No b jets for bin (" << xBin << "," << yBin << ")!" << endl;
+									return -1;
+							}
+							float NofTaggedBJets = inBtaggedBJets_T->GetBinContent(xBin,yBin);
+							tagEff = NofTaggedBJets/NofBJets;
+					}
+					else if (fabs(flavor) == 4.)
+					{
+					    //cout<<" C"<<endl;
+							float NofCJets = inTotalNofCJets_T->GetBinContent(xBin,yBin);
+							if (NofCJets == 0.)
+							{
+							    cout << "BTagWeightTools::getMCEventWeight WARNING: No c jets for bin (" << xBin << "," << yBin << ")." << endl;
+									return -1;
+							}
+							float NofTaggedCJets = inBtaggedCJets_T->GetBinContent(xBin,yBin);
+							tagEff = NofTaggedCJets/NofCJets;
+					 }
+					 else if (fabs(flavor) == 1. || fabs(flavor) == 2. || fabs(flavor) == 3. || fabs(flavor) == 21.)
+					 {
+					    //cout<<" DUSG"<<endl;
+							float NofLightJets = inTotalNofLightJets_T->GetBinContent(xBin,yBin);
+							if (NofLightJets == 0.)
+							{
+							    cout << "BTagWeightTools::getMCEventWeight WARNING: No light jets for bin (" << xBin << "," << yBin << ")." << endl;
+									return -1;
+							}
+							float NofTaggedLightJets = inBtaggedLightJets_T->GetBinContent(xBin,yBin);
+							tagEff = NofTaggedLightJets/NofLightJets;
+					 }
+					 else if (fabs(flavor) == 0.)
+					 {
+					    //cout<<" PU?"<<endl;
+							//cout << "Eventnr.: " << ievt << ", Jetnr.: " << i << ", pdgId: " << flavor << ". Is pileup jet -> consider as light jet." << endl;
+							float NofLightJets = inTotalNofLightJets_T->GetBinContent(xBin,yBin);
+							if (NofLightJets == 0.)
+							{
+									cout << "BTagWeightTools::getMCEventWeight WARNING: No light jets for bin (" << xBin << "," << yBin << ")." << endl;
+									return -1;
+							}
+							float NofTaggedLightJets = inBtaggedLightJets_T->GetBinContent(xBin,yBin);
+							tagEff = NofTaggedLightJets/NofLightJets;
+					 }
+					 else if (fabs(flavor) > 100.)
+					 {
+					     //cout<<" hadron?"<<endl;
+							 //cout << "Eventnr.: " << ievt << ", Jetnr.: " << i << ", pdgId: " << flavor << ". Is hadron -> consider as light jet." << endl;
+							 float NofLightJets = inTotalNofLightJets_T->GetBinContent(xBin,yBin);
+							 if (NofLightJets == 0.)
+							 {
+								  cout << "BTagWeightTools::getMCEventWeight WARNING: No light jets for bin (" << xBin << "," << yBin << ")." << endl;
+									return -1;
+							 }
+							 float NofTaggedLightJets = inBtaggedLightJets_T->GetBinContent(xBin,yBin);
+							 tagEff = NofTaggedLightJets/NofLightJets;
+						}
+						else
+						{
+							 cout << endl << "BTagWeightTools::getMCEventWeight WARNING: Jet not identified! PdgId: " << flavor << endl;
+							 return -1;
+						}
+						
+						return tagEff;
+
+}
+
