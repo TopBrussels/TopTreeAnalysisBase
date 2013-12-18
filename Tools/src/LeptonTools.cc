@@ -58,7 +58,7 @@ void LeptonTools::readMuonSF(string IdIsoFile, string trigFileAB, string trigFil
   int N = inTrigDEtaLow.GetN();
   
   if(verbose_) cout << "Muon SF!!" << endl;
-  
+	
   for(int i=0; i<N; i++)
   {
     double low = xBinTmp[i]-inTrigDEtaLow.GetErrorXlow(i);
@@ -167,6 +167,9 @@ void LeptonTools::readMuonSF(string IdFile, string IsoFile, string trigFile)
 	
   if(verbose_) cout << "Muon SF!!" << endl;
   
+	ScaleFactor trigSF, idSF, isoSF;
+	
+	//note that there is a mismatch of the number of bins in the trigger and iso/id files -> therefore the getSF method needed to be changed here to the getSFstruct
   for(int i=0; i<N; i++)
   {
     double low = xBinTmp[i]-inIdEtaLow.GetErrorXlow(i);
@@ -177,35 +180,42 @@ void LeptonTools::readMuonSF(string IdFile, string IsoFile, string trigFile)
 		//note that the trigger SF for the first two bins ([10-20] and [20-25] do not make sense, since the trigger SF is only determined from 25 GeV onwards)
     if(verbose_) cout << "bin: " << i << " |  " << low << " <---> " << high << " | " << muonPt[i] << " +- " << muonPtErr[i] << endl;
     
-    double trigSFEtaLow = getSF(&inTrigEtaLow, low, high);
-    double trigSFEtaLowUncPlus = inTrigEtaLow.GetErrorYhigh(i);
-    double trigSFEtaLowUncMinus = inTrigEtaLow.GetErrorYlow(i);
-    
-    double idSFEtaLow = getSF(&inIdEtaLow, low, high);
-    double idSFEtaLowUncPlus = inIdEtaLow.GetErrorYhigh(i);
-    double idSFEtaLowUncMinus = inIdEtaLow.GetErrorYlow(i);
 		
-    double isoSFEtaLow = getSF(&inIsoEtaLow, low, high);
-    double isoSFEtaLowUncPlus = inIsoEtaLow.GetErrorYhigh(i);
-    double isoSFEtaLowUncMinus = inIsoEtaLow.GetErrorYlow(i);
+		trigSF = getSFstruct(&inTrigEtaLow, low, high);
+    double trigSFEtaLow = trigSF.centralvalue;
+    double trigSFEtaLowUncPlus = trigSF.highvalue;
+    double trigSFEtaLowUncMinus = trigSF.lowvalue;
+    
+		idSF = getSFstruct(&inIdEtaLow, low, high);
+    double idSFEtaLow = idSF.centralvalue;
+    double idSFEtaLowUncPlus = idSF.highvalue;
+    double idSFEtaLowUncMinus = idSF.lowvalue;
+		
+		isoSF = getSFstruct(&inIsoEtaLow, low, high);
+    double isoSFEtaLow = isoSF.centralvalue;
+    double isoSFEtaLowUncPlus = isoSF.highvalue;
+    double isoSFEtaLowUncMinus = isoSF.lowvalue;
     
     double totalSFEtaLow = trigSFEtaLow*idSFEtaLow*isoSFEtaLow;
     double totalSFEtaLowUncPlus = sqrt( pow(trigSFEtaLowUncPlus*idSFEtaLow*isoSFEtaLow, 2) + pow(idSFEtaLowUncPlus*trigSFEtaLow*isoSFEtaLow, 2) + pow(isoSFEtaLowUncPlus*trigSFEtaLow*idSFEtaLow, 2) );
     double totalSFEtaLowUncMinus = sqrt( pow(trigSFEtaLowUncMinus*idSFEtaLow*isoSFEtaLow, 2) + pow(idSFEtaLowUncMinus*trigSFEtaLow*isoSFEtaLow, 2) + pow(isoSFEtaLowUncMinus*trigSFEtaLow*idSFEtaLow, 2) );
     if(verbose_) cout << "trigger*id*iso SF -> etaLow: " << totalSFEtaLow << " + " << totalSFEtaLowUncPlus << " - " << totalSFEtaLowUncMinus << endl;    
     
+		
+    trigSF = getSFstruct(&inTrigEtaMed, low, high);
+    double trigSFEtaMed = trigSF.centralvalue;
+    double trigSFEtaMedUncPlus = trigSF.highvalue;
+    double trigSFEtaMedUncMinus = trigSF.lowvalue;
+
+    idSF = getSFstruct(&inIdEtaMed, low, high);
+    double idSFEtaMed = idSF.centralvalue;
+    double idSFEtaMedUncPlus = idSF.highvalue;
+    double idSFEtaMedUncMinus = idSF.lowvalue;
     
-    double trigSFEtaMed = getSF(&inTrigEtaMed, low, high);
-    double trigSFEtaMedUncPlus = inTrigEtaMed.GetErrorYhigh(i);
-    double trigSFEtaMedUncMinus = inTrigEtaMed.GetErrorYlow(i);
-    
-    double idSFEtaMed = getSF(&inIdEtaMed, low, high);
-    double idSFEtaMedUncPlus = inIdEtaMed.GetErrorYhigh(i);
-    double idSFEtaMedUncMinus = inIdEtaMed.GetErrorYlow(i);
-    
-    double isoSFEtaMed = getSF(&inIsoEtaMed, low, high);
-    double isoSFEtaMedUncPlus = inIsoEtaMed.GetErrorYhigh(i);
-    double isoSFEtaMedUncMinus = inIsoEtaMed.GetErrorYlow(i);
+		isoSF = getSFstruct(&inIsoEtaMed, low, high);
+    double isoSFEtaMed = isoSF.centralvalue;
+    double isoSFEtaMedUncPlus = isoSF.highvalue;
+    double isoSFEtaMedUncMinus = isoSF.lowvalue;
     
     double totalSFEtaMed = trigSFEtaMed*idSFEtaMed*isoSFEtaMed;
     double totalSFEtaMedUncPlus = sqrt( pow(trigSFEtaMedUncPlus*idSFEtaMed*isoSFEtaMed, 2) + pow(idSFEtaMedUncPlus*trigSFEtaMed*isoSFEtaMed, 2) + pow(isoSFEtaMedUncPlus*trigSFEtaMed*idSFEtaMed, 2) );
@@ -213,17 +223,20 @@ void LeptonTools::readMuonSF(string IdFile, string IsoFile, string trigFile)
     if(verbose_) cout << "trigger*id*iso SF -> etaMed: " << totalSFEtaMed << " + " << totalSFEtaMedUncPlus << " - " << totalSFEtaMedUncMinus << endl;    
     
     
-    double trigSFEtaHigh = getSF(&inTrigEtaHigh, low, high);
-    double trigSFEtaHighUncPlus = inTrigEtaHigh.GetErrorYhigh(i);
-    double trigSFEtaHighUncMinus = inTrigEtaHigh.GetErrorYlow(i);
+		trigSF = getSFstruct(&inTrigEtaHigh, low, high);
+    double trigSFEtaHigh = trigSF.centralvalue;
+    double trigSFEtaHighUncPlus = trigSF.highvalue;
+    double trigSFEtaHighUncMinus = trigSF.lowvalue;
+
+    idSF = getSFstruct(&inIdEtaHigh, low, high);
+		double idSFEtaHigh = idSF.centralvalue;
+    double idSFEtaHighUncPlus = idSF.highvalue;
+    double idSFEtaHighUncMinus = idSF.lowvalue;
     
-    double idSFEtaHigh = getSF(&inIdEtaHigh, low, high);
-    double idSFEtaHighUncPlus = inIdEtaHigh.GetErrorYhigh(i);
-    double idSFEtaHighUncMinus = inIdEtaHigh.GetErrorYlow(i);
-    
-    double isoSFEtaHigh = getSF(&inIsoEtaHigh, low, high);
-    double isoSFEtaHighUncPlus = inIsoEtaHigh.GetErrorYhigh(i);
-    double isoSFEtaHighUncMinus = inIsoEtaHigh.GetErrorYlow(i);
+		isoSF = getSFstruct(&inIsoEtaHigh, low, high);
+    double isoSFEtaHigh = isoSF.centralvalue;
+    double isoSFEtaHighUncPlus = isoSF.highvalue;
+    double isoSFEtaHighUncMinus = isoSF.lowvalue;
     
     double totalSFEtaHigh = trigSFEtaHigh*idSFEtaHigh*isoSFEtaHigh;
     double totalSFEtaHighUncPlus = sqrt( pow(trigSFEtaHighUncPlus*idSFEtaHigh*isoSFEtaHigh, 2) + pow(idSFEtaHighUncPlus*trigSFEtaHigh*isoSFEtaHigh, 2) + pow(isoSFEtaHighUncPlus*trigSFEtaHigh*idSFEtaHigh, 2) );
@@ -270,12 +283,16 @@ void LeptonTools::readMuonSF(string IdFile, string IsoFile, string trigFile)
     double idisoSFEtaHighUncMinus = sqrt( pow(idSFEtaHighUncMinus*isoSFEtaHigh, 2) + pow(isoSFEtaHighUncMinus*idSFEtaHigh, 2) );	
 		if(verbose_) cout << "id*iso SF -> etaHigh: " << idisoSFEtaHigh << " + " << idisoSFEtaHighUncPlus << " - " << idisoSFEtaHighUncMinus << endl;    		
 
-		double idSFEtaVeryHigh = getSF(&inIdEtaVeryHigh, low, high);
-    double idSFEtaVeryHighUncPlus = inIdEtaVeryHigh.GetErrorYhigh(i);
-    double idSFEtaVeryHighUncMinus = inIdEtaVeryHigh.GetErrorYlow(i);    
-    double isoSFEtaVeryHigh = getSF(&inIsoEtaVeryHigh, low, high);
-    double isoSFEtaVeryHighUncPlus = inIsoEtaVeryHigh.GetErrorYhigh(i);
-    double isoSFEtaVeryHighUncMinus = inIsoEtaVeryHigh.GetErrorYlow(i);    
+    idSF = getSFstruct(&inIdEtaVeryHigh, low, high);
+		double idSFEtaVeryHigh = idSF.centralvalue;
+    double idSFEtaVeryHighUncPlus = idSF.highvalue;
+    double idSFEtaVeryHighUncMinus = idSF.lowvalue;
+		
+    isoSF = getSFstruct(&inIsoEtaVeryHigh, low, high);
+		double isoSFEtaVeryHigh = isoSF.centralvalue;
+    double isoSFEtaVeryHighUncPlus = isoSF.highvalue;
+    double isoSFEtaVeryHighUncMinus = isoSF.lowvalue; 
+		
     double idisoSFEtaVeryHigh = idSFEtaVeryHigh*isoSFEtaVeryHigh;
     double idisoSFEtaVeryHighUncPlus = sqrt( pow(idSFEtaVeryHighUncPlus*isoSFEtaVeryHigh, 2) + pow(isoSFEtaVeryHighUncPlus*idSFEtaVeryHigh, 2) );
     double idisoSFEtaVeryHighUncMinus = sqrt( pow(idSFEtaVeryHighUncMinus*isoSFEtaVeryHigh, 2) + pow(isoSFEtaVeryHighUncMinus*idSFEtaVeryHigh, 2) );		
@@ -593,4 +610,22 @@ double LeptonTools::getSF(TGraphAsymmErrors* graph, double low, double high)
       return yTmp;
   }
   return 0;
+}
+
+LeptonTools::ScaleFactor LeptonTools::getSFstruct(TGraphAsymmErrors* graph, double low, double high)
+{
+  int N = graph->GetN();	
+  for(int i=0; i<N; i++)
+  {
+    double xTmp = 0, yTmp = 0;
+    graph->GetPoint(i, xTmp, yTmp);
+    if( xTmp > low && xTmp < high )
+		{
+      SF.centralvalue = yTmp;
+			SF.highvalue = graph->GetErrorYhigh(i);
+			SF.lowvalue = graph->GetErrorYlow(i);
+			//if(verbose_) cout<<"  [LeptonTools::getSF] i = "<<i<<", SF.centralvalue = "<<SF.centralvalue<<", SF.highvalue = "<<SF.highvalue<<", SF.lowvalue = "<<SF.lowvalue<<endl;
+		}
+  }
+  return SF;
 }

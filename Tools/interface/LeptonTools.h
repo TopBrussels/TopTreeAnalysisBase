@@ -18,6 +18,7 @@ using namespace TopTree;
 
 class LeptonTools
 {
+  struct ScaleFactor {double centralvalue; double highvalue; double lowvalue;};
   public:
     LeptonTools(bool verbose = false);
     ~LeptonTools();
@@ -33,7 +34,9 @@ class LeptonTools
 		
   private:
     double getSF(TGraphAsymmErrors* graph, double low, double high);
-    
+    ScaleFactor getSFstruct(TGraphAsymmErrors* graph, double low, double high);
+		ScaleFactor SF;
+		
     vector<double> muonPt;
     vector<double> muonPtErr;
     
