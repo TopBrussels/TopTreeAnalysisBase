@@ -164,25 +164,25 @@ void BTagWeightTools::parsefile(){
 
 
 // various getters:
-float BTagWeightTools::getSF(float pt, float eta, int flavor, int syst=0){
+float BTagWeightTools::getSF(float pt, float eta, int flavor,int btagsyst, int mistagsyst){
 
-  return getSF(pt,eta,flavor,_defaultalgo,syst);
+  return getSF(pt,eta,flavor,_defaultalgo,btagsyst,mistagsyst);
 }
 
-float  BTagWeightTools::getSF(float pt, float eta,int flavor,string algo,int syst=0){
+float  BTagWeightTools::getSF(float pt, float eta,int flavor,string algo, int btagsyst, int mistagsyst){
   if(pt<_ptmin || pt>_ptmax)
     cout << "BTagWeightTools::getSF WARNING retrieving for pT value (" << pt << ") outside range of " << _ptmin << ","<< _ptmax << " which is fine but tread with caution..." << endl;
   if(fabs(eta)>_etamax)
     cout << "BTagWeightTools::getSF WARNING retrieving for eta value (" << eta << ") outside range of " << _etamax  << " which is fine but tread with caution..." << endl;
  
   if(abs(flavor)==5 ||abs(flavor)==4){
-    if(syst==0){
+    if(btagsyst==0){
       if(_functions.find(algo)!=_functions.end())
 	return _functions[algo].Eval(pt);
     }
     else{
     // get the uncertainty:
-      float err = getUncertainty(pt,eta, flavor, algo,syst);
+      float err = getUncertainty(pt,eta, flavor, algo,btagsyst);
       // and do the multiplication and check if above 1:
       if(_functions.find(algo)!=_functions.end()){
 	float multiplyer = 1. + err;
@@ -191,7 +191,7 @@ float  BTagWeightTools::getSF(float pt, float eta,int flavor,string algo,int sys
     }
   } 
   else {
-   return getSFlight(pt,eta,algo,syst);
+   return getSFlight(pt,eta,algo,mistagsyst);
   }
 
 	
@@ -1213,13 +1213,19 @@ TF1* BTagWeightTools::fillfakerates(TString meanminmax, TString tagger, TString 
 void BTagWeightTools::InitializeMCEfficiencyHistos(int NofPtBins,float PtMin,float PtMax,int NofEtaBins)
 {
   _PtMaxhistos = PtMax;
-  _histo2D["BtaggedJets"] = new TH2F("BtaggedJets", "Total number of btagged jets", NofPtBins, PtMin, PtMax, NofEtaBins, 0, 2.4);
+  _histo2D["BtaggedJets"] = new TH2F("BtaggedJets", "Total number of btagged jets", NofPtBins, PtMin, PtMax, NofEtaBins, 0, 2.4);	
 	_histo2D["BtaggedBJets"] = new TH2F("BtaggedBJets", "Total number of btagged b-jets", NofPtBins, PtMin, PtMax, NofEtaBins, 0, 2.4);
 	_histo2D["BtaggedCJets"] = new TH2F("BtaggedCJets", "Total number of btagged c-jets", NofPtBins, PtMin, PtMax, NofEtaBins, 0, 2.4);
 	_histo2D["BtaggedLightJets"] = new TH2F("BtaggedLightJets", "Total number of btagged light jets", NofPtBins, PtMin, PtMax, NofEtaBins, 0, 2.4);
 	_histo2D["TotalNofBJets"] = new TH2F("TotalNofBJets", "Total number of b-jets", NofPtBins, PtMin, PtMax, NofEtaBins, 0, 2.4);
 	_histo2D["TotalNofCJets"] = new TH2F("TotalNofCJets", "Total number of c-jets", NofPtBins, PtMin, PtMax, NofEtaBins, 0, 2.4);
 	_histo2D["TotalNofLightJets"] = new TH2F("TotalNofLightJets", "Total number of light jets", NofPtBins, PtMin, PtMax, NofEtaBins, 0, 2.4);
+	for(map<string,TH2F*>::const_iterator it = _histo2D.begin(); it != _histo2D.end(); it++)
+  {
+	   _histo2D[it->first]->GetXaxis()->SetTitle("Jet p_{T} (GeV)");
+		 _histo2D[it->first]->GetYaxis()->SetTitle("Jet |#eta|");
+  }
+	
 	MCEfficiencyHistosInitialized = true;	
 }
 
@@ -1397,7 +1403,7 @@ void BTagWeightTools::ReadMCEfficiencyHistos(std::string infilename_L,std::strin
 			inTotalNofLightJets_T = (TH2F*) infile_T->Get("TotalNofLightJets");
 }
 
-float BTagWeightTools::getMCEventWeight(vector< TRootJet* >& selectedJets, int syst)
+float BTagWeightTools::getMCEventWeight(vector< TRootJet* >& selectedJets, int btagsyst, int mistagsyst)
 {
       float probMC = 1.;
 			float probData = 1.;
@@ -1406,7 +1412,7 @@ float BTagWeightTools::getMCEventWeight(vector< TRootJet* >& selectedJets, int s
 			for (unsigned int i=0; i < selectedJets.size(); i++) 
 			{
 						tagEff = getTagEff(selectedJets[i]->Pt(), selectedJets[i]->Eta(), selectedJets[i]->partonFlavour());											
-						btagSF = getSF(selectedJets[i]->Pt(), selectedJets[i]->Eta(), selectedJets[i]->partonFlavour(), _defaultalgo, syst);
+						btagSF = getSF(selectedJets[i]->Pt(), selectedJets[i]->Eta(), selectedJets[i]->partonFlavour(), _defaultalgo, btagsyst, mistagsyst);
 						//cout<<"  btagSF = "<<btagSF<<", tagEff = "<<tagEff<<", syst = "<<syst<<endl;	
 														
 						if (tagEff == 0.)
@@ -1447,7 +1453,7 @@ float BTagWeightTools::getMCEventWeight(vector< TRootJet* >& selectedJets, int s
 			return Weight;
 }
 
-float BTagWeightTools::getMCEventWeight(vector< TLorentzVector >& selectedJets, vector<int>& selectedJets_partonFlavour, vector<float>& selectedJets_bTagValues, int syst)
+float BTagWeightTools::getMCEventWeight(vector< TLorentzVector >& selectedJets, vector<int>& selectedJets_partonFlavour, vector<float>& selectedJets_bTagValues, int btagsyst, int mistagsyst)
 {
       float probMC = 1.;
 			float probData = 1.;
@@ -1456,7 +1462,7 @@ float BTagWeightTools::getMCEventWeight(vector< TLorentzVector >& selectedJets, 
 			for (unsigned int i=0; i < selectedJets.size(); i++) 
 			{
 					  tagEff = getTagEff(selectedJets[i].Pt(), selectedJets[i].Eta(), selectedJets_partonFlavour[i]);											
-						btagSF = getSF(selectedJets[i].Pt(), selectedJets[i].Eta(), selectedJets_partonFlavour[i], _defaultalgo, syst);
+						btagSF = getSF(selectedJets[i].Pt(), selectedJets[i].Eta(), selectedJets_partonFlavour[i], _defaultalgo, btagsyst, mistagsyst);
 						//cout<<"  btagSF = "<<btagSF<<", tagEff = "<<tagEff<<", syst = "<<syst<<endl;
 														
 						if (tagEff == 0.)
@@ -1489,7 +1495,7 @@ float BTagWeightTools::getMCEventWeight(vector< TLorentzVector >& selectedJets, 
 			return Weight;
 }
 
-float BTagWeightTools::getMCEventWeight_LT(vector< TLorentzVector >& selectedJets, vector<int>& selectedJets_partonFlavour, vector<float>& selectedJets_bTagValues, int syst)
+float BTagWeightTools::getMCEventWeight_LT(vector< TLorentzVector >& selectedJets, vector<int>& selectedJets_partonFlavour, vector<float>& selectedJets_bTagValues, int btagsyst, int mistagsyst)
 {
       float probMC = 1.;
 			float probData = 1.;
@@ -1499,8 +1505,8 @@ float BTagWeightTools::getMCEventWeight_LT(vector< TLorentzVector >& selectedJet
 			{
 					  tagEff_L = getTagEff(selectedJets[i].Pt(), selectedJets[i].Eta(), selectedJets_partonFlavour[i]);
 						tagEff_T = getTagEff_T(selectedJets[i].Pt(), selectedJets[i].Eta(), selectedJets_partonFlavour[i]);				
-						btagSF_L = getSF(selectedJets[i].Pt(), selectedJets[i].Eta(), selectedJets_partonFlavour[i], _algo_L, syst);
-						btagSF_T = getSF(selectedJets[i].Pt(), selectedJets[i].Eta(), selectedJets_partonFlavour[i], _algo_T, syst);
+						btagSF_L = getSF(selectedJets[i].Pt(), selectedJets[i].Eta(), selectedJets_partonFlavour[i], _algo_L, btagsyst, mistagsyst);
+						btagSF_T = getSF(selectedJets[i].Pt(), selectedJets[i].Eta(), selectedJets_partonFlavour[i], _algo_T, btagsyst, mistagsyst);
 						//cout<<"  btagSF_L = "<<btagSF_L<<", tagEff_L = "<<tagEff_L<<", syst = "<<syst<<endl;
 						//cout<<"  btagSF_T = "<<btagSF_T<<", tagEff_T = "<<tagEff_T<<", syst = "<<syst<<endl;
 						

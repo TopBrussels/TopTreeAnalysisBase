@@ -68,8 +68,8 @@ class BTagWeightTools
   void setABCDRangeFakeRates(TString range){_abcdrange=range;} // set to "ABCD" for default. Consult BTV documentation for options (essentially "ABCD","AB","C","D")
 
   // useful getters
-  float getSF(float pt, float eta, int flavor,int syst);
-  float getSF(float pt, float eta, int flavor,string algo,int syst);
+  float getSF(float pt, float eta, int flavor, int btagsyst=0, int mistagsyst=0);
+  float getSF(float pt, float eta, int flavor,string algo, int btagsyst=0, int mistagsyst=0);
   //  float getSF(TRootJet *jet,int syst=0); // uses getSF(float pt, float eta,int flavor,int syst=0);
   //  float getSF(TRootJet *jet,string algo,int syst=0); // uses getSF(float pt, float eta,int flavor,int syst=0);
 
@@ -84,9 +84,9 @@ class BTagWeightTools
 	void WriteMCEfficiencyHistos(std::string outfilename);
 	void ReadMCEfficiencyHistos(std::string infilename);
 	void ReadMCEfficiencyHistos(std::string infilename_L,std::string infilename_T); //in case you use two operating points, a loose and a tight one
-	float getMCEventWeight(vector< TRootJet* >& selectedJets, int syst);
-  float getMCEventWeight(vector< TLorentzVector >& selectedJets, vector<int>& selectedJets_partonFlavour, vector<float>& selectedJets_bTagValues, int syst);
-	float getMCEventWeight_LT(vector< TLorentzVector >& selectedJets, vector<int>& selectedJets_partonFlavour, vector<float>& selectedJets_bTagValues, int syst); //only in case you use two operating points, a loose and a tight one
+	float getMCEventWeight(vector< TRootJet* >& selectedJets, int btagsyst=0, int mistagsyst=0);
+  float getMCEventWeight(vector< TLorentzVector >& selectedJets, vector<int>& selectedJets_partonFlavour, vector<float>& selectedJets_bTagValues, int btagsyst=0, int mistagsyst=0);
+	float getMCEventWeight_LT(vector< TLorentzVector >& selectedJets, vector<int>& selectedJets_partonFlavour, vector<float>& selectedJets_bTagValues, int btagsyst=0, int mistagsyst=0); //only in case you use two operating points, a loose and a tight one
   float getTagEff(float pt, float eta, int flavor);
 	float getTagEff_T(float pt, float eta, int flavor); //only useful in case you use two operating points, same as getTagEff but with the histograms obtained with a 'tighter' WP (e.g. inBtaggedJets_T)
 
