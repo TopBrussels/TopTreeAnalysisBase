@@ -740,13 +740,17 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
 	if(hStack_)	hStack_->SetMaximum(ymax);
 	if(hStackAreaNorm_) hStackAreaNorm_->SetMaximum(ymaxAreaNorm);
 
-	hCanvasStack_->cd(0);
+	if(pad) pad->cd(0); //otherwise the legend disappears when saving the canvas...
+	else hCanvasStack_->cd(0);
 	leg_->Draw();
-	hCanvasStackLogY_->cd(0);
-	leg_->Draw();
-	hCanvasStackAreaNorm_->cd(0);			
+	if(padLogY) padLogY->cd(0); //otherwise the legend disappears when saving the canvas...
+	else hCanvasStackLogY_->cd(0);
+	leg_->Draw(); 
+	if(padAreaNorm) padAreaNorm->cd(0); //otherwise the legend disappears when saving the canvas...
+	else hCanvasStackAreaNorm_->cd(0);			
 	legAreaNorm_->Draw();
-	hCanvasStackAreaNormLogY_->cd(0);			
+	if(padAreaNormLogY) padAreaNormLogY->cd(0); //otherwise the legend disappears when saving the canvas...
+	else hCanvasStackAreaNormLogY_->cd(0);			
 	legAreaNorm_->Draw();
 	
   //if(tmpInfile) tmpInfile->Close(); //causes a crash when trying to write hData_ in the Write method...?
