@@ -33,14 +33,16 @@ class MultiSamplePlot{
 
  		void AddDataHisto(TH1F* histo); /**add a data histogram*/
 		void Fill(float value, Dataset* data, bool scale = true, float Lumi = 1.); /**if scale==true: histo are scaled by data.NormFactor()*Lumi */
-		void Draw(string label = string("CMSPlot"), unsigned int RatioType = 0, bool addRatioErrorBand = false, bool addErrorBand = false, bool ErrorBandAroundTotalInput = false, int scaleNPSignal = 1); /**RatioType=1: ratio = data/MC, RatioType=2: ratio=(data-MC)/MC and RatioType=0: no ratio plot drawn. ErrorBandAroundTotalInput set on false means that the error band will be centered around a nominal histogram read in from an external errorband file*/
-		void Write(TFile* file, string label = string(""), bool savePNG = false, string pathPNG = string(""), string ext = string("png"));
+		void Draw(string label = string("CMSPlot"), unsigned int RatioType = 0, bool addRatioErrorBand = false, bool addErrorBand = false, bool ErrorBandAroundTotalInput = false, int scaleNPSignal = 1,float x1=0.45, float y1=0.63, float x2=0.97, float y2=0.94, float magnify=1.3); 
+		/**RatioType=1: ratio = data/MC, RatioType=2: ratio=(data-MC)/MC and RatioType=0: no ratio plot drawn. ErrorBandAroundTotalInput set on false means that the error band will be centered around a nominal histogram read in from an external errorband file*/
+		void Write(TFile* file, string label = string(""), bool savePNG = false, string pathPNG = string(""), string ext = string("png"), float magnifyLog=1.3);
 
 		void setDataLumi(float lum) { lumi_ = lum; } /**if running over data, you don't need to use this method, as the lumi will be taken from the dataset info*/
 		void setSqrtsTeV(float sqrts) { sqrts_ = sqrts; } /**"sqrt(s) = 8 TeV" displayed by default in title*/
 		void setPreliminary(bool prelim) { prelim_ = prelim; } /**"CMS Preliminary" displayed by default in title; set it to "CMS" via this method*/
 		void showNumberEntries(bool a) { showNumberEntries_ = a; } /**show number of entries in the legend (default = true)*/
 		void setMaxY(float y) { maxY_ = y; } /**set maximum value of y-axis*/
+		float getMaxY() { return maxY_ ; } /**get maximum value of y-axis*/
 		void setMinLogY(float y) { minLogY_ = y; } /**set minimum value of log-scale y-axis*/
 		void addText(string text) { text_ = text; } /**add some text on the plot (as alternative to specifying it in the constructor)*/
 		string getplotName() {return plotName_; }

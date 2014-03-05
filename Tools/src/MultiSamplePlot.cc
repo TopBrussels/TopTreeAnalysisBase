@@ -119,10 +119,14 @@ void MultiSamplePlot::Fill(float value, Dataset* data, bool scale, float Lumi)
 			if(data->Name()==plots_[i].second->Name()) plots_[i].first->Fill(value);
 		}
 	}
+
 }
 
-void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioErrorBand, bool addErrorBand, bool ErrorBandAroundTotalInput, int scaleNPSignal)
+void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioErrorBand, bool addErrorBand, bool ErrorBandAroundTotalInput, int scaleNPSignal,
+			   float x1, float y1, float x2, float y2, float magnify)
 {
+  if(magnify<=0) magnify=1.3;
+
 	vector<TH1F*> normalizedhistos;
 	vector<Dataset*> mergeddatasets;
 	
@@ -313,7 +317,8 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
 	}
 
 
-	leg_ = new TLegend(0.45,0.63,0.97,0.94);
+	//leg_ = new TLegend(0.45,0.63,0.97,0.94);
+	leg_ = new TLegend(x1,y1,x2,y2);
 	leg_->SetFillColor(0);
 	leg_->SetTextFont(42);
 	leg_->SetLineColor(1);
@@ -323,7 +328,7 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
 	if( ! showNumberEntries_ ) leg_->SetX1(0.76);
 	
 	//a second legend is needed because otherwise it will add the datasets two times to the same legend...
-	legAreaNorm_ = new TLegend(0.45,0.63,0.97,0.94);
+	legAreaNorm_ = new TLegend(x1,y1,x2,y2);
 	legAreaNorm_->SetFillColor(0);
 	legAreaNorm_->SetTextFont(42);
 	legAreaNorm_->SetLineColor(1);
@@ -401,7 +406,7 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
      }
 		
 		 DrawStackedPlot(hCanvasStack_,hCanvasStackLogY_,hStack_,histosForOverlay,scaleNPSignal,histosForHStack[0]->GetXaxis()->GetTitle(),histosForHStack[0]->GetYaxis()->GetTitle(),RatioType);	
-		 ymax = 1.3*hStack_->GetMaximum();
+		 ymax = magnify*hStack_->GetMaximum();
 		 if(ymaxoverlay > ymax) ymax = ymaxoverlay;
 	}
 	
@@ -417,16 +422,16 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
 	    hCanvasStackAreaNorm_->SetCanvasSize(1000, 800);
 	    hCanvasStackAreaNorm_->SetBottomMargin(0.3);
 	    hCanvasStackAreaNormLogY_->SetCanvasSize(1000, 800);
-      hCanvasStackAreaNormLogY_->SetBottomMargin(0.3);
+	    hCanvasStackAreaNormLogY_->SetBottomMargin(0.3);
     }
 		
 	  DrawStackedPlot(hCanvasStackAreaNorm_,hCanvasStackAreaNormLogY_,hStackAreaNorm_,histosForOverlayAreaNorm,scaleNPSignal,histosForHStackAreaNorm[0]->GetXaxis()->GetTitle(),histosForHStackAreaNorm[0]->GetYaxis()->GetTitle(),RatioType);
-		ymaxAreaNorm = 1.3*hStackAreaNorm_->GetMaximum();
+		ymaxAreaNorm = magnify*hStackAreaNorm_->GetMaximum();
 		if(ymaxoverlayAreaNorm > ymaxAreaNorm) ymaxAreaNorm = ymaxoverlayAreaNorm;
 	}
 
 
-  //Now superimpose data to the plots + draw ratio plots + draw error bands
+	//Now superimpose data to the plots + draw ratio plots + draw error bands
 	TH1F* ratio = 0;
 	TPad* pad = 0;
 	TPad* padLogY = 0;
@@ -728,8 +733,8 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
 	
 	if(hData_)
 	{
-	  if(hStack_ && ymax < 1.3*(hData_->GetMaximum())) ymax = 1.3*(hData_->GetMaximum());
-	  if(hStackAreaNorm_ && ymaxAreaNorm < 1.3*(hData_->GetMaximum())) ymaxAreaNorm = 1.3*(hData_->GetMaximum());
+	  if(hStack_ && ymax < magnify*(hData_->GetMaximum())) ymax = magnify*(hData_->GetMaximum());
+	  if(hStackAreaNorm_ && ymaxAreaNorm < magnify*(hData_->GetMaximum())) ymaxAreaNorm = magnify*(hData_->GetMaximum());
 	}
 
 	if(maxY_ > 0)
@@ -737,6 +742,8 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
 	  ymax = maxY_;
 	  ymaxAreaNorm = maxY_;
 	}
+	else maxY_ = ymax;
+
 	if(hStack_)	hStack_->SetMaximum(ymax);
 	if(hStackAreaNorm_) hStackAreaNorm_->SetMaximum(ymaxAreaNorm);
 
@@ -850,11 +857,13 @@ void MultiSamplePlot::DrawErrorBand(TH1F* totalSM, TH1F* hErrorPlus, TH1F* hErro
 	ErrorGraph->SetFillColor(kRed);
 	ErrorGraph->SetLineColor(kRed);
 	ErrorGraph->SetLineWidth(1);
-	ErrorGraph->Draw("2"); 
+	ErrorGraph->Draw("2");
 }
 
-void MultiSamplePlot::Write(TFile* fout, string label, bool savePNG, string pathPNG, string ext) 
+void MultiSamplePlot::Write(TFile* fout, string label, bool savePNG, string pathPNG, string ext, float magnifyLog) 
 {
+  if(magnifyLog<=0) magnifyLog=1.3;
+
 	fout->cd();
 	string dirname = "MultiSamplePlot_"+label;
 	if(fout->Get(dirname.c_str())==0)
@@ -882,12 +891,15 @@ void MultiSamplePlot::Write(TFile* fout, string label, bool savePNG, string path
 	}
   
 	if(hCanvasStackLogY_)
-	{
-	  if(hStack_) hStack_->SetMinimum(minLogY_);
-	  hCanvasStackLogY_->Write();
-	  if(savePNG)
-	    hCanvasStackLogY_->SaveAs( (pathPNG+label+"_StackLogY."+ext).c_str() );
-	}
+	  {
+	    if(hStack_) {
+	      hStack_->SetMinimum(minLogY_);
+	      if(maxY_>0 && magnifyLog>0) hStack_->SetMaximum(pow(maxY_,magnifyLog));
+	    }
+	    hCanvasStackLogY_->Write();
+	    if(savePNG)
+	      hCanvasStackLogY_->SaveAs( (pathPNG+label+"_StackLogY."+ext).c_str() );
+	  }
   
 	if(hCanvasStackAreaNorm_ && hData_)
 	{
