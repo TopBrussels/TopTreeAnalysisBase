@@ -122,6 +122,27 @@ void MultiSamplePlot::Fill(float value, Dataset* data, bool scale, float Lumi)
 
 }
 
+TH1F* MultiSamplePlot::getTH1F(string name)
+{
+  
+  TH1F* h =0;
+  for(unsigned int i=0;i<plots_.size();i++){
+    if(name==plots_[i].second->Name()) h = plots_[i].first;
+  }
+  
+  return h;
+  
+}
+
+vector<string> MultiSamplePlot::getTH1FNames()
+{
+  vector<string> names;
+  for(unsigned int i=0;i<plots_.size();i++)
+    names.push_back(plots_[i].second->Name());
+  
+  return names;
+}
+
 void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioErrorBand, bool addErrorBand, bool ErrorBandAroundTotalInput, int scaleNPSignal,
 			   float x1, float y1, float x2, float y2, float magnify)
 {
