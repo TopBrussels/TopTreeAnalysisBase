@@ -26,6 +26,9 @@ using namespace std;
 class MultiSamplePlot{
 
  public:
+  
+  typedef pair< string , vector< pair<string,float> > > MSIntegral;
+
   MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int Nbins, float Min, float Max, string XaxisLabel = string("Variable"), string YaxisLabel = string("#Events"), string AddText = string(""));
   MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int Nbins, float* binsX, string XaxisLabel = string("Variable"), string YaxisLabel = string("#Events"), string AddText = string(""));
   MultiSamplePlot(vector<pair<TH1F*,Dataset*> > vec, string PlotName, string XaxisLabel, string YaxisLabel, string AddText);
@@ -49,6 +52,8 @@ class MultiSamplePlot{
   void addText(string text) { text_ = text; } /**add some text on the plot (as alternative to specifying it in the constructor)*/
   string getplotName() {return plotName_; }
   void setErrorBandFile(string errorbandfile) { errorbandfile_ = errorbandfile;} /**set the file where to look for the errorbands*/
+
+  MultiSamplePlot::MSIntegral Integrate();
 	
  private:
   void Initialize(); /**initialize some private members common for all MultiSamplePlot constructors*/

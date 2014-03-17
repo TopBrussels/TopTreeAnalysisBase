@@ -945,3 +945,29 @@ void MultiSamplePlot::Write(TFile* fout, string label, bool savePNG, string path
 	plots_[i].first->Write();
       } 
 }
+
+MultiSamplePlot::MSIntegral MultiSamplePlot::Integrate() {
+
+  MSIntegral msi;
+  vector<float> integrals;
+  vector<string> names;
+  float integral=0;
+  float total=0;
+  TH1F* h=0;
+
+  // Fill the MSIntegral
+  msi.first = plotName_ ;
+  names = this->getTH1FNames();
+
+  for(u_int i=0 ; i<names.size() ; i++) {
+    h = this->getTH1F(names[i]);
+    integral = h!=0 ? h->Integral() : 0;
+    (msi.second).push_back( make_pair(names[i],integral) );
+    total += integral;
+  }
+
+  (msi.second).push_back( make_pair("total",total) );
+
+  return msi;
+
+}
