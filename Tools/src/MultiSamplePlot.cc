@@ -946,13 +946,18 @@ void MultiSamplePlot::Write(TFile* fout, string label, bool savePNG, string path
       } 
 }
 
-MultiSamplePlot::MSIntegral MultiSamplePlot::Integrate() {
+MultiSamplePlot::MSIntegral MultiSamplePlot::Integrate(Int_t binx1, Int_t binx2, Option_t *option) {
 
   MSIntegral msi;
-  vector<float> integrals;
   vector<string> names;
-  float integral=0;
-  float total=0;
+
+  Double_t    entries=0;
+  Double_t integral=0;
+  Double_t error=0;
+
+  Double_t    tot_entries=0;
+  Double_t total=0;
+  Double_t tot_err=0;
   TH1F* h=0;
 
   // Fill the MSIntegral
@@ -960,13 +965,23 @@ MultiSamplePlot::MSIntegral MultiSamplePlot::Integrate() {
   names = this->getTH1FNames();
 
   for(u_int i=0 ; i<names.size() ; i++) {
+
     h = this->getTH1F(names[i]);
-    integral = h!=0 ? h->Integral() : 0;
-    (msi.second).push_back( make_pair(names[i],integral) );
-    total += integral;
+    entries = h->GetEntries();
+    
+    integral = h!=0 ? h->IntegralAndError(binx1, binx2, error, option) : 0;
+
+    (msi.second).push_back( make_pair(names[i], make_pair( entries , make_pair(integral,error) ) ) );
+
+    tot_entries += entries;
+    total   += integral;
+    tot_err += error*error;
   }
 
-  (msi.second).push_back( make_pair("total",total) );
+  if(tot_err>=0) tot_err = TMath::Sqrt(tot_err);
+  else           tot_err = -1;
+
+  (msi.second).push_back( make_pair("total", make_pair( tot_entries , make_pair(total,tot_err) ) ) );
 
   return msi;
 

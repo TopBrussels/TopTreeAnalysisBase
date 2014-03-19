@@ -2,6 +2,7 @@
 #define MultiSamplePlot_h
 
 #include "TH1F.h"
+#include "TMath.h"
 #include "THStack.h"
 #include "TFile.h"
 #include "TLatex.h"
@@ -27,7 +28,7 @@ class MultiSamplePlot{
 
  public:
   
-  typedef pair< string , vector< pair<string,float> > > MSIntegral;
+  typedef pair< string , vector< pair<string, pair< Double_t , pair<Double_t,Double_t> > > > > MSIntegral;
 
   MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int Nbins, float Min, float Max, string XaxisLabel = string("Variable"), string YaxisLabel = string("#Events"), string AddText = string(""));
   MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int Nbins, float* binsX, string XaxisLabel = string("Variable"), string YaxisLabel = string("#Events"), string AddText = string(""));
@@ -53,7 +54,7 @@ class MultiSamplePlot{
   string getplotName() {return plotName_; }
   void setErrorBandFile(string errorbandfile) { errorbandfile_ = errorbandfile;} /**set the file where to look for the errorbands*/
 
-  MultiSamplePlot::MSIntegral Integrate();
+  MultiSamplePlot::MSIntegral Integrate(Int_t binx1, Int_t binx2, Option_t *option="");
 	
  private:
   void Initialize(); /**initialize some private members common for all MultiSamplePlot constructors*/
