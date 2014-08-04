@@ -1948,8 +1948,13 @@ void JetCombiner::Write(TFile* fout, bool savePNG, string pathPNG, bool plotMVAs
 
         MultiSamplePlot *temp = it->second;
         string name = it->first + MVAfilePostfix_;
-        temp->Draw(false, name, true, true, true, true, true);
+	// temp->Draw(false, name, true, true, true, true, true);
+        temp->Draw("JetCombiner",1,false, false, false, 1,0.45,0.63,0.97,0.94,1.0);
+
         temp->Write(fout, name, savePNG, pathPNG+"MSPlot/");
+
+	//        void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioErrorBand, bool addErrorBand, bool ErrorBandAroundTotalInput, int scaleNPSignal,   float x1, float y1, float x2, float y2, float magnify
+	//Draw(std::string, unsigned int, bool, bool, bool, int, float, float, float, float, float)
     }
     
     for(std::map<std::string,TH1F*>::const_iterator it = histo1D_.begin(); it != histo1D_.end(); it++)

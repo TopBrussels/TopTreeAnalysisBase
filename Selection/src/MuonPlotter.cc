@@ -153,7 +153,9 @@ MuonPlotter::Fill (vector < TRootMuon > muons, vector < TRootJet > selJets)
 	if(muons[0].isTrackerMuon())    h_HPTMuon_Type_vs_Type_->Fill(2.,1.);
 					h_HPTMuon_Type_vs_Type_->Fill(2.,2.);
     }
+
     h_HPTMuon_RelIso_->Fill(muons[0].relPfIso(3));
+
     float mindRMuJet = 999.;
     TRootJet jet;
     for(unsigned int j=0;j<selJets.size();j++)
@@ -192,7 +194,9 @@ MuonPlotter::Fill (vector < TRootMuon > muons, vector < TRootJet > selJets)
 	if(muons[i].isTrackerMuon())    h_AllMuons_Type_vs_Type_->Fill(2.,1.);
 					h_AllMuons_Type_vs_Type_->Fill(2.,2.);
     }
+
     h_AllMuons_RelIso_->Fill(muons[i].relPfIso(3));
+
     float mindRMuJet = 999.;
     TRootJet jet;
     for(unsigned int j=0;j<selJets.size();j++)
