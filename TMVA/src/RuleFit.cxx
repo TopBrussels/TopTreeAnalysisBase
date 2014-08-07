@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: RuleFit.cxx,v 1.1.2.1 2012/01/04 18:54:07 caebergs Exp $
+// @(#)root/tmva $Id: RuleFit.cxx 44110 2012-05-04 08:34:05Z evt $
 // Author: Andreas Hoecker, Joerg Stelzer, Fredrik Tegenfeldt, Helge Voss
 
 /**********************************************************************************
@@ -46,7 +46,7 @@ ClassImp(TMVA::RuleFit)
 //_______________________________________________________________________
 TMVA::RuleFit::RuleFit( const MethodBase *rfbase )
    : fVisHistsUseImp( kTRUE ),
-   fLogger( new MsgLogger("RuleFit") )
+     fLogger( new MsgLogger("RuleFit") )
 {
    // constructor
    Initialize( rfbase );
@@ -55,8 +55,12 @@ TMVA::RuleFit::RuleFit( const MethodBase *rfbase )
 
 //_______________________________________________________________________
 TMVA::RuleFit::RuleFit()
-   : fVisHistsUseImp( kTRUE ),
-     fLogger( new MsgLogger("RuleFit") )
+   : fNTreeSample(0)
+   , fNEveEffTrain(0)
+   , fMethodRuleFit(0)
+   , fMethodBase(0)
+   , fVisHistsUseImp( kTRUE )
+   , fLogger( new MsgLogger("RuleFit") )
 {
    // default constructor
    std::srand( randSEED ); // initialize random number generator used by std::random_shuffle
@@ -188,7 +192,7 @@ void TMVA::RuleFit::MakeForest()
    //
    Timer timer( fMethodRuleFit->GetNTrees(), "RuleFit" );
 
-   Double_t fsig;
+   // Double_t fsig;
    Int_t nsig,nbkg;
    //
    TRandom3 rndGen;
@@ -199,7 +203,7 @@ void TMVA::RuleFit::MakeForest()
    // Weights are modifed by the boosting.
    // Those weights we do not want for the later fitting.
    //
-   Bool_t useBoost = fMethodRuleFit->UseBoost();
+   Bool_t useBoost = fMethodRuleFit->UseBoost(); // (AdaBoost (True) or RandomForest/Tree (False)
 
    if (useBoost) SaveEventWeights();
 
@@ -209,12 +213,10 @@ void TMVA::RuleFit::MakeForest()
       nsig=0;
       nbkg=0;
       for (UInt_t ie = 0; ie<fNTreeSample; ie++) {
-         if (fTrainingEventsRndm[ie]->IsSignal()) nsig++; // ignore weights here
+         if (fMethodBase->DataInfo().IsSignal(fTrainingEventsRndm[ie])) nsig++; // ignore weights here
          else nbkg++;
       }
-      fsig = Double_t(nsig)/Double_t(nsig+nbkg);
-      SeparationBase *qualitySepType = new GiniIndex();
-      // generate random number of events
+      // fsig = Double_t(nsig)/Double_t(nsig+nbkg);
       // do not implement the above in this release...just set it to default
       //      nminRnd = fNodeMinEvents;
       DecisionTree *dt;
@@ -224,7 +226,10 @@ void TMVA::RuleFit::MakeForest()
       while (tryAgain) {
          Double_t frnd = rndGen.Uniform( fMethodRuleFit->GetMinFracNEve(), fMethodRuleFit->GetMaxFracNEve() );
          nminRnd = Int_t(frnd*static_cast<Double_t>(fNTreeSample));
-         dt = new DecisionTree( fMethodRuleFit->GetSeparationBase(), nminRnd, fMethodRuleFit->GetNCuts(), qualitySepType );
+         Int_t     iclass = 0; // event class being treated as signal during training
+         Bool_t    useRandomisedTree = !useBoost;  
+         dt = new DecisionTree( fMethodRuleFit->GetSeparationBase(), nminRnd, fMethodRuleFit->GetNCuts(), iclass, useRandomisedTree);
+
          BuildTree(dt); // reads fNTreeSample events from fTrainingEventsRndm
          if (dt->GetNNodes()<3) {
             delete dt;
@@ -236,8 +241,9 @@ void TMVA::RuleFit::MakeForest()
       if (dt) {
          fForest.push_back(dt);
          if (useBoost) Boost(dt);
-      } 
-      else {
+
+      } else {
+
          Log() << kWARNING << "------------------------------------------------------------------" << Endl;
          Log() << kWARNING << " Failed growing a tree even after " << ntriesMax << " trials" << Endl;
          Log() << kWARNING << " Possible solutions: " << Endl;
@@ -303,7 +309,7 @@ void TMVA::RuleFit::Boost( DecisionTree *dt )
       Double_t w = (*e)->GetWeight();
       sumw += w;
       // 
-      if (isSignalType == (*e)->IsSignal()) { // correctly classified
+      if (isSignalType == fMethodBase->DataInfo().IsSignal(*e)) { // correctly classified
          correctSelected.push_back(kTRUE);
       } 
       else {                                // missclassified
@@ -436,7 +442,7 @@ void TMVA::RuleFit::NormVisHists(std::vector<TH2F *> & hlist)
    // if all weights are positive, the scale will be 1/maxweight
    // if minimum weight < 0, then the scale will be 1/max(maxweight,abs(minweight))
    //
-   if (hlist.size()==0) return;
+   if (hlist.empty()) return;
    //
    Double_t wmin=0;
    Double_t wmax=0;
@@ -492,6 +498,7 @@ void TMVA::RuleFit::FillCut(TH2F* h2, const Rule *rule, Int_t vind)
    if (!ruleHasVar) return;
    //
    Int_t firstbin = h2->GetBin(1,1,1);
+   if(firstbin<0) firstbin=0;
    Int_t lastbin = h2->GetBin(h2->GetNbinsX(),1,1);
    Int_t binmin=(dormin ? h2->FindBin(rmin,0.5):firstbin);
    Int_t binmax=(dormax ? h2->FindBin(rmax,0.5):lastbin);
@@ -509,10 +516,10 @@ void TMVA::RuleFit::FillCut(TH2F* h2, const Rule *rule, Int_t vind)
       fbin = bin-firstbin+1;
       if (bin==binmin) {
          f = fbfrac;
-      } 
+      }
       else if (bin==binmax) {
          f = lbfrac;
-      } 
+      }
       else {
          f = 1.0;
       }
@@ -541,7 +548,7 @@ void TMVA::RuleFit::FillLin(TH2F* h2,Int_t vind)
    Double_t val;
    if (fVisHistsUseImp) {
       val = fRuleEnsemble.GetLinImportance(vind);
-   } 
+   }
    else {
       val = fRuleEnsemble.GetLinCoefficients(vind);
    }
@@ -560,7 +567,7 @@ void TMVA::RuleFit::FillCorr(TH2F* h2,const Rule *rule,Int_t vx, Int_t vy)
    Double_t val;
    if (fVisHistsUseImp) {
       val = rule->GetImportance();
-   } 
+   }
    else {
       val = rule->GetCoefficient()*rule->GetSupport();
    }
@@ -750,7 +757,7 @@ void TMVA::RuleFit::MakeVisHists()
    if (varDir==0) {
       Log() << kWARNING << "No input variable directory found - BUG?" << Endl;
       return;
-   }   
+   }
    corrDir = (TDirectory*)varDir->Get( corrDirName );
    if (corrDir==0) {
       Log() << kWARNING << "No correlation directory found" << Endl;
@@ -767,7 +774,11 @@ void TMVA::RuleFit::MakeVisHists()
    //
    // get correlation plot directory
    corrDir = (TDirectory *)varDir->Get(corrDirName);
-   if (corrDir==0) Log() << kWARNING << "No correlation directory found : " << corrDirName << Endl;
+   if (corrDir==0) {
+      Log() << kWARNING << "No correlation directory found : " << corrDirName << Endl;
+      return;
+   }
+
    // how many plots are in the var directory?
    Int_t noPlots = ((varDir->GetListOfKeys())->GetEntries()) / 2;
    Log() << kDEBUG << "Got number of plots = " << noPlots << Endl;
@@ -780,7 +791,7 @@ void TMVA::RuleFit::MakeVisHists()
    while ((key = (TKey*)next())) {
       // make sure, that we only look at histograms
       TClass *cl = gROOT->GetClass(key->GetClassName());
-      if (!cl->InheritsFrom("TH1F")) continue;
+      if (!cl->InheritsFrom(TH1F::Class())) continue;
       TH1F *sig = (TH1F*)key->ReadObj();
       TString hname= sig->GetName();
       Log() << kDEBUG << "Got histogram : " << hname << Endl;
@@ -807,7 +818,7 @@ void TMVA::RuleFit::MakeVisHists()
    while ((key = (TKey*)nextCorr())) {
       // make sure, that we only look at histograms
       TClass *cl = gROOT->GetClass(key->GetClassName());
-      if (!cl->InheritsFrom("TH2F")) continue;
+      if (!cl->InheritsFrom(TH2F::Class())) continue;
       TH2F *sig = (TH2F*)key->ReadObj();
       TString hname= sig->GetName();
 

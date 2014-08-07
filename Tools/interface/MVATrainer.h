@@ -15,10 +15,12 @@
 #include "TROOT.h"
 #include "TPluginManager.h"
 
-#include "TopTreeAnalysisBase/TMVA/src/Factory.h"
-#include "TopTreeAnalysisBase/TMVA/src/Tools.h"
-#include "TopTreeAnalysisBase/TMVA/src/Config.h"
 
+
+//Changing to these include paths for compatibility with ROOT v5.34
+#include "TopTreeAnalysisBase/TMVA/inc/TMVA/Factory.h"
+#include "TopTreeAnalysisBase/TMVA/inc/TMVA/Tools.h"
+#include "TopTreeAnalysisBase/TMVA/inc/TMVA/Config.h"
 
 
 class MVATrainer {

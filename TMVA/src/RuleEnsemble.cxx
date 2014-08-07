@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: RuleEnsemble.cxx,v 1.1.2.1 2012/01/04 18:54:07 caebergs Exp $
+// @(#)root/tmva $Id: RuleEnsemble.cxx 41891 2011-11-10 22:46:31Z pcanal $
 // Author: Andreas Hoecker, Joerg Stelzer, Fredrik Tegenfeldt, Helge Voss
 
 /**********************************************************************************
@@ -17,9 +17,9 @@
  *      Helge Voss         <Helge.Voss@cern.ch>         - MPI-KP Heidelberg, GER  *
  *                                                                                *
  * Copyright (c) 2005:                                                            *
- *      CERN, Switzerland                                                         * 
+ *      CERN, Switzerland                                                         *
  *      Iowa State U.                                                             *
- *      MPI-K Heidelberg, Germany                                                 * 
+ *      MPI-K Heidelberg, Germany                                                 *
  *                                                                                *
  * Redistribution and use in source and binary forms, with or without             *
  * modification, are permitted according to the terms listed in LICENSE           *
@@ -40,11 +40,23 @@
 
 //_______________________________________________________________________
 TMVA::RuleEnsemble::RuleEnsemble( RuleFit *rf )
-   : fLearningModel    ( kFull )
-   , fLinQuantile      ( 0.025 ) // default quantile for killing outliers in linear terms
-   , fAverageSupport   ( 0.8 )
-   , fAverageRuleSigma ( 0.4 )  // default value - used if only linear model is chosen
-   , fRuleMinDist      ( 1e-3 ) // closest allowed 'distance' between two rules
+   : fLearningModel   ( kFull )
+   , fImportanceCut   ( 0 )
+   , fLinQuantile     ( 0.025 ) // default quantile for killing outliers in linear terms
+   , fOffset          ( 0 )
+   , fAverageSupport  ( 0.8 )
+   , fAverageRuleSigma( 0.4 )  // default value - used if only linear model is chosen
+   , fRuleFSig        ( 0 )
+   , fRuleNCave       ( 0 )
+   , fRuleNCsig       ( 0 )
+   , fRuleMinDist     ( 1e-3 ) // closest allowed 'distance' between two rules
+   , fNRulesGenerated ( 0 )
+   , fEvent           ( 0 )
+   , fEventCacheOK    ( true )
+   , fRuleMapOK       ( true )
+   , fRuleMapInd0     ( 0 )
+   , fRuleMapInd1     ( 0 )
+   , fRuleMapEvents   ( 0 )
    , fLogger( new MsgLogger("RuleFit") )
 {
    // constructor
@@ -54,6 +66,9 @@ TMVA::RuleEnsemble::RuleEnsemble( RuleFit *rf )
 //_______________________________________________________________________
 TMVA::RuleEnsemble::RuleEnsemble( const RuleEnsemble& other )
    : fAverageSupport   ( 1 )
+   , fEvent(0)
+   , fRuleMapEvents(0)
+   , fRuleFit(0)
    , fLogger( new MsgLogger("RuleFit") )
 {
    // copy constructor
@@ -61,9 +76,27 @@ TMVA::RuleEnsemble::RuleEnsemble( const RuleEnsemble& other )
 }
 
 //_______________________________________________________________________
-TMVA::RuleEnsemble::RuleEnsemble() :
-   fAverageSupport( 1 ),
-   fLogger( new MsgLogger("RuleFit") )
+TMVA::RuleEnsemble::RuleEnsemble()
+   : fLearningModel     ( kFull )
+   , fImportanceCut   ( 0 )
+   , fLinQuantile     ( 0.025 ) // default quantile for killing outliers in linear terms
+   , fOffset          ( 0 )
+   , fImportanceRef   ( 1.0 )
+   , fAverageSupport  ( 0.8 )
+   , fAverageRuleSigma( 0.4 )  // default value - used if only linear model is chosen
+   , fRuleFSig        ( 0 )
+   , fRuleNCave       ( 0 )
+   , fRuleNCsig       ( 0 )
+   , fRuleMinDist     ( 1e-3 ) // closest allowed 'distance' between two rules
+   , fNRulesGenerated ( 0 )
+   , fEvent           ( 0 )
+   , fEventCacheOK    ( true )
+   , fRuleMapOK       ( true )
+   , fRuleMapInd0     ( 0 )
+   , fRuleMapInd1     ( 0 )
+   , fRuleMapEvents   ( 0 )
+   , fRuleFit         ( 0 )
+   , fLogger( new MsgLogger("RuleFit") )
 {
    // constructor
 }
@@ -345,7 +378,7 @@ void TMVA::RuleEnsemble::CalcRuleSupport()
             if ((*itrRule)->EvalEvent( *(*itrEvent) )) {
                ew = (*itrEvent)->GetWeight();
                s += ew;
-               if ((*itrEvent)->IsSignal()) ssig += ew;
+               if (GetMethodRuleFit()->DataInfo().IsSignal(*itrEvent)) ssig += ew;
                else                         sbkg += ew;
             }
          }
@@ -516,10 +549,10 @@ void TMVA::RuleEnsemble::MakeRules( const std::vector< const DecisionTree *> & f
    Double_t sumnendn=0;
    Double_t sumn2=0;
    //
-   UInt_t prevs;
+   // UInt_t prevs;
    UInt_t ntrees = forest.size();
    for ( UInt_t ind=0; ind<ntrees; ind++ ) {
-      prevs = fRules.size();
+      // prevs = fRules.size();
       MakeRulesFromTree( forest[ind] );
       nrules = CalcNRules( forest[ind] );
       nendn = (nrules/2) + 1;
@@ -771,7 +804,7 @@ void TMVA::RuleEnsemble::RuleResponseStats()
    Bool_t sigRule;
    Bool_t sigTag;
    Bool_t bkgTag;
-   Bool_t noTag;
+   // Bool_t noTag;
    Bool_t sigTrue;
    Bool_t tagged;
    // Counters
@@ -817,8 +850,8 @@ void TMVA::RuleEnsemble::RuleResponseStats()
          tagged  = fRules[i]->EvalEvent(*eveData);
          sigTag = (tagged && sigRule);        // it's tagged as a signal
          bkgTag = (tagged && (!sigRule));     // ... as bkg
-         noTag = !(sigTag || bkgTag);         // ... not tagged
-         sigTrue = eveData->IsSignal();       // true if event is true signal
+         // noTag = !(sigTag || bkgTag);         // ... not tagged
+         sigTrue = (eveData->GetClass() == 0);       // true if event is true signal
          if (tagged) {
             ntag++;
             if (sigTag && sigTrue)  nss++;
@@ -1002,6 +1035,7 @@ void TMVA::RuleEnsemble::Print() const
 void TMVA::RuleEnsemble::PrintRaw( ostream & os ) const
 {
    // write rules to stream
+   Int_t dp = os.precision();
    UInt_t nrules = fRules.size();
    //   std::sort(fRules.begin(),fRules.end());
    //
@@ -1027,6 +1061,7 @@ void TMVA::RuleEnsemble::PrintRaw( ostream & os ) const
          << fLinDP[i] << " "
          << fLinImportance[i] << " " << std::endl;
    }
+   os << std::setprecision(dp);
 }
 
 //_______________________________________________________________________
@@ -1080,13 +1115,13 @@ void TMVA::RuleEnsemble::ReadFromXML( void* wghtnode )
 
    UInt_t i = 0;
    fRules.resize( nrules  );
-   void* ch = gTools().xmlengine().GetChild( wghtnode );
+   void* ch = gTools().GetChild( wghtnode );
    for (i=0; i<nrules; i++) {
       fRules[i] = new Rule();
       fRules[i]->SetRuleEnsemble( this );
       fRules[i]->ReadFromXML( ch );
 
-      ch = gTools().xmlengine().GetNext(ch);
+      ch = gTools().GetNextChild(ch);
    }
 
    // read linear classifier (Fisher)
@@ -1109,7 +1144,7 @@ void TMVA::RuleEnsemble::ReadFromXML( void* wghtnode )
       gTools().ReadAttr( ch, "Importance", fLinImportance[i]    );
 
       i++;
-      ch = gTools().xmlengine().GetNext(ch);
+      ch = gTools().GetNextChild(ch);
    }
 }
 
@@ -1146,6 +1181,7 @@ void TMVA::RuleEnsemble::ReadRaw( istream & istr )
    //
    UInt_t nlinear;
    //
+   // coverity[tainted_data_argument]
    istr >> dummy >> nlinear;
    //
    fLinNorm        .resize( nlinear );
@@ -1182,6 +1218,16 @@ void TMVA::RuleEnsemble::Copy( const RuleEnsemble & other )
       fVarImportance     = other.GetVarImportance();
       fLearningModel     = other.GetLearningModel();
       fLinQuantile       = other.GetLinQuantile();
+      fRuleNCsig         = other.fRuleNCsig;
+      fAverageRuleSigma  = other.fAverageRuleSigma;
+      fEventCacheOK      = other.fEventCacheOK;
+      fImportanceRef     = other.fImportanceRef;
+      fNRulesGenerated   = other.fNRulesGenerated;
+      fRuleFSig          = other.fRuleFSig;
+      fRuleMapInd0       = other.fRuleMapInd0;
+      fRuleMapInd1       = other.fRuleMapInd1;
+      fRuleMapOK         = other.fRuleMapOK;
+      fRuleNCave         = other.fRuleNCave;
    }
 }
 
@@ -1271,10 +1317,11 @@ TMVA::Rule *TMVA::RuleEnsemble::MakeTheRule( const Node *node )
    nodeVec.push_back( node );
    while (parent!=0) {
       parent = parent->GetParent();
-      if (parent) {
-         if (dynamic_cast<const DecisionTreeNode*>(parent)->GetSelector()>=0)
-            nodeVec.insert( nodeVec.begin(), parent );
-      }
+      if (!parent) continue;
+      const DecisionTreeNode* dtn = dynamic_cast<const DecisionTreeNode*>(parent);
+      if (dtn && dtn->GetSelector()>=0)
+         nodeVec.insert( nodeVec.begin(), parent );
+
    }
    if (nodeVec.size()<2) {
       Log() << kFATAL << "<MakeTheRule> BUG! Inconsistent Rule!" << Endl;

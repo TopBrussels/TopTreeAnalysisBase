@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: Node.cxx,v 1.1.2.1 2012/01/04 18:54:05 caebergs Exp $    
+// @(#)root/tmva $Id: Node.cxx 40005 2011-06-27 15:29:10Z stelzer $    
 // Author: Andreas Hoecker, Joerg Stelzer, Helge Voss, Kai Voss 
 
 /**********************************************************************************
@@ -100,6 +100,13 @@ TMVA::Node::~Node()
 }
 
 //_______________________________________________________________________
+int TMVA::Node::GetCount()
+{
+   // retuns the global number of instantiated nodes
+   return fgCount;
+}
+
+//_______________________________________________________________________
 Int_t TMVA::Node::CountMeAndAllDaughters() const 
 {
    //recursively go through the part of the tree below this node and count all daughters
@@ -138,9 +145,9 @@ void* TMVA::Node::AddXMLTo( void* parent ) const
    void* node = gTools().AddChild(parent, "Node", s.str().c_str());
    gTools().AddAttr( node, "pos",   fPos );
    gTools().AddAttr( node, "depth", fDepth );
-   AddAttributesToNode(node);
-   if (fLeft)  fLeft->AddXMLTo(node);
-   if (fRight) fRight->AddXMLTo(node);
+   this->AddAttributesToNode(node);
+   if (this->GetLeft())  this->GetLeft()->AddXMLTo(node);
+   if (this->GetRight()) this->GetRight()->AddXMLTo(node);
    return node;
 }
 
@@ -149,7 +156,7 @@ void TMVA::Node::ReadXML( void* node,  UInt_t tmva_Version_Code )
 {
    // read attributes from XML
    ReadAttributes(node, tmva_Version_Code);
-   const char* content = gTools().xmlengine().GetNodeContent(node);
+   const char* content = gTools().GetContent(node);
    if (content) {
       std::stringstream s(content);
       ReadContent(s);
@@ -157,15 +164,15 @@ void TMVA::Node::ReadXML( void* node,  UInt_t tmva_Version_Code )
    gTools().ReadAttr( node, "pos",   fPos );
    gTools().ReadAttr( node, "depth", fDepth );
 
-   void* ch = gTools().xmlengine().GetChild(node);
+   void* ch = gTools().GetChild(node);
    while (ch) {
       Node* n = CreateNode();
       n->ReadXML(ch, tmva_Version_Code);
-      if (n->GetPos()=='l') { fLeft  = n; }
-      else if(n->GetPos()=='r') { fRight = n; }
+      if (n->GetPos()=='l')     { this->SetLeft(n);  }
+      else if(n->GetPos()=='r') { this->SetRight(n); }
       else { 
-         std::cout << "neither left nor right" << std::endl;
+	 std::cout << "neither left nor right" << std::endl;
       }
-      ch = gTools().xmlengine().GetNext(ch);
+      ch = gTools().GetNextChild(ch);
    }
 }

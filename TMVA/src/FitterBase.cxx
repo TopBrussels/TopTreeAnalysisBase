@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: FitterBase.cxx,v 1.1.2.1 2012/01/04 18:53:58 caebergs Exp $ 
+// @(#)root/tmva $Id: FitterBase.cxx 33928 2010-06-15 16:19:31Z stelzer $ 
 // Author: Andreas Hoecker, Peter Speckmayer, Joerg Stelzer, Helge Voss
 
 /**********************************************************************************
@@ -57,7 +57,7 @@ TMVA::FitterBase::FitterBase( IFitterTarget& target,
      fFitterTarget( target ),
      fRanges( ranges ),
      fNpars( ranges.size() ),
-     fLogger( new MsgLogger(this) ),
+     fLogger( new MsgLogger("FitterBase", kINFO) ),
      fClassName( name )
 {
    // constructor   

@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: ConvergenceTest.cxx,v 1.1.2.1 2012/01/04 18:53:56 caebergs Exp $
+// @(#)root/tmva $Id: ConvergenceTest.cxx 38475 2011-03-17 10:46:00Z evt $
 // Author: Andreas Hoecker, Peter Speckmayer, Joerg Stelzer, Helge Voss
 
 /**********************************************************************************
@@ -117,7 +117,7 @@ Float_t TMVA::ConvergenceTest::SpeedControl( UInt_t ofSteps )
    Int_t n = 0;
    Int_t sum = 0;
    std::deque<Short_t>::iterator vec = fSuccessList.begin();
-   for (; vec<fSuccessList.end() ; vec++) {
+   for (; vec != fSuccessList.end() ; vec++) {
       sum += *vec;
       n++;
    }

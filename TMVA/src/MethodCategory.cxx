@@ -1,5 +1,5 @@
-// @(#)root/tmva $Id: MethodCategory.cxx,v 1.1.2.1 2012/01/04 18:54:01 caebergs Exp $   
-// Author: Andreas Hoecker, Joerg Stelzer, Helge Voss, Kai Voss,Or Cohen, Eckhard von Toerne 
+// @(#)root/tmva $Id: MethodCategory.cxx 44112 2012-05-04 10:00:41Z evt $
+// Author: Andreas Hoecker, Joerg Stelzer, Helge Voss, Eckhard von Toerne
 
 /**********************************************************************************
  * Project: TMVA - a Root-integrated toolkit for multivariate data analysis       *
@@ -11,13 +11,18 @@
  *      Virtual base class for all MVA method                                     *
  *                                                                                *
  * Authors (alphabetical):                                                        *
- *      Nadim Sah       <Nadim.Sah@cern.ch>      - Berlin, Germany                *
- *      Joerg Stelzer   <Joerg.Stelzer@cern.ch>  - CERN, Switzerland              *
+ *      Andreas Hoecker   <Andreas.Hocker@cern.ch>   - CERN, Switzerland          *
+ *      Nadim Sah         <Nadim.Sah@cern.ch>        - Berlin, Germany            *
+ *      Peter Speckmayer  <Peter.Speckmazer@cern.ch> - CERN, Switzerland          *
+ *      Joerg Stelzer     <Joerg.Stelzer@cern.ch>    - MSU East Lansing, USA      *
+ *      Helge Voss        <Helge.Voss@cern.ch>       - MPI-K Heidelberg, Germany  *
+ *      Jan Therhaag      <Jan.Therhaag@cern.ch>     - U of Bonn, Germany         *
+ *      Eckhard v. Toerne <evt@uni-bonn.de>          - U of Bonn, Germany         *
  *                                                                                *
- * Copyright (c) 2005:                                                            *
- *      CERN, Switzerland                                                         * 
- *      U. of Victoria, Canada                                                    * 
- *      MPI-K Heidelberg, Germany                                                 * 
+ * Copyright (c) 2005-2011:                                                       *
+ *      CERN, Switzerland                                                         *
+ *      MSU East Lansing, USA                                                     *
+ *      MPI-K Heidelberg, Germany                                                 *
  *      U. of Bonn, Germany                                                       *
  *                                                                                *
  * Redistribution and use in source and binary forms, with or without             *
@@ -57,6 +62,7 @@
 #include "TMVA/Ranking.h"
 #include "TMVA/VariableInfo.h"
 #include "TMVA/DataSetManager.h"
+#include "TMVA/VariableRearrangeTransform.h"
 
 REGISTER_METHOD(Category)
 
@@ -68,8 +74,9 @@ TMVA::MethodCategory::MethodCategory( const TString& jobName,
                                       DataSetInfo& theData,
                                       const TString& theOption,
                                       TDirectory* theTargetDir )
-   :  TMVA::MethodCompositeBase( jobName, Types::kCategory, methodTitle, theData, theOption, theTargetDir ),
-   fCatTree(0)
+ : TMVA::MethodCompositeBase( jobName, Types::kCategory, methodTitle, theData, theOption, theTargetDir ),
+   fCatTree(0),
+   fDataSetManager(NULL)
 {
    // standard constructor
 }
@@ -79,7 +86,8 @@ TMVA::MethodCategory::MethodCategory( DataSetInfo& dsi,
                                       const TString& theWeightFile,
                                       TDirectory* theTargetDir )
    : TMVA::MethodCompositeBase( Types::kCategory, dsi, theWeightFile, theTargetDir ),
-   fCatTree(0)
+     fCatTree(0),
+     fDataSetManager(NULL)
 {
    // constructor from weight file
 }
@@ -98,15 +106,16 @@ TMVA::MethodCategory::~MethodCategory( void )
 Bool_t TMVA::MethodCategory::HasAnalysisType( Types::EAnalysisType type, UInt_t numberClasses, UInt_t numberTargets )
 {
    // check whether method category has analysis type
-   std::vector<IMethod*>::iterator itrMethod;
+   // the method type has to be the same for all sub-methods
+
+   std::vector<IMethod*>::iterator itrMethod = fMethods.begin();
 
    // iterate over methods and check whether they have the analysis type
-   for (itrMethod = fMethods.begin(); itrMethod != fMethods.end(); ++itrMethod ) {
-      MethodBase* method = dynamic_cast<MethodBase*>(*itrMethod);
-      if ( !method->HasAnalysisType(type, numberClasses, numberTargets) )
+   for(; itrMethod != fMethods.end(); ++itrMethod ) {
+      if ( !(*itrMethod)->HasAnalysisType(type, numberClasses, numberTargets) )
          return kFALSE;
    }
-   return kTRUE;    
+   return kTRUE;
 }
 
 //_______________________________________________________________________
@@ -118,24 +127,43 @@ void TMVA::MethodCategory::DeclareOptions()
 //_______________________________________________________________________
 TMVA::IMethod* TMVA::MethodCategory::AddMethod( const TCut& theCut,
                                                 const TString& theVariables,
-                                                Types::EMVA theMethod , 
-                                                const TString& theTitle, 
+                                                Types::EMVA theMethod ,
+                                                const TString& theTitle,
                                                 const TString& theOptions )
 {
    // adds sub-classifier for a category
-   
-   std::string addedMethodName = std::string(Types::Instance().GetMethodName(theMethod)); 
+
+   std::string addedMethodName = std::string(Types::Instance().GetMethodName(theMethod));
 
    Log() << kINFO << "Adding sub-classifier: " << addedMethodName << "::" << theTitle << Endl;
 
+   // add transformation to rearrange the input variables
+   VariableRearrangeTransform* rearrangeTransformation = new VariableRearrangeTransform(DataInfo());
+   TString variables(theVariables);
+   variables.ReplaceAll(":",","); // use ',' as separator between variables
+//   std::cout << "variables " << variables.Data() << std::endl;
+
    DataSetInfo& dsi = CreateCategoryDSI(theCut, theVariables, theTitle);
 
-   IMethod* addedMethod = ClassifierFactory::Instance().Create(addedMethodName,GetJobName(),theTitle,dsi,theOptions);
+   rearrangeTransformation->SetOutputDataSetInfo( &dsi );
+   rearrangeTransformation->ToggleInputSortOrder(kFALSE); // kFALSE --> take the order of variables from the option string
+   rearrangeTransformation->SelectInput( variables, kTRUE );
+//   std::cout << "set input done "  << std::endl;
+
+   rearrangeTransformation->SetEnabled(kFALSE);
+   IMethod* addedMethod = ClassifierFactory::Instance().Create(addedMethodName,
+                                                               GetJobName(),
+                                                               theTitle,
+                                                               dsi,
+                                                               theOptions);
 
    MethodBase *method = (dynamic_cast<MethodBase*>(addedMethod));
+   if(method==0) return 0;
 
+   method->SetAnalysisType( fAnalysisType );
    method->SetupMethod();
    method->ParseOptions();
+   method->GetTransformationHandler().AddTransformation( rearrangeTransformation, -1 );
    method->ProcessSetup();
 
    // set or create correct method base dir for added method
@@ -162,10 +190,12 @@ TMVA::IMethod* TMVA::MethodCategory::AddMethod( const TCut& theCut,
 
    UInt_t newSpectatorIndex = primaryDSI.GetSpectatorInfos().size();
    fCategorySpecIdx.push_back(newSpectatorIndex);
-   
-   primaryDSI.AddSpectator( Form("%s_cat%i:=%s", GetName(),fMethods.size(),theCut.GetTitle()),
+
+   primaryDSI.AddSpectator( Form("%s_cat%i:=%s", GetName(),(int)fMethods.size(),theCut.GetTitle()),
                             Form("%s:%s",GetName(),method->GetName()),
                             "pass", 0, 0, 'C' );
+
+   rearrangeTransformation->SetEnabled(kTRUE);
 
    return method;
 }
@@ -183,7 +213,8 @@ TMVA::DataSetInfo& TMVA::MethodCategory::CreateCategoryDSI(const TCut& theCut,
    DataSetInfo* dsi = new DataSetInfo(dsiName);
 
    // register the new dsi
-   DataSetManager::Instance().AddDataSetInfo(*dsi);
+//   DataSetManager::Instance().AddDataSetInfo(*dsi); // DSMTEST replaced by following line
+   fDataSetManager->AddDataSetInfo(*dsi);
 
    // copy the targets and spectators from the old dsi to the new dsi
    std::vector<VariableInfo>::iterator itrVarInfo;
@@ -211,7 +242,9 @@ TMVA::DataSetInfo& TMVA::MethodCategory::CreateCategoryDSI(const TCut& theCut,
 
       // check the variables of the old dsi for the variable that we want to add
       for (itrVarInfo = oldDSI.GetVariableInfos().begin(); itrVarInfo != oldDSI.GetVariableInfos().end(); itrVarInfo++) {
-         if((*itrVariables==itrVarInfo->GetLabel()) || (*itrVariables==itrVarInfo->GetExpression())) {
+         if((*itrVariables==itrVarInfo->GetLabel()) ) { // || (*itrVariables==itrVarInfo->GetExpression())) { 
+	    // don't compare the expression, since the user might take two times the same expression, but with different labels
+	    // and apply different transformations to the variables.
             dsi->AddVariable(*itrVarInfo);
             varMap.push_back(counter);
             found = kTRUE;
@@ -221,7 +254,9 @@ TMVA::DataSetInfo& TMVA::MethodCategory::CreateCategoryDSI(const TCut& theCut,
       
       // check the spectators of the old dsi for the variable that we want to add
       for (itrVarInfo = oldDSI.GetSpectatorInfos().begin(); itrVarInfo != oldDSI.GetSpectatorInfos().end(); itrVarInfo++) {
-         if((*itrVariables==itrVarInfo->GetLabel()) || (*itrVariables==itrVarInfo->GetExpression())) {
+         if((*itrVariables==itrVarInfo->GetLabel()) ) { // || (*itrVariables==itrVarInfo->GetExpression())) {
+	    // don't compare the expression, since the user might take two times the same expression, but with different labels
+	    // and apply different transformations to the variables.
             dsi->AddVariable(*itrVarInfo);
             varMap.push_back(counter);
             found = kTRUE;
@@ -306,20 +341,18 @@ void TMVA::MethodCategory::InitCircularTree(const DataSetInfo& dsi)
 
    for (viIt = vars.begin(); viIt != vars.end(); ++viIt) {
       const VariableInfo& vi = *viIt;
-      fCatTree->Branch(vi.GetExpression(),(Float_t*)vi.GetExternalLink());
+      fCatTree->Branch(vi.GetExpression(),(Float_t*)vi.GetExternalLink(), TString(vi.GetExpression())+TString("/F"));
    }
    for (viIt = specs.begin(); viIt != specs.end(); ++viIt) {
       const VariableInfo& vi = *viIt;
       if(vi.GetVarType()=='C') continue;
-      fCatTree->Branch(vi.GetExpression(),(Float_t*)vi.GetExternalLink());
+      fCatTree->Branch(vi.GetExpression(),(Float_t*)vi.GetExternalLink(), TString(vi.GetExpression())+TString("/F"));
    }
 
    for(UInt_t cat=0; cat!=fCategoryCuts.size(); ++cat) {
       fCatFormulas.push_back(new TTreeFormula(Form("Category_%i",cat), fCategoryCuts[cat].GetTitle(), fCatTree));
    }
 }
-
-
 
 //_______________________________________________________________________
 void TMVA::MethodCategory::Train()
@@ -329,30 +362,29 @@ void TMVA::MethodCategory::Train()
    // specify the minimum # of training events and set 'classification'
    const Int_t  MinNoTrainingEvents = 10;
 
-   // THIS NEEDS TO BE CHANGED:
-   TString what("Classification");
-   what.ToLower();
-   Types::EAnalysisType analysisType = ( what.CompareTo("regression")==0 ? Types::kRegression : Types::kClassification );
+   Types::EAnalysisType analysisType = GetAnalysisType();
 
    // start the training
-   Log() << kINFO << "Train all sub-classifiers for " 
+   Log() << kINFO << "Train all sub-classifiers for "
          << (analysisType == Types::kRegression ? "Regression" : "Classification") << " ..." << Endl;
 
    // don't do anything if no sub-classifier booked
-   if (fMethods.size() == 0) {
+   if (fMethods.empty()) {
       Log() << kINFO << "...nothing found to train" << Endl;
       return;
    }
-   
+
    std::vector<IMethod*>::iterator itrMethod;
 
    // iterate over all booked sub-classifiers  and train them
    for (itrMethod = fMethods.begin(); itrMethod != fMethods.end(); ++itrMethod ) {
 
       MethodBase* mva = dynamic_cast<MethodBase*>(*itrMethod);
-      if (!mva->HasAnalysisType( analysisType, 
-                                 mva->DataInfo().GetNClasses(), 
-				 mva->DataInfo().GetNTargets() ) ) {
+      if(!mva) continue;
+      mva->SetAnalysisType( analysisType );
+      if (!mva->HasAnalysisType( analysisType,
+                                 mva->DataInfo().GetNClasses(),
+                                 mva->DataInfo().GetNTargets() ) ) {
          Log() << kWARNING << "Method " << mva->GetMethodTypeName() << " is not capable of handling " ;
          if (analysisType == Types::kRegression)
             Log() << "regression with " << mva->DataInfo().GetNTargets() << " targets." << Endl;
@@ -361,36 +393,34 @@ void TMVA::MethodCategory::Train()
          itrMethod = fMethods.erase( itrMethod );
          continue;
       }
-
-      mva->SetAnalysisType( analysisType );
       if (mva->Data()->GetNTrainingEvents() >= MinNoTrainingEvents) {
 
-         Log() << kINFO << "Train method: " << mva->GetMethodName() << " for " 
+         Log() << kINFO << "Train method: " << mva->GetMethodName() << " for "
                << (analysisType == Types::kRegression ? "Regression" : "Classification") << Endl;
          mva->TrainMethod();
          Log() << kINFO << "Training finished" << Endl;
 
       } else {
 
-         Log() << kWARNING << "Method " << mva->GetMethodName() 
+         Log() << kWARNING << "Method " << mva->GetMethodName()
                << " not trained (training tree has less entries ["
-               << mva->Data()->GetNTrainingEvents() 
-               << "] than required [" << MinNoTrainingEvents << "]" << Endl; 
+               << mva->Data()->GetNTrainingEvents()
+               << "] than required [" << MinNoTrainingEvents << "]" << Endl;
       }
    }
 
    if (analysisType != Types::kRegression) {
 
-      // variable ranking 
+      // variable ranking
       Log() << kINFO << "Begin ranking of input variables..." << Endl;
       for (itrMethod = fMethods.begin(); itrMethod != fMethods.end(); itrMethod++) {
          MethodBase* mva = dynamic_cast<MethodBase*>(*itrMethod);
-         if (mva->Data()->GetNTrainingEvents() >= MinNoTrainingEvents) {
+         if (mva && mva->Data()->GetNTrainingEvents() >= MinNoTrainingEvents) {
             const Ranking* ranking = (*itrMethod)->CreateRanking();
             if (ranking != 0)
                ranking->Print();
             else
-               Log() << kINFO << "No variable ranking supplied by classifier: " 
+               Log() << kINFO << "No variable ranking supplied by classifier: "
                      << dynamic_cast<MethodBase*>(*itrMethod)->GetMethodName() << Endl;
          }
       }
@@ -398,13 +428,13 @@ void TMVA::MethodCategory::Train()
 }
 
 //_______________________________________________________________________
-void TMVA::MethodCategory::AddWeightsXMLTo( void* parent ) const 
+void TMVA::MethodCategory::AddWeightsXMLTo( void* parent ) const
 {
    // create XML description of Category classifier
    void* wght = gTools().AddChild(parent, "Weights");
    gTools().AddAttr( wght, "NSubMethods", fMethods.size() );
    void* submethod(0);
-   
+
    std::vector<IMethod*>::iterator itrMethod;
 
    // iterate over methods and write them to XML file
@@ -420,7 +450,7 @@ void TMVA::MethodCategory::AddWeightsXMLTo( void* parent ) const
 }
 
 //_______________________________________________________________________
-void TMVA::MethodCategory::ReadWeightsFromXML( void* wghtnode ) 
+void TMVA::MethodCategory::ReadWeightsFromXML( void* wghtnode )
 {
    // read weights of sub-classifiers of MethodCategory from xml weight file
    UInt_t nSubMethods;
@@ -431,7 +461,7 @@ void TMVA::MethodCategory::ReadWeightsFromXML( void* wghtnode )
    TString theVariables;
    Int_t titleLength;
    gTools().ReadAttr( wghtnode, "NSubMethods",  nSubMethods );
-   void* subMethodNode = gTools().xmlengine().GetChild(wghtnode);
+   void* subMethodNode = gTools().GetChild(wghtnode);
 
    Log() << kINFO << "Recreating sub-classifiers from XML-file " << Endl;
 
@@ -453,8 +483,10 @@ void TMVA::MethodCategory::ReadWeightsFromXML( void* wghtnode )
       DataSetInfo& dsi = CreateCategoryDSI(TCut(theCutString), theVariables, methodTitle);
 
       // recreate sub-method from weights and add to fMethods
-      MethodBase* method = dynamic_cast<MethodBase*>( ClassifierFactory::Instance().Create( methodType.Data(), 
+      MethodBase* method = dynamic_cast<MethodBase*>( ClassifierFactory::Instance().Create( methodType.Data(),
                                                                                             dsi, "none" ) );
+      if(method==0)
+         Log() << kFATAL << "Could not create sub-method " << method << " from XML." << Endl;
 
       method->SetupMethod();
       method->ReadStateFromXML(subMethodNode);
@@ -471,7 +503,7 @@ void TMVA::MethodCategory::ReadWeightsFromXML( void* wghtnode )
       // find the spectator index
       std::vector<VariableInfo>& spectators=primaryDSI.GetSpectatorInfos();
       std::vector<VariableInfo>::iterator itrVarInfo;
-      TString specName= Form("%s_cat%i", GetName(),fCategorySpecIdx.size()+1);
+      TString specName= Form("%s_cat%i", GetName(),(int)fCategorySpecIdx.size()+1);
 
       for (itrVarInfo = spectators.begin(); itrVarInfo != spectators.end(); ++itrVarInfo, ++counter) {
          if((specName==itrVarInfo->GetLabel()) || (specName==itrVarInfo->GetExpression())) {
@@ -481,7 +513,7 @@ void TMVA::MethodCategory::ReadWeightsFromXML( void* wghtnode )
          }
       }
 
-      subMethodNode = gTools().xmlengine().GetNext(subMethodNode);
+      subMethodNode = gTools().GetNextChild(subMethodNode);
    }
 
    InitCircularTree(DataInfo());
@@ -514,6 +546,7 @@ void TMVA::MethodCategory::GetHelpMessage() const
 //_______________________________________________________________________
 const TMVA::Ranking* TMVA::MethodCategory::CreateRanking()
 { 
+   // no ranking 
    return 0;
 }
 
@@ -521,14 +554,15 @@ const TMVA::Ranking* TMVA::MethodCategory::CreateRanking()
 Bool_t TMVA::MethodCategory::PassesCut( const Event* ev, UInt_t methodIdx )
 {
 
-   if(fCatTree) {
+   if (fCatTree) {
       if (methodIdx>=fCatFormulas.size()) {
          Log() << kFATAL << "Large method index " << methodIdx << ", number of category formulas = "
                << fCatFormulas.size() << Endl;
       }
       TTreeFormula* f = fCatFormulas[methodIdx];
       return f->EvalInstance(0) > 0.5;
-   } else {
+   } 
+   else {
 
       // checks whether an event lies within a cut
       if (methodIdx>=fCategorySpecIdx.size()) {
@@ -542,22 +576,21 @@ Bool_t TMVA::MethodCategory::PassesCut( const Event* ev, UInt_t methodIdx )
    }
 }
 
-
 //_______________________________________________________________________
-Double_t TMVA::MethodCategory::GetMvaValue( Double_t* err )
+Double_t TMVA::MethodCategory::GetMvaValue( Double_t* err, Double_t* errUpper )
 {
    // returns the mva value of the right sub-classifier
 
-   if (fMethods.size()==0) return 0;
+   if (fMethods.empty()) return 0;
 
    UInt_t methodToUse = 0;
-   const Event* ev = GetEvent(); 
+   const Event* ev = GetEvent();
 
    // determine which sub-classifier to use for this event
    Int_t suitableCutsN = 0;
 
    for (UInt_t i=0; i<fMethods.size(); ++i) {
-      if (PassesCut(ev, i)) { 
+      if (PassesCut(ev, i)) {
          ++suitableCutsN;
          methodToUse=i;
       }
@@ -574,10 +607,48 @@ Double_t TMVA::MethodCategory::GetMvaValue( Double_t* err )
    }
 
    // get mva value from the suitable sub-classifier
-   ev->SetVariableArrangement(&fVarMaps[methodToUse]);
-   Double_t mvaValue = dynamic_cast<MethodBase*>(fMethods[methodToUse])->GetMvaValue(ev,err);
-   ev->SetVariableArrangement(0);
+   Double_t mvaValue = dynamic_cast<MethodBase*>(fMethods[methodToUse])->GetMvaValue(ev,err,errUpper);
 
    return mvaValue;
+}
+
+
+
+//_______________________________________________________________________
+const std::vector<Float_t> &TMVA::MethodCategory::GetRegressionValues() 
+{
+   // returns the mva value of the right sub-classifier
+
+   if (fMethods.empty()) return MethodBase::GetRegressionValues();
+
+   UInt_t methodToUse = 0;
+   const Event* ev = GetEvent();
+
+   // determine which sub-classifier to use for this event
+   Int_t suitableCutsN = 0;
+
+   for (UInt_t i=0; i<fMethods.size(); ++i) {
+      if (PassesCut(ev, i)) {
+         ++suitableCutsN;
+         methodToUse=i;
+      }
+   }
+
+   if (suitableCutsN == 0) {
+      Log() << kWARNING << "Event does not lie within the cut of any sub-classifier." << Endl;
+      return MethodBase::GetRegressionValues();
+   }
+
+   if (suitableCutsN > 1) {
+      Log() << kFATAL << "The defined categories are not disjoint." << Endl;
+      return MethodBase::GetRegressionValues();
+   }
+   MethodBase* meth = dynamic_cast<MethodBase*>(fMethods[methodToUse]);
+   if (!meth){
+      Log() << kFATAL << "method not found in Category Regression method" << Endl;
+      return MethodBase::GetRegressionValues();
+   }
+   // get mva value from the suitable sub-classifier
+   return meth->GetRegressionValues(ev);
 }
 

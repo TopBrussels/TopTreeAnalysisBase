@@ -1,5 +1,5 @@
-// @(#)root/tmva $Id: Tools.cxx,v 1.1.2.1 2012/01/04 18:54:11 caebergs Exp $   
-// Author: Andreas Hoecker, Joerg Stelzer, Helge Voss
+// @(#)root/tmva $Id: Tools.cxx 44110 2012-05-04 08:34:05Z evt $
+// Author: Andreas Hoecker, Peter Speckmayer, Joerg Stelzer, Helge Voss, Jan Therhaag
 
 /**********************************************************************************
  * Project: TMVA - a Root-integrated toolkit for multivariate data analysis       *
@@ -12,13 +12,16 @@
  *                                                                                *
  * Authors (alphabetical):                                                        *
  *      Andreas Hoecker <Andreas.Hocker@cern.ch> - CERN, Switzerland              *
+ *      Peter Speckmayer <Peter.Speckmayer@cern.ch> - CERN, Switzerland           *
+ *      Jan Therhaag       <Jan.Therhaag@cern.ch>     - U of Bonn, Germany        *
  *      Helge Voss      <Helge.Voss@cern.ch>     - MPI-K Heidelberg, Germany      *
  *      Kai Voss        <Kai.Voss@cern.ch>       - U. of Victoria, Canada         *
  *                                                                                *
- * Copyright (c) 2005:                                                            *
+ * Copyright (c) 2005-2011:                                                       *
  *      CERN, Switzerland                                                         *
  *      U. of Victoria, Canada                                                    *
  *      MPI-K Heidelberg, Germany                                                 *
+ *      U. of Bonn, Germany                                                       *
  *                                                                                *
  * Redistribution and use in source and binary forms, with or without             *
  * modification, are permitted according to the terms listed in LICENSE           *
@@ -39,10 +42,12 @@
 #include "TSpline.h"
 #include "TVector.h"
 #include "TMatrixD.h"
+#include "TMatrixDSymEigen.h"
 #include "TVectorD.h"
 #include "TTreeFormula.h"
 #include "TXMLEngine.h"
 #include "TROOT.h"
+#include "TMatrixDSymEigen.h"
 
 #ifndef ROOT_TMVA_Tools
 #include "TMVA/Tools.h"
@@ -76,11 +81,11 @@ TMVA::Tools::Tools() :
    fLogger(new MsgLogger("Tools")),
    fXMLEngine(new TXMLEngine())
 {
-   // constructor   
+   // constructor
 }
 
 //_______________________________________________________________________
-TMVA::Tools::~Tools() 
+TMVA::Tools::~Tools()
 {
    // destructor
    delete fLogger;
@@ -100,7 +105,7 @@ Double_t TMVA::Tools::GetSeparation( TH1* S, TH1* B ) const
    // compute "separation" defined as
    // <s2> = (1/2) Int_-oo..+oo { (S^2(x) - B^2(x))/(S(x) + B(x)) dx }
    Double_t separation = 0;
-   
+
    // sanity checks
    // signal and background histograms must have same number of bins and 
    // same limits
@@ -124,6 +129,7 @@ Double_t TMVA::Tools::GetSeparation( TH1* S, TH1* B ) const
    Double_t intBin = (S->GetXaxis()->GetXmax() - S->GetXaxis()->GetXmin())/nstep;
    Double_t nS     = S->GetSumOfWeights()*intBin;
    Double_t nB     = B->GetSumOfWeights()*intBin;
+
    if (nS > 0 && nB > 0) {
       for (Int_t bin=0; bin<nstep; bin++) {
          Double_t s = S->GetBinContent( bin )/Double_t(nS);
@@ -184,7 +190,7 @@ void TMVA::Tools::ComputeStat( const std::vector<TMVA::Event*>& events, std::vec
       Log() << kFATAL << "<Tools::ComputeStat> value vector is zero pointer" << Endl;
    
    if ( events.size() != valVec->size() ) 
-      Log() << kFATAL << "<Tools::ComputeStat> event and value vector have different lengths " 
+      Log() << kWARNING << "<Tools::ComputeStat> event and value vector have different lengths " 
             << events.size() << "!=" << valVec->size() << Endl;
 
    Long64_t entries = valVec->size();
@@ -301,11 +307,20 @@ const TMatrixD* TMVA::Tools::GetCorrelationMatrix( const TMatrixD* covMat )
       for (Int_t jvar=0; jvar<nvar; jvar++) {
          if (ivar != jvar) {
             Double_t d = (*covMat)(ivar, ivar)*(*covMat)(jvar, jvar);
-            if (d > 0) (*corrMat)(ivar, jvar) = (*covMat)(ivar, jvar)/TMath::Sqrt(d);
+            if (d > 1E-20) (*corrMat)(ivar, jvar) = (*covMat)(ivar, jvar)/TMath::Sqrt(d);
             else {
                Log() << kWARNING << "<GetCorrelationMatrix> zero variances for variables "
                      << "(" << ivar << ", " << jvar << ")" << Endl;
                (*corrMat)(ivar, jvar) = 0;
+            }
+            if (TMath::Abs( (*corrMat)(ivar,jvar))  > 1){
+               Log() << kWARNING
+                     <<  " Element  corr("<<ivar<<","<<ivar<<")=" << (*corrMat)(ivar,jvar)  
+                     << " sigma2="<<d
+                     << " cov("<<ivar<<","<<ivar<<")=" <<(*covMat)(ivar, ivar)
+                     << " cov("<<jvar<<","<<jvar<<")=" <<(*covMat)(jvar, jvar)
+                     << Endl; 
+               
             }
          }
          else (*corrMat)(ivar, ivar) = 1.0;
@@ -671,7 +686,7 @@ void TMVA::Tools::UsefulSortAscending( std::vector<Double_t>& v )
 Int_t TMVA::Tools::GetIndexMaxElement( std::vector<Double_t>& v )
 {
    // find index of maximum entry in vector
-   if (v.size()==0) return -1;
+   if (v.empty()) return -1;
 
    Int_t pos=0; Double_t mx=v[0];
    for (UInt_t i=0; i<v.size(); i++){
@@ -687,7 +702,7 @@ Int_t TMVA::Tools::GetIndexMaxElement( std::vector<Double_t>& v )
 Int_t TMVA::Tools::GetIndexMinElement( std::vector<Double_t>& v )
 {
    // find index of minimum entry in vector
-   if (v.size()==0) return -1;
+   if (v.empty()) return -1;
 
    Int_t pos=0; Double_t mn=v[0];
    for (UInt_t i=0; i<v.size(); i++){
@@ -973,7 +988,7 @@ TString TMVA::Tools::GetYTitleWithUnit( const TH1& h, const TString& unit, Bool_
 }
 
 //_______________________________________________________________________
-void TMVA::Tools::WriteFloatArbitraryPrecision( Float_t val, ostream& os ) 
+void TMVA::Tools::WriteFloatArbitraryPrecision( Float_t val, ostream& os )
 {
    // writes a float value with the available precision to a stream
    os << val << " :: ";
@@ -987,7 +1002,7 @@ void TMVA::Tools::WriteFloatArbitraryPrecision( Float_t val, ostream& os )
 }
 
 //_______________________________________________________________________
-void TMVA::Tools::ReadFloatArbitraryPrecision( Float_t& val, istream& is ) 
+void TMVA::Tools::ReadFloatArbitraryPrecision( Float_t& val, istream& is )
 {
    // reads a float value with the available precision from a stream
    Float_t a = 0;
@@ -1004,15 +1019,61 @@ void TMVA::Tools::ReadFloatArbitraryPrecision( Float_t& val, istream& is )
    val = a;
 }
 
+
+// XML file reading/writing helper functions
+
 //_______________________________________________________________________
-void* TMVA::Tools::AddChild( void* parent, const char* childname, const char* content ) {
+Bool_t TMVA::Tools::HasAttr( void* node, const char* attrname )
+{
+   // add attribute from xml
+   return xmlengine().HasAttr(node, attrname);
+}
+
+//_______________________________________________________________________
+void TMVA::Tools::ReadAttr( void* node, const char* attrname, TString& value )
+{
+   // add attribute from xml
+   if (!HasAttr(node, attrname)) {
+      const char * nodename = xmlengine().GetNodeName(node);
+      Log() << kFATAL << "Trying to read non-existing attribute '" << attrname << "' from xml node '" << nodename << "'" << Endl;
+   }
+   const char* val = xmlengine().GetAttr(node, attrname);
+   value = TString(val);
+}
+
+//_______________________________________________________________________
+void TMVA::Tools::AddAttr( void* node, const char* attrname, const char* value )
+{
+   // add attribute to node
+   if( node == 0 ) return;
+   gTools().xmlengine().NewAttr(node, 0, attrname, value );
+}
+
+//_______________________________________________________________________
+void* TMVA::Tools::AddChild( void* parent, const char* childname, const char* content, bool isRootNode ) 
+{
+   // add child node
+   if( !isRootNode && parent == 0 ) return 0;
    return gTools().xmlengine().NewChild(parent, 0, childname, content);
 }
 
-
 //_______________________________________________________________________
-void* TMVA::Tools::GetChild( void* parent, const char* childname ) 
+Bool_t TMVA::Tools::AddComment( void* node, const char* comment ) {
+   if( node == 0 ) return kFALSE;
+   return gTools().xmlengine().AddComment(node, comment);
+}
+ //_______________________________________________________________________
+void* TMVA::Tools::GetParent( void* child)
 {
+   // get parent node
+   void* par = xmlengine().GetParent(child);
+   
+   return par;
+}
+//_______________________________________________________________________
+void* TMVA::Tools::GetChild( void* parent, const char* childname )
+{
+   // get child node
    void* ch = xmlengine().GetChild(parent);
    if (childname != 0) {
       while (ch!=0 && strcmp(xmlengine().GetNodeName(ch),childname) != 0) ch = xmlengine().GetNext(ch);
@@ -1021,7 +1082,7 @@ void* TMVA::Tools::GetChild( void* parent, const char* childname )
 }
 
 //_______________________________________________________________________
-void* TMVA::Tools::GetNextChild( void* prevchild, const char* childname ) 
+void* TMVA::Tools::GetNextChild( void* prevchild, const char* childname )
 {
    // XML helpers
    void* ch = xmlengine().GetNext(prevchild);
@@ -1032,10 +1093,24 @@ void* TMVA::Tools::GetNextChild( void* prevchild, const char* childname )
 }
 
 //_______________________________________________________________________
-const char* TMVA::Tools::GetContent( void* node ) 
+const char* TMVA::Tools::GetContent( void* node )
 {
    // XML helpers
    return xmlengine().GetNodeContent(node);
+}
+
+//_______________________________________________________________________
+const char* TMVA::Tools::GetName( void* node )
+{
+   // XML helpers
+   return xmlengine().GetNodeName(node);
+}
+
+//_______________________________________________________________________
+Bool_t TMVA::Tools::AddRawLine( void* node, const char * raw )
+{
+   // XML helpers
+   return xmlengine().AddRawLine( node, raw );
 }
 
 //_______________________________________________________________________
@@ -1051,7 +1126,7 @@ std::vector<TString> TMVA::Tools::SplitString(const TString& theOpt, const char 
       if ( !splitOpt.Contains(separator) ) {
          splitV.push_back(splitOpt);
          break;
-      } 
+      }
       else {
          TString toSave = splitOpt(0,splitOpt.First(separator));
          splitV.push_back(toSave);
@@ -1076,12 +1151,12 @@ TString TMVA::Tools::StringFromDouble( Double_t d )
 {
    // string tools
    std::stringstream s;
-   s << d;
+   s << Form( "%5.8e", d );
    return TString(s.str().c_str());
 }
 
 //_______________________________________________________________________
-void TMVA::Tools::WriteTMatrixDToXML(void* node, const char* name, TMatrixD* mat)
+void TMVA::Tools::WriteTMatrixDToXML( void* node, const char* name, TMatrixD* mat )
 {
    // XML helpers
    void* matnode = xmlengine().NewChild(node, 0, name);
@@ -1090,39 +1165,37 @@ void TMVA::Tools::WriteTMatrixDToXML(void* node, const char* name, TMatrixD* mat
    std::stringstream s;
    for (Int_t row = 0; row<mat->GetNrows(); row++) {
       for (Int_t col = 0; col<mat->GetNcols(); col++) {
-         s << (*mat)[row][col] << " ";
+         s << Form( "%5.15e ", (*mat)[row][col] );
       }
    }
    xmlengine().AddRawLine( matnode, s.str().c_str() );
 }
 
 //_______________________________________________________________________
-void TMVA::Tools::WriteTVectorDToXML(void* node, const char* name, TVectorD* vec)
+void TMVA::Tools::WriteTVectorDToXML( void* node, const char* name, TVectorD* vec )
 {
    TMatrixD mat(1,vec->GetNoElements(),&((*vec)[0]));
-   WriteTMatrixDToXML(node, name, &mat);
+   WriteTMatrixDToXML( node, name, &mat );
 }
 
 //_______________________________________________________________________
-void TMVA::Tools::ReadTVectorDFromXML(void* node, const char* name, TVectorD* vec)
+void TMVA::Tools::ReadTVectorDFromXML( void* node, const char* name, TVectorD* vec )
 {
    TMatrixD mat(1,vec->GetNoElements(),&((*vec)[0]));
-   ReadTMatrixDFromXML(node,name,&mat);
-   for (int i=0;i<vec->GetNoElements();++i){
-      (*vec)[i]=mat[0][i];
-   }
+   ReadTMatrixDFromXML( node, name, &mat );
+   for (int i=0;i<vec->GetNoElements();++i) (*vec)[i] = mat[0][i];
 }
 
 //_______________________________________________________________________
-void TMVA::Tools::ReadTMatrixDFromXML(void* node, const char* name, TMatrixD* mat)
+void TMVA::Tools::ReadTMatrixDFromXML( void* node, const char* name, TMatrixD* mat )
 {
    if (strcmp(xmlengine().GetNodeName(node),name)!=0){
       Log() << kWARNING << "Possible Error: Name of matrix in weight file"
             << " does not match name of matrix passed as argument!" << Endl;
    }
    Int_t nrows, ncols;
-   ReadAttr(node, "Rows", nrows);
-   ReadAttr(node, "Columns", ncols);
+   ReadAttr( node, "Rows",    nrows );
+   ReadAttr( node, "Columns", ncols );
    if (mat->GetNrows() != nrows || mat->GetNcols() != ncols){
       Log() << kWARNING << "Possible Error: Dimension of matrix in weight file"
             << " does not match dimension of matrix passed as argument!" << Endl;
@@ -1144,9 +1217,10 @@ void TMVA::Tools::TMVAWelcomeMessage()
    cout << endl;
    cout << Color("bold") << "TMVA -- Toolkit for Multivariate Data Analysis" << Color("reset") << endl;
    cout << "        " << "Version " << TMVA_RELEASE << ", " << TMVA_RELEASE_DATE << endl;
-   cout << "        " << "Copyright (C) 2005-2009 CERN, MPI-K Heidelberg, Us of Bonn and Victoria" << endl;
-   cout << "        " << "Home page http://tmva.sourceforge.net" << endl;
-   cout << "        " << "All rights reserved, please read http://tmva.sf.net/license.txt" << endl << endl;
+   cout << "        " << "Copyright (C) 2005-2010 CERN, MPI-K Heidelberg, Us of Bonn and Victoria" << endl;
+   cout << "        " << "Home page:     http://tmva.sf.net" << endl;
+   cout << "        " << "Citation info: http://tmva.sf.net/citeTMVA.html" << endl;
+   cout << "        " << "License:       http://tmva.sf.net/LICENSE" << endl << endl;
 }
 
 //_______________________________________________________________________
@@ -1272,8 +1346,179 @@ void TMVA::Tools::TMVAWelcomeMessage( MsgLogger& logger, EWelcomeMessage msgType
 }
 
 //_______________________________________________________________________
+void TMVA::Tools::TMVACitation( MsgLogger& logger, ECitation citType )
+{
+   // kinds of TMVA citation
+
+   switch (citType) {
+
+   case kPlainText:
+      logger << "A. Hoecker, P. Speckmayer, J. Stelzer, J. Therhaag, E. von Toerne, H. Voss" << Endl;
+      logger << "\"TMVA - Toolkit for Multivariate Data Analysis\" PoS ACAT:040,2007. e-Print: physics/0703039" << Endl;
+      break;
+
+   case kBibTeX:
+      logger << "@Article{TMVA2007," << Endl;
+      logger << "     author    = \"Hoecker, Andreas and Speckmayer, Peter and Stelzer, Joerg " << Endl;
+      logger << "                   and Therhaag, Jan and von Toerne, Eckhard and Voss, Helge\"," << Endl;
+      logger << "     title     = \"{TMVA: Toolkit for multivariate data analysis}\"," << Endl;
+      logger << "     journal   = \"PoS\"," << Endl;
+      logger << "     volume    = \"ACAT\"," << Endl;
+      logger << "     year      = \"2007\"," << Endl;
+      logger << "     pages     = \"040\"," << Endl;
+      logger << "     eprint    = \"physics/0703039\"," << Endl;
+      logger << "     archivePrefix = \"arXiv\"," << Endl;
+      logger << "     SLACcitation  = \"%%CITATION = PHYSICS/0703039;%%\"" << Endl;
+      logger << "}" << Endl;
+      break;
+
+   case kLaTeX:
+      logger << "%\\cite{TMVA2007}" << Endl;
+      logger << "\\bibitem{TMVA2007}" << Endl;
+      logger << "  A.~Hoecker, P.~Speckmayer, J.~Stelzer, J.~Therhaag, E.~von Toerne, H.~Voss" << Endl;
+      logger << "  %``TMVA: Toolkit for multivariate data analysis,''" << Endl;
+      logger << "  PoS A {\\bf CAT} (2007) 040" << Endl;
+      logger << "  [arXiv:physics/0703039]." << Endl;
+      logger << "  %%CITATION = POSCI,ACAT,040;%%" << Endl;
+      break;
+
+   case kHtmlLink:
+      logger << kINFO << "  " << Endl;
+      logger << kINFO << gTools().Color("bold") 
+         << "Thank you for using TMVA!" << gTools().Color("reset") << Endl;
+      logger << kINFO << gTools().Color("bold") 
+             << "For citation information, please visit: http://tmva.sf.net/citeTMVA.html"
+             << gTools().Color("reset") << Endl; 
+   }
+}
+
+//_______________________________________________________________________
 Bool_t TMVA::Tools::HistoHasEquidistantBins(const TH1& h)
 {
    return !(h.GetXaxis()->GetXbins()->fN);
+}
+
+//_______________________________________________________________________
+std::vector<TMatrixDSym*>*
+TMVA::Tools::CalcCovarianceMatrices( const std::vector<Event*>& events, Int_t maxCls, VariableTransformBase* transformBase )
+{
+   // compute covariance matrices
+
+   if (events.empty()) return 0;
+
+
+   UInt_t nvars=0, ntgts=0, nspcts=0;
+   if (transformBase) 
+      transformBase->CountVariableTypes( nvars, ntgts, nspcts );
+   else {
+      nvars =events.at(0)->GetNVariables ();
+      ntgts =events.at(0)->GetNTargets   ();
+      nspcts=events.at(0)->GetNSpectators();
+   }
+
+
+   // init matrices
+   Int_t matNum = maxCls;
+   if (maxCls > 1 ) matNum++; // if more than one classes, then produce one matrix for all events as well (beside the matrices for each class)
+
+   std::vector<TVectorD*>* vec = new std::vector<TVectorD*>(matNum);
+   std::vector<TMatrixD*>* mat2 = new std::vector<TMatrixD*>(matNum);
+   std::vector<Double_t> count(matNum);
+   count.assign(matNum,0);
+
+   Int_t cls = 0;
+   TVectorD* v;
+   TMatrixD* m;
+   UInt_t ivar=0, jvar=0;
+   for (cls = 0; cls < matNum ; cls++) {
+      vec->at(cls) = new TVectorD(nvars);
+      mat2->at(cls) = new TMatrixD(nvars,nvars);
+      v = vec->at(cls);
+      m = mat2->at(cls);
+
+      for (ivar=0; ivar<nvars; ivar++) {
+         (*v)(ivar) = 0;
+         for (jvar=0; jvar<nvars; jvar++) {
+            (*m)(ivar, jvar) = 0;
+         }
+      }
+   }
+
+   // perform event loop
+   for (UInt_t i=0; i<events.size(); i++) {
+
+      // fill the event
+      Event * ev = events[i];
+      cls = ev->GetClass();
+      Double_t weight = ev->GetWeight();
+
+      std::vector<Float_t> input;
+      std::vector<Char_t> mask; // entries with kTRUE must not be transformed
+      // Bool_t hasMaskedEntries = kFALSE;
+      if (transformBase) {
+	 /* hasMaskedEntries = */ transformBase->GetInput (ev, input, mask);
+      } else {
+	 for (ivar=0; ivar<nvars; ++ivar) {
+	    input.push_back (ev->GetValue(ivar));
+	 }
+      }
+       
+      if (maxCls > 1) {
+         v = vec->at(matNum-1);
+         m = mat2->at(matNum-1);
+
+         count.at(matNum-1)+=weight; // count used events
+         for (ivar=0; ivar<nvars; ivar++) {
+
+            Double_t xi = input.at (ivar);
+            (*v)(ivar) += xi*weight;
+            (*m)(ivar, ivar) += (xi*xi*weight);
+
+            for (jvar=ivar+1; jvar<nvars; jvar++) {
+               Double_t xj = input.at (jvar);
+               (*m)(ivar, jvar) += (xi*xj*weight);
+               (*m)(jvar, ivar) = (*m)(ivar, jvar); // symmetric matrix
+            }
+         }
+      }
+
+      count.at(cls)+=weight; // count used events
+      v = vec->at(cls);
+      m = mat2->at(cls);
+      for (ivar=0; ivar<nvars; ivar++) {
+         Double_t xi = input.at (ivar);
+         (*v)(ivar) += xi*weight;
+         (*m)(ivar, ivar) += (xi*xi*weight);
+
+         for (jvar=ivar+1; jvar<nvars; jvar++) {
+            Double_t xj = input.at (jvar);
+            (*m)(ivar, jvar) += (xi*xj*weight);
+            (*m)(jvar, ivar) = (*m)(ivar, jvar); // symmetric matrix
+         }
+      }
+   }
+
+   // variance-covariance
+   std::vector<TMatrixDSym*>* mat = new std::vector<TMatrixDSym*>(matNum);
+   for (cls = 0; cls < matNum; cls++) {
+      v = vec->at(cls);
+      m = mat2->at(cls);
+
+      mat->at(cls) = new TMatrixDSym(nvars);
+
+      Double_t n = count.at(cls);
+      for (ivar=0; ivar<nvars; ivar++) {
+         for (jvar=0; jvar<nvars; jvar++) {
+            (*(mat->at(cls)))(ivar, jvar) = (*m)(ivar, jvar)/n - (*v)(ivar)*(*v)(jvar)/(n*n);
+         }
+      }
+      delete v;
+      delete m;
+   }
+
+   delete mat2;
+   delete vec;
+
+   return mat;
 }
 

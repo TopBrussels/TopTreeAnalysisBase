@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: ResultsRegression.cxx,v 1.1.2.1 2012/01/04 18:54:06 caebergs Exp $
+// @(#)root/tmva $Id: ResultsRegression.cxx 31458 2009-11-30 13:58:20Z stelzer $
 // Author: Andreas Hoecker, Peter Speckmayer, Joerg Stelzer, Helge Voss
 
 /**********************************************************************************

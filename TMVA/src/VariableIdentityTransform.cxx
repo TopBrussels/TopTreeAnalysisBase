@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: VariableIdentityTransform.cxx,v 1.1.2.1 2012/01/04 18:54:11 caebergs Exp $
+// @(#)root/tmva $Id: VariableIdentityTransform.cxx 38475 2011-03-17 10:46:00Z evt $
 // Author: Andreas Hoecker, Joerg Stelzer, Helge Voss
 
 /**********************************************************************************
@@ -23,7 +23,6 @@
  * modification, are permitted according to the terms listed in LICENSE           *
  * (http://tmva.sourceforge.net/LICENSE)                                          *
  **********************************************************************************/
-
 
 #include <iostream>
 
@@ -58,6 +57,9 @@ Bool_t TMVA::VariableIdentityTransform::PrepareTransformation( const std::vector
 
    Log() << kINFO << "Preparing the Identity transformation..." << Endl;
 
+   if( fGet.size() < events[0]->GetNVariables() )
+      Log() << kFATAL << "Identity transform does not allow for a selection of input variables. Please remove the variable selection option and put only 'I'." << Endl;
+
    SetNVariables(events[0]->GetNVariables());
 
    SetCreated( kTRUE );
@@ -66,7 +68,7 @@ Bool_t TMVA::VariableIdentityTransform::PrepareTransformation( const std::vector
 }
 
 //_______________________________________________________________________
-void TMVA::VariableIdentityTransform::AttachXMLTo(void* ) 
+void TMVA::VariableIdentityTransform::AttachXMLTo( void* ) 
 {
    // identity transformation to write to XML
    //Log() << kFATAL << "Please implement writing of transformation as XML" << Endl;
@@ -80,14 +82,15 @@ void TMVA::VariableIdentityTransform::ReadFromXML( void* )
 }
 
 //_______________________________________________________________________
-const TMVA::Event* TMVA::VariableIdentityTransform::Transform(const TMVA::Event* const ev, Int_t) const 
+const TMVA::Event* TMVA::VariableIdentityTransform::Transform (const TMVA::Event* const ev, Int_t ) const 
 {
    // identity transform returns same event
    return ev;
 }
 
 //_______________________________________________________________________
-void TMVA::VariableIdentityTransform::MakeFunction(std::ostream& fout, const TString& fncName, Int_t , UInt_t trCounter, Int_t ) 
+void TMVA::VariableIdentityTransform::MakeFunction( std::ostream& fout, const TString& fncName, 
+                                                    Int_t , UInt_t trCounter, Int_t ) 
 {
    // creates C++ code fragment of the indentity transform for inclusion in standalone C++ class
 

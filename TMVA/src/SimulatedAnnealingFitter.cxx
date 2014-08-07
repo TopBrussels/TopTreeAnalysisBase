@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: SimulatedAnnealingFitter.cxx,v 1.1.2.1 2012/01/04 18:54:09 caebergs Exp $ 
+// @(#)root/tmva $Id: SimulatedAnnealingFitter.cxx 29195 2009-06-24 10:39:49Z brun $ 
 // Author: Andraes Hoecker, Kamil Kraszewski, Maciej Kruk
 
 /**********************************************************************************

@@ -1,5 +1,5 @@
-// @(#)root/tmva $Id: MethodDT.cxx,v 1.1.2.1 2012/01/04 18:54:02 caebergs Exp $ 
-// Author: Andreas Hoecker, Joerg Stelzer, Helge Voss, Kai Voss 
+// @(#)root/tmva $Id: MethodDT.cxx 41891 2011-11-10 22:46:31Z pcanal $
+// Author: Andreas Hoecker, Joerg Stelzer, Helge Voss, Kai Voss
 
 /**********************************************************************************
  * Project: TMVA - a Root-integrated toolkit for multivariate data analysis       *
@@ -16,8 +16,8 @@
  *      Or Cohen        <orcohenor@gmail.com>    - Weizmann Inst., Israel         *
  *                                                                                *
  * Copyright (c) 2005:                                                            *
- *      CERN, Switzerland                                                         * 
- *      MPI-K Heidelberg, Germany                                                 * 
+ *      CERN, Switzerland                                                         *
+ *      MPI-K Heidelberg, Germany                                                 *
  *                                                                                *
  * Redistribution and use in source and binary forms, with or without             *
  * modification, are permitted according to the terms listed in LICENSE           *
@@ -25,17 +25,17 @@
  **********************************************************************************/
 
 //_______________________________________________________________________
-//                                                                      
-// Analysis of Boosted Decision Trees                                   
-//               
-// Boosted decision trees have been successfully used in High Energy 
+//
+// Analysis of Boosted Decision Trees
+//
+// Boosted decision trees have been successfully used in High Energy
 // Physics analysis for example by the MiniBooNE experiment
 // (Yang-Roe-Zhu, physics/0508045). In Boosted Decision Trees, the
 // selection is done on a majority vote on the result of several decision
 // trees, which are all derived from the same training sample by
 // supplying different event weights during the training.
 //
-// Decision trees: 
+// Decision trees:
 //
 // successive decision nodes are used to categorize the
 // events out of the sample as either signal or background. Each node
@@ -58,7 +58,7 @@
 // leave nodes are then called "signal" or "background" if they contain
 // more signal respective background events from the training sample.
 //
-// Boosting: 
+// Boosting:
 //
 // the idea behind the boosting is, that signal events from the training
 // sample, that *end up in a background node (and vice versa) are given a
@@ -68,13 +68,13 @@
 // times (typically 100-500 times) and one ends up with a set of decision
 // trees (a forest).
 //
-// Bagging: 
+// Bagging:
 //
 // In this particular variant of the Boosted Decision Trees the boosting
 // is not done on the basis of previous training results, but by a simple
 // stochasitc re-sampling of the initial training event sample.
 //
-// Analysis: 
+// Analysis:
 //
 // applying an individual decision tree to a test event results in a
 // classification of the event as either signal or background. For the
@@ -121,15 +121,45 @@ TMVA::MethodDT::MethodDT( const TString& jobName,
                           const TString& theOption,
                           TDirectory* theTargetDir ) :
    TMVA::MethodBase( jobName, Types::kDT, methodTitle, theData, theOption, theTargetDir )
+   , fTree(0)
+   , fNodeMinEvents(0)
+   , fNCuts(0)
+   , fUseYesNoLeaf(kFALSE)
+   , fNodePurityLimit(0)
+   , fNNodesMax(0)
+   , fMaxDepth(0)
+   , fErrorFraction(0)
+   , fPruneStrength(0)
+   , fPruneMethod(DecisionTree::kNoPruning)
+   , fAutomatic(kFALSE)
+   , fRandomisedTrees(kFALSE)
+   , fUseNvars(0)
+   , fPruneBeforeBoost(kFALSE)
+   , fDeltaPruneStrength(0)
 {
-   // the standard constructor for just an ordinar "decision trees" 
+   // the standard constructor for just an ordinar "decision trees"
 }
 
 //_______________________________________________________________________
-TMVA::MethodDT::MethodDT( DataSetInfo& dsi, 
-                          const TString& theWeightFile,  
+TMVA::MethodDT::MethodDT( DataSetInfo& dsi,
+                          const TString& theWeightFile,
                           TDirectory* theTargetDir ) :
    TMVA::MethodBase( Types::kDT, dsi, theWeightFile, theTargetDir )
+   , fTree(0)
+   , fNodeMinEvents(0)
+   , fNCuts(0)
+   , fUseYesNoLeaf(kFALSE)
+   , fNodePurityLimit(0)
+   , fNNodesMax(0)
+   , fMaxDepth(0)
+   , fErrorFraction(0)
+   , fPruneStrength(0)
+   , fPruneMethod(DecisionTree::kNoPruning)
+   , fAutomatic(kFALSE)
+   , fRandomisedTrees(kFALSE)
+   , fUseNvars(0)
+   , fPruneBeforeBoost(kFALSE)
+   , fDeltaPruneStrength(0)
 {
    //constructor from Reader
 }
@@ -144,9 +174,9 @@ Bool_t TMVA::MethodDT::HasAnalysisType( Types::EAnalysisType type, UInt_t number
 
 
 //_______________________________________________________________________
-void TMVA::MethodDT::DeclareOptions() 
+void TMVA::MethodDT::DeclareOptions()
 {
-   // define the options (their key words) that can be set in the option string 
+   // define the options (their key words) that can be set in the option string
    // UseRandomisedTrees  choose at each node splitting a random set of variables 
    // UseNvars         use UseNvars variables in randomised trees
    // SeparationType   the separation criterion applied in the node splitting
@@ -188,6 +218,12 @@ void TMVA::MethodDT::DeclareOptions()
    AddPreDefVal(TString("ExpectedError"));
    AddPreDefVal(TString("CostComplexity"));
 
+   DeclareOptionRef(fNNodesMax=100000,"NNodesMax","Max number of nodes in tree");
+   if (DoRegression()) {
+      DeclareOptionRef(fMaxDepth=50,"MaxDepth","Max depth of the decision tree allowed");
+   }else{
+      DeclareOptionRef(fMaxDepth=3,"MaxDepth","Max depth of the decision tree allowed");
+   }
 }
 
 //_______________________________________________________________________
@@ -249,7 +285,7 @@ void TMVA::MethodDT::Init( void )
    // common initialisation with defaults for the DT-Method
    fNodeMinEvents  = TMath::Max( 20, int( Data()->GetNTrainingEvents() / (10*GetNvar()*GetNvar())) );
    fNCuts          = 20; 
-   fPruneMethod    = DecisionTree::kCostComplexityPruning;
+   fPruneMethod    = DecisionTree::kNoPruning;
    fPruneStrength  = 5;     // means automatic determination of the prune strength using a validation sample  
    fDeltaPruneStrength=0.1;
    fRandomisedTrees= kFALSE;
@@ -257,6 +293,11 @@ void TMVA::MethodDT::Init( void )
 
    // reference cut value to distingiush signal-like from background-like events   
    SetSignalReferenceCut( 0 );
+   if (fAnalysisType == Types::kClassification || fAnalysisType == Types::kMulticlass ) {
+      fMaxDepth        = 3;
+   }else {
+      fMaxDepth = 50;
+   }
 }
 
 //_______________________________________________________________________
@@ -269,15 +310,16 @@ TMVA::MethodDT::~MethodDT( void )
 //_______________________________________________________________________
 void TMVA::MethodDT::Train( void )
 {
-   SeparationBase *qualitySepType = new GiniIndex();
-   fTree = new DecisionTree( fSepType, fNodeMinEvents, fNCuts, qualitySepType,
-                             fRandomisedTrees, fUseNvars, 0 );
+   TMVA::DecisionTreeNode::fgIsTraining=true;
+   fTree = new DecisionTree( fSepType, fNodeMinEvents, fNCuts, 0, 
+                             fRandomisedTrees, fUseNvars, fNNodesMax, fMaxDepth,0 );
    if (fRandomisedTrees) Log()<<kWARNING<<" randomised Trees do not work yet in this framework," 
                                 << " as I do not know how to give each tree a new random seed, now they"
                                 << " will be all the same and that is not good " << Endl;
    fTree->SetAnalysisType( GetAnalysisType() );
 
    fTree->BuildTree(GetEventCollection(Types::kTraining));
+   TMVA::DecisionTreeNode::fgIsTraining=false;
 }
 
 //_______________________________________________________________________
@@ -309,19 +351,22 @@ Bool_t TMVA::MethodDT::MonitorBoost( MethodBoost* booster )
       booster->GetMonitoringHist(0)->SetBinContent(booster->GetBoostNum()+1,fTree->GetNNodes());
 
    if (booster->GetBoostStage() == ((fPruneBeforeBoost)?Types::kBeforeBoosting:Types::kBoostValidation)
-       && !(fPruneMethod == DecisionTree::kNoPruning))
-      {
-         if (methodIndex==0 && fPruneBeforeBoost == kFALSE)
-            {
-               Log() << kINFO << "Pruning "<< booster->GetBoostNum() << " Decision Trees ... patience please" << Endl;
-            }
-         //reading the previous value
-         if (fAutomatic && methodIndex > 0)
-            fPruneStrength = dynamic_cast<MethodDT*>(booster->GetPreviousMethod())->GetPruneStrength();
-         booster->GetMonitoringHist(0)->SetBinContent(methodIndex+1,fTree->GetNNodes());
-         booster->GetMonitoringHist(2)->SetBinContent(methodIndex+1,PruneTree(methodIndex));
-         booster->GetMonitoringHist(1)->SetBinContent(methodIndex+1,fTree->GetNNodes());
-      } // no pruning is performed
+       && !(fPruneMethod == DecisionTree::kNoPruning)) {
+      
+      if (methodIndex==0 && fPruneBeforeBoost == kFALSE)
+         Log() << kINFO << "Pruning "<< booster->GetBoostNum() << " Decision Trees ... patience please" << Endl;
+         
+      //reading the previous value
+      if (fAutomatic && methodIndex > 0) {
+         MethodDT* mdt = dynamic_cast<MethodDT*>(booster->GetPreviousMethod());
+         if(mdt)
+            fPruneStrength = mdt->GetPruneStrength();
+      }
+
+      booster->GetMonitoringHist(0)->SetBinContent(methodIndex+1,fTree->GetNNodes());
+      booster->GetMonitoringHist(2)->SetBinContent(methodIndex+1,PruneTree(methodIndex));
+      booster->GetMonitoringHist(1)->SetBinContent(methodIndex+1,fTree->GetNNodes());
+   } // no pruning is performed
    else if (booster->GetBoostStage() != Types::kBoostProcEnd)
       return kFALSE;
 
@@ -346,7 +391,7 @@ Bool_t TMVA::MethodDT::MonitorBoost( MethodBoost* booster )
 
 
 //_______________________________________________________________________
-Double_t TMVA::MethodDT::PruneTree(const Int_t methodIndex)
+Double_t TMVA::MethodDT::PruneTree(const Int_t /* methodIndex */ )
 {
    if (fAutomatic && fPruneMethod == DecisionTree::kCostComplexityPruning) { // automatic cost complexity pruning
       CCPruner* pruneTool = new CCPruner(fTree, this->Data() , fSepType);
@@ -358,9 +403,8 @@ Double_t TMVA::MethodDT::PruneTree(const Int_t methodIndex)
       delete pruneTool;
    } 
    else if (fAutomatic &&  fPruneMethod != DecisionTree::kCostComplexityPruning){
-      Int_t bla; 
-      bla = methodIndex; //make the compiler quiet
       /*
+
       Double_t alpha = 0;
       Double_t delta = fDeltaPruneStrength;
       
@@ -450,7 +494,7 @@ Double_t TMVA::MethodDT::TestTreeQuality( DecisionTree *dt )
    for (Long64_t ievt=0; ievt<Data()->GetNEvents(); ievt++)
       {
          Event * ev = Data()->GetEvent(ievt);
-         if ((dt->CheckEvent(*ev) > dt->GetNodePurityLimit() ) == ev->IsSignal()) SumCorrect+=ev->GetWeight();
+         if ((dt->CheckEvent(*ev) > dt->GetNodePurityLimit() ) == DataInfo().IsSignal(ev)) SumCorrect+=ev->GetWeight();
          else SumWrong+=ev->GetWeight();
       }
    Data()->SetCurrentType(Types::kTraining);
@@ -458,9 +502,19 @@ Double_t TMVA::MethodDT::TestTreeQuality( DecisionTree *dt )
 }
 
 //_______________________________________________________________________
-void TMVA::MethodDT::AddWeightsXMLTo( void* /*parent*/ ) const 
+void TMVA::MethodDT::AddWeightsXMLTo( void* parent ) const 
 {
-   Log() << kFATAL << "Please implement writing of weights as XML" << Endl;
+   fTree->AddXMLTo(parent);
+   //Log() << kFATAL << "Please implement writing of weights as XML" << Endl;
+}
+
+//_______________________________________________________________________
+void TMVA::MethodDT::ReadWeightsFromXML( void* wghtnode)
+{
+   if(fTree)
+      delete fTree;
+   fTree = new DecisionTree();
+   fTree->ReadXML(wghtnode,GetTrainingTMVAVersionCode());
 }
 
 //_______________________________________________________________________
@@ -472,12 +526,12 @@ void  TMVA::MethodDT::ReadWeightsFromStream( istream& istr )
 }
 
 //_______________________________________________________________________
-Double_t TMVA::MethodDT::GetMvaValue( Double_t* err )
+Double_t TMVA::MethodDT::GetMvaValue( Double_t* err, Double_t* errUpper )
 {
    // returns MVA value
 
    // cannot determine error
-   if (err != 0) *err = -1;
+   NoErrorCalc(err, errUpper);
 
    return fTree->CheckEvent(*GetEvent(),fUseYesNoLeaf);
 }

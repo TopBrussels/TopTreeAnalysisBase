@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: MethodKNN.cxx,v 1.1.2.1 2012/01/04 18:54:03 caebergs Exp $
+// @(#)root/tmva $Id: MethodKNN.cxx 41891 2011-11-10 22:46:31Z pcanal $
 // Author: Rustem Ospanov 
 
 /**********************************************************************************
@@ -57,8 +57,19 @@ TMVA::MethodKNN::MethodKNN( const TString& jobName,
                             DataSetInfo& theData, 
                             const TString& theOption,
                             TDirectory* theTargetDir ) 
-   : TMVA::MethodBase(jobName, Types::kKNN, methodTitle, theData, theOption, theTargetDir),
-     fModule(0)
+   : TMVA::MethodBase(jobName, Types::kKNN, methodTitle, theData, theOption, theTargetDir)
+   , fSumOfWeightsS(0)
+   , fSumOfWeightsB(0)
+   , fModule(0)
+   , fnkNN(0)
+   , fBalanceDepth(0)
+   , fScaleFrac(0)
+   , fSigmaFact(0)
+   , fTrim(kFALSE)
+   , fUseKernel(kFALSE)
+   , fUseWeight(kFALSE)
+   , fUseLDA(kFALSE)
+   , fTreeOptDepth(0)
 {
    // standard constructor
 }
@@ -67,8 +78,19 @@ TMVA::MethodKNN::MethodKNN( const TString& jobName,
 TMVA::MethodKNN::MethodKNN( DataSetInfo& theData, 
                             const TString& theWeightFile,  
                             TDirectory* theTargetDir ) 
-   : TMVA::MethodBase( Types::kKNN, theData, theWeightFile, theTargetDir),
-     fModule(0)
+   : TMVA::MethodBase( Types::kKNN, theData, theWeightFile, theTargetDir)
+   , fSumOfWeightsS(0)
+   , fSumOfWeightsB(0)
+   , fModule(0)
+   , fnkNN(0)
+   , fBalanceDepth(0)
+   , fScaleFrac(0)
+   , fSigmaFact(0)
+   , fTrim(kFALSE)
+   , fUseKernel(kFALSE)
+   , fUseWeight(kFALSE)
+   , fUseLDA(kFALSE)
+   , fTreeOptDepth(0)
 {
    // constructor from weight file
 }
@@ -229,7 +251,7 @@ void TMVA::MethodKNN::Train()
       
       Short_t event_type = 0;
 
-      if (evt_ -> IsSignal()) { // signal type = 1
+      if (DataInfo().IsSignal(evt_)) { // signal type = 1
          fSumOfWeightsS += weight;
          event_type = 1;
       }
@@ -255,12 +277,12 @@ void TMVA::MethodKNN::Train()
 }
 
 //_______________________________________________________________________
-Double_t TMVA::MethodKNN::GetMvaValue( Double_t* err )
+Double_t TMVA::MethodKNN::GetMvaValue( Double_t* err, Double_t* errUpper )
 {
    // Compute classifier response
 
    // cannot determine error
-   if (err != 0) *err = -1;
+   NoErrorCalc(err, errUpper);
 
    //
    // Define local variables
@@ -274,7 +296,7 @@ Double_t TMVA::MethodKNN::GetMvaValue( Double_t* err )
    
    for (Int_t ivar = 0; ivar < nvar; ++ivar) {
       vvec[ivar] = ev->GetValue(ivar);
-   }   
+   }
 
    // search for fnkNN+2 nearest neighbors, pad with two 
    // events to avoid Monte-Carlo events with zero distance
@@ -581,7 +603,8 @@ void TMVA::MethodKNN::ReadWeightsFromStream(istream& is)
          Log() << kFATAL << "Missing comma delimeter(s)" << Endl;
       }
 
-      Int_t ievent = -1, type = -1;
+      // Int_t ievent = -1;
+      Int_t type = -1;
       Double_t weight = -1.0;
       
       kNN::VarVec vvec(nvar, 0.0);
@@ -608,7 +631,7 @@ void TMVA::MethodKNN::ReadWeightsFromStream(istream& is)
          }
          
          if (vcount == 0) {
-            ievent = std::atoi(vstring.c_str());
+            // ievent = std::atoi(vstring.c_str());
          }
          else if (vcount == 1) {
             type = std::atoi(vstring.c_str());

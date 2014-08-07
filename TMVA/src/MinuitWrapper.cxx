@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: MinuitWrapper.cxx,v 1.1.2.1 2012/01/04 18:54:04 caebergs Exp $ 
+// @(#)root/tmva $Id: MinuitWrapper.cxx 20882 2007-11-19 11:31:26Z rdm $ 
 // Author: Peter Speckmayer
 
 /**********************************************************************************

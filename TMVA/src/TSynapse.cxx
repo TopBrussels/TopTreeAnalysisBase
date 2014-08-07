@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: TSynapse.cxx,v 1.1.2.1 2012/01/04 18:54:10 caebergs Exp $
+// @(#)root/tmva $Id: TSynapse.cxx 33928 2010-06-15 16:19:31Z stelzer $
 // Author: Matt Jachowski 
 
 /**********************************************************************************
@@ -40,6 +40,8 @@ static const Int_t fgUNINITIALIZED = -1;
 
 ClassImp(TMVA::TSynapse);
 
+TMVA::MsgLogger* TMVA::TSynapse::fgLogger = 0;
+
 //______________________________________________________________________________
 TMVA::TSynapse::TSynapse()
   : fWeight( 0 ),
@@ -48,11 +50,11 @@ TMVA::TSynapse::TSynapse()
     fDEDw( 0 ),
     fCount( 0 ),
     fPreNeuron( NULL ),
-    fPostNeuron( NULL ),
-    fLogger( new MsgLogger("TSynapse") )
+    fPostNeuron( NULL )
 {
    // constructor
    fWeight     = fgUNINITIALIZED;
+   if (!fgLogger) fgLogger = new MsgLogger("TSynapse");
 }
 
 
@@ -60,7 +62,6 @@ TMVA::TSynapse::TSynapse()
 TMVA::TSynapse::~TSynapse()
 {
    // destructor
-   delete fLogger;
 }
 
 //______________________________________________________________________________

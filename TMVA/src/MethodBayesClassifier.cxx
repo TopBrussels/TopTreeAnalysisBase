@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: MethodBayesClassifier.cxx,v 1.1.2.1 2012/01/04 18:54:01 caebergs Exp $    
+// @(#)root/tmva $Id: MethodBayesClassifier.cxx 36966 2010-11-26 09:50:13Z evt $    
 // Author: Marcin .... 
 
 /**********************************************************************************
@@ -110,13 +110,13 @@ void  TMVA::MethodBayesClassifier::ReadWeightsFromStream( istream & )
 }
 
 //_______________________________________________________________________
-Double_t TMVA::MethodBayesClassifier::GetMvaValue( Double_t* err )
+Double_t TMVA::MethodBayesClassifier::GetMvaValue( Double_t* err, Double_t* errUpper )
 {
    // returns MVA value for given event
    Double_t myMVA = 0;
 
    // cannot determine error
-   if (err != 0) *err = -1;
+   NoErrorCalc(err, errUpper);
 
    return myMVA;
 }

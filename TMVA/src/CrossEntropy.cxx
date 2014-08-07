@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: CrossEntropy.cxx,v 1.1.2.1 2012/01/04 18:53:56 caebergs Exp $       
+// @(#)root/tmva $Id: CrossEntropy.cxx 39989 2011-06-27 13:19:22Z stelzer $       
 // Author: Andreas Hoecker, Joerg Stelzer, Helge Voss, Kai Voss 
 
 /**********************************************************************************
@@ -32,7 +32,7 @@
 //             -p log (p) - (1-p)log(1-p);     p=purity                        
 //_______________________________________________________________________
 
-#include <math.h>
+#include "TMath.h"
 #include "TMVA/CrossEntropy.h"
 
 ClassImp(TMVA::CrossEntropy)
@@ -45,5 +45,6 @@ Double_t  TMVA::CrossEntropy::GetSeparationIndex( const Double_t &s, const Doubl
    if (s+b <= 0) return 0;
    Double_t p = s/(s+b);
    if (p<=0 || p >=1) return 0;
-   return - ( p * log (p) + (1-p)*log(1-p) );
+   //   return - ( p * log (p) + (1-p)*log(1-p) );
+   return - ( p * TMath::Log2(p) + (1-p)*TMath::Log2(1-p) );
 }

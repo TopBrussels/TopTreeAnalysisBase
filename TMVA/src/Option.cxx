@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: Option.cxx,v 1.1.2.1 2012/01/04 18:54:05 caebergs Exp $   
+// @(#)root/tmva $Id: Option.cxx 34301 2010-07-02 11:32:29Z stelzer $   
 // Author: Andreas Hoecker, Joerg Stelzer, Helge Voss
 
 /**********************************************************************************
@@ -28,16 +28,18 @@
 
 #include "TMVA/Option.h"
 
+TMVA::MsgLogger* TMVA::OptionBase::fgLogger = 0;
+
 //______________________________________________________________________
 TMVA::OptionBase::OptionBase( const TString& name, const TString& desc ) 
    : TObject(), 
      fName        ( name ), 
      fNameAllLower( name ), 
      fDescription ( desc ), 
-     fIsSet       ( kFALSE ), 
-     fLogger      ("OptionBase") 
+     fIsSet       ( kFALSE )
 {
    // constructor
+   if (!fgLogger) fgLogger = new MsgLogger("Option",kDEBUG);
    fNameAllLower.ToLower();
 }
 

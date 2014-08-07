@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: RuleFitParams.cxx,v 1.1.2.1 2012/01/04 18:54:08 caebergs Exp $
+// @(#)root/tmva $Id: RuleFitParams.cxx 41891 2011-11-10 22:46:31Z pcanal $
 // Author: Andreas Hoecker, Joerg Stelzer, Fredrik Tegenfeldt, Helge Voss
 
 /**********************************************************************************
@@ -60,6 +60,7 @@ TMVA::RuleFitParams::RuleFitParams()
    , fPathIdx2 ( 0 )
    , fPerfIdx1 ( 0 )
    , fPerfIdx2 ( 0 )
+   , fGDNTauTstOK( 0 )
    , fGDNTau     ( 51 )
    , fGDTauPrec  ( 0.02 )
    , fGDTauScan  ( 1000 )
@@ -69,10 +70,20 @@ TMVA::RuleFitParams::RuleFitParams()
    , fGDPathStep ( 0.01 )
    , fGDNPathSteps ( 1000 )
    , fGDErrScale ( 1.1 )
-   , fGDNtuple ( 0 )
+   , fAverageTruth( 0 )
+   , fFstarMedian ( 0 )
+   , fGDNtuple    ( 0 )
+   , fNTRisk      ( 0 )
+   , fNTErrorRate ( 0 )
+   , fNTNuval     ( 0 )
+   , fNTCoefRad   ( 0 )
    , fNTOffset ( 0 )
    , fNTCoeff ( 0 )
    , fNTLinCoeff ( 0 )
+   , fsigave( 0 )
+   , fsigrms( 0 )
+   , fbkgave( 0 )
+   , fbkgrms( 0 )
    , fLogger( new MsgLogger("RuleFit") )
 {
    // constructor
@@ -226,8 +237,8 @@ void TMVA::RuleFitParams::EvaluateAverage( UInt_t ind1, UInt_t ind2,
          ew = fRuleFit->GetTrainingEventWeight(i);
          sumew += ew;
          // first cache rule/lin response
-         Double_t val = fRuleEnsemble->EvalLinEvent(*((*events)[i]));
-         val = fRuleEnsemble->EvalEvent(*((*events)[i]));
+         /* Double_t val = */ fRuleEnsemble->EvalLinEvent(*((*events)[i]));
+         /* val = */ fRuleEnsemble->EvalEvent(*((*events)[i]));
          // loop over linear terms
          for ( UInt_t sel=0; sel<fNLinear; sel++ ) {
             avsel[sel] += ew*fRuleEnsemble->GetEventLinearValNorm(sel);
@@ -254,7 +265,7 @@ Double_t TMVA::RuleFitParams::LossFunction( const Event& e ) const
    // Implementation of squared-error ramp loss function (eq 39,40 in ref 1)
    // This is used for binary Classifications where y = {+1,-1} for (sig,bkg)
    Double_t h = TMath::Max( -1.0, TMath::Min(1.0,fRuleEnsemble->EvalEvent( e )) );
-   Double_t diff = (e.IsSignal()?1:-1) - h;
+   Double_t diff = (fRuleFit->GetMethodRuleFit()->DataInfo().IsSignal(&e)?1:-1) - h;
    //
    return diff*diff*e.GetWeight();
 }
@@ -265,7 +276,7 @@ Double_t TMVA::RuleFitParams::LossFunction( UInt_t evtidx ) const
    // Implementation of squared-error ramp loss function (eq 39,40 in ref 1)
    // This is used for binary Classifications where y = {+1,-1} for (sig,bkg)
    Double_t h = TMath::Max( -1.0, TMath::Min(1.0,fRuleEnsemble->EvalEvent( evtidx )) );
-   Double_t diff = (fRuleEnsemble->GetRuleMapEvent( evtidx )->IsSignal()?1:-1) - h;
+   Double_t diff = (fRuleFit->GetMethodRuleFit()->DataInfo().IsSignal(fRuleEnsemble->GetRuleMapEvent( evtidx ))?1:-1) - h;
    //
    return diff*diff*fRuleFit->GetTrainingEventWeight(evtidx);
 }
@@ -277,7 +288,7 @@ Double_t TMVA::RuleFitParams::LossFunction( UInt_t evtidx, UInt_t itau ) const
    // This is used for binary Classifications where y = {+1,-1} for (sig,bkg)
    Double_t e = fRuleEnsemble->EvalEvent( evtidx , fGDOfsTst[itau], fGDCoefTst[itau], fGDCoefLinTst[itau]);
    Double_t h = TMath::Max( -1.0, TMath::Min(1.0,e) );
-   Double_t diff = (fRuleEnsemble->GetRuleMapEvent( evtidx )->IsSignal()?1:-1) - h;
+   Double_t diff = (fRuleFit->GetMethodRuleFit()->DataInfo().IsSignal(fRuleEnsemble->GetRuleMapEvent( evtidx ))?1:-1) - h;
    //
    return diff*diff*fRuleFit->GetTrainingEventWeight(evtidx);
 }
@@ -540,7 +551,7 @@ void TMVA::RuleFitParams::MakeGDPath()
 
    // parameters set at point with min error
    Double_t              errmin=1e32;  // min error
-   Double_t              riskMin=0;    // risk
+   // Double_t              riskMin=0;    // risk
    Int_t                 indMin=-1;    // index
    std::vector<Double_t> coefsMin;     // rule coefs
    std::vector<Double_t> lincoefsMin;  // linear coefs
@@ -688,7 +699,7 @@ void TMVA::RuleFitParams::MakeGDPath()
          //
          if (fNTErrorRate<=errmin) {
             errmin  = fNTErrorRate;
-            riskMin = fNTRisk;
+            // riskMin = fNTRisk;
             indMin  = iloop;
             fRuleEnsemble->GetCoefficients(coefsMin);
             lincoefsMin = fRuleEnsemble->GetLinCoefficients();
@@ -744,7 +755,7 @@ void TMVA::RuleFitParams::MakeGDPath()
          if (indMin<0) {
             Log() << kWARNING << "BUG TRAP: should not be here - still, this bug is harmless;)" << Endl;
             errmin  = fNTErrorRate;
-            riskMin = fNTRisk;
+            // riskMin = fNTRisk;
             indMin  = iloop;
             fRuleEnsemble->GetCoefficients(coefsMin);
             lincoefsMin = fRuleEnsemble->GetLinCoefficients();
@@ -910,7 +921,7 @@ Double_t TMVA::RuleFitParams::Optimism()
    for (UInt_t i=fPerfIdx1; i<fPerfIdx2+1; i++) {
       const Event& e = *(*events)[i];
       yhat = fRuleEnsemble->EvalEvent(i);         // evaluated using the model
-      y    = (e.IsSignal() ? 1.0:-1.0);           // the truth
+      y    = (fRuleFit->GetMethodRuleFit()->DataInfo().IsSignal(&e) ? 1.0:-1.0);           // the truth
       w    = fRuleFit->GetTrainingEventWeight(i)/fNEveEffPerf; // the weight, reweighted such that sum=1
       sumy     += w*y;
       sumyhat  += w*yhat;
@@ -994,7 +1005,7 @@ Double_t TMVA::RuleFitParams::ErrorRateBin()
       //      Double_t sFstar = fRuleEnsemble->FStar(e); // THIS CAN BE CALCULATED ONCE!
       signF = (sF>0 ? +1:-1);
       //      signy = (sFStar>0 ? +1:-1);
-      signy = (e.IsSignal() ? +1:-1);
+      signy = (fRuleFit->GetMethodRuleFit()->DataInfo().IsSignal(&e) ? +1:-1);
       sumdfbin += TMath::Abs(Double_t(signF-signy))*0.5;
    }
    Double_t f = sumdfbin/dneve;
@@ -1036,7 +1047,7 @@ Double_t TMVA::RuleFitParams::ErrorRateRocRaw( std::vector<Double_t> & sFsig,
    Double_t effs=1.0;
    Double_t prejb=0;
    Double_t peffs=1.0;
-   Double_t drejb;
+   // Double_t drejb;
    Double_t deffs;
    Double_t area=0;
    Int_t    npok=0;
@@ -1054,7 +1065,7 @@ Double_t TMVA::RuleFitParams::ErrorRateRocRaw( std::vector<Double_t> & sFsig,
          rejb = Double_t(nrbkg)/Double_t(nbkg);
          effs = Double_t(nesig)/Double_t(nsig);
          //
-         drejb = rejb-prejb;
+         // drejb = rejb-prejb;
          deffs = effs-peffs;
          area += 0.5*TMath::Abs(deffs)*(rejb+prejb); // trapezoid
          prejb = rejb;
@@ -1096,7 +1107,7 @@ Double_t TMVA::RuleFitParams::ErrorRateRoc()
    for (UInt_t i=fPerfIdx1; i<fPerfIdx2+1; i++) {
       const Event& e = *(*events)[i];
       sF = fRuleEnsemble->EvalEvent(i);// * fRuleFit->GetTrainingEventWeight(i);
-      if (e.IsSignal()) {
+      if (fRuleFit->GetMethodRuleFit()->DataInfo().IsSignal(&e)) {
          sFsig.push_back(sF);
          sumfsig  +=sF;
          sumf2sig +=sF*sF;
@@ -1148,7 +1159,7 @@ void TMVA::RuleFitParams::ErrorRateRocTst()
          //         if (itau==0) sF = fRuleEnsemble->EvalEvent( *(*events)[i], fGDOfsTst[itau], fGDCoefTst[itau], fGDCoefLinTst[itau] );
          //         else         sF = fRuleEnsemble->EvalEvent(                fGDOfsTst[itau], fGDCoefTst[itau], fGDCoefLinTst[itau] );
          sF = fRuleEnsemble->EvalEvent( i, fGDOfsTst[itau], fGDCoefTst[itau], fGDCoefLinTst[itau] );
-         if ((*events)[i]->IsSignal()) {
+         if (fRuleFit->GetMethodRuleFit()->DataInfo().IsSignal((*events)[i])) {
             sFsig[itau].push_back(sF);
          } 
          else {
@@ -1276,7 +1287,7 @@ void TMVA::RuleFitParams::MakeTstGradientVector()
             if (TMath::Abs(sF)<1.0) {
                nsfok++;
                r = 0;
-               y = (e->IsSignal()?1.0:-1.0);
+               y = (fRuleFit->GetMethodRuleFit()->DataInfo().IsSignal(e)?1.0:-1.0);
                r = norm*(y - sF) * fRuleFit->GetTrainingEventWeight(i);
                // rule gradient vector
                for (UInt_t ir=0; ir<nrules; ir++) {
@@ -1390,7 +1401,7 @@ void TMVA::RuleFitParams::MakeGradientVector()
             eventRuleMap = &(fRuleEnsemble->GetEventRuleMap(i));
             nrules = (*eventRuleMap).size();
          }
-         y = (e->IsSignal()?1.0:-1.0);
+         y = (fRuleFit->GetMethodRuleFit()->DataInfo().IsSignal(e)?1.0:-1.0);
          r = norm*(y - sF) * fRuleFit->GetTrainingEventWeight(i);
          // rule gradient vector
          for (UInt_t ir=0; ir<nrules; ir++) {
@@ -1508,14 +1519,21 @@ Double_t TMVA::RuleFitParams::CalcAverageTruth()
    const std::vector<Event *> *events = &(fRuleFit->GetTrainingEvents());
    for (UInt_t i=fPathIdx1; i<fPathIdx2+1; i++) {
       Double_t ew = fRuleFit->GetTrainingEventWeight(i);
-      if ((*events)[i]->IsSignal()) ensig += ew;
+      if (fRuleFit->GetMethodRuleFit()->DataInfo().IsSignal((*events)[i])) ensig += ew;
       else                          enbkg += ew;
-      sum += ew*((*events)[i]->IsSignal()?1.0:-1.0);
+      sum += ew*(fRuleFit->GetMethodRuleFit()->DataInfo().IsSignal((*events)[i])?1.0:-1.0);
    }
    Log() << kVERBOSE << "Effective number of signal / background = " << ensig << " / " << enbkg << Endl;
 
    return sum/fNEveEffPath;
 }
+
+//_______________________________________________________________________
+
+Int_t  TMVA::RuleFitParams::Type( const Event * e ) const { 
+   return (fRuleFit->GetMethodRuleFit()->DataInfo().IsSignal(e) ? 1:-1);
+}
+
 
 //_______________________________________________________________________
 void TMVA::RuleFitParams::SetMsgType( EMsgType t ) {

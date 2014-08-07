@@ -1,4 +1,4 @@
-// $Id: LDA.cxx,v 1.1.2.1 2012/01/04 18:54:00 caebergs Exp $
+// $Id: LDA.cxx 29195 2009-06-24 10:39:49Z brun $
 /**********************************************************************************
  * Project: TMVA - a Root-integrated toolkit for multivariate data analysis       *
  * Package: TMVA                                                                  *

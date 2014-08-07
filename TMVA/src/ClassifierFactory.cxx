@@ -1,4 +1,4 @@
-// @(#)Root/tmva $Id: ClassifierFactory.cxx,v 1.1.2.1 2012/01/04 18:53:56 caebergs Exp $   
+// @(#)Root/tmva $Id: ClassifierFactory.cxx 33928 2010-06-15 16:19:31Z stelzer $   
 // Author: Andreas Hoecker, Joerg Stelzer, Helge Voss, Kai Voss 
 
 /**********************************************************************************
@@ -144,5 +144,5 @@ void TMVA::ClassifierFactory::Print() const
    std::cout << "Print: ClassifierFactory<> knows about " << fCalls.size() << " objects" << std::endl;  
 
    CallMap::const_iterator it = fCalls.begin();
-   for (; it != fCalls.end(); ++it) std::cout << "Registerted object name " << it -> first << std::endl;
+   for (; it != fCalls.end(); ++it) std::cout << "Registered object name " << it -> first << std::endl;
 }

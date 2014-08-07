@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: MethodCommittee.cxx,v 1.1.2.1 2012/01/04 18:54:01 caebergs Exp $ 
+// @(#)root/tmva $Id: MethodCommittee.cxx 36966 2010-11-26 09:50:13Z evt $ 
 // Author: Andreas Hoecker, Joerg Stelzer, Helge Voss
 
 /**********************************************************************************
@@ -72,7 +72,14 @@ TMVA::MethodCommittee::MethodCommittee( const TString& jobName,
                                         TDirectory* theTargetDir ) :
    TMVA::MethodBase( jobName, Types::kCommittee, methodTitle, dsi, theOption, theTargetDir ),
    fNMembers(100),
-   fBoostType("AdaBoost")
+   fBoostType("AdaBoost"),
+   fMemberType(Types::kMaxMethod),
+   fUseMemberDecision(kFALSE),
+   fUseWeightedMembers(kFALSE),
+   fITree(0),
+   fBoostFactor(0),
+   fErrorFraction(0),
+   fNnodes(0)
 {
    // constructor
 }
@@ -83,7 +90,14 @@ TMVA::MethodCommittee::MethodCommittee( DataSetInfo& theData,
                                         TDirectory* theTargetDir ) :
    TMVA::MethodBase( Types::kCommittee, theData, theWeightFile, theTargetDir ),
    fNMembers(100),
-   fBoostType("AdaBoost")
+   fBoostType("AdaBoost"),
+   fMemberType(Types::kMaxMethod),
+   fUseMemberDecision(kFALSE),
+   fUseWeightedMembers(kFALSE),
+   fITree(0),
+   fBoostFactor(0),
+   fErrorFraction(0),
+   fNnodes(0)
 {
    // constructor for calculating Committee-MVA using previously generatad decision trees
    // the result of the previous training (the decision trees) are read in via the
@@ -215,7 +229,9 @@ Double_t TMVA::MethodCommittee::Boost( TMVA::MethodBase* method, UInt_t imember 
 {
    // apply the boosting alogrithim (the algorithm is selecte via the the "option" given
    // in the constructor. The return value is the boosting weight 
-  
+   if(!method)
+      return 0;
+   
    if      (fBoostType=="AdaBoost") return this->AdaBoost( method );
    else if (fBoostType=="Bagging")  return this->Bagging( imember );
    else {
@@ -259,7 +275,7 @@ Double_t TMVA::MethodCommittee::AdaBoost( TMVA::MethodBase* method )
       Bool_t isSignalType = mbase->IsSignalLike();
       
       // to prevent code duplication
-      if (isSignalType == ev->IsSignal())
+      if (isSignalType == DataInfo().IsSignal(ev))
          correctSelected.push_back( kTRUE );
       else {
          sumwfalse += ev->GetBoostWeight();
@@ -343,6 +359,7 @@ Double_t TMVA::MethodCommittee::Bagging( UInt_t imember )
       ev->SetBoostWeight( ev->GetBoostWeight() * Data()->GetNTrainingEvents() / newSumw );      
    }
 
+   delete trandom;
    // return weight factor for this committee member
    return 1.0;  // here as there are random weights for each event, just return a constant==1;
 }
@@ -385,38 +402,43 @@ void  TMVA::MethodCommittee::ReadWeightsFromStream( istream& istr )
       IMethod* method = ClassifierFactory::Instance().Create(std::string(Types::Instance().GetMethodName( fMemberType )), dsi, "" );
 
       // read weight file
-      (dynamic_cast<MethodBase*>(method))->ReadStateFromStream(istr);
+      MethodBase* m = dynamic_cast<MethodBase*>(method);
+      if(m)
+         m->ReadStateFromStream(istr);
       GetCommittee().push_back(method);
       GetBoostWeights().push_back(boostWeight);
    }
 }
 
 //_______________________________________________________________________
-Double_t TMVA::MethodCommittee::GetMvaValue( Double_t* err )
+Double_t TMVA::MethodCommittee::GetMvaValue( Double_t* err, Double_t* errUpper )
 {
    // return the MVA value (range [-1;1]) that classifies the
    // event.according to the majority vote from the total number of
    // decision trees
-   // In the literature I found that people actually use the 
+   // In the literature I found that people actually use the
    // weighted majority vote (using the boost weights) .. However I
-   // did not see any improvement in doing so :(  
+   // did not see any improvement in doing so :(
    // --> this is currently switched off
 
    // cannot determine error
-   if (err != 0) *err = -1;
+   NoErrorCalc(err, errUpper);
 
    Double_t myMVA = 0;
    Double_t norm  = 0;
    for (UInt_t itree=0; itree<GetCommittee().size(); itree++) {
 
-      Double_t tmpMVA = ( fUseMemberDecision ? ( (dynamic_cast<MethodBase*>(GetCommittee()[itree]))->IsSignalLike() ? 1.0 : -1.0 ) 
+      MethodBase* m = dynamic_cast<MethodBase*>(GetCommittee()[itree]);
+      if(m==0) continue;
+
+      Double_t tmpMVA = ( fUseMemberDecision ? ( m->IsSignalLike() ? 1.0 : -1.0 ) 
                           : GetCommittee()[itree]->GetMvaValue() );
 
-      if (fUseWeightedMembers){ 
+      if (fUseWeightedMembers){
          myMVA += GetBoostWeights()[itree] * tmpMVA;
          norm  += GetBoostWeights()[itree];
       }
-      else { 
+      else {
          myMVA += tmpMVA;
          norm  += 1;
       }

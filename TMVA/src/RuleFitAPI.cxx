@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: RuleFitAPI.cxx,v 1.1.2.1 2012/01/04 18:54:07 caebergs Exp $
+// @(#)root/tmva $Id: RuleFitAPI.cxx 35727 2010-09-24 21:41:20Z stelzer $
 // Author: Andreas Hoecker, Joerg Stelzer, Fredrik Tegenfeldt, Helge Voss 
 
 /**********************************************************************************
@@ -42,11 +42,12 @@
 
 ClassImp(TMVA::RuleFitAPI)
 
-   TMVA::RuleFitAPI::RuleFitAPI( const MethodRuleFit *rfbase,
-                                 RuleFit *rulefit,
-                                 EMsgType minType = kINFO ) :
+TMVA::RuleFitAPI::RuleFitAPI( const MethodRuleFit *rfbase,
+                              RuleFit *rulefit,
+                              EMsgType minType = kINFO ) :
    fMethodRuleFit(rfbase),
    fRuleFit(rulefit),
+   fRFProgram(kRfTrain),
    fLogger("RuleFitAPI",minType)
 {
    // standard constructor
@@ -376,7 +377,7 @@ Bool_t TMVA::RuleFitAPI::WriteTrain()
          WriteFloat(fx,&x,1);
          if (ivar==0) {
             w = ev->GetWeight();
-            y = ev->IsSignal() ? 1.0 : -1.0;
+            y = fMethodRuleFit->DataInfo().IsSignal(ev)? 1.0 : -1.0;
             WriteFloat(fy,&y,1);
             WriteFloat(fw,&w,1);
          }

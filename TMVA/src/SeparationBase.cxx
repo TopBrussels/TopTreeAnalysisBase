@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: SeparationBase.cxx,v 1.1.2.1 2012/01/04 18:54:08 caebergs Exp $   
+// @(#)root/tmva $Id: SeparationBase.cxx 40005 2011-06-27 15:29:10Z stelzer $   
 // Author: Andreas Hoecker, Joerg Stelzer, Helge Voss
 
 /**********************************************************************************
@@ -45,34 +45,53 @@
 ClassImp(TMVA::SeparationBase)
 
 #include <limits>
+#include <iostream>
 #include "TMath.h"
 
 
 TMVA::SeparationBase::SeparationBase() :
+   fName(""),
    fPrecisionCut(TMath::Sqrt(std::numeric_limits<double>::epsilon()))
-{}
+{
+   // default constructor
+}
+
+//copy constructor
+TMVA::SeparationBase::SeparationBase( const SeparationBase& s ) :
+   fName(s.fName),
+   fPrecisionCut(TMath::Sqrt(std::numeric_limits<double>::epsilon()))
+{
+   // copy constructor
+}
 
 //_______________________________________________________________________
-Double_t TMVA::SeparationBase::GetSeparationGain(const Double_t &nSelS, const Double_t& nSelB, 
+Double_t TMVA::SeparationBase::GetSeparationGain(const Double_t &nSelS, const Double_t& nSelB,
                                                  const Double_t& nTotS, const Double_t& nTotB)
 {
-   // Separation Gain:                                                     
-   // the measure of how the quality of separation of the sample increases 
-   // by splitting the sample e.g. into a "left-node" and a "right-node"   
-   // (N * Index_parent) - (N_left * Index_left) - (N_right * Index_right) 
-   // this is then the quality crition which is optimized for when trying  
-   // to increase the information in the system (making the best selection             
+   // Separation Gain:
+   // the measure of how the quality of separation of the sample increases
+   // by splitting the sample e.g. into a "left-node" and a "right-node"
+   // (N * Index_parent) - (N_left * Index_left) - (N_right * Index_right)
+   // this is then the quality crition which is optimized for when trying
+   // to increase the information in the system (making the best selection
 
    if ( (nTotS-nSelS)==nSelS && (nTotB-nSelB)==nSelB) return 0.;
 
    Double_t parentIndex = (nTotS+nTotB) *this->GetSeparationIndex(nTotS,nTotB);
+
    Double_t leftIndex   = ( ((nTotS - nSelS) + (nTotB - nSelB))
                             * this->GetSeparationIndex(nTotS-nSelS,nTotB-nSelB) );
    Double_t rightIndex  = (nSelS+nSelB) * this->GetSeparationIndex(nSelS,nSelB);
-   
-   Double_t diff = parentIndex - leftIndex - rightIndex;
 
-   if(diff/parentIndex<fPrecisionCut ) return 0;
+   //Double_t diff = parentIndex - leftIndex - rightIndex;
+   Double_t diff = (parentIndex - leftIndex - rightIndex)/(nTotS+nTotB);
+
+   if(diff<fPrecisionCut ) {
+      // std::cout << " Warning value in GetSeparation is below numerical presicion " 
+      //           << diff/parentIndex 
+      //           << std::endl;
+      return 0;
+   }
 
    return diff;
 }

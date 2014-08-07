@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: Types.cxx,v 1.1.2.1 2012/01/04 18:54:11 caebergs Exp $   
+// @(#)root/tmva $Id: Types.cxx 33928 2010-06-15 16:19:31Z stelzer $   
 // Author: Andreas Hoecker, Joerg Stelzer, Helge Voss
 
 /**********************************************************************************
@@ -45,6 +45,20 @@ TMVA::Types::~Types()
    // destructor
    delete fLogger;
 }
+
+//_______________________________________________________________________
+TMVA::Types& TMVA::Types::Instance() 
+{ 
+   // the the single instance of "Types" if existin already, or create it  (Signleton) 
+   return fgTypesPtr ? *fgTypesPtr : *(fgTypesPtr = new Types()); 
+}
+//_______________________________________________________________________
+void   TMVA::Types::DestroyInstance() 
+{ 
+   // "destructor" of the single instance
+   if (fgTypesPtr != 0) { delete fgTypesPtr; fgTypesPtr = 0; } 
+}
+
 
 //_______________________________________________________________________
 Bool_t TMVA::Types::AddTypeMapping( Types::EMVA method, const TString& methodname ) 

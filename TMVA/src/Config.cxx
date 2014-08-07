@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: Config.cxx,v 1.1.2.1 2012/01/04 18:53:56 caebergs Exp $   
+// @(#)root/tmva $Id: Config.cxx 38719 2011-04-04 12:22:28Z evt $   
 // Author: Andreas Hoecker, Joerg Stelzer, Fredrik Tegenfeldt, Helge Voss
 
 /**********************************************************************************
@@ -47,10 +47,11 @@ TMVA::Config::Config() :
    
    // plotting
    fVariablePlotting.fTimesRMS = 8.0;
-   fVariablePlotting.fNbins1D  = 60;
+   fVariablePlotting.fNbins1D  = 40;
    fVariablePlotting.fNbins2D  = 300;
    fVariablePlotting.fMaxNumOfAllowedVariablesForScatterPlots = 20;
    
+   fVariablePlotting.fNbinsMVAoutput   = 40;
    fVariablePlotting.fNbinsXOfROCCurve = 100;
 
    // IO names
@@ -64,5 +65,19 @@ TMVA::Config::~Config()
 {
    // destructor
    delete fLogger;
+}
+
+//_______________________________________________________________________
+void TMVA::Config::DestroyInstance()
+{
+   // static function: destroy TMVA instance
+   if (fgConfigPtr != 0) { delete fgConfigPtr; fgConfigPtr = 0;}
+}
+
+//_______________________________________________________________________
+TMVA::Config& TMVA::Config::Instance()
+{
+   // static function: returns  TMVA instance
+   return fgConfigPtr ? *fgConfigPtr :*(fgConfigPtr = new Config());
 }
 

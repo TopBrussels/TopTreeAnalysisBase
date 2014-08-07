@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: MethodPDERS.cxx,v 1.1.2.2 2012/01/11 09:54:49 aolbrech Exp $
+// @(#)root/tmva $Id: MethodPDERS.cxx 44112 2012-05-04 10:00:41Z evt $
 // Author: Andreas Hoecker, Yair Mahalalel, Joerg Stelzer, Helge Voss, Kai Voss
 
 /***********************************************************************************
@@ -11,7 +11,7 @@
  *      Implementation                                                             *
  *                                                                                 *
  * Authors (alphabetical):                                                         *
- *      Krzysztof Danielowski <danielow@cern.ch>       - IFJ PAN & AGH, Poland     *     
+ *      Krzysztof Danielowski <danielow@cern.ch>       - IFJ PAN & AGH, Poland     *
  *      Andreas Hoecker       <Andreas.Hocker@cern.ch> - CERN, Switzerland         *
  *      Kamil Kraszewski      <kalq@cern.ch>           - IFJ PAN & UJ, Poland      *
  *      Maciej Kruk           <mkruk@cern.ch>          - IFJ PAN & AGH, Poland     *
@@ -34,33 +34,33 @@
 /*
   This is a generalization of the above Likelihood methods to <i>N</i><sub>var</sub>
   dimensions, where <i>N</i><sub>var</sub> is the number of input variables
-  used in the MVA. If the multi-dimensional probability density functions 
-  (PDFs) for signal and background were known, this method contains the entire 
-  physical information, and is therefore optimal. Usually, kernel estimation 
-  methods are used to approximate the PDFs using the events from the 
+  used in the MVA. If the multi-dimensional probability density functions
+  (PDFs) for signal and background were known, this method contains the entire
+  physical information, and is therefore optimal. Usually, kernel estimation
+  methods are used to approximate the PDFs using the events from the
   training sample. <br><p></p>
-   
+
   A very simple probability density estimator (PDE) has been suggested
   in <a href="http://arxiv.org/abs/hep-ex/0211019">hep-ex/0211019</a>. The
-  PDE for a given test event is obtained from counting the (normalized) 
-  number of signal and background (training) events that occur in the 
-  "vicinity" of the test event. The volume that describes "vicinity" is 
-  user-defined. A <a href="http://arxiv.org/abs/hep-ex/0211019">search 
-  method based on binary-trees</a> is used to effectively reduce the 
+  PDE for a given test event is obtained from counting the (normalized)
+  number of signal and background (training) events that occur in the
+  "vicinity" of the test event. The volume that describes "vicinity" is
+  user-defined. A <a href="http://arxiv.org/abs/hep-ex/0211019">search
+  method based on binary-trees</a> is used to effectively reduce the
   selection time for the range search. Three different volume definitions
   are optional: <br><p></p>
   <ul>
   <li><u>MinMax:</u>
-  the volume is defined in each dimension with respect 
+  the volume is defined in each dimension with respect
   to the full variable range found in the training sample. </li>
   <li><u>RMS:</u>
-  the volume is defined in each dimensions with respect 
+  the volume is defined in each dimensions with respect
   to the RMS estimated from the training sample. </li>
   <li><u>Adaptive:</u>
-  a volume element is defined in each dimensions with 
-  respect to the RMS estimated from the training sample. The overall 
-  scale of the volume element is then determined for each event so 
-  that the total number of events confined in the volume be within 
+  a volume element is defined in each dimensions with
+  respect to the RMS estimated from the training sample. The overall
+  scale of the volume element is then determined for each event so
+  that the total number of events confined in the volume be within
   a user-defined range.</li>
   </ul><p></p>
   The adaptive range search is used by default.
@@ -84,7 +84,7 @@
 #undef  TMVA_MethodPDERS__countByHand__Debug__
 
 namespace TMVA {
-   const Bool_t MethodPDERS_UseFindRoot = kFALSE; 
+   const Bool_t MethodPDERS_UseFindRoot = kFALSE;
 };
 
 TMVA::MethodPDERS* TMVA::MethodPDERS::fgThisPDERS = NULL;
@@ -96,12 +96,31 @@ ClassImp(TMVA::MethodPDERS)
 //_______________________________________________________________________
 TMVA::MethodPDERS::MethodPDERS( const TString& jobName,
                                 const TString& methodTitle,
-                                DataSetInfo& theData, 
+                                DataSetInfo& theData,
                                 const TString& theOption,
                                 TDirectory* theTargetDir ) :
    MethodBase( jobName, Types::kPDERS, methodTitle, theData, theOption, theTargetDir ),
+   fFcnCall(0),
+   fVRangeMode(kAdaptive),
+   fKernelEstimator(kBox),
    fDelta(0),
-   fShift(0)
+   fShift(0),
+   fScaleS(0),
+   fScaleB(0),
+   fDeltaFrac(0),
+   fGaussSigma(0),
+   fGaussSigmaNorm(0),
+   fNRegOut(0),
+   fNEventsMin(0),
+   fNEventsMax(0),
+   fMaxVIterations(0),
+   fInitialScale(0),
+   fInitializedVolumeEle(0),
+   fkNNMin(0),
+   fkNNMax(0),
+   fMax_distance(0),
+   fPrinted(0),
+   fNormTree(0)
 {
    // standard constructor for the PDERS method
 }
@@ -111,8 +130,27 @@ TMVA::MethodPDERS::MethodPDERS( DataSetInfo& theData,
                                 const TString& theWeightFile,
                                 TDirectory* theTargetDir ) :
    MethodBase( Types::kPDERS, theData, theWeightFile, theTargetDir ),
-   fDelta( 0 ),
-   fShift( 0 )
+   fFcnCall(0),
+   fVRangeMode(kAdaptive),
+   fKernelEstimator(kBox),
+   fDelta(0),
+   fShift(0),
+   fScaleS(0),
+   fScaleB(0),
+   fDeltaFrac(0),
+   fGaussSigma(0),
+   fGaussSigmaNorm(0),
+   fNRegOut(0),
+   fNEventsMin(0),
+   fNEventsMax(0),
+   fMaxVIterations(0),
+   fInitialScale(0),
+   fInitializedVolumeEle(0),
+   fkNNMin(0),
+   fkNNMax(0),
+   fMax_distance(0),
+   fPrinted(0),
+   fNormTree(0)
 {
    // construct MethodPDERS through from file
 }
@@ -314,7 +352,7 @@ void TMVA::MethodPDERS::Train( void )
 }
 
 //_______________________________________________________________________
-Double_t TMVA::MethodPDERS::GetMvaValue( Double_t* err )
+Double_t TMVA::MethodPDERS::GetMvaValue( Double_t* err, Double_t* errUpper )
 {
    // init the size of a volume element using a defined fraction of the
    // volume containing the entire events
@@ -329,7 +367,7 @@ Double_t TMVA::MethodPDERS::GetMvaValue( Double_t* err )
    }
 
    // cannot determine error
-   if (err != 0) *err = -1;
+   NoErrorCalc(err, errUpper);
 
    return this->CRScalc( *GetEvent() );
 }
@@ -541,14 +579,14 @@ void TMVA::MethodPDERS::GetSample( const Event& e,
       // starting values
 
       fBinaryTree->SearchVolume( svolume, &events );
-   } 
+   }
    else if (fVRangeMode == kAdaptive) {      // adaptive volume
 
       // -----------------------------------------------------------------------
 
-      // TODO: optimize, perhaps multi stage with broadening limits, 
+      // TODO: optimize, perhaps multi stage with broadening limits,
       // or a different root finding method entirely,
-      if (MethodPDERS_UseFindRoot) { 
+      if (MethodPDERS_UseFindRoot) {
 
          // that won't need to search through large volume, where the bottle neck probably is
 
@@ -637,79 +675,80 @@ void TMVA::MethodPDERS::GetSample( const Event& e,
          volume->ScaleInterval( scaleBest );
          fBinaryTree->SearchVolume( volume, &events );
       }
-        
-   } // end of adaptive method
-   else if (fVRangeMode == kkNN)
-      {
-         Volume v(*volume);
-         
-         events.clear();
-         // check number of signals in begining volume
-         Int_t kNNcount = fBinaryTree->SearchVolumeWithMaxLimit( &v, &events, fkNNMax+1 );   
-         //if this number is too large return fkNNMax+1
 
-         Int_t t_times = 0;  // number of iterations
-      
-         while ( !(kNNcount >= fkNNMin && kNNcount <= fkNNMax) ) {
-            if (kNNcount < fkNNMin) {         //if we have too less points
-               Float_t scale = 2;      //better scale needed
-               volume->ScaleInterval( scale );
-            }
-            else if (kNNcount > fkNNMax) {    //if we have too many points
-               Float_t scale = 0.1;      //better scale needed
-               volume->ScaleInterval( scale );
-            }
-            events.clear();
-          
-            v = *volume ;
-         
-            kNNcount = fBinaryTree->SearchVolumeWithMaxLimit( &v, &events, fkNNMax+1 );  //new search
-         
-            t_times++;
-         
-            if (t_times == fMaxVIterations) {
-               Log() << kWARNING << "warining in event" << e
-                     << ": kNN volume adjustment reached "
-                     << "max. #iterations (" << fMaxVIterations << ")"
-                     << "[ kNN: " << fkNNMin << " " << fkNNMax << Endl;
-               break;
-            }
+      // end of adaptive method
+
+   } else if (fVRangeMode == kkNN) {
+      Volume v(*volume);
+
+      events.clear();
+      // check number of signals in begining volume
+      Int_t kNNcount = fBinaryTree->SearchVolumeWithMaxLimit( &v, &events, fkNNMax+1 );
+      //if this number is too large return fkNNMax+1
+
+      Int_t t_times = 0;  // number of iterations
+
+      while ( !(kNNcount >= fkNNMin && kNNcount <= fkNNMax) ) {
+         if (kNNcount < fkNNMin) {         //if we have too less points
+            Float_t scale = 2;      //better scale needed
+            volume->ScaleInterval( scale );
          }
-      
-         //vector to normalize distance in each dimension
-         Double_t *dim_normalization = new Double_t[GetNvar()];
-         for (UInt_t ivar=0; ivar<GetNvar(); ivar++) {
-            dim_normalization [ivar] = 1.0 / ((*v.fUpper)[ivar] - (*v.fLower)[ivar]);
-         }      
+         else if (kNNcount > fkNNMax) {    //if we have too many points
+            Float_t scale = 0.1;      //better scale needed
+            volume->ScaleInterval( scale );
+         }
+         events.clear();
 
-         std::vector<const BinarySearchTreeNode*> tempVector;    // temporary vector for events
-      
-         if (kNNcount >= fkNNMin) {
-            std::vector<Double_t> *distances = new std::vector<Double_t>( kNNcount );
-         
-            //counting the distance for each event
-            for (Int_t j=0;j< Int_t(events.size()) ;j++)
-               (*distances)[j] = GetNormalizedDistance ( e, *events[j], dim_normalization );
-         
-            //counting the fkNNMin-th element    
-            std::vector<Double_t>::iterator wsk = distances->begin();
-            for (Int_t j=0;j<fkNNMin-1;j++) wsk++;
-            std::nth_element( distances->begin(), wsk, distances->end() );
-         
-            //getting all elements that are closer than fkNNMin-th element
-            //signals
-            for (Int_t j=0;j<Int_t(events.size());j++) {
-               Double_t dist = GetNormalizedDistance( e, *events[j], dim_normalization );
-               
-               if (dist <= (*distances)[fkNNMin-1])        
-                  tempVector.push_back( events[j] );
-            }      
-            fMax_distance = (*distances)[fkNNMin-1];
-            delete distances;
-         }      
-         events = tempVector;
+         v = *volume ;
+
+         kNNcount = fBinaryTree->SearchVolumeWithMaxLimit( &v, &events, fkNNMax+1 );  //new search
+
+         t_times++;
+
+         if (t_times == fMaxVIterations) {
+            Log() << kWARNING << "warining in event" << e
+                  << ": kNN volume adjustment reached "
+                  << "max. #iterations (" << fMaxVIterations << ")"
+                  << "[ kNN: " << fkNNMin << " " << fkNNMax << Endl;
+            break;
+         }
       }
-   else {
+
+      //vector to normalize distance in each dimension
+      Double_t *dim_normalization = new Double_t[GetNvar()];
+      for (UInt_t ivar=0; ivar<GetNvar(); ivar++) {
+         dim_normalization [ivar] = 1.0 / ((*v.fUpper)[ivar] - (*v.fLower)[ivar]);
+      }
+
+      std::vector<const BinarySearchTreeNode*> tempVector;    // temporary vector for events
+
+      if (kNNcount >= fkNNMin) {
+         std::vector<Double_t> *distances = new std::vector<Double_t>( kNNcount );
+
+         //counting the distance for each event
+         for (Int_t j=0;j< Int_t(events.size()) ;j++)
+            (*distances)[j] = GetNormalizedDistance ( e, *events[j], dim_normalization );
+
+         //counting the fkNNMin-th element
+         std::vector<Double_t>::iterator wsk = distances->begin();
+         for (Int_t j=0;j<fkNNMin-1;j++) wsk++;
+         std::nth_element( distances->begin(), wsk, distances->end() );
+
+         //getting all elements that are closer than fkNNMin-th element
+         //signals
+         for (Int_t j=0;j<Int_t(events.size());j++) {
+            Double_t dist = GetNormalizedDistance( e, *events[j], dim_normalization );
+
+            if (dist <= (*distances)[fkNNMin-1])
+               tempVector.push_back( events[j] );
+         }
+         fMax_distance = (*distances)[fkNNMin-1];
+         delete distances;
+      }
+      delete[] dim_normalization;
+      events = tempVector;
+
+   } else {
 
       // troubles ahead...
       Log() << kFATAL << "<GetSample> unknown RangeMode: " << fVRangeMode << Endl;
@@ -722,7 +761,7 @@ Double_t TMVA::MethodPDERS::CRScalc( const Event& e )
 {
    std::vector<const BinarySearchTreeNode*> events;
 
-   // computes event weight by counting number of signal and background 
+   // computes event weight by counting number of signal and background
    // events (of reference sample) that are found within given volume
    // defined by the event
    std::vector<Double_t> *lb = new std::vector<Double_t>( GetNvar() );
@@ -750,7 +789,7 @@ void TMVA::MethodPDERS::RRScalc( const Event& e, std::vector<Float_t>* count )
 {
    std::vector<const BinarySearchTreeNode*> events;
 
-   // computes event weight by counting number of signal and background 
+   // computes event weight by counting number of signal and background
    // events (of reference sample) that are found within given volume
    // defined by the event
    std::vector<Double_t> *lb = new std::vector<Double_t>( GetNvar() );
@@ -762,7 +801,7 @@ void TMVA::MethodPDERS::RRScalc( const Event& e, std::vector<Float_t>* count )
       (*ub)[ivar] += (*fDelta)[ivar]*(*fShift)[ivar];
    }
    Volume *volume = new Volume( lb, ub );
-   
+
    GetSample( e, events, volume );
    RKernelEstimate( e, events, *volume, count );
 
@@ -778,27 +817,29 @@ Double_t TMVA::MethodPDERS::CKernelEstimate( const Event & event,
    Double_t *dim_normalization = new Double_t[GetNvar()];
    for (UInt_t ivar=0; ivar<GetNvar(); ivar++)
       dim_normalization [ivar] = 2 / ((*v.fUpper)[ivar] - (*v.fLower)[ivar]);
-  
+
    Double_t pdfSumS = 0;
    Double_t pdfSumB = 0;
 
    // Iteration over sample points
    for (std::vector<const BinarySearchTreeNode*>::iterator iev = events.begin(); iev != events.end(); iev++) {
-    
+
    // First switch to the one dimensional distance
    Double_t normalized_distance = GetNormalizedDistance (event, *(*iev), dim_normalization);
-    
+
    // always working within the hyperelipsoid, except for when we don't
    // note that rejection ratio goes to 1 as nvar goes to infinity
-   if (normalized_distance > 1 && fKernelEstimator != kBox) continue;      
-      
-   if ( (*iev)->IsSignal() )
+   if (normalized_distance > 1 && fKernelEstimator != kBox) continue;
+
+   if ( (*iev)->GetClass()==fSignalClass )
       pdfSumS += ApplyKernelFunction (normalized_distance) * (*iev)->GetWeight();
    else
       pdfSumB += ApplyKernelFunction (normalized_distance) * (*iev)->GetWeight();
    }
    pdfSumS = KernelNormalization( pdfSumS < 0. ? 0. : pdfSumS );
    pdfSumB = KernelNormalization( pdfSumB < 0. ? 0. : pdfSumB );
+
+   delete[] dim_normalization;
 
    if (pdfSumS < 1e-20 && pdfSumB < 1e-20) return 0.5;
    if (pdfSumB < 1e-20) return 1.0;
@@ -817,7 +858,7 @@ void TMVA::MethodPDERS::RKernelEstimate( const Event & event,
    Double_t *dim_normalization = new Double_t[GetNvar()];
    for (UInt_t ivar=0; ivar<GetNvar(); ivar++)
       dim_normalization [ivar] = 2 / ((*v.fUpper)[ivar] - (*v.fLower)[ivar]);
-  
+
    //   std::vector<Float_t> pdfSum;
    pdfSum->clear();
    Float_t pdfDiv = 0;
@@ -828,20 +869,22 @@ void TMVA::MethodPDERS::RKernelEstimate( const Event & event,
 
    // Iteration over sample points
    for (std::vector<const BinarySearchTreeNode*>::iterator iev = events.begin(); iev != events.end(); iev++) {
-    
+
       // First switch to the one dimensional distance
       Double_t normalized_distance = GetNormalizedDistance (event, *(*iev), dim_normalization);
-    
+
       // always working within the hyperelipsoid, except for when we don't
       // note that rejection ratio goes to 1 as nvar goes to infinity
-      if (normalized_distance > 1 && fKernelEstimator != kBox) continue;      
-      
+      if (normalized_distance > 1 && fKernelEstimator != kBox) continue;
+
       for (Int_t ivar = 0; ivar < fNRegOut ; ivar++) {
          pdfSum->at(ivar) += ApplyKernelFunction (normalized_distance) * (*iev)->GetWeight() * (*iev)->GetTargets()[ivar];
          pdfDiv           += ApplyKernelFunction (normalized_distance) * (*iev)->GetWeight();
-      } 
+      }
    }
-   
+
+   delete[] dim_normalization;
+
    if (pdfDiv == 0)
       return;
 
@@ -852,7 +895,7 @@ void TMVA::MethodPDERS::RKernelEstimate( const Event & event,
 }
 
 //_______________________________________________________________________
-Double_t TMVA::MethodPDERS::ApplyKernelFunction (Double_t normalized_distance) 
+Double_t TMVA::MethodPDERS::ApplyKernelFunction (Double_t normalized_distance)
 {
    // from the normalized euclidean distance calculate the distance
    // for a certain kernel
@@ -945,7 +988,7 @@ Double_t TMVA::MethodPDERS::KernelNormalization (Double_t pdf)
    }
 
    // Normalizing by the full volume
-   ret *= ( TMath::Power (2., (Double_t)GetNvar()) * TMath::Gamma (1 + (((Double_t) GetNvar()) / 2.)) ) /
+   ret *= ( TMath::Power (2., static_cast<Int_t>(GetNvar())) * TMath::Gamma (1 + (((Double_t) GetNvar()) / 2.)) ) /
       TMath::Power (TMath::Pi(), ((Double_t) GetNvar()) / 2.);
 
    return ret*pdf;
@@ -980,9 +1023,9 @@ Double_t TMVA::MethodPDERS::NormSinc (Double_t x)
    Double_t ret;
 
    if (GetNvar() % 2)
-     ret = TMath::Power (sinc, (Double_t)GetNvar());
+      ret = TMath::Power (sinc, static_cast<Int_t>(GetNvar()));
    else
-     ret = TMath::Abs (sinc) * TMath::Power (sinc, (Double_t)GetNvar() - 1);
+      ret = TMath::Abs (sinc) * TMath::Power (sinc, static_cast<Int_t>(GetNvar() - 1));
 
    return ret;
 }
@@ -1000,8 +1043,8 @@ Double_t TMVA::MethodPDERS::LanczosFilter (Int_t level, Double_t x)
    Double_t lanczos = (TMath::Sin(pix) / pix) * (TMath::Sin(pixtimesn) / pixtimesn);
    Double_t ret;
 
-   if (GetNvar() % 2) ret = TMath::Power (lanczos, (Double_t)GetNvar());
-   else               ret = TMath::Abs (lanczos) * TMath::Power (lanczos, (Double_t)GetNvar() - 1);
+   if (GetNvar() % 2) ret = TMath::Power (lanczos, static_cast<Int_t>(GetNvar()));
+   else               ret = TMath::Abs (lanczos) * TMath::Power (lanczos, static_cast<Int_t>(GetNvar() - 1));
 
    return ret;
 }
@@ -1026,23 +1069,27 @@ Float_t TMVA::MethodPDERS::GetError( Float_t countS, Float_t countB,
 }
 
 //_______________________________________________________________________
-void TMVA::MethodPDERS::AddWeightsXMLTo( void* parent ) const 
+void TMVA::MethodPDERS::AddWeightsXMLTo( void* parent ) const
 {
    // write weights to xml file
-   void* wght = gTools().xmlengine().NewChild(parent, 0, "Weights");
+   void* wght = gTools().AddChild(parent, "Weights");
    if (fBinaryTree)
       fBinaryTree->AddXMLTo(wght);
    else
-      Log() << kFATAL << "Signal and background binary search tree not available" << Endl; 
+      Log() << kFATAL << "Signal and background binary search tree not available" << Endl;
    //Log() << kFATAL << "Please implement writing of weights as XML" << Endl;
 }
 
 //_______________________________________________________________________
 void TMVA::MethodPDERS::ReadWeightsFromXML( void* wghtnode)
 {
-   if (NULL != fBinaryTree) delete fBinaryTree; 
-   void* treenode = gTools().xmlengine().GetChild(wghtnode);
-   fBinaryTree = dynamic_cast<BinarySearchTree*>(TMVA::BinaryTree::CreateFromXML(treenode));
+   if (NULL != fBinaryTree) delete fBinaryTree;
+   void* treenode = gTools().GetChild(wghtnode);
+   fBinaryTree = TMVA::BinarySearchTree::CreateFromXML(treenode);
+   if(!fBinaryTree)
+      Log() << kFATAL << "Could not create BinarySearchTree from XML" << Endl;
+   if(!fBinaryTree)
+      Log() << kFATAL << "Could not create BinarySearchTree from XML" << Endl;
    fBinaryTree->SetPeriode( GetNvar() );
    fBinaryTree->CalcStatistics();
    fBinaryTree->CountNodes();
@@ -1063,8 +1110,6 @@ void TMVA::MethodPDERS::ReadWeightsFromStream( istream& istr)
    fBinaryTree = new BinarySearchTree();
 
    istr >> *fBinaryTree;
-
-   std::cout << *fBinaryTree;
 
    fBinaryTree->SetPeriode( GetNvar() );
 
@@ -1095,6 +1140,19 @@ void TMVA::MethodPDERS::WriteWeightsToStream( TFile& ) const
 void TMVA::MethodPDERS::ReadWeightsFromStream( TFile& /*rf*/ )
 {
    // read training sample from file
+}
+
+//_______________________________________________________________________
+TMVA::MethodPDERS* TMVA::MethodPDERS::ThisPDERS( void ) 
+{ 
+   // static pointer to this object
+   return fgThisPDERS; 
+}
+//_______________________________________________________________________
+void TMVA::MethodPDERS::UpdateThis( void ) 
+{
+   // update static this pointer
+   fgThisPDERS = this; 
 }
 
 //_______________________________________________________________________

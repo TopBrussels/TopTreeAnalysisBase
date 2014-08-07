@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: Results.cxx,v 1.1.2.1 2012/01/04 18:54:06 caebergs Exp $
+// @(#)root/tmva $Id: Results.cxx 38475 2011-03-17 10:46:00Z evt $
 // Author: Andreas Hoecker, Peter Speckmayer, Joerg Stelzer, Helge Voss
 
 /**********************************************************************************
@@ -28,6 +28,7 @@
 #include <vector>
 
 #include "TH1.h"
+#include "TGraph.h"
 
 #include "TMVA/Results.h"
 #include "TMVA/MsgLogger.h"
@@ -71,7 +72,7 @@ void TMVA::Results::Store( TObject* obj, const char* alias )
       // alias exists
       *fLogger << kFATAL << "Alias " << as << " already exists in results storage" << Endl;
    }
-   if( obj->InheritsFrom("TH1") ) {
+   if( obj->InheritsFrom(TH1::Class()) ) {
       ((TH1*)obj)->SetDirectory(0);
    }
    fStorage->Add( obj );
@@ -94,4 +95,20 @@ TObject* TMVA::Results::GetObject(const TString & alias) const
 TH1* TMVA::Results::GetHist(const TString & alias) const 
 {
    return (TH1*)GetObject(alias);
+}
+
+//_______________________________________________________________________
+TGraph* TMVA::Results::GetGraph(const TString & alias) const 
+{
+   return (TGraph*)GetObject(alias);
+}
+
+
+//_______________________________________________________________________
+void TMVA::Results::Delete()
+{
+   // delete all stored histograms
+
+   fStorage->Delete();
+   fHistAlias->clear();
 }

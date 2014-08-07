@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: TNeuron.cxx,v 1.1.2.1 2012/01/04 18:54:09 caebergs Exp $
+// @(#)root/tmva $Id: TNeuron.cxx 36966 2010-11-26 09:50:13Z evt $
 // Author: Matt Jachowski
 
 /**********************************************************************************
@@ -20,11 +20,11 @@
  * modification, are permitted according to the terms listed in LICENSE           *
  * (http://tmva.sourceforge.net/LICENSE)                                          *
  **********************************************************************************/
-   
+
 //_______________________________________________________________________
-//                                                                      
-// Neuron class used by TMVA artificial neural network methods      
-//                                                                      
+//
+// Neuron class used by TMVA artificial neural network methods
+//
 //_______________________________________________________________________
 
 #include "TH1D.h"
@@ -51,11 +51,13 @@ using std::vector;
 
 ClassImp(TMVA::TNeuron)
 
+TMVA::MsgLogger* TMVA::TNeuron::fgLogger = 0;
+
 //______________________________________________________________________________
 TMVA::TNeuron::TNeuron()
-   : fLogger( new MsgLogger(this, kDEBUG) )
 {
    // standard constructor
+   if (!fgLogger) fgLogger = new MsgLogger("TNeuron",kDEBUG);
    InitNeuron();
 }
 
@@ -64,7 +66,6 @@ TMVA::TNeuron::~TNeuron()
    // destructor
    if (fLinksIn != NULL)  delete fLinksIn;
    if (fLinksOut != NULL) delete fLinksOut;
-   delete fLogger;
 }
 
 void TMVA::TNeuron::InitNeuron()
@@ -75,6 +76,7 @@ void TMVA::TNeuron::InitNeuron()
    fValue = UNINITIALIZED;
    fActivationValue = UNINITIALIZED;
    fDelta = UNINITIALIZED;
+   fDEDw = UNINITIALIZED;
    fError = UNINITIALIZED;
    fActivation = NULL;
    fForcedValue = kFALSE;
@@ -205,7 +207,7 @@ void TMVA::TNeuron::DeleteLinksArray(TObjArray*& links)
 void TMVA::TNeuron::SetError(Double_t error)
 {
    // set error, this should only be done for an output neuron
-   if (!IsOutputNeuron()) 
+   if (!IsOutputNeuron())
       PrintMessage( kWARNING, "Warning! Setting an error on a non-output neuron is probably not what you want to do." );
 
    fError = error;

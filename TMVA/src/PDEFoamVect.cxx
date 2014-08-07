@@ -1,3 +1,5 @@
+// @(#)root/tmva $Id: PDEFoamVect.cxx 44110 2012-05-04 08:34:05Z evt $
+// Author: S. Jadach, Tancredi Carli, Dominik Dannheim, Alexander Voigt
 
 /**********************************************************************************
  * Project: TMVA - a Root-integrated toolkit for multivariate data analysis       *
@@ -13,7 +15,7 @@
  *      S. Jadach        - Institute of Nuclear Physics, Cracow, Poland           *
  *      Tancredi Carli   - CERN, Switzerland                                      *
  *      Dominik Dannheim - CERN, Switzerland                                      *
- *      Alexander Voigt  - CERN, Switzerland                                      *
+ *      Alexander Voigt  - TU Dresden, Germany                                    *
  *                                                                                *
  * Copyright (c) 2008:                                                            *
  *      CERN, Switzerland                                                         *
@@ -24,22 +26,24 @@
  * (http://tmva.sourceforge.net/LICENSE)                                          *
  **********************************************************************************/
 
+#include <iostream>
 #include <iomanip>
 
 #ifndef ROOT_TMVA_PDEFoamVect
 #include "TMVA/PDEFoamVect.h"
 #endif
 
-#define SW2 std::setprecision(7) << std::setw(12)
+using namespace std;
 
-ClassImp(TMVA::PDEFoamVect);
+//#define SW2 std::setw(12)
+
+ClassImp(TMVA::PDEFoamVect)
 
 //_____________________________________________________________________
 TMVA::PDEFoamVect::PDEFoamVect()
    : TObject(),
      fDim(0),
-     fCoords(0),
-     fLogger( new MsgLogger("PDEFoamVect") )
+     fCoords(0)
 {
    // Default constructor for streamer
 }
@@ -48,8 +52,7 @@ TMVA::PDEFoamVect::PDEFoamVect()
 TMVA::PDEFoamVect::PDEFoamVect(Int_t n)
    : TObject(),
      fDim(n),
-     fCoords(0),
-     fLogger( new MsgLogger("PDEFoamVect") )
+     fCoords(0)
 {
    // User constructor creating n-dimensional vector
    // and allocating dynamically array of components
@@ -76,7 +79,6 @@ TMVA::PDEFoamVect::~PDEFoamVect()
    // Destructor
    delete [] fCoords; //  free(fCoords)
    fCoords=0;
-   delete fLogger;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -84,20 +86,20 @@ TMVA::PDEFoamVect::~PDEFoamVect()
 //////////////////////////////////////////////////////////////////////////////
 
 //_____________________________________________________________________
-TMVA::PDEFoamVect& TMVA::PDEFoamVect::operator =(const PDEFoamVect& Vect)
+TMVA::PDEFoamVect& TMVA::PDEFoamVect::operator =(const PDEFoamVect& vect)
 {
    // substitution operator
 
-   if (&Vect == this) return *this;
-   if( fDim != Vect.fDim )
-      Error( "PDEFoamVect","operator=Dims. are different: %d and %d \n ",fDim,Vect.fDim);
-   if( fDim != Vect.fDim ) {  // cleanup
+   if (&vect == this) return *this;
+   if (fDim != vect.fDim)
+      Error("PDEFoamVect", "operator=Dims. are different: %d and %d \n ", fDim, vect.fDim);
+   if (fDim != vect.fDim) {  // cleanup
       delete [] fCoords;
       fCoords = new Double_t[fDim];
    }
-   fDim=Vect.fDim;
+   fDim = vect.fDim;
    for(Int_t i=0; i<fDim; i++)
-      fCoords[i] = Vect.fCoords[i];
+      fCoords[i] = vect.fCoords[i];
    return *this;
 }
 
@@ -126,26 +128,26 @@ TMVA::PDEFoamVect& TMVA::PDEFoamVect::operator*=(const Double_t &x)
 }
 
 //_____________________________________________________________________
-TMVA::PDEFoamVect& TMVA::PDEFoamVect::operator+=(const PDEFoamVect& Shift)
+TMVA::PDEFoamVect& TMVA::PDEFoamVect::operator+=(const PDEFoamVect& shift)
 {
    // unary addition operator +=; adding vector c*=x,
-   if( fDim != Shift.fDim){
-      Error(  "PDEFoamVect","operator+, different dimensions= %d %d \n",fDim,Shift.fDim);
+   if(fDim != shift.fDim){
+      Error("PDEFoamVect", "operator+, different dimensions= %d %d \n", fDim, shift.fDim);
    }
    for(Int_t i=0;i<fDim;i++)
-      fCoords[i] = fCoords[i]+Shift.fCoords[i];
+      fCoords[i] = fCoords[i] + shift.fCoords[i];
    return *this;
 }
 
 //_____________________________________________________________________
-TMVA::PDEFoamVect& TMVA::PDEFoamVect::operator-=(const PDEFoamVect& Shift)
+TMVA::PDEFoamVect& TMVA::PDEFoamVect::operator-=(const PDEFoamVect& shift)
 {
    // unary subtraction operator -=
-   if( fDim != Shift.fDim) {
-      Error(  "PDEFoamVect","operator+, different dimensions= %d %d \n",fDim,Shift.fDim);
+   if(fDim != shift.fDim) {
+      Error("PDEFoamVect", "operator+, different dimensions= %d %d \n", fDim, shift.fDim);
    }
    for(Int_t i=0;i<fDim;i++)
-      fCoords[i] = fCoords[i]-Shift.fCoords[i];
+      fCoords[i] = fCoords[i] - shift.fCoords[i];
    return *this;
 }
 
@@ -198,10 +200,13 @@ TMVA::PDEFoamVect& TMVA::PDEFoamVect::operator =(Double_t x)
 //_____________________________________________________________________
 void TMVA::PDEFoamVect::Print(Option_t *option) const
 {
-   // Printout of all vector components on "Log()"
+   // Printout of all vector components
+   streamsize wid = cout.width(); // saving current field width
    if(!option) Error( "Print ", "No option set \n");
-   Log() << "(";
-   for(Int_t i=0; i<fDim-1; i++) Log() << SW2 << *(fCoords+i) << ",";
-   Log() << SW2 << *(fCoords+fDim-1);
-   Log() << ")";
+   cout << "(";
+   for(Int_t i=0; i<fDim-1; i++) 
+      cout << std::setw(12) << *(fCoords+i) << ",";
+   cout << std::setw(12) << *(fCoords+fDim-1);
+   cout << ")";
+   cout.width(wid);
 }

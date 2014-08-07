@@ -1,5 +1,5 @@
-// @(#)root/tmva $Id: Rule.cxx,v 1.1.2.1 2012/01/04 18:54:06 caebergs Exp $
-// Author: Andreas Hoecker, Joerg Stelzer, Fredrik Tegenfeldt, Helge Voss 
+// @(#)root/tmva $Id: Rule.cxx 36134 2010-10-06 18:29:59Z stelzer $
+// Author: Andreas Hoecker, Joerg Stelzer, Fredrik Tegenfeldt, Helge Voss
 
 /**********************************************************************************
  * Project: TMVA - a Root-integrated toolkit for multivariate data analysis       *
@@ -8,7 +8,7 @@
  * Web    : http://tmva.sourceforge.net                                           *
  *                                                                                *
  * Description:                                                                   *
- *      A class describung a 'rule'                                               * 
+ *      A class describung a 'rule'                                               *
  *      Each internal node of a tree defines a rule from all the parental nodes.  *
  *      A rule consists of atleast 2 nodes.                                       *
  *      Input: a decision tree (in the constructor)                               *
@@ -18,9 +18,9 @@
  *      Helge Voss         <Helge.Voss@cern.ch>         - MPI-KP Heidelberg, Ger. *
  *                                                                                *
  * Copyright (c) 2005:                                                            *
- *      CERN, Switzerland                                                         * 
+ *      CERN, Switzerland                                                         *
  *      Iowa State U.                                                             *
- *      MPI-K Heidelberg, Germany                                                 * 
+ *      MPI-K Heidelberg, Germany                                                 *
  *                                                                                *
  * Redistribution and use in source and binary forms, with or without             *
  * modification, are permitted according to the terms listed in LICENSE           *
@@ -63,6 +63,8 @@ TMVA::Rule::Rule( RuleEnsemble *re,
    , fImportance    ( 0.0 )
    , fImportanceRef ( 1.0 )
    , fRuleEnsemble  ( re )
+   , fSSB           ( 0 )
+   , fSSBNeve       ( 0 )
    , fLogger( new MsgLogger("RuleFit") )
 {
    // the main constructor for a Rule
@@ -72,7 +74,7 @@ TMVA::Rule::Rule( RuleEnsemble *re,
    //   nodes  - a vector of Node; from these all possible rules will be created
    //
    //
-   
+
    fCut     = new RuleCut( nodes );
    fSSB     = fCut->GetPurity();
    fSSBNeve = fCut->GetCutNeve();
@@ -88,6 +90,8 @@ TMVA::Rule::Rule( RuleEnsemble *re )
    , fImportance    ( 0.0 )
    , fImportanceRef ( 1.0 )
    , fRuleEnsemble  ( re )
+   , fSSB           ( 0 )
+   , fSSBNeve       ( 0 )
    , fLogger( new MsgLogger("RuleFit") )
 {
    // the simple constructor
@@ -103,6 +107,8 @@ TMVA::Rule::Rule()
    , fImportance    ( 0.0 )
    , fImportanceRef ( 1.0 )
    , fRuleEnsemble  ( 0 )
+   , fSSB           ( 0 )
+   , fSSBNeve       ( 0 )
    , fLogger( new MsgLogger("RuleFit") )
 {
    // the simple constructor
@@ -112,6 +118,7 @@ TMVA::Rule::Rule()
 TMVA::Rule::~Rule() 
 {
    // destructor
+   delete fCut;
    delete fLogger;
 }
 
@@ -337,6 +344,7 @@ void TMVA::Rule::PrintLogger(const char *title) const
 void TMVA::Rule::PrintRaw( ostream& os ) const
 {
    // extensive print function used to print info for the weight file
+   Int_t dp = os.precision();
    const UInt_t nvars = fCut->GetNvars();
    os << "Parameters: "
       << std::setprecision(10)
@@ -360,6 +368,7 @@ void TMVA::Rule::PrintRaw( ostream& os ) const
          << " " << (fCut->GetCutDoMax(i) ? "T":"F")
          << std::endl;
    }
+   os << std::setprecision(dp);
 }
 
 //_______________________________________________________________________
@@ -394,7 +403,7 @@ void* TMVA::Rule::AddXMLTo( void* parent ) const
 void TMVA::Rule::ReadFromXML( void* wghtnode )
 {
    // read rule from XML
-   TString nodeName = TString( gTools().xmlengine().GetNodeName(wghtnode) );
+   TString nodeName = TString( gTools().GetName(wghtnode) );
    if (nodeName != "Rule") Log() << kFATAL << "<ReadFromXML> Unexpected node name: " << nodeName << Endl;
 
    gTools().ReadAttr( wghtnode, "Importance", fImportance    );
@@ -405,22 +414,22 @@ void TMVA::Rule::ReadFromXML( void* wghtnode )
    gTools().ReadAttr( wghtnode, "Norm",       fNorm          );
    gTools().ReadAttr( wghtnode, "SSB",        fSSB           );
    gTools().ReadAttr( wghtnode, "SSBNeve",    fSSBNeve       );
-   
+
    UInt_t nvars;
    gTools().ReadAttr( wghtnode, "Nvars",      nvars          );
    if (fCut) delete fCut;
    fCut = new RuleCut();
    fCut->SetNvars( nvars );
-   
+
    // read Cut
-   void*    ch = gTools().xmlengine().GetChild( wghtnode );
+   void*    ch = gTools().GetChild( wghtnode );
    UInt_t   i = 0;
    UInt_t   ui;
    Double_t d;
    Char_t   c;
    while (ch) {
       gTools().ReadAttr( ch, "Selector", ui );
-      fCut->SetSelector( i, ui ); 
+      fCut->SetSelector( i, ui );
       gTools().ReadAttr( ch, "Min",      d );
       fCut->SetCutMin  ( i, d );
       gTools().ReadAttr( ch, "Max",      d );
@@ -429,10 +438,10 @@ void TMVA::Rule::ReadFromXML( void* wghtnode )
       fCut->SetCutDoMin( i, (c == 'T' ? kTRUE : kFALSE ) );
       gTools().ReadAttr( ch, "DoMax",    c );
       fCut->SetCutDoMax( i, (c == 'T' ? kTRUE : kFALSE ) );
-      
+
       i++;
-      ch = gTools().xmlengine().GetNext(ch);
-   }   
+      ch = gTools().GetNextChild(ch);
+   }
 
    // sanity check
    if (i != nvars) Log() << kFATAL << "<ReadFromXML> Mismatch in number of cuts: " << i << " != " << nvars << Endl;
@@ -454,6 +463,7 @@ void TMVA::Rule::ReadRaw( istream& istr )
         >> fNorm
         >> fSSB
         >> fSSBNeve;
+   // coverity[tainted_data_argument]
    istr >> dummy >> nvars;
    Double_t cutmin,cutmax;
    UInt_t   sel,idum;

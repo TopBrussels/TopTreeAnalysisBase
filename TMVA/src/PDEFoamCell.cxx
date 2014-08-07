@@ -1,3 +1,5 @@
+// @(#)root/tmva $Id: PDEFoamCell.cxx 44110 2012-05-04 08:34:05Z evt $
+// Author: S.Jadach, Tancredi Carli, Dominik Dannheim, Alexander Voigt
 
 /**********************************************************************************
  * Project: TMVA - a Root-integrated toolkit for multivariate data analysis       *
@@ -15,7 +17,7 @@
  *      S. Jadach        - Institute of Nuclear Physics, Cracow, Poland           *
  *      Tancredi Carli   - CERN, Switzerland                                      *
  *      Dominik Dannheim - CERN, Switzerland                                      *
- *      Alexander Voigt  - CERN, Switzerland                                      *
+ *      Alexander Voigt  - TU Dresden, Germany                                    *
  *                                                                                *
  * Copyright (c) 2008:                                                            *
  *      CERN, Switzerland                                                         *
@@ -26,6 +28,7 @@
  * (http://tmva.sourceforge.net/LICENSE)                                          *
  **********************************************************************************/
 
+#include <iostream>
 #include <ostream>
 
 #ifndef ROOT_TMVA_PDEFoamCell
@@ -37,9 +40,10 @@ using namespace std;
 ClassImp(TMVA::PDEFoamCell)
 
 //_____________________________________________________________________
-TMVA::PDEFoamCell::PDEFoamCell() 
+TMVA::PDEFoamCell::PDEFoamCell()
    : TObject(),
      fDim(0),
+     fSerial(0),
      fStatus(1),
      fParent(0),
      fDaught0(0),
@@ -55,9 +59,10 @@ TMVA::PDEFoamCell::PDEFoamCell()
 }
 
 //_____________________________________________________________________
-TMVA::PDEFoamCell::PDEFoamCell(Int_t kDim) 
+TMVA::PDEFoamCell::PDEFoamCell(Int_t kDim)
    : TObject(),
      fDim(kDim),
+     fSerial(0),
      fStatus(1),
      fParent(0),
      fDaught0(0),
@@ -78,6 +83,7 @@ TMVA::PDEFoamCell::PDEFoamCell(Int_t kDim)
 TMVA::PDEFoamCell::PDEFoamCell(const PDEFoamCell &cell)
    : TObject(),
      fDim     (cell.fDim),
+     fSerial  (cell.fSerial),
      fStatus  (cell.fStatus),
      fParent  (cell.fParent),
      fDaught0 (cell.fDaught0),
@@ -100,15 +106,14 @@ TMVA::PDEFoamCell::~PDEFoamCell()
 }
 
 //_____________________________________________________________________
-void TMVA::PDEFoamCell::Fill(Int_t Status, PDEFoamCell *Parent, PDEFoamCell *Daugh1, PDEFoamCell *Daugh2)
+void TMVA::PDEFoamCell::Fill(Int_t status, PDEFoamCell *parent, PDEFoamCell *daugh1, PDEFoamCell *daugh2)
 {
    // Fills in certain data into newly allocated cell
 
-   fStatus  = Status;
-   fParent  = Parent;
-   //   Log() << "D1" << Daugh1 << Endl;
-   fDaught0 = Daugh1;
-   fDaught1 = Daugh2;
+   fStatus  = status;
+   fParent  = parent;
+   fDaught0 = daugh1;
+   fDaught1 = daugh2;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -182,6 +187,41 @@ void TMVA::PDEFoamCell::CalcVolume(void)
       for(k=0; k<fDim; k++) volu *= cellSize[k];
    }
    fVolume =volu;
+}
+
+//_____________________________________________________________________
+UInt_t TMVA::PDEFoamCell::GetDepth()
+{
+   // Get depth of cell in binary tree, where the root cell has depth
+   // 1
+
+   // check wheter we are in the root cell
+   if (fParent == 0)
+      return 1;
+
+   UInt_t depth = 1;
+   PDEFoamCell *cell = this;
+   while ((cell=cell->GetPare()) != 0){
+      ++depth;
+   }
+   return depth;
+}
+
+//_____________________________________________________________________
+UInt_t TMVA::PDEFoamCell::GetTreeDepth(UInt_t depth)
+{
+   // Get depth of cell tree, starting at this cell.
+
+   if (GetStat() == 1)    // this is an active cell
+      return depth + 1;
+
+   UInt_t depth0 = 0, depth1 = 0;
+   if (GetDau0() != NULL)
+      depth0 = GetDau0()->GetTreeDepth(depth+1);
+   if (GetDau1() != NULL)
+      depth1 = GetDau1()->GetTreeDepth(depth+1);
+
+   return (depth0 > depth1 ? depth0 : depth1);
 }
 
 //_____________________________________________________________________

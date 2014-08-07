@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: BinarySearchTreeNode.cxx,v 1.1.2.1 2012/01/04 18:53:55 caebergs Exp $    
+// @(#)root/tmva $Id: BinarySearchTreeNode.cxx 38719 2011-04-04 12:22:28Z evt $    
 // Author: Andreas Hoecker, Joerg Stelzer, Helge Voss, Kai Voss 
 
 /**********************************************************************************
@@ -50,12 +50,12 @@
 ClassImp(TMVA::BinarySearchTreeNode)
 
 //_______________________________________________________________________
-TMVA::BinarySearchTreeNode::BinarySearchTreeNode( const Event* e ) 
+TMVA::BinarySearchTreeNode::BinarySearchTreeNode( const Event* e, UInt_t /* signalClass */ ) 
    : TMVA::Node(),
      fEventV  ( std::vector<Float_t>() ),
      fTargets ( std::vector<Float_t>() ),
      fWeight  ( e==0?0:e->GetWeight()  ),
-     fClass   ( e==0?1:(e->IsSignal()?0:1) ), // see BinarySearchTree.h, line Mean() RMS() Min() and Max()
+     fClass   ( e==0?0:e->GetClass() ), // see BinarySearchTree.h, line Mean() RMS() Min() and Max()
      fSelector( -1 )
 {
    // constructor of a node for the search tree
@@ -73,7 +73,7 @@ TMVA::BinarySearchTreeNode::BinarySearchTreeNode( BinarySearchTreeNode* parent, 
    fEventV  ( std::vector<Float_t>() ),
    fTargets ( std::vector<Float_t>() ),
    fWeight  ( 0  ),
-   fClass   ( -1 ),
+   fClass   ( 0 ),
    fSelector( -1 )
 {
    // constructor of a daughter node as a daughter of 'p'
@@ -143,7 +143,7 @@ void TMVA::BinarySearchTreeNode::Print( ostream& os ) const
    os << fEventV.size() << " vars: ";
    for (;it!=fEventV.end(); it++) os << " " << std::setw(10) << *it;
    os << "  EvtWeight " << std::setw(10) << fWeight;
-   os << std::setw(10) << (IsSignal()?" Signal":" Background") << std::endl;
+   os << std::setw(10) << "Class: " << GetClass() << std::endl;
 
    os << "Selector: " <<  this->GetSelector() <<std::endl;
    os << "My address is " << long(this) << ", ";
@@ -164,7 +164,7 @@ void TMVA::BinarySearchTreeNode::PrintRec( ostream& os ) const
    os << fEventV.size() << " vars: ";
    for (;it!=fEventV.end(); it++) os << " " << std::setw(10) << *it;
    os << "  EvtWeight " << std::setw(10) << fWeight;
-   os << std::setw(10) << (IsSignal()?" Signal":" Background") << std::endl;
+   os << std::setw(10) << "Class: " << GetClass() << std::endl;
 
    if (this->GetLeft() != NULL)this->GetLeft()->PrintRec(os) ;
    if (this->GetRight() != NULL)this->GetRight()->PrintRec(os);
@@ -192,6 +192,7 @@ Bool_t TMVA::BinarySearchTreeNode::ReadDataRecord( istream& is, UInt_t /* Tmva_V
    this->SetSelector(selIdx);
 
    // next line: read and build the event
+   // coverity[tainted_data_argument]
    is >> nvar;
    fEventV.clear();
    for (UInt_t ivar=0; ivar<nvar; ivar++) {
@@ -212,7 +213,11 @@ void TMVA::BinarySearchTreeNode::ReadAttributes(void* node, UInt_t /* tmva_Versi
    gTools().ReadAttr(node, "weight",   fWeight );
    std::string sb;
    gTools().ReadAttr(node, "type",     sb);
-   fClass = (sb=="Signal")?0:1;
+   if (sb=="Signal" || sb=="0")
+      fClass=0;
+   if (sb=="1")
+      fClass=1;
+//   fClass = (sb=="Signal")?0:1;
    Int_t nvars;
    gTools().ReadAttr(node, "NVars",nvars);
    fEventV.resize(nvars);
@@ -224,7 +229,8 @@ void TMVA::BinarySearchTreeNode::AddAttributesToNode(void* node) const {
    // adding attributes to tree node
    gTools().AddAttr(node, "selector", fSelector );
    gTools().AddAttr(node, "weight", fWeight );
-   gTools().AddAttr(node, "type", (IsSignal()?"Signal":"Background"));
+//   gTools().AddAttr(node, "type", (IsSignal()?"Signal":"Background"));
+   gTools().AddAttr(node, "type", GetClass());
    gTools().AddAttr(node, "NVars", fEventV.size());
 }
 
@@ -233,9 +239,11 @@ void TMVA::BinarySearchTreeNode::AddAttributesToNode(void* node) const {
 void TMVA::BinarySearchTreeNode::AddContentToNode( std::stringstream& s ) const 
 {
    // adding attributes to tree node
+   std::ios_base::fmtflags ff = s.flags();
    s.precision( 16 );
-   for (UInt_t i=0; i<fEventV.size();  i++) s << std::scientific << " " << fEventV[i];   
+   for (UInt_t i=0; i<fEventV.size();  i++) s << std::scientific << " " << fEventV[i];
    for (UInt_t i=0; i<fTargets.size(); i++) s << std::scientific << " " << fTargets[i];
+   s.flags(ff);
 }
 //_______________________________________________________________________
 void TMVA::BinarySearchTreeNode::ReadContent( std::stringstream& s ) 

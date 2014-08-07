@@ -1,5 +1,5 @@
-// @(#)root/tmva $Id: DataSetManager.cxx,v 1.1.2.1 2012/01/04 18:53:57 caebergs Exp $
-// Author: Andreas Hoecker, Joerg Stelzer, Helge Voss
+// @(#)root/tmva $Id: DataSetManager.cxx 39989 2011-06-27 13:19:22Z stelzer $
+// Author: Andreas Hoecker, Peter Speckmayer, Joerg Stelzer, Helge Voss
 
 /**********************************************************************************
  * Project: TMVA - a Root-integrated toolkit for multivariate data analysis       *
@@ -44,13 +44,14 @@ using std::endl;
 #include "TMVA/MsgLogger.h"
 #endif
 
-TMVA::DataSetManager* TMVA::DataSetManager::fgDSManager = 0;
-TMVA::DataSetManager& TMVA::DataSetManager::Instance() { return *fgDSManager; }      
-void TMVA::DataSetManager::CreateInstance( DataInputHandler& dataInput ) { fgDSManager = new DataSetManager(dataInput); }
-void TMVA::DataSetManager::DestroyInstance() { if (fgDSManager) { delete fgDSManager; fgDSManager=0; } }
+//TMVA::DataSetManager* TMVA::DataSetManager::fgDSManager = 0; // DSMTEST removed
+//TMVA::DataSetManager& TMVA::DataSetManager::Instance() { return *fgDSManager; }      // DSMTEST removed
+// void TMVA::DataSetManager::CreateInstance( DataInputHandler& dataInput ) { fgDSManager = new DataSetManager(dataInput); } // DSMTEST removed
+
+// void TMVA::DataSetManager::DestroyInstance() { if (fgDSManager) { delete fgDSManager; fgDSManager=0; } } // DSMTEST removed
 
 //_______________________________________________________________________
-TMVA::DataSetManager::DataSetManager( DataInputHandler& dataInput ) 
+TMVA::DataSetManager::DataSetManager( DataInputHandler& dataInput )
    : fDataInput(dataInput),
      fDataSetInfoCollection(),
      fLogger( new MsgLogger("DataSetManager", kINFO) )
@@ -59,20 +60,20 @@ TMVA::DataSetManager::DataSetManager( DataInputHandler& dataInput )
 }
 
 //_______________________________________________________________________
-TMVA::DataSetManager::~DataSetManager() 
+TMVA::DataSetManager::~DataSetManager()
 {
    // destructor
-   fDataSetInfoCollection.SetOwner();
+//   fDataSetInfoCollection.SetOwner(); // DSMTEST --> created a segfault because the DataSetInfo-objects got deleted twice
 
    TMVA::DataSetFactory::destroyInstance();
-
+   
    delete fLogger;
 }
 
 //_______________________________________________________________________
-TMVA::DataSet* TMVA::DataSetManager::CreateDataSet( const TString& dsiName ) 
+TMVA::DataSet* TMVA::DataSetManager::CreateDataSet( const TString& dsiName )
 {
-   // Creates the singleton dataset 
+   // Creates the singleton dataset
    DataSetInfo* dsi = GetDataSetInfo( dsiName );
    if (!dsi) Log() << kFATAL << "DataSetInfo object '" << dsiName << "' not found" << Endl;
 
@@ -91,6 +92,9 @@ TMVA::DataSetInfo* TMVA::DataSetManager::GetDataSetInfo(const TString& dsiName)
 TMVA::DataSetInfo& TMVA::DataSetManager::AddDataSetInfo(DataSetInfo& dsi) 
 {
    // stores a copy of the dataset info object
+
+   dsi.SetDataSetManager( this ); // DSMTEST
+
    DataSetInfo * dsiInList = GetDataSetInfo(dsi.GetName());
    if (dsiInList!=0) return *dsiInList;
    fDataSetInfoCollection.Add( const_cast<DataSetInfo*>(&dsi) );

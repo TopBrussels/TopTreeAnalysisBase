@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: ClassInfo.cxx,v 1.1.2.1 2012/01/04 18:53:56 caebergs Exp $
+// @(#)root/tmva $Id: ClassInfo.cxx 29122 2009-06-22 06:51:30Z brun $
 // Author: Andreas Hoecker, Peter Speckmayer, Joerg Stelzer, Helge Voss
 
 /**********************************************************************************

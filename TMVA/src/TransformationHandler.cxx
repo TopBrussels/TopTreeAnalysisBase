@@ -1,5 +1,5 @@
-// @(#)root/tmva $Id: TransformationHandler.cxx,v 1.1.2.1 2012/01/04 18:54:11 caebergs Exp $
-// Author: Andreas Hoecker, Peter Speckmayer, Joerg Stelzer, Helge Voss, Eckhard von Toerne
+// @(#)root/tmva $Id: TransformationHandler.cxx 44118 2012-05-04 12:29:18Z evt $
+// Author: Andreas Hoecker, Peter Speckmayer, Joerg Stelzer, Helge Voss, Eckhard von Toerne, Jan Therhaag
 
 /**********************************************************************************
  * Project: TMVA - a Root-integrated toolkit for multivariate data analysis       *
@@ -14,10 +14,11 @@
  *      Andreas Hoecker <Andreas.Hocker@cern.ch> - CERN, Switzerland              *
  *      Peter Speckmayer <speckmay@mail.cern.ch>  - CERN, Switzerland             *
  *      Joerg Stelzer   <Joerg.Stelzer@cern.ch>  - CERN, Switzerland              *
- *      Eckhard v. Toerne  <evt@uni-bonn.de>     - U of Bonn, Germany          *  
+ *      Jan Therhaag       <Jan.Therhaag@cern.ch>     - U of Bonn, Germany        *
+ *      Eckhard v. Toerne  <evt@uni-bonn.de>     - U of Bonn, Germany             *  
  *      Helge Voss      <Helge.Voss@cern.ch>     - MPI-K Heidelberg, Germany      *
  *                                                                                *
- * Copyright (c) 2008:                                                            *
+ * Copyright (c) 2005-2011:                                                       *
  *      CERN, Switzerland                                                         *
  *      MPI-K Heidelberg, Germany                                                 *
  *      U. of Bonn, Germany                                                       *
@@ -35,7 +36,6 @@
 #include "TH2.h"
 #include "TAxis.h"
 #include "TProfile.h"
-#include "TXMLEngine.h"
 
 #ifndef ROOT_TMVA_Config
 #include "TMVA/Config.h"
@@ -66,6 +66,7 @@
 #include "TMVA/VariablePCATransform.h"
 #include "TMVA/VariableGaussTransform.h"
 #include "TMVA/VariableNormalizeTransform.h"
+#include "TMVA/VariableRearrangeTransform.h"
 
 //_______________________________________________________________________
 TMVA::TransformationHandler::TransformationHandler( DataSetInfo& dsi, const TString& callerName ) 
@@ -109,7 +110,7 @@ TMVA::VariableTransformBase* TMVA::TransformationHandler::AddTransformation( Var
    trf->Log().SetSource(TString(fCallerName+"_"+tfname+"_TF").Data());
    fTransformations.Add(trf);
    fTransformationsReferenceClasses.push_back( cls );
-   return trf;
+  return trf;
 }
 
 //_______________________________________________________________________
@@ -140,11 +141,12 @@ void TMVA::TransformationHandler::SetTransformationReferenceClass( Int_t cls )
 const TMVA::Event* TMVA::TransformationHandler::Transform( const Event* ev ) const 
 {
    // the transformation
-
+   
    TListIter trIt(&fTransformations);
    std::vector<Int_t>::const_iterator rClsIt = fTransformationsReferenceClasses.begin();
    const Event* trEv = ev;
    while (VariableTransformBase *trf = (VariableTransformBase*) trIt()) {
+      if (rClsIt == fTransformationsReferenceClasses.end()) Log() << kFATAL<< "invalid read in TransformationHandler::Transform " <<Endl;
       trEv = trf->Transform(trEv, (*rClsIt) );
       rClsIt++;
    }
@@ -152,18 +154,45 @@ const TMVA::Event* TMVA::TransformationHandler::Transform( const Event* ev ) con
 }
 
 //_______________________________________________________________________
-const TMVA::Event* TMVA::TransformationHandler::InverseTransform( const Event* ev ) const 
+const TMVA::Event* TMVA::TransformationHandler::InverseTransform( const Event* ev, Bool_t suppressIfNoTargets ) const 
 {
+   if (fTransformationsReferenceClasses.empty()){
+      //Log() << kWARNING << __FILE__ <<":InverseTransform fTransformationsReferenceClasses is empty" << Endl;
+      return ev; 
+   }
    // the inverse transformation
-   TListIter trIt(&fTransformations);
-   std::vector< Int_t >::const_iterator rClsIt = fTransformationsReferenceClasses.begin();
+   TListIter trIt(&fTransformations, kIterBackward);
+   std::vector< Int_t >::const_iterator rClsIt = fTransformationsReferenceClasses.end();
+   rClsIt--;
    const Event* trEv = ev;
-   while (VariableTransformBase *trf = (VariableTransformBase*) trIt() ) {
-      if (trf->IsCreated()) trEv = trf->InverseTransform(ev, (*rClsIt) );
+   UInt_t nvars = 0, ntgts = 0, nspcts = 0;
+   while (VariableTransformBase *trf = (VariableTransformBase*) trIt() ) { // shouldn't be the transformation called in the inverse order for the inversetransformation?????
+      if (trf->IsCreated()) {
+	 trf->CountVariableTypes( nvars, ntgts, nspcts );	 
+	 if( !(suppressIfNoTargets && ntgts==0) )
+	    trEv = trf->InverseTransform(ev, (*rClsIt) );
+      }
       else break;
-      rClsIt++;
+      --rClsIt;
    }
    return trEv;
+
+
+//    TListIter trIt(&fTransformations);
+//    std::vector< Int_t >::const_iterator rClsIt = fTransformationsReferenceClasses.begin();
+//    const Event* trEv = ev;
+//    UInt_t nvars = 0, ntgts = 0, nspcts = 0;
+//    while (VariableTransformBase *trf = (VariableTransformBase*) trIt() ) { // shouldn't be the transformation called in the inverse order for the inversetransformation?????
+//       if (trf->IsCreated()) {
+// 	 trf->CountVariableTypes( nvars, ntgts, nspcts );	 
+// 	 if( !(suppressIfNoTargets && ntgts==0) )
+// 	    trEv = trf->InverseTransform(ev, (*rClsIt) );
+//       }
+//       else break;
+//       rClsIt++;
+//    }
+//    return trEv;
+
 }
 
 //_______________________________________________________________________
@@ -431,14 +460,19 @@ void TMVA::TransformationHandler::PlotVariables( const std::vector<Event*>& even
    // - histograms for all input variables
    // - scatter plots for all pairs of input variables
 
-
    if (fRootBaseDir==0 && theDirectory == 0) return;
+
+   Log() << kINFO << "Plot event variables for ";
+   if (theDirectory !=0) Log()<< TString(theDirectory->GetName()) << Endl;
+   else Log() << GetName() << Endl;
 
    // extension for transformation type
    TString transfType = "";
    if (theDirectory == 0) {
       transfType += "_";
       transfType += GetName();
+   }else{ // you plot for the individual classifiers. Note, here the "statistics" still need to be calculated as you are in the testing phase
+      CalcStats(events);
    }
 
    const UInt_t nvar = fDataSetInfo.GetNVariables();
@@ -525,6 +559,7 @@ void TMVA::TransformationHandler::PlotVariables( const std::vector<Event*>& even
                Double_t xmin = TMath::Max( GetMin( ( var_tgt*nvar )+ivar), mean - timesRMS*rms );
                Double_t xmax = TMath::Min( GetMax( ( var_tgt*nvar )+ivar), mean + timesRMS*rms );
       
+               //std::cout << "Class="<<cls<<" xmin="<<xmin << " xmax="<<xmax<<" mean="<<mean<<" rms="<<rms<<" timesRMS="<<timesRMS<<std::endl;
                // protection
                if (xmin >= xmax) xmax = xmin*1.1; // try first...
                if (xmin >= xmax) xmax = xmin + 1; // this if xmin == xmax == 0
@@ -689,8 +724,8 @@ void TMVA::TransformationHandler::PlotVariables( const std::vector<Event*>& even
    // computes ranking of input variables
    // separation for 2-class classification
    else if (fDataSetInfo.GetNClasses() == 2 
-	    && fDataSetInfo.GetClassInfo("Signal") != NULL 
-	    && fDataSetInfo.GetClassInfo("Background") != NULL 
+            && fDataSetInfo.GetClassInfo("Signal") != NULL 
+            && fDataSetInfo.GetClassInfo("Background") != NULL 
       ) { // TODO: ugly hack.. adapt to new framework
       fRanking.push_back( new Ranking( GetName() + "Transformation", "Separation" ) );
       for (UInt_t i=0; i<nvar; i++) {   
@@ -714,12 +749,22 @@ void TMVA::TransformationHandler::PlotVariables( const std::vector<Event*>& even
       while (VariableTransformBase *trf = (VariableTransformBase*) trIt())
          outputDir += "_" + TString(trf->GetShortName());
 
-      TObject* o = fRootBaseDir->FindObject(outputDir);
-      if (o != 0) {
-         Log() << kFATAL << "A " << o->ClassName() << " with name " << o->GetName() << " already exists in " 
-               << fRootBaseDir->GetPath() << "("<<outputDir<<")" << Endl;
+      TString uniqueOutputDir = outputDir;
+      Int_t counter = 0;
+      TObject* o = NULL;
+      while( (o = fRootBaseDir->FindObject(uniqueOutputDir)) != 0 ){
+	 uniqueOutputDir = outputDir+Form("_%d",counter);
+         Log() << kINFO << "A " << o->ClassName() << " with name " << o->GetName() << " already exists in " 
+               << fRootBaseDir->GetPath() << ", I will try with "<<uniqueOutputDir<<"." << Endl;
+	 ++counter;
       }
-      localDir = fRootBaseDir->mkdir( outputDir );
+
+//       TObject* o = fRootBaseDir->FindObject(outputDir);
+//       if (o != 0) {
+//          Log() << kFATAL << "A " << o->ClassName() << " with name " << o->GetName() << " already exists in " 
+//                << fRootBaseDir->GetPath() << "("<<outputDir<<")" << Endl;
+//       }
+      localDir = fRootBaseDir->mkdir( uniqueOutputDir );
       localDir->cd();
    
       Log() << kVERBOSE << "Create and switch to directory " << localDir->GetPath() << Endl;
@@ -816,7 +861,7 @@ void TMVA::TransformationHandler::AddXMLTo( void* parent ) const
    // XML node describing the transformation
    //   return;
    if(!parent) return;
-   void* trfs = gTools().xmlengine().NewChild(parent, 0, "Transformations");
+   void* trfs = gTools().AddChild(parent, "Transformations");
    gTools().AddAttr( trfs, "NTransformations", fTransformations.GetSize() );
    TListIter trIt(&fTransformations);
    while (VariableTransformBase *trf = (VariableTransformBase*) trIt()) trf->AttachXMLTo(trfs);
@@ -832,9 +877,9 @@ void TMVA::TransformationHandler::ReadFromStream( std::istream& )
 }
 
 //_______________________________________________________________________
-void TMVA::TransformationHandler::ReadFromXML( void* trfsnode ) 
+void TMVA::TransformationHandler::ReadFromXML( void* trfsnode )
 {
-   void* ch = gTools().xmlengine().GetChild( trfsnode );
+   void* ch = gTools().GetChild( trfsnode );
    while(ch) {
       Int_t idxCls = -1;
       TString trfname;
@@ -844,31 +889,40 @@ void TMVA::TransformationHandler::ReadFromXML( void* trfsnode )
 
       if (trfname == "Decorrelation" ) {
          newtrf = new VariableDecorrTransform(fDataSetInfo);
-      } 
+      }
       else if (trfname == "PCA" ) {
          newtrf = new VariablePCATransform(fDataSetInfo);
-      } 
+      }
       else if (trfname == "Gauss" ) {
          newtrf = new VariableGaussTransform(fDataSetInfo);
-      } 
+      }
+      else if (trfname == "Uniform" ) {
+         newtrf = new VariableGaussTransform(fDataSetInfo, "Uniform");
+      }
       else if (trfname == "Normalize" ) {
          newtrf = new VariableNormalizeTransform(fDataSetInfo);
+      }
+      else if (trfname == "Rearrange" ) {
+         newtrf = new VariableRearrangeTransform(fDataSetInfo);
       } 
       else if (trfname != "None") {
+      }
+      else {
          Log() << kFATAL << "<ReadFromXML> Variable transform '"
                << trfname << "' unknown." << Endl;
       }
       newtrf->ReadFromXML( ch );
       AddTransformation( newtrf, idxCls );
-      ch = gTools().xmlengine().GetNext(ch);      
+      ch = gTools().GetNextChild(ch);
    }
 }
 
 //_______________________________________________________________________
 void TMVA::TransformationHandler::PrintVariableRanking() const
 {
-   // prints ranking of input variables   
-   Log() << kINFO << "Ranking input variables..." << Endl;
+   // prints ranking of input variables
+   Log() << kINFO << " " << Endl;
+   Log() << kINFO << "Ranking input variables (method unspecific)..." << Endl;
    std::vector<Ranking*>::const_iterator it = fRanking.begin();
    for (; it != fRanking.end(); it++) (*it)->Print();
 }
@@ -933,7 +987,7 @@ Double_t TMVA::TransformationHandler::GetMax( Int_t ivar, Int_t cls ) const
 {
    try {
       return fVariableStats.at(cls).at(ivar).fMax;
-   } 
+   }
    catch(...) {
       try {
          return fVariableStats.at(fNumC-1).at(ivar).fMax;

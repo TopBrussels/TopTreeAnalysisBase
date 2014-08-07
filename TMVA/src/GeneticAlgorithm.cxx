@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: GeneticAlgorithm.cxx,v 1.1.2.1 2012/01/04 18:53:58 caebergs Exp $    
+// @(#)root/tmva $Id: GeneticAlgorithm.cxx 38475 2011-03-17 10:46:00Z evt $    
 // Author: Peter Speckmayer
 
 /**********************************************************************************
@@ -61,6 +61,7 @@ TMVA::GeneticAlgorithm::GeneticAlgorithm( IFitterTarget& target, Int_t populatio
      fPopulationSize(populationSize),
      fRanges( ranges ),
      fPopulation(ranges, populationSize, seed),
+     fBestFitness(DBL_MAX),
      fLogger( new MsgLogger("GeneticAlgorithm") )
 {
    // Constructor
@@ -211,7 +212,7 @@ Double_t TMVA::GeneticAlgorithm::SpreadControl( Int_t ofSteps, Int_t successStep
    Int_t n = 0;
    Int_t sum = 0;
    std::deque<Int_t>::iterator vec = fSuccessList.begin();
-   for (; vec<fSuccessList.end() ; vec++) {
+   for (; vec != fSuccessList.end() ; vec++) {
       sum += *vec;
       n++;
    }

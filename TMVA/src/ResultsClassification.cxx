@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: ResultsClassification.cxx,v 1.1.2.1 2012/01/04 18:54:06 caebergs Exp $
+// @(#)root/tmva $Id: ResultsClassification.cxx 35727 2010-09-24 21:41:20Z stelzer $
 // Author: Andreas Hoecker, Peter Speckmayer, Joerg Stelzer, Helge Voss
 
 /**********************************************************************************
@@ -34,13 +34,14 @@
 //_______________________________________________________________________
 TMVA::ResultsClassification::ResultsClassification( const DataSetInfo* dsi ) 
    : Results( dsi ),
+     fRet(1),
      fLogger( new MsgLogger("ResultsClassification", kINFO) )
 {
    // constructor
 }
 
 //_______________________________________________________________________
-TMVA::ResultsClassification::~ResultsClassification() 
+TMVA::ResultsClassification::~ResultsClassification()
 {
    // destructor
    delete fLogger;
@@ -48,10 +49,10 @@ TMVA::ResultsClassification::~ResultsClassification()
 
 //_______________________________________________________________________
 void TMVA::ResultsClassification::SetValue( Float_t value, Int_t ievt ) 
-{ 
+{
    // set MVA response
    if (ievt >= (Int_t)fMvaValues.size()) fMvaValues.resize( ievt+1 );
-   fMvaValues[ievt] = value; 
+   fMvaValues[ievt] = value;
 }
 
 

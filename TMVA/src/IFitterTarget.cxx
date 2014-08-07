@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: IFitterTarget.cxx,v 1.1.2.1 2012/01/04 18:53:59 caebergs Exp $ 
+// @(#)root/tmva $Id: IFitterTarget.cxx 23334 2008-04-19 18:38:57Z brun $ 
 // Author: Andreas Hoecker, Peter Speckmayer
 
 /**********************************************************************************

@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: BinarySearchTree.cxx,v 1.1.2.1 2012/01/04 18:53:55 caebergs Exp $    
+// @(#)root/tmva $Id: BinarySearchTree.cxx 44112 2012-05-04 10:00:41Z evt $    
 // Author: Andreas Hoecker, Joerg Stelzer, Helge Voss, Kai Voss 
 
 /**********************************************************************************
@@ -27,7 +27,7 @@
  * (http://tmva.sourceforge.net/LICENSE)                                          *
  *                                                                                *
  **********************************************************************************/
-      
+
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // BinarySearchTree                                                     //
@@ -85,7 +85,7 @@ TMVA::BinarySearchTree::BinarySearchTree( void ) :
    fCanNormalize( kFALSE )
 {
    // default constructor
-   fLogger->SetSource( "BinarySearchTree" );
+   fNEventsW[0]=fNEventsW[1]=0.;
 }
 
 //_______________________________________________________________________
@@ -98,7 +98,7 @@ TMVA::BinarySearchTree::BinarySearchTree( const BinarySearchTree &b)
      fCanNormalize( kFALSE )
 {
    // copy constructor that creates a true copy, i.e. a completely independent tree 
-   fLogger->SetSource( "BinarySearchTree" );
+   fNEventsW[0]=fNEventsW[1]=0.;
    Log() << kFATAL << " Copy constructor not implemented yet " << Endl;
 }
 
@@ -111,6 +111,16 @@ TMVA::BinarySearchTree::~BinarySearchTree( void )
        pIt != fNormalizeTreeTable.end(); pIt++) {
       delete pIt->second;
    }
+}
+
+//_______________________________________________________________________
+TMVA::BinarySearchTree* TMVA::BinarySearchTree::CreateFromXML(void* node, UInt_t tmva_Version_Code ) {
+   // re-create a new tree (decision tree or search tree) from XML
+   std::string type("");
+   gTools().ReadAttr(node,"type", type);
+   BinarySearchTree* bt = new BinarySearchTree();
+   bt->ReadXML( node, tmva_Version_Code );
+   return bt;
 }
 
 //_______________________________________________________________________
@@ -273,7 +283,7 @@ Double_t TMVA::BinarySearchTree::Fill( const std::vector<Event*>& events, Int_t 
          fSumOfWeights += events[ievt]->GetWeight();
       }
    } // end of event loop
-   CalcStatistics();
+   CalcStatistics(0);
 
    return fSumOfWeights;
 }
@@ -449,7 +459,9 @@ void TMVA::BinarySearchTree::CalcStatistics( Node* n )
    const std::vector<Float_t> & evtVec = currentNode->GetEventV();
    Double_t                     weight = currentNode->GetWeight();
 //    Int_t                        type   = currentNode->IsSignal(); 
-   Int_t                        type   = currentNode->IsSignal() ? 0 : 1; 
+//   Int_t                        type   = currentNode->IsSignal() ? 0 : 1; 
+   Int_t                        type   = Int_t(currentNode->GetClass())== Types::kSignal ? 0 : 1; 
+
    fNEventsW[type] += weight;
    fSumOfWeights   += weight;
 
@@ -460,8 +472,8 @@ void TMVA::BinarySearchTree::CalcStatistics( Node* n )
       if (val < fMin[type][j]) fMin[type][j] = val; 
       if (val > fMax[type][j]) fMax[type][j] = val; 
    }
-
-   if ( (currentNode->GetLeft()  != NULL) ) CalcStatistics( currentNode->GetLeft()  ); 
+   
+   if ( (currentNode->GetLeft()  != NULL) ) CalcStatistics( currentNode->GetLeft() ); 
    if ( (currentNode->GetRight() != NULL) ) CalcStatistics( currentNode->GetRight() ); 
 
    if (n == NULL) { // i.e. the root node
