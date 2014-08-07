@@ -15,10 +15,15 @@
 #include "TROOT.h"
 #include "TPluginManager.h"
 
-//Changing the include paths for compatibility with ROOT v5.34                                                    
-#include "TopTreeAnalysisBase/TMVA/inc/TMVA/Factory.h"
-#include "TopTreeAnalysisBase/TMVA/inc/TMVA/Tools.h"
-#include "TopTreeAnalysisBase/TMVA/inc/TMVA/Config.h"
+
+#include "TopTreeAnalysisBase/TMVA/src/Factory.h"
+#include "TopTreeAnalysisBase/TMVA/src/Tools.h"
+#include "TopTreeAnalysisBase/TMVA/src/Config.h"
+
+//Change to these include paths for compatibility with ROOT v5.34                                                    
+//#include "TopTreeAnalysisBase/TMVA/inc/TMVA/Factory.h"
+//#include "TopTreeAnalysisBase/TMVA/inc/TMVA/Tools.h"
+//#include "TopTreeAnalysisBase/TMVA/inc/TMVA/Config.h"
 
 
 

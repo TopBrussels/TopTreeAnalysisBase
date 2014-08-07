@@ -60,14 +60,14 @@ ElectronPlotter::Fill (vector < TRootElectron > electrons)
     h_HPTElectron_Pt_->Fill (electrons[0].Pt ());
     h_HPTElectron_Eta_->Fill (electrons[0].Eta ());
     h_HPTElectron_d0_->Fill (electrons[0].d0 ());
-    h_HPTElectron_RelIso_->Fill((electrons[0].caloIso(3)+electrons[0].trackIso(3)) / electrons[0].Et());
+    h_HPTElectron_RelIso_->Fill((electrons[0].caloIso(3)+electrons[0].trackerIso(3)) / electrons[0].Et());
 
   }
   h_AllElectrons_mult_->Fill (electrons.size());
   for (unsigned int i = 0; i < electrons.size (); i++) {
     h_AllElectrons_Pt_->Fill (electrons[i].Pt ());
     h_AllElectrons_Eta_->Fill (electrons[i].Eta ());
-    h_AllElectrons_RelIso_->Fill((electrons[i].caloIso(3)+electrons[i].trackIso(3)) / electrons[i].Et());
+    h_AllElectrons_RelIso_->Fill((electrons[i].caloIso(3)+electrons[i].trackerIso(3)) / electrons[i].Et());
 
   }
 }

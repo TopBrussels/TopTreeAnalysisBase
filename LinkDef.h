@@ -9,11 +9,9 @@
 #include "TopTreeProducer/interface/TRootPFJet.h"
 #include "TopTreeProducer/interface/TRootJPTJet.h"
 #include "TopTreeProducer/interface/TRootGenJet.h"
-#include "TopTreeProducer/interface/TRootLepton.h"
 #include "TopTreeProducer/interface/TRootMuon.h"
 #include "TopTreeProducer/interface/TRootElectron.h"
 #include "TopTreeProducer/interface/TRootMET.h"
-#include "TopTreeProducer/interface/TRootPhoton.h"
 #include "TopTreeProducer/interface/TRootCaloMET.h"
 #include "TopTreeProducer/interface/TRootPFMET.h"
 #include "TopTreeProducer/interface/TRootTrackMET.h"
@@ -73,8 +71,6 @@
 #pragma link C++ class TRootPFJet;
 #pragma link C++ class TRootJPTJet;
 #pragma link C++ class TRootGenJet;
-#pragma link C++ class TRootLepton;
-#pragma link C++ class TRootPhoton;
 #pragma link C++ class TRootMuon;
 #pragma link C++ class TRootElectron;
 #pragma link C++ class TRootMET;
