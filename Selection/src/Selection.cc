@@ -64,7 +64,7 @@ Selection::Selection(const std::vector<TRootJet*>& jets_, const std::vector<TRoo
   for(unsigned int i=0;i<jets_.size();i++) jets.push_back(jets_[i]);
   for(unsigned int i=0;i<muons_.size();i++) muons.push_back(muons_[i]);
   for(unsigned int i=0;i<electrons_.size();i++) electrons.push_back(electrons_[i]);
-  for(unsigned int i=0;i<mets_.size();i++) mets.push_back(mets_[i]);	
+  for(unsigned int i=0;i<mets_.size();i++) mets.push_back(mets_[i]);
 	cutHFHadronEnergyFraction_ = false;
 }
 
@@ -82,7 +82,7 @@ Selection::Selection(const std::vector<TRootJet*>& jets_, const std::vector<TRoo
   for(unsigned int i=0;i<jets_.size();i++) jets.push_back(jets_[i]);
   for(unsigned int i=0;i<muons_.size();i++) muons.push_back(muons_[i]);
   for(unsigned int i=0;i<electrons_.size();i++) electrons.push_back(electrons_[i]);
-  for(unsigned int i=0;i<mets_.size();i++) mets.push_back(mets_[i]);	
+  for(unsigned int i=0;i<mets_.size();i++) mets.push_back(mets_[i]);
 	cutHFHadronEnergyFraction_ = false;
 }
 
@@ -96,18 +96,18 @@ Selection::Selection(const Selection& s) {
   mets = s.mets;
   // copy the cutvalues
   setJetCuts(s.JetPtThreshold_,s.JetEtaThreshold_,s.JetEMFThreshold_,s.n90HitsThreshold_,s.fHPDThreshold_,s.DRJetElectron_,s.DRJetMuon_);
-  
+
   setMuonCuts(s.MuonPtThreshold_,s.MuonEtaThreshold_,s.MuonRelIso_,s.Muond0Cut_,s.MuonDRJetsCut_,s.MuonNMatchedStations_,s.MuonDz_,s.MuonNTrackerLayersWithMeasurement_,s.MuonNValidPixelHits_);
   setDiMuonCuts(s.MuonPtThreshold_,s.MuonEtaThreshold_,s.MuonRelIso_,s.Muond0Cut_);
-  
+
   setLooseMuonCuts(s.JetPtThreshold_,s.JetEtaThreshold_,s.MuonRelIso_);
-  
+
   setElectronCuts(s.ElectronEtThreshold_,s.ElectronEtaThreshold_,s.ElectronRelIso_,s.Electrond0Cut_,s.ElectronMVAId_,s.ElectronDRJetsCut_,s.ElectronMaxMissingHitsCut_);
   setDiElectronCuts(s.ElectronEtThreshold_,s.ElectronEtaThreshold_,s.ElectronRelIso_,s.Electrond0Cut_,s.ElectronMVAId_,9999.,s.ElectronDRJetsCut_,s.ElectronMaxMissingHitsCut_);
 
   setLooseElectronCuts(s.ElectronLooseEtThreshold_,s.ElectronLooseEtaThreshold_,s.ElectronLooseRelIso_,s.ElectronLooseMVAId_);
   setLooseDiElectronCuts(s.ElectronLooseEtThreshold_,s.ElectronLooseEtaThreshold_,s.ElectronLooseRelIso_,s.ElectronLooseMVAId_);
-  
+
 	cutHFHadronEnergyFraction_ = false;
 }
 
@@ -227,7 +227,7 @@ void Selection::setDiMuonCuts(float Pt, float Eta, float RelIso, float d0) {
   MuonEtaThreshold_ = Eta;
   MuonRelIso_ = RelIso;
   Muond0Cut_ = d0;
- 
+
 }
 
 void Selection::setDiMuonCuts() {
@@ -283,7 +283,7 @@ std::vector<TRootJet*> Selection::GetSelectedJets(float PtThr, float EtaThr, boo
       else if (init_jet->jetType() == 2)
 	{ // PFJets
 	  const TRootPFJet* PFJet = static_cast<const TRootPFJet*>(init_jet);
-      
+
 	        //cout << "jet pT:  " << PFJet->Pt() << "  cutValue: " << PtThr << endl;
 	        //cout << "jet Eta:  " << fabs(PFJet->Eta()) << "  cutValue: " << EtaThr << endl;
 	        //cout << "jet nConstituents:  " << PFJet->nConstituents() << endl;
@@ -294,7 +294,7 @@ std::vector<TRootJet*> Selection::GetSelectedJets(float PtThr, float EtaThr, boo
 	        //cout << "jet chargedHadronEnergyFraction:  " << PFJet->chargedHadronEnergyFraction() << endl;
 	        //cout << "jet chargedMultiplicity:  " << PFJet->chargedMultiplicity() << endl;
 					//if(cutHFHadronEnergyFraction_) cout << "sum of jet neutralHadronEnergyFraction and HFHadronEnergyFraction: " << (PFJet->neutralHadronEnergyFraction() + PFJet->HFHadronEnergyFraction()) << endl;
-      
+
 	  if( fabs(PFJet->Eta())<EtaThr && PFJet->Pt()>PtThr )
 	    {
 	      if ( applyJetID )
@@ -303,7 +303,7 @@ std::vector<TRootJet*> Selection::GetSelectedJets(float PtThr, float EtaThr, boo
 		    if ((!cutHFHadronEnergyFraction_ && (PFJet->neutralHadronEnergyFraction() < 0.99))  || (cutHFHadronEnergyFraction_ && ((PFJet->neutralHadronEnergyFraction() + PFJet->HFHadronEnergyFraction()) < 0.99 )))
 		      if (PFJet->neutralEmEnergyFraction() < 0.99 )
 			if (fabs(PFJet->Eta()) >= 2.4 || PFJet->chargedEmEnergyFraction() < 0.99 )
-			  if (fabs(PFJet->Eta()) >= 2.4 || PFJet->chargedHadronEnergyFraction() > 0) 
+			  if (fabs(PFJet->Eta()) >= 2.4 || PFJet->chargedHadronEnergyFraction() > 0)
 			    if (fabs(PFJet->Eta()) >= 2.4 || PFJet->chargedMultiplicity() > 0)
 			      {
 				//		                  cout << "  -->  OK!" << endl;
@@ -349,7 +349,7 @@ std::vector<TRootJet*> Selection::GetSelectedJets(float PtThr, float EtaThr, vec
       float dr = l->DeltaR(*init_jets[i]);
       if ( dr < minDrElJet ) minDrElJet = dr;
     }
-  
+
     if (minDrElJet >= dRLeptonJet)
       selectedJets.push_back(init_jets[i]);
   }
@@ -408,12 +408,59 @@ std::vector<TRootJet*> Selection::GetSelectedBJets(const std::vector<TRootJet*>&
   return bjets;
 }
 
+std::vector<TRootPFJet*> Selection::GetSelectedPFJets(float PtThr, float EtaThr, bool applyJetID) const{
+  std::vector<TRootPFJet*> selectedJets;
+  for(unsigned int i=0;i<jets.size();i++)
+    {
+      TRootPFJet* init_jet = (TRootPFJet*) jets[i];
+      if (init_jet->jetType() == 2)
+	{ // PFJets
+	  const TRootPFJet* PFJet = static_cast<const TRootPFJet*>(init_jet);
+
+	        //cout << "jet pT:  " << PFJet->Pt() << "  cutValue: " << PtThr << endl;
+	        //cout << "jet Eta:  " << fabs(PFJet->Eta()) << "  cutValue: " << EtaThr << endl;
+	        //cout << "jet nConstituents:  " << PFJet->nConstituents() << endl;
+	        //cout << "jet chargedEmEnergyFraction:  " << PFJet->chargedEmEnergyFraction() << endl;
+	        //cout << "jet neutralHadronEnergyFraction:  " << PFJet->neutralHadronEnergyFraction() << endl;
+          //if(cutHFHadronEnergyFraction_) cout << "jet HFHadronEnergyFraction:  " << PFJet->HFHadronEnergyFraction() << endl;
+	        //cout << "jet neutralEmEnergyFraction:  " << PFJet->neutralEmEnergyFraction() << endl;
+	        //cout << "jet chargedHadronEnergyFraction:  " << PFJet->chargedHadronEnergyFraction() << endl;
+	        //cout << "jet chargedMultiplicity:  " << PFJet->chargedMultiplicity() << endl;
+					//if(cutHFHadronEnergyFraction_) cout << "sum of jet neutralHadronEnergyFraction and HFHadronEnergyFraction: " << (PFJet->neutralHadronEnergyFraction() + PFJet->HFHadronEnergyFraction()) << endl;
+
+	  if( fabs(PFJet->Eta())<EtaThr && PFJet->Pt()>PtThr )
+	    {
+	      if ( applyJetID )
+		{
+		  if (PFJet->nConstituents() > 1 )
+		    if ((!cutHFHadronEnergyFraction_ && (PFJet->neutralHadronEnergyFraction() < 0.99))  || (cutHFHadronEnergyFraction_ && ((PFJet->neutralHadronEnergyFraction() + PFJet->HFHadronEnergyFraction()) < 0.99 )))
+		      if (PFJet->neutralEmEnergyFraction() < 0.99 )
+			if (fabs(PFJet->Eta()) >= 2.4 || PFJet->chargedEmEnergyFraction() < 0.99 )
+			  if (fabs(PFJet->Eta()) >= 2.4 || PFJet->chargedHadronEnergyFraction() > 0)
+			    if (fabs(PFJet->Eta()) >= 2.4 || PFJet->chargedMultiplicity() > 0)
+			      {
+				//		                  cout << "  -->  OK!" << endl;
+				selectedJets.push_back(init_jet);
+			      }
+		}
+	      else selectedJets.push_back(init_jet);
+	    }
+	}
+    }
+  std::sort(selectedJets.begin(),selectedJets.end(),HighestPt());
+  return selectedJets;
+}
+
+std::vector<TRootPFJet*> Selection::GetSelectedPFJets(bool applyJetID) const{
+  return GetSelectedPFJets(JetPtThreshold_,JetEtaThreshold_,applyJetID);
+}
+
 // ______________MUONS________________________________________________//
 
 std::vector<TRootMuon*> Selection::GetSelectedMuons(float PtThr, float EtaThr,float MuonRelIso) const{
   std::vector<TRootMuon*> selectedMuons;
   for(unsigned int i=0;i<muons.size();i++){
-    
+
     //float reliso = (muons[i]->chargedHadronIso()+muons[i]->neutralHadronIso()+muons[i]->photonIso())/muons[i]->Pt();
     float reliso = (muons[i]->chargedHadronIso() + max( 0.0, muons[i]->neutralHadronIso() + muons[i]->photonIso() - 0.5*muons[i]->puChargedHadronIso() ) ) / muons[i]->Pt(); // dBeta corrected
 
@@ -427,11 +474,11 @@ std::vector<TRootMuon*> Selection::GetSelectedMuons(float PtThr, float EtaThr,fl
     //    cout << "mu nMatches:  " << muons[i]->nofMatches() << "  cutValue: " << MuonNMatches_ << endl;
     //    cout << "mu nPixLayers:  " << muons[i]->nofValidPixelHits() << "  cutValue: " << MuonNTrackerLayersWithMeasurement_ << endl;
     if(muons[i]->idGlobalMuonPromptTight() //&& muons[i]->isPFMuon()
-       && muons[i]->Pt()>PtThr 
-       && fabs(muons[i]->Eta())<EtaThr 
-       && reliso < MuonRelIso 
+       && muons[i]->Pt()>PtThr
+       && fabs(muons[i]->Eta())<EtaThr
+       && reliso < MuonRelIso
        && fabs(muons[i]->d0()) <Muond0Cut_
-       && muons[i]->nofMatchedStations()>MuonNMatchedStations_ 
+       && muons[i]->nofMatchedStations()>MuonNMatchedStations_
        && muons[i]->nofTrackerLayersWithMeasurement() > MuonNTrackerLayersWithMeasurement_
        && muons[i]->nofValidPixelHits() > MuonNValidPixelHits_) {
       selectedMuons.push_back(muons[i]);
@@ -495,8 +542,8 @@ std::vector<TRootMuon*> Selection::GetSelectedDiMuons(float PtThr, float EtaThr,
   for(unsigned int i=0;i<muons.size();i++){
     float reliso = (muons[i]->chargedHadronIso() + max( 0.0, muons[i]->neutralHadronIso() + muons[i]->photonIso() - 0.5*muons[i]->puChargedHadronIso() ) ) / muons[i]->Pt(); // dBeta corrected
     if((muons[i]->isGlobalMuon() || muons[i]->isTrackerMuon())
-       && muons[i]->Pt()>PtThr 
-       && fabs(muons[i]->Eta())<EtaThr 
+       && muons[i]->Pt()>PtThr
+       && fabs(muons[i]->Eta())<EtaThr
        && reliso < MuonRelIso )
     {
       selectedMuons.push_back(muons[i]);
@@ -579,7 +626,7 @@ std::vector<TRootMuon*> Selection::GetSelectedMuonsIsoRange(float PtThr, float E
   std::sort(selectedMuons.begin(),selectedMuons.end(),HighestPt());
   return selectedMuons;
 }
-  
+
 // ______________ELECTRONS____________________________________________//
 /*
 bool Selection::passConversionRejection(TRootElectron* electron)
@@ -641,7 +688,7 @@ bool Selection::foundZCandidate(std::vector<TRootElectron*>& electrons1, std::ve
 	  TRootElectron* el1 = (TRootElectron*) electrons1[j];
 	  TRootElectron* el2 = (TRootElectron*) electrons2[i];
 	  if( fabs(el2->Pt() - el1->Pt()) > 0.001 && fabs(el2->Eta() - el1->Eta()) > 0.001 )
-	    {	
+	    {
 	      double zMass = (*el1 + *el2).M();
 	      if( zMass >= (91.-windowsize) && zMass <= (91.+windowsize) )
 		{
@@ -664,7 +711,7 @@ bool Selection::foundZCandidate(std::vector<TRootMuon*>& muons1, std::vector<TRo
 	  TRootMuon* mu1 = (TRootMuon*) muons1[j];
 	  TRootMuon* mu2 = (TRootMuon*) muons2[i];
 	  if( fabs(mu2->Pt() - mu1->Pt()) > 0.001 && fabs(mu2->Eta() - mu1->Eta()) > 0.001 )
-	    {	
+	    {
 	      double zMass = (*mu1 + *mu2).M();
 	      if( zMass >= (91.-windowsize) && zMass <= (91.+windowsize) )
 		{
@@ -692,7 +739,7 @@ std::vector<TRootElectron*> Selection::GetSelectedElectrons(float PtThr, float E
     //  float RelIso = (el->chargedHadronIso()+max(0.0,el->neutralHadronIso()+el->photonIso()-0.5*el->puChargedHadronIso()))/el->Pt();
 
     double EffectiveArea = 0.;
-    
+
     // HCP 2012 updated for electron conesize = 0.3, taken from http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/EGamma/EGammaAnalysisTools/interface/ElectronEffectiveArea.h?revision=1.4&view=markup
     if (fabs(el->superClusterEta()) >= 0.0   && fabs(el->superClusterEta()) < 1.0   ) EffectiveArea = 0.130;
     if (fabs(el->superClusterEta()) >= 1.0   && fabs(el->superClusterEta()) < 1.479 ) EffectiveArea = 0.137;
@@ -717,7 +764,7 @@ std::vector<TRootElectron*> Selection::GetSelectedElectrons(float PtThr, float E
     }
     // Compute the relative isolation
     float RelIso = (el->chargedHadronIso() + max(0.0 , el->neutralHadronIso() + el->photonIso() - isocorr) )/ el->Pt();
-    
+
     if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr)
       if(fabs(el->superClusterEta()) < 1.4442 || fabs(el->superClusterEta()) > 1.5660)
         if(fabs(el->d0()) < Electrond0Cut_)
@@ -739,9 +786,9 @@ std::vector<TRootElectron*> Selection::GetSelectedElectrons(float PtThr, float E
   for(unsigned int i=0;i<electrons.size();i++)
   {
     TRootElectron* el = (TRootElectron*) electrons[i];
-    
+
     double EffectiveArea = 0.;
-    
+
     // HCP 2012 updated for electron conesize = 0.3, taken from http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/EGamma/EGammaAnalysisTools/interface/ElectronEffectiveArea.h?revision=1.4&view=markup
     if (fabs(el->superClusterEta()) >= 0.0   && fabs(el->superClusterEta()) < 1.0   ) EffectiveArea = 0.130;
     if (fabs(el->superClusterEta()) >= 1.0   && fabs(el->superClusterEta()) < 1.479 ) EffectiveArea = 0.137;
@@ -750,10 +797,10 @@ std::vector<TRootElectron*> Selection::GetSelectedElectrons(float PtThr, float E
     if (fabs(el->superClusterEta()) >= 2.2   && fabs(el->superClusterEta()) < 2.3   ) EffectiveArea = 0.107;
     if (fabs(el->superClusterEta()) >= 2.3   && fabs(el->superClusterEta()) < 2.4   ) EffectiveArea = 0.110;
     if (fabs(el->superClusterEta()) >= 2.4) EffectiveArea = 0.138;
-    
-    
+
+
     float RelIso = (el->chargedHadronIso() + max( el->neutralHadronIso() + el->photonIso()  - rho*EffectiveArea, 0.) )/ el->Pt();
-    
+
     if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr)
       if(fabs(el->superClusterEta()) < 1.4442 || fabs(el->superClusterEta()) > 1.5660)
         if(fabs(el->d0()) < Electrond0Cut_)
@@ -835,9 +882,9 @@ std::vector<TRootElectron*> Selection::GetSelectedDiElectrons(float PtThr, float
     //  float RelIso = (el->chargedHadronIso()+el->neutralHadronIso()+el->photonIso())/el->Pt();
     // PF relative isolation with dBeta correction:
     //  float RelIso = (el->chargedHadronIso()+max(0.0,el->neutralHadronIso()+el->photonIso()-0.5*el->puChargedHadronIso()))/el->Pt();
-    
+
     double EffectiveArea = 0.;
-    
+
     // HCP 2012 updated for electron conesize = 0.3, taken from http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/EGamma/EGammaAnalysisTools/interface/ElectronEffectiveArea.h?revision=1.4&view=markup
     if (fabs(el->superClusterEta()) >= 0.0   && fabs(el->superClusterEta()) < 1.0   ) EffectiveArea = 0.130;
     if (fabs(el->superClusterEta()) >= 1.0   && fabs(el->superClusterEta()) < 1.479 ) EffectiveArea = 0.137;
@@ -846,7 +893,7 @@ std::vector<TRootElectron*> Selection::GetSelectedDiElectrons(float PtThr, float
     if (fabs(el->superClusterEta()) >= 2.2   && fabs(el->superClusterEta()) < 2.3   ) EffectiveArea = 0.107;
     if (fabs(el->superClusterEta()) >= 2.3   && fabs(el->superClusterEta()) < 2.4   ) EffectiveArea = 0.110;
     if (fabs(el->superClusterEta()) >= 2.4) EffectiveArea = 0.138;
-    
+
     double isocorr = 0;
     if(elecIsoCorrType_ == 1) // rho correction (default corr)
       isocorr = rho_*EffectiveArea;
@@ -894,9 +941,9 @@ std::vector<TRootElectron*> Selection::GetSelectedLooseElectrons(float PtThr, fl
     //  float RelIso = (el->chargedHadronIso()+el->neutralHadronIso()+el->photonIso())/el->Pt();
     // PF relative isolation with dBeta correction:
     //  float RelIso = (el->chargedHadronIso()+max(0.0,el->neutralHadronIso()+el->photonIso()-0.5*el->puChargedHadronIso()))/el->Pt();
-    
+
     double EffectiveArea = 0.;
-    
+
     // HCP 2012 updated for electron conesize = 0.3, taken from http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/EGamma/EGammaAnalysisTools/interface/ElectronEffectiveArea.h?revision=1.4&view=markup
     if (fabs(el->superClusterEta()) >= 0.0   && fabs(el->superClusterEta()) < 1.0   ) EffectiveArea = 0.130;
     if (fabs(el->superClusterEta()) >= 1.0   && fabs(el->superClusterEta()) < 1.479 ) EffectiveArea = 0.137;
@@ -905,7 +952,7 @@ std::vector<TRootElectron*> Selection::GetSelectedLooseElectrons(float PtThr, fl
     if (fabs(el->superClusterEta()) >= 2.2   && fabs(el->superClusterEta()) < 2.3   ) EffectiveArea = 0.107;
     if (fabs(el->superClusterEta()) >= 2.3   && fabs(el->superClusterEta()) < 2.4   ) EffectiveArea = 0.110;
     if (fabs(el->superClusterEta()) >= 2.4) EffectiveArea = 0.138;
-    
+
     double isocorr = 0;
     if(elecIsoCorrType_ == 1) // rho correction (default corr)
       isocorr = rho_*EffectiveArea;
@@ -943,9 +990,9 @@ std::vector<TRootElectron*> Selection::GetSelectedLooseDiElectrons(float PtThr, 
     //  float RelIso = (el->chargedHadronIso()+el->neutralHadronIso()+el->photonIso())/el->Pt();
     // PF relative isolation with dBeta correction:
     //  float RelIso = (el->chargedHadronIso()+max(0.0,el->neutralHadronIso()+el->photonIso()-0.5*el->puChargedHadronIso()))/el->Pt();
-    
+
     double EffectiveArea = 0.;
-    
+
     // HCP 2012 updated for electron conesize = 0.3, taken from http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/EGamma/EGammaAnalysisTools/interface/ElectronEffectiveArea.h?revision=1.4&view=markup
     if (fabs(el->superClusterEta()) >= 0.0   && fabs(el->superClusterEta()) < 1.0   ) EffectiveArea = 0.130;
     if (fabs(el->superClusterEta()) >= 1.0   && fabs(el->superClusterEta()) < 1.479 ) EffectiveArea = 0.137;
@@ -954,7 +1001,7 @@ std::vector<TRootElectron*> Selection::GetSelectedLooseDiElectrons(float PtThr, 
     if (fabs(el->superClusterEta()) >= 2.2   && fabs(el->superClusterEta()) < 2.3   ) EffectiveArea = 0.107;
     if (fabs(el->superClusterEta()) >= 2.3   && fabs(el->superClusterEta()) < 2.4   ) EffectiveArea = 0.110;
     if (fabs(el->superClusterEta()) >= 2.4) EffectiveArea = 0.138;
-    
+
     double isocorr = 0;
     if(elecIsoCorrType_ == 1) // rho correction (default corr)
       isocorr = rho_*EffectiveArea;
@@ -998,7 +1045,7 @@ std::vector<TRootElectron*> Selection::GetSelectedElectronsInvIso(float Electron
   for(unsigned int i=0; i<init_electrons.size(); i++)
   {
     if(init_electrons[i]->mvaTrigId() > 0.5) continue;
-    
+
     float mindRElJet = 999.;
     for(unsigned int j=0; j<selJets.size(); j++)
     {
@@ -1011,9 +1058,9 @@ std::vector<TRootElectron*> Selection::GetSelectedElectronsInvIso(float Electron
     //  float RelIso = (el->chargedHadronIso()+el->neutralHadronIso()+el->photonIso())/el->Pt();
     // PF relative isolation with dBeta correction:
     //  float RelIso = (el->chargedHadronIso()+max(0.0,el->neutralHadronIso()+el->photonIso()-0.5*el->puChargedHadronIso()))/el->Pt();
-    
+
     double EffectiveArea = 0.;
-    
+
     // HCP 2012 updated for electron conesize = 0.3, taken from http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/EGamma/EGammaAnalysisTools/interface/ElectronEffectiveArea.h?revision=1.4&view=markup
     if (fabs(init_electrons[i]->superClusterEta()) >= 0.0   && fabs(init_electrons[i]->superClusterEta()) < 1.0   ) EffectiveArea = 0.130;
     if (fabs(init_electrons[i]->superClusterEta()) >= 1.0   && fabs(init_electrons[i]->superClusterEta()) < 1.479 ) EffectiveArea = 0.137;
@@ -1022,7 +1069,7 @@ std::vector<TRootElectron*> Selection::GetSelectedElectronsInvIso(float Electron
     if (fabs(init_electrons[i]->superClusterEta()) >= 2.2   && fabs(init_electrons[i]->superClusterEta()) < 2.3   ) EffectiveArea = 0.107;
     if (fabs(init_electrons[i]->superClusterEta()) >= 2.3   && fabs(init_electrons[i]->superClusterEta()) < 2.4   ) EffectiveArea = 0.110;
     if (fabs(init_electrons[i]->superClusterEta()) >= 2.4) EffectiveArea = 0.138;
-    
+
     double isocorr = 0;
     if(elecIsoCorrType_ == 1) // rho correction (default corr)
       isocorr = rho_*EffectiveArea;
@@ -1038,9 +1085,9 @@ std::vector<TRootElectron*> Selection::GetSelectedElectronsInvIso(float Electron
     }
     // Compute the relative isolation
     float RelIso = (init_electrons[i]->chargedHadronIso() + max( init_electrons[i]->neutralHadronIso() + init_electrons[i]->photonIso()  - isocorr, 0.) )/ init_electrons[i]->Pt();
-    
+
 //    cout << "reliso = " << RelIso << "  minDR = " << mindRElJet << endl;
-    
+
     if( mindRElJet > ElectronDRJetsCut_ && RelIso > ElectronRelIso )
       selectedElectrons.push_back(init_electrons[i]);
   }

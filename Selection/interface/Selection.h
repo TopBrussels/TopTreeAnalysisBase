@@ -1,5 +1,5 @@
 /*
- 
+
   An example of how to use this class for e+jets and mu+jets selection (SelV4)
 
   http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/NewPhysicsBrussels/TopTreeAnalysis/macros/SyncRefSel.cc?view=log&pathrev=CMSSW_38X#rev1.1.2.1
@@ -47,7 +47,7 @@ struct HighestPt{
   bool operator()( TLorentzVector* j1, TLorentzVector* j2 ) const{
     return j1->Pt() > j2->Pt() ;
   }
-};				
+};
 
 class Selection{
 
@@ -59,9 +59,9 @@ class Selection{
   Selection(const std::vector<TRootJet*>&, const std::vector<TRootMuon*>&, const std::vector<TRootElectron*>&,const std::vector<TRootMET*>&, const float rho);
   Selection(const Selection &);
   ~Selection();
-     
+
 //  void SetConfiguration(float PtThrJets, float EtaThrJets, float EMFThrJets, float PtThrMuons, float EtaThrMuons, float MuonRelIso, float MuonVetoEM, float MuonVetoHad);
-      
+
   bool isPVSelected(const std::vector<TRootVertex*>& vertex, int NdofCut, float Zcut, float RhoCut);
 
   //bool passVBTFID(TRootElectron* electron, std::map<std::string,float> cuts);
@@ -76,8 +76,8 @@ class Selection{
   void setJetCuts();
   void setJetCuts(float Pt, float Eta, float EMF, float n90Hits, float fHPD, float dRJetElectron, float dRJetMuon);
 	void cutHFHadronEnergyFraction(){cutHFHadronEnergyFraction_ = true;}; //jets in 53X_v5 toptrees have a HFHadronEnergyFraction function, absent in older toptrees
-	
-  
+
+
 // ELECTRON SELECTION CUTS ========================================
   void setElectronIsoCorrType(int corrType = 1);
 // -- single-lepton channel
@@ -110,6 +110,8 @@ class Selection{
   std::vector<TRootJet*> GetSelectedJets(float PtThr, float EtaThr, vector<TRootMuon*>& muons, float dRLeptonJet, bool applyJetID = false) const;
   std::vector<TRootJet*> GetSelectedJets(float PtThr, float EtaThr, vector<TRootElectron*>& electrons, float dRLeptonJet, bool applyJetID = false) const;
   std::vector<TRootJet*> GetSelectedBJets(const std::vector<TRootJet*>& seljets, Int_t& btagAlgo, Float_t& btagCut) const;
+  std::vector<TRootPFJet*> GetSelectedPFJets(bool applyJetID = false) const;
+  std::vector<TRootPFJet*> GetSelectedPFJets(float PtThr, float EtaThr, bool applyJetID = false) const;
 
 // ELECTRON GETTERS ===============================================
   std::vector<TRootElectron*> GetSelectedElectrons() const;
@@ -161,13 +163,13 @@ class Selection{
  private:
   float rho_;
   int elecIsoCorrType_;
-  
+
   //int JetType;
   std::vector<TRootJet*> jets;
   std::vector<TRootElectron*> electrons;
   std::vector<TRootMuon*> muons;
   std::vector<TRootMET*> mets;
-	
+
   //jets
   int Njets_;
   float JetPtThreshold_;
