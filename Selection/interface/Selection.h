@@ -116,7 +116,7 @@ class Selection{
 // ELECTRON GETTERS ===============================================
   std::vector<TRootElectron*> GetSelectedElectrons() const;
   std::vector<TRootElectron*> GetSelectedElectrons(vector<TRootJet*>& selJets) const;
-  std::vector<TRootElectron*> GetSelectedElectrons(float EtThr, float EtaThr, float ElectronRelIso, bool invertIdCut = false) const;
+  std::vector<TRootElectron*> GetSelectedElectrons(float EtThr, float EtaThr, float ElectronRelIso, bool mvaID = true, bool bx25 = false, bool invertIdCut = false) const;
 //  std::vector<TRootElectron*> GetSelectedElectrons(float EtThr, float EtaThr, float ElectronRelIso, float rho) const;
   std::vector<TRootElectron*> GetSelectedElectrons(float EtThr, float EtaThr, float ElectronRelIso, vector<TRootJet*>& selJets) const;
 //  std::vector<TRootElectron*> GetSelectedElectrons(float EtThr, float EtaThr, float ElectronRelIso, float rho, vector<TRootJet*>& selJets) const;
