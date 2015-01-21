@@ -767,29 +767,29 @@ std::vector<TRootElectron*> Selection::GetSelectedElectrons(float PtThr, float E
 
                         }
                     }
-                    if(bx25) { //Cuts for the 25ns Bunch Spacings Scenario for CSA14
+                    if(bx25) { //Cuts for the 25ns Bunch Spacings Scenario for PHYS14
                     if(fabs(el->superClusterEta()) <= 1.479) {
-                        if(fabs(el->deltaEtaIn() < 0.01))
-                            if(fabs(el->deltaPhiIn() < 0.03))
+                        if(fabs(el->deltaEtaIn() < 0.007641))
+                            if(fabs(el->deltaPhiIn() < 0.032643))
                                 //if(el->e5x5() < 0.01)
-                                    if(el->hadronicOverEm() < 0.067)
-                                        if(fabs(el->d0()) < 0.013)
-                                            if(fabs(el->dz()) < 0.022)
-                                                if(fabs(1/el->E() - 1/el->P()) < 0.1)
-                                                    if(el->relPfIso(3, 0.5) < 0.22)
+                                    if(el->hadronicOverEm() < 0.060662)
+                                        if(fabs(el->d0()) < 0.011811)
+                                            if(fabs(el->dz()) < 0.070775)
+                                                if(fabs(1/el->E() - 1/el->P()) < 0.153897)
+                                                    if(el->relPfIso(3, 0.5) < 0.097213)
                                                         if(el->passConversion())
                                                             if(el->missingHits() <= 1)
                                                                 selectedElectrons.push_back(electrons[i]);
                         }
                     else if (fabs(el->superClusterEta()) < 2.5) {
-                        if(fabs(el->deltaEtaIn() < 0.011))
-                            if(fabs(el->deltaPhiIn() < 0.045))
+                        if(fabs(el->deltaEtaIn() < 0.009285))
+                            if(fabs(el->deltaPhiIn() < 0.042447))
                                 //if(el->e5x5() < 0.032)
-                                    if(el->hadronicOverEm() < 0.1)
-                                        if(fabs(el->d0()) < 0.08)
-                                            if(fabs(el->dz()) < 0.75)
-                                                if(fabs(1/el->E() - 1/el->P()) < 0.12)
-                                                    if(el->relPfIso(3, 0.5) < 0.25)
+                                    if(el->hadronicOverEm() < 0.104263)
+                                        if(fabs(el->d0()) < 0.051682)
+                                            if(fabs(el->dz()) < 0.180720)
+                                                if(fabs(1/el->E() - 1/el->P()) < 0.137468)
+                                                    if(el->relPfIso(3, 0.5) < 0.116708)
                                                         if(el->passConversion())
                                                             if(el->missingHits() <= 1)
                                                                 selectedElectrons.push_back(electrons[i]);

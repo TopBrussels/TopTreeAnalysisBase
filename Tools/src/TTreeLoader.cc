@@ -107,11 +107,11 @@ TTreeLoader::LoadDatasets (vector < Dataset* >& datasets, const char *xmlfilenam
 	int add = 0;
 	int ls = 1;
 	int lw = 1;
-	int color = 1;	
+	int color = 1;
 	float normf = 1.;
 	float xsection = 1.;
 	float xsectionError = 0.;
-	float mass = -1.; 
+	float mass = -1.;
 	elem->QueryIntAttribute ("ls", &ls);
 	elem->QueryIntAttribute ("lw", &lw);
 	elem->QueryIntAttribute ("color", &color);
@@ -128,23 +128,23 @@ TTreeLoader::LoadDatasets (vector < Dataset* >& datasets, const char *xmlfilenam
 	 d = new Dataset(name, title, true, color, ls, lw, normf, xsection, filenames);
 	 d->SetXsectionError(xsectionError);
 	 d->SetMass(mass);
-	 //Norm with Eff and NofEvts 
+	 //Norm with Eff and NofEvts
 	 float PreselEff = -1.;
 	 int NofPSEvts = -1;
 	 elem->QueryFloatAttribute ("PreselEff", &PreselEff);
 	 elem->QueryIntAttribute ("NofPSEvts", &NofPSEvts);
 	 if(PreselEff>0 && NofPSEvts>0){
-	  (NofPSEvts<= d->eventTree()->GetEntries())? d->SetPreselEffAndNumberOfPreselEvents(PreselEff,NofPSEvts):d->SetPreselEffAndNumberOfPreselEvents(PreselEff,d->eventTree()->GetEntries()) ;	
+	  (NofPSEvts<= d->eventTree()->GetEntries())? d->SetPreselEffAndNumberOfPreselEvents(PreselEff,NofPSEvts):d->SetPreselEffAndNumberOfPreselEvents(PreselEff,d->eventTree()->GetEntries()) ;
 	 }
 	 if(PreselEff>0 && NofPSEvts==-1){
-	  (d->SetPreselEffAndNumberOfPreselEvents(PreselEff,d->eventTree()->GetEntries())) ;	
+	  (d->SetPreselEffAndNumberOfPreselEvents(PreselEff,d->eventTree()->GetEntries())) ;
 	 }
 	 //Norm with nof of evts before preselection
 	 int NofEvts = -1;
 	 elem->QueryIntAttribute ("NofEvts", &NofEvts);
 	 if(NofEvts!=-1)
- 		(NofEvts>0 && NofEvts<= d->eventTree()->GetEntries())? d->SetOriginalNumberOfEvents(NofEvts):d->SetOriginalNumberOfEvents(d->eventTree()->GetEntries()); 
-	
+ 		(NofEvts>0 && NofEvts<= d->eventTree()->GetEntries())? d->SetOriginalNumberOfEvents(NofEvts):d->SetOriginalNumberOfEvents(d->eventTree()->GetEntries());
+
 	//Norm with eq lumi
 	float EqLumi = -1;
 	elem->QueryFloatAttribute ("EqLumi", &EqLumi);
@@ -164,7 +164,7 @@ TTreeLoader::LoadDatasets (vector < Dataset* >& datasets, const char *xmlfilenam
 	datasets.push_back(d);
     }
 
-	elem = elem->NextSiblingElement ();	// iteration 
+	elem = elem->NextSiblingElement ();	// iteration
     }
   //delete elem;
   //delete node;
@@ -174,7 +174,7 @@ TTreeLoader::LoadDatasets (vector < Dataset* >& datasets, const char *xmlfilenam
 void
 TTreeLoader::LoadDataset (Dataset* d, AnalysisEnvironment anaEnv)
 {
-  d_ = d; 
+  d_ = d;
   char branchStatus[100];
 
   //d_->runTree()  ->SetBranchStatus ("*",0);
@@ -256,17 +256,17 @@ TTreeLoader::LoadDataset (Dataset* d, AnalysisEnvironment anaEnv)
       d_->eventTree()->SetBranchStatus(branchStatus,1);
       d_->eventTree()->SetBranchAddress(anaEnv.NPGenEventCollection.c_str(),&tcnpgenEvt);
     }
-    
+
   if (anaEnv.loadTrackMETCollection)
-   { 
+   {
       tctrackmets = new TClonesArray ("TopTree::TRootMET", 0);
       sprintf(branchStatus,"%s*",anaEnv.TrackMETCollection.c_str());
       d_->eventTree()->SetBranchStatus(branchStatus,1);
       d_->eventTree()->SetBranchAddress(anaEnv.TrackMETCollection.c_str(),&tctrackmets);
     }
-    
-    
-/*  
+
+
+/*
   if (anaEnv.loadGenJetCollection)
     {
       genjets_br = (TBranch *) d.eventTree ()->GetBranch (anaEnv.GenJetCollection.c_str());
@@ -285,7 +285,7 @@ TTreeLoader::LoadDataset (Dataset* d, AnalysisEnvironment anaEnv)
       tcnpgenEvt = new TClonesArray ("TopTree::TRootNPGenEvent", 0);
       npgenEvt_br->SetAddress (&tcnpgenEvt);
     }
-  
+
   run_br = (TBranch *) d.runTree ()->GetBranch ("runInfos");
   run_br->SetAddress (&runInfos);
   event_br = (TBranch *) d.eventTree ()->GetBranch ("Event");
@@ -314,8 +314,8 @@ TTreeLoader::LoadEvent(int ievt, vector<TRootVertex*>& vertex, vector < TRootMuo
 //  if (ientry < 0)
 //    return;
   d_->eventTree ()->GetEntry (ievt);
-
-  //clear vectors   
+if (verbose) cout << "Event Loaded" << endl;
+  //clear vectors
   vertex.clear();
   init_muons.clear ();
   init_electrons.clear ();
@@ -330,7 +330,7 @@ TTreeLoader::LoadEvent(int ievt, vector<TRootVertex*>& vertex, vector < TRootMuo
     init_electrons.push_back ((TRootElectron *) tcelectrons->At (i));
   for (int i = 0; i < tcmets->GetEntriesFast (); i++)
     mets.push_back ((TRootMET *) tcmets->At (i));
- 
+
   if (verbose)
     {
       cout << "In event: " << ievt << endl;
@@ -347,14 +347,14 @@ TTreeLoader::LoadEvent (int ievt, vector<TRootVertex*>& vertex, vector < TRootMu
 
   	for (int i = 0; i < tcjets->GetEntriesFast (); i++) {
 	  //const TRootCaloJet* CaloJet = static_cast<const TRootCaloJet*>((TRootJet*)(tcjets->At(0)));
-	
+
 	  //if (i==0)
 	  //  cout << "EMF " << CaloJet->ecalEnergyFraction() << " fHPD" << CaloJet->fHPD() << " n90Hits " << CaloJet->n90Hits() <<endl;
 
 	  init_jets.push_back( (TRootJet *) tcjets->At (i));
 
 	  //const TRootCaloJet* CaloJet2 = static_cast<const TRootCaloJet*>((TRootJet*) init_jets[0]);
-	  
+
 	  //if (i==0)
 	  //  cout << "NOPOINTER EMF " << CaloJet2->ecalEnergyFraction() << " fHPD" << CaloJet2->fHPD() << " n90Hits " << CaloJet2->n90Hits() <<endl;
 	}
@@ -384,8 +384,8 @@ TTreeLoader::LoadTrackMET(int ievt)
   return vtrackmets;
 }
 
- 
-    
+
+
 vector<TRootGenJet*>
 TTreeLoader::LoadGenJet(int ievt, bool reloadEvent)
 {
@@ -425,7 +425,7 @@ TTreeLoader::LoadMCEvent (int ievt, TRootGenEvent * genEvt, TRootNPGenEvent * np
 
 void
 TTreeLoader::LoadMCEvent (int ievt, TRootGenEvent * genEvt, TRootNPGenEvent * npgenEvt, vector < TRootMCParticle* >& vmcparticles, bool reloadEvent)
-{ 
+{
   if (reloadEvent)
     d_->eventTree ()->GetEntry (ievt);
   vmcparticles.clear ();
@@ -458,9 +458,9 @@ TTreeLoader::EventPassedJSON(int runID, int lumiBlockID)
 
 int
 TTreeLoader::iTrigger (string triggerName, int runID, int iFile)
-{ 
+{
   d_->runTree()->GetEntry(iFile);
-  
+
   if (runInfos == 0) return -9999;
   return runInfos->getHLTinfo(runID).hltPath(triggerName);
 }
