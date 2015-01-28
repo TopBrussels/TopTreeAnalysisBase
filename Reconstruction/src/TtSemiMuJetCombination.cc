@@ -351,7 +351,9 @@ double TtSemiMuJetCombination::ChiSquareMatchingHadTop( std::vector<TRootJet> &j
 	double ChiSquare=0, HadWChiSquare=0, HadTopChiSquare=0;
 	HadWChiSquare   = pow(((jets[Permutation[0]]+jets[Permutation[1]]).M()-WMass_),2)/pow(HadWMassResol_,2);
 	HadTopChiSquare = pow(((jets[Permutation[0]]+jets[Permutation[1]]+jets[Permutation[2]]).M()-TopMass_),2)/pow(HadTopMassResol_,2);
-	if(isnan(HadWChiSquare+HadTopChiSquare) || isinf(HadWChiSquare+HadTopChiSquare)) ChiSquare = 99999;
+
+    if(std::isnan(HadWChiSquare+HadTopChiSquare)) ChiSquare= 99999;
+    else if(std::isinf(HadWChiSquare+HadTopChiSquare)) ChiSquare = 99999;
 	else ChiSquare = HadWChiSquare+HadTopChiSquare;
 	if(verboselevel_>2)
 	{
@@ -372,7 +374,9 @@ double TtSemiMuJetCombination::ChiSquareMatching( std::vector<TRootJet> &jets, c
 	HadTopChiSquare = pow(((jets[Permutation[0]]+jets[Permutation[1]]+jets[Permutation[2]]).M()-TopMass_),2)/pow(HadTopMassResol_,2);
 	LepblChiSquare  = pow(((jets[Permutation[3]]+muon).M()-blMass_),2)/pow(LepblMassResol_,2);
 	
-	if(isnan(HadWChiSquare+HadTopChiSquare+LepblChiSquare) || isinf(HadWChiSquare+HadTopChiSquare+LepblChiSquare)) ChiSquare = 99999;
+    if(std::isnan(HadWChiSquare+HadTopChiSquare+LepblChiSquare))
+        ChiSquare=99999;
+    else if(std::isinf(HadWChiSquare+HadTopChiSquare+LepblChiSquare)) ChiSquare = 99999;
 	else ChiSquare = HadWChiSquare+HadTopChiSquare+LepblChiSquare;
 	
 	if(verboselevel_>2)

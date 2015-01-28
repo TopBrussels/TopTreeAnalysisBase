@@ -451,13 +451,13 @@ void JetCombiner::ProcessEvent_SingleHadTop(Dataset* dataSet, const vector<TRoot
                     tempselectedJets.push_back(selectedJets_[k]);
                     float mindeltaR =100.;
                     float mindeltaR_temp =100.;
-                    int wj1;
-                    int wj2;
-                    int bj1;
+                    unsigned int wj1=0;
+                    unsigned int wj2=0;
+                    unsigned int bj1=0;
 
                     //define the jets from W as the jet pair with smallest deltaR
-                    for (int m=0; m<tempselectedJets.size(); m++) {
-                        for (int n=0; n<tempselectedJets.size(); n++) {
+                    for (unsigned int m=0; m<tempselectedJets.size(); m++) {
+                        for (unsigned int n=0; n<tempselectedJets.size(); n++) {
                             if(n==m) continue;
                             TLorentzVector lj1  = *tempselectedJets[m];
                             TLorentzVector lj2  = *tempselectedJets[n];
@@ -474,10 +474,10 @@ void JetCombiner::ProcessEvent_SingleHadTop(Dataset* dataSet, const vector<TRoot
                     for (unsigned int p=0; p<tempselectedJets.size(); p++) {
                         if(p!=wj1 && p!=wj2) bj1 = p;
                         }
-
-
-                    float btag = tempselectedJets[bj1]->btag_combinedSecondaryVertexBJetTags();
-
+                    float btag = -9999;
+                    if(tempselectedJets.size()>0)
+                        btag = tempselectedJets[bj1]->btag_combinedSecondaryVertexBJetTags();
+                    
                     //  float  delR =   sqrt(   pow(tempselectedJets[wj1]->Eta() - tempselectedJets[wj2]->Eta(),2) + pow(tempselectedJets[wj1]->Phi() - tempselectedJets[wj2]->Phi(),2 )   ) ;
 
                     //float  delR =  sqrt(   pow(selectedJets[0]->Eta() - selectedJets[1]->Eta(),2) + pow(selectedJets[0]->Phi() - selectedJets[1]->Phi(),2 )   )  +  sqrt(   pow(selectedJets[1]->Eta() - selectedJets[2]->Eta(),2) + pow(selectedJets[1]->Phi() - selectedJets[2]->Phi(),2 )   )  + sqrt(   pow(selectedJets[2]->Eta() - selectedJets[0]->Eta(),2) + pow(selectedJets[2]->Phi() - selectedJets[0]->Phi(),2 )) ;
@@ -488,7 +488,7 @@ void JetCombiner::ProcessEvent_SingleHadTop(Dataset* dataSet, const vector<TRoot
                     TLorentzVector Bh = *tempselectedJets[bj1];
                     TLorentzVector Th = Wh+Bh;
 
-                    double TopMass = Th.M();
+                    //double TopMass = Th.M(); // currently not used anywhere!
 
                     // TLorentzVector Bl = *selectedJets_[l];
                     //TLorentzVector Mu = *selectedLepton;
@@ -514,7 +514,7 @@ void JetCombiner::ProcessEvent_SingleHadTop(Dataset* dataSet, const vector<TRoot
 
 
                     //trying the summed energy of the jets...
-                    double sumE = (tempselectedJets[wj1]->E())+ (tempselectedJets[wj2]->E()) + (tempselectedJets[bj1]->E()) ;
+// currently not used                    double sumE = (tempselectedJets[wj1]->E())+ (tempselectedJets[wj2]->E()) + (tempselectedJets[bj1]->E()) ;
 
 
                     //float AngleThMu = Th.Angle(Mu.Vect());
@@ -1228,6 +1228,7 @@ void JetCombiner::ProcessEvent(Dataset* dataSet, const vector<TRootMCParticle*> 
 void JetCombiner::ProcessEvent(Dataset* dataSet, const vector<TLorentzVector> mcParticlesForMatching, const vector<TLorentzVector> selectedJets, const vector<float> bTagValues, const TLorentzVector selectedLepton, bool isSemiLep, float scaleFactor, bool TprimeEvaluation) {
     //initialize stuff for each event
     bool all4PartonsMatched = false; // True if the 4 ttbar semi-lep partons are matched to 4 jets (not necessarily the 4 highest pt jets)
+    all4PartonsMatched=false;
     all4JetsMatched_MCdef_ = false; // True if the 4 highest pt jets are matched to the 4 ttbar semi-lep partons
     hadronictopJetsMatched_MCdef_ = false;
 
@@ -1690,6 +1691,10 @@ void JetCombiner::Write(TFile* fout, bool savePNG, string pathPNG, bool plotMVAs
                 // make efficiency vs purity plot
                 ///////////////////////////////////
                 double x[100000], yBadComb[100000], yAllSemiMuBGComb[100000];
+                // set first array value to 0 to avoid warnings
+                x[0]=yBadComb[0]=yAllSemiMuBGComb[0]=0;
+                
+                
                 int nVals = 0;
 
                 cerr << " post canvas write 2"   << endl;
