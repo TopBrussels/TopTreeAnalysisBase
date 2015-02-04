@@ -334,6 +334,8 @@ bool Run2Selection::foundZCandidate(std::vector<TRootMuon*>& muons1, std::vector
     return foundZ;
 }
 
+// ______________ELECTRONS______________________________________________//
+
 float Run2Selection::GetElectronIsoCorrType(TRootElectron *el){
     double EffectiveArea = 0.;
     // HCP 2012 updated for electron conesize = 0.3, taken from http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/EGamma/EGammaAnalysisTools/interface/ElectronEffectiveArea.h?revision=1.4&view=markup
