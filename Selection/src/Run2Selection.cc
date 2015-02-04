@@ -120,7 +120,7 @@ std::vector<TRootPFJet*> Run2Selection::GetSelectedJets(float PtThr, float EtaTh
                 {
                     if(passPFJetID8TEV(PFJet))//This is the 8TeV Recommended Loose PFJet ID.  This should be updated when 13TeV recommendations become available.
                     {
-                    selectedJets.push_back(init_jet);
+                        selectedJets.push_back(init_jet);
                     }
                 }
                 else selectedJets.push_back(init_jet);
@@ -334,6 +334,88 @@ bool Run2Selection::foundZCandidate(std::vector<TRootMuon*>& muons1, std::vector
     return foundZ;
 }
 
+float Run2Selection::GetElectronIsoCorrType(TRootElectron *el){
+    double EffectiveArea = 0.;
+    // HCP 2012 updated for electron conesize = 0.3, taken from http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/EGamma/EGammaAnalysisTools/interface/ElectronEffectiveArea.h?revision=1.4&view=markup
+    if (fabs(el->superClusterEta()) >= 0.0   && fabs(el->superClusterEta()) < 1.0   ) EffectiveArea = 0.130;
+    if (fabs(el->superClusterEta()) >= 1.0   && fabs(el->superClusterEta()) < 1.479 ) EffectiveArea = 0.137;
+    if (fabs(el->superClusterEta()) >= 1.479 && fabs(el->superClusterEta()) < 2.0   ) EffectiveArea = 0.067;
+    if (fabs(el->superClusterEta()) >= 2.0   && fabs(el->superClusterEta()) < 2.2   ) EffectiveArea = 0.089;
+    if (fabs(el->superClusterEta()) >= 2.2   && fabs(el->superClusterEta()) < 2.3   ) EffectiveArea = 0.107;
+    if (fabs(el->superClusterEta()) >= 2.3   && fabs(el->superClusterEta()) < 2.4   ) EffectiveArea = 0.110;
+    if (fabs(el->superClusterEta()) >= 2.4) EffectiveArea = 0.138;
+
+    double isocorr = 0;
+    if(elecIsoCorrType_ == 1) // rho correction (default corr)
+        isocorr = rho_*EffectiveArea;
+    else if(elecIsoCorrType_ == 2) // dB correction
+        isocorr = 0.5*el->puChargedHadronIso();
+    else if (elecIsoCorrType_ == 0) // no correction
+        isocorr = 0.;
+    else {
+        cerr << "Please, specify the correction type to be applied for the calculation of the electron relative isolation" << endl;
+        cerr << " - Use setElectronIsoCorrType(int) method: " << endl;
+        cerr << " -- 0: no correction, 1: rho correction (default), 2: dB correction" << endl;
+        exit(1);
+    }
+    return isocorr;
+}
+
+std::vector<TRootElectron*> Run2Selection::GetSelectedElectrons(string WorkingPoint, string PHYS14orCSA14, bool CutsBased) const {
+    std::vector<TRootElectron* > ElectronCollection;
+    if (CutsBased == true){
+        if (PHYS14orCSA14 == "PHYS14" && WorkingPoint == "Tight"){
+            ElectronCollection.insert(ElectronCollection.end(), GetSelectedTightElectronsCutsBasedPHYS14(30, 2.5).begin(), GetSelectedTightElectronsCutsBasedPHYS14(30, 2.5).end());
+        }
+        else {
+            cout<<"Selected electron error"<<endl;
+        }  
+    }
+    return ElectronCollection;      
+}   
+
+std::vector<TRootElectron*> Run2Selection::GetSelectedTightElectronsCutsBasedPHYS14(float PtThr, float EtaThr) const { //CSA14
+    std::vector<TRootElectron*> selectedElectrons;
+    for(unsigned int i=0; i<electrons.size(); i++) {
+        TRootElectron* el = (TRootElectron*) electrons[i];
+        // Using cut-based
+        if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr) {
+            if( fabs(el->superClusterEta()) <= 1.479 
+                && fabs(el->deltaEtaIn()) < 0.006574
+                && fabs(el->deltaPhiIn()) < 0.022868
+                //&& el->e5x5() < 0.01
+                && el->hadronicOverEm() < 0.037553
+                && fabs(el->d0()) < 0.009924
+                && fabs(el->dz()) < 0.015310
+                && fabs(1/el->E() - 1/el->P()) < 0.131191
+                && el->relPfIso(3, 0.5) < 0.074355
+                && el->passConversion()
+                && el->missingHits() <= 1)
+            {
+                selectedElectrons.push_back(electrons[i]);
+            }
+
+            else if (fabs(el->superClusterEta()) < 2.5 
+                && fabs(el->deltaEtaIn()) < 0.005681
+                && fabs(el->deltaPhiIn()) < 0.032046
+                // && if(el->e5x5() < 0.03)
+                && (el->hadronicOverEm() < 0.081902)
+                && fabs(el->d0()) < 0.027261
+                && fabs(el->dz()) < 0.147154
+                && fabs(1/el->E() - 1/el->P()) < 0.106055
+                && el->relPfIso(3, 0.5) < 0.090185
+                && el->passConversion()
+                && el->missingHits() <= 1)
+            {
+                selectedElectrons.push_back(electrons[i]);
+            }           
+        }
+    }
+    std::sort(selectedElectrons.begin(),selectedElectrons.end(),HighestPt());
+    return selectedElectrons;
+}
+
+/*
 std::vector<TRootElectron*> Run2Selection::GetSelectedElectrons(float PtThr, float EtaThr, float ElectronRelIso, bool mvaID, bool bx25, bool invertIdCut) const
 {
     std::vector<TRootElectron*> selectedElectrons;
@@ -465,7 +547,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedElectrons(float PtThr, flo
     return selectedElectrons;
 }
 
-/*
+
 //Method including rho correction
 std::vector<TRootElectron*> Selection::GetSelectedElectrons(float PtThr, float EtaThr, float ElectronRelIso, float rho) const {
   std::vector<TRootElectron*> selectedElectrons;
@@ -500,18 +582,18 @@ std::vector<TRootElectron*> Selection::GetSelectedElectrons(float PtThr, float E
   std::sort(selectedElectrons.begin(),selectedElectrons.end(),HighestPt());
   return selectedElectrons;
 }
-*/
+
 std::vector<TRootElectron*> Run2Selection::GetSelectedElectrons() const
 {
     return GetSelectedElectrons(ElectronEtThreshold_, ElectronEtaThreshold_, ElectronRelIso_);
 }
 
-/*
+
 //Method including rho correction
-std::vector<TRootElectron*> Selection::GetSelectedElectrons(float rho) const{
-  return GetSelectedElectrons(ElectronEtThreshold_, ElectronEtaThreshold_, ElectronRelIso_, rho);
-}
-*/
+//std::vector<TRootElectron*> Selection::GetSelectedElectrons(float rho) const{
+//  return GetSelectedElectrons(ElectronEtThreshold_, ElectronEtaThreshold_, ElectronRelIso_, rho);
+//}
+
 std::vector<TRootElectron*> Run2Selection::GetSelectedElectrons(vector<TRootJet*>& selJets) const
 {
     return GetSelectedElectrons(ElectronEtThreshold_, ElectronEtaThreshold_, ElectronRelIso_, selJets);
@@ -540,7 +622,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedElectrons(float EtThr, flo
     return selectedElectrons;
 }
 
-/*
+
 //Method including rho correction
 std::vector<TRootElectron*> Selection::GetSelectedElectrons(float EtThr, float EtaThr, float ElectronRelIso, float rho, vector<TRootJet*>& selJets) const{
   std::vector<TRootElectron*> init_electrons = GetSelectedElectrons(EtThr,EtaThr,ElectronRelIso,rho);
@@ -560,7 +642,7 @@ std::vector<TRootElectron*> Selection::GetSelectedElectrons(float EtThr, float E
   std::sort(selectedElectrons.begin(),selectedElectrons.end(),HighestPt());
   return selectedElectrons;
 }
-*/
+
 
 std::vector<TRootElectron*> Run2Selection::GetSelectedDiElectrons(float PtThr, float EtaThr, float ElectronRelIso) const
 {
@@ -798,12 +880,13 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedElectronsInvIso(float Elec
     std::sort(selectedElectrons.begin(),selectedElectrons.end(),HighestPt());
     return selectedElectrons;
 }
+*/
 
 //=======================
 //Jet Helper Functions===
 //=======================
 
-bool passPFJetID8TEV(const TRootPFJet* PFJet)
+bool Run2Selection::passPFJetID8TEV(const TRootPFJet* PFJet) const
 {
     if (PFJet->nConstituents() > 1 )
     {

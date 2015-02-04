@@ -83,8 +83,11 @@ public:
     std::vector<TRootPFJet*> GetSelectedJets() const;
     std::vector<TRootPFJet*> GetSelectedJets(float PtThr, float EtaThr, bool applyJetID = true) const;
 
+
+    void setElectronIsoCorrType(int corrType = 1);
+    float GetElectronIsoCorrType(TRootElectron* el);
 // ELECTRON GETTERS ===============================================
-    std::vector<TRootElectron*> GetSelectedElectrons() const;
+/*    std::vector<TRootElectron*> GetSelectedElectrons() const;
     std::vector<TRootElectron*> GetSelectedElectrons(vector<TRootJet*>& selJets) const;
     std::vector<TRootElectron*> GetSelectedElectrons(float EtThr, float EtaThr, float ElectronRelIso, bool mvaID = true, bool bx25 = false, bool invertIdCut = false) const;
 //  std::vector<TRootElectron*> GetSelectedElectrons(float EtThr, float EtaThr, float ElectronRelIso, float rho) const;
@@ -102,6 +105,8 @@ public:
 
     std::vector<TRootElectron*> GetSelectedElectronsInvIso(float ElectronRelIso) const;
     std::vector<TRootElectron*> GetSelectedElectronsInvIso(float ElectronRelIso, vector<TRootJet*>& selJets) const;
+*/
+    std::vector<TRootElectron*> GetSelectedElectrons(string WorkingPoint, string PHYS14orCSA14, bool CutsBased) const;
 // MUON GETTERS ==================================================
     std::vector<TRootMuon*> GetSelectedMuons() const;
     std::vector<TRootMuon*> GetSelectedMuons(float PtThr, float EtaThr, float MuonRelIso) const;
@@ -125,6 +130,15 @@ public:
     };
 
 private:
+
+    std::vector<TRootElectron*> GetSelectedTightElectronsCutsBasedPHYS14(float PtThr, float EtaThr) const;
+    std::vector<TRootElectron*> GetSelectedLooseElectronsPHYS14() const;
+    std::vector<TRootElectron*> GetSelectedVetoElectronsPHYS14() const;
+    std::vector<TRootElectron*> GetSelectedTightElectronsCSA14() const;
+    std::vector<TRootElectron*> GetSelectedMediumElectronsCSA14() const;
+    std::vector<TRootElectron*> GetSelectedLooseElectronsCSA14() const;
+    std::vector<TRootElectron*> GetSelectedVetoElectronsCSA14() const;
+
     float rho_;
     int elecIsoCorrType_;
 
