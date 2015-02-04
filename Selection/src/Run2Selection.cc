@@ -803,7 +803,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedElectronsInvIso(float Elec
 //Jet Helper Functions===
 //=======================
 
-bool passPFJetID8TEV(const TRootPFJet* PFJet)
+bool Run2Selection::passPFJetID8TEV(const TRootPFJet* PFJet) const
 {
     if (PFJet->nConstituents() > 1 )
     {
@@ -828,6 +828,11 @@ bool passPFJetID8TEV(const TRootPFJet* PFJet)
 }
 
 //____________IS SELECTED_______________________________________________//
-
+bool Run2Selection::isPVSelected(const std::vector<TRootVertex*>& vertex, int NdofCut, float Zcut, float RhoCut) {
+    if(vertex.size()==0) return false;
+    float Rho = sqrt(vertex[0]->x()*vertex[0]->x()+vertex[0]->y()*vertex[0]->y());
+    if(!vertex[0]->isFake() && vertex[0]->ndof()>NdofCut && abs(vertex[0]->z())<Zcut && Rho<RhoCut) return true;
+    return false;
+    }
 
 //______________________________________________________________________//
