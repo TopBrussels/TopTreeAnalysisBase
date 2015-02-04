@@ -365,10 +365,15 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedElectrons(string WorkingPo
     std::vector<TRootElectron* > ElectronCollection;
     if (CutsBased == true){
         if (PHYS14orCSA14 == "PHYS14" && WorkingPoint == "Tight"){
-            ElectronCollection.insert(ElectronCollection.end(), GetSelectedTightElectronsCutsBasedPHYS14(30, 2.5).begin(), GetSelectedTightElectronsCutsBasedPHYS14(30, 2.5).end());
+            ElectronCollection = GetSelectedTightElectronsCutsBasedPHYS14(30, 2.5);
+            //ElectronCollection.insert(ElectronCollection.end(), GetSelectedTightElectronsCutsBasedPHYS14(30, 2.5).begin(), GetSelectedTightElectronsCutsBasedPHYS14(30, 2.5).end());
+        }
+        else if (PHYS14orCSA14 == "PHYS14" && WorkingPoint == "Loose"){
+            ElectronCollection = GetSelectedLooseElectronsCutsBasedPHYS14(30, 2.5);           
         }
         else {
-            cout<<"Selected electron error"<<endl;
+            throw std::invalid_argument( "received incorrect args to GetSelectedElectrons" );
+            //cout<<"Selected electron error"<<endl;
         }  
     }
     return ElectronCollection;      
@@ -404,6 +409,47 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedTightElectronsCutsBasedPHY
                 && fabs(el->dz()) < 0.147154
                 && fabs(1/el->E() - 1/el->P()) < 0.106055
                 && el->relPfIso(3, 0.5) < 0.090185
+                && el->passConversion()
+                && el->missingHits() <= 1)
+            {
+                selectedElectrons.push_back(electrons[i]);
+            }           
+        }
+    }
+    std::sort(selectedElectrons.begin(),selectedElectrons.end(),HighestPt());
+    return selectedElectrons;
+}
+
+std::vector<TRootElectron*> Run2Selection::GetSelectedLooseElectronsCutsBasedPHYS14(float PtThr, float EtaThr) const { //CSA14
+    std::vector<TRootElectron*> selectedElectrons;
+    for(unsigned int i=0; i<electrons.size(); i++) {
+        TRootElectron* el = (TRootElectron*) electrons[i];
+        // Using cut-based
+        if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr) {
+            if( fabs(el->superClusterEta()) <= 1.479 
+                && fabs(el->deltaEtaIn()) < 0.012442
+                && fabs(el->deltaPhiIn()) < 0.072624
+                //&& el->e5x5() < 0.01
+                && el->hadronicOverEm() < 0.121476
+                && fabs(el->d0()) < 0.022664
+                && fabs(el->dz()) < 0.173670
+                && fabs(1/el->E() - 1/el->P()) < 0.221803
+                && el->relPfIso(3, 0.5) < 0.120026
+                && el->passConversion()
+                && el->missingHits() <= 1)
+            {
+                selectedElectrons.push_back(electrons[i]);
+            }
+
+            else if (fabs(el->superClusterEta()) < 2.5 
+                && fabs(el->deltaEtaIn()) < 0.032602
+                && fabs(el->deltaPhiIn()) < 0.010654
+                // && if(el->e5x5() < 0.03)
+                && (el->hadronicOverEm() < 0.131862)
+                && fabs(el->d0()) < 0.097358
+                && fabs(el->dz()) < 0.198444
+                && fabs(1/el->E() - 1/el->P()) < 0.142283
+                && el->relPfIso(3, 0.5) < 0.162914
                 && el->passConversion()
                 && el->missingHits() <= 1)
             {
