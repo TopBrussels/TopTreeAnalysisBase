@@ -87,25 +87,6 @@ public:
     void setElectronIsoCorrType(int corrType = 1);
     float GetElectronIsoCorrType(TRootElectron* el);
 // ELECTRON GETTERS ===============================================
-/*    std::vector<TRootElectron*> GetSelectedElectrons() const;
-    std::vector<TRootElectron*> GetSelectedElectrons(vector<TRootJet*>& selJets) const;
-    std::vector<TRootElectron*> GetSelectedElectrons(float EtThr, float EtaThr, float ElectronRelIso, bool mvaID = true, bool bx25 = false, bool invertIdCut = false) const;
-//  std::vector<TRootElectron*> GetSelectedElectrons(float EtThr, float EtaThr, float ElectronRelIso, float rho) const;
-    std::vector<TRootElectron*> GetSelectedElectrons(float EtThr, float EtaThr, float ElectronRelIso, vector<TRootJet*>& selJets) const;
-//  std::vector<TRootElectron*> GetSelectedElectrons(float EtThr, float EtaThr, float ElectronRelIso, float rho, vector<TRootJet*>& selJets) const;
-    std::vector<TRootElectron*> GetSelectedLooseElectrons() const;
-    std::vector<TRootElectron*> GetSelectedLooseElectrons(float EtThr, float EtaThr, float ElectronRelIso) const;
-    //  std::vector<TRootElectron*> GetSelectedLooseElectrons(float EtThr, float EtaThr, float ElectronRelIso, float rho) const;
-
-    std::vector<TRootElectron*> GetSelectedDiElectrons() const;
-    std::vector<TRootElectron*> GetSelectedDiElectrons(float EtThr, float EtaThr, float ElectronRelIso) const;
-//  std::vector<TRootElectron*> GetSelectedDiElectrons(float EtThr, float EtaThr, float ElectronRelIso, float rho) const;
-    std::vector<TRootElectron*> GetSelectedLooseDiElectrons() const;
-    std::vector<TRootElectron*> GetSelectedLooseDiElectrons(float EtThr, float EtaThr, float ElectronRelIso) const;
-
-    std::vector<TRootElectron*> GetSelectedElectronsInvIso(float ElectronRelIso) const;
-    std::vector<TRootElectron*> GetSelectedElectronsInvIso(float ElectronRelIso, vector<TRootJet*>& selJets) const;
-*/
     std::vector<TRootElectron*> GetSelectedElectrons(string WorkingPoint, string PHYS14orCSA14, bool CutsBased) const;
 // MUON GETTERS ==================================================
     std::vector<TRootMuon*> GetSelectedMuons() const;

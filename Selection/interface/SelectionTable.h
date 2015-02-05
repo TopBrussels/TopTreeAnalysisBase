@@ -1,6 +1,5 @@
 #ifndef SelectionTable_h
 #define SelectionTable_h
-#include "Selection.h"
 #include "TopTreeAnalysisBase/Tools/interface/Efficiency.h"
 #include "TopTreeAnalysisBase/Content/interface/Dataset.h"
 
@@ -14,7 +13,7 @@
 using namespace std;
 
 	/**
-	//  Aim : producing latex-formatted tables containing the selection efficiencies (and associated errors) 
+	//  Aim : producing latex-formatted tables containing the selection efficiencies (and associated errors)
 	//	  and the numbers of events passing a list of pre-defined selection cuts
 	//
 	//  How to use :
@@ -22,7 +21,7 @@ using namespace std;
 
 class SelectionTable {
 
-  
+
   public:
   	SelectionTable(); /** Default constructor */
   	SelectionTable(vector<string> listOfCuts, vector<Dataset*> listOfDatasets);
@@ -32,7 +31,7 @@ class SelectionTable {
 	void SetLuminosity(float Lumi) {lumi_ = Lumi;};
 	void SetPrecision(int Precision) {precision_ = Precision;} /** To specify exactly how many digits to display after the decimal point */
 
-	// Accessors 
+	// Accessors
 	float Luminosity() const {return lumi_;};
 	int Precision() const {return precision_;}
 	vector<string> ListOfCuts() const {return listOfCuts_;};
@@ -55,14 +54,14 @@ class SelectionTable {
   /**
 	Method to display latex-formatted tables
 	Options :
-	* writeMerged ; if true, display individual contributions for split samples (ex ; st+jets s-ch, t-ch, tW-ch, ...). Set to true by default. 
+	* writeMerged ; if true, display individual contributions for split samples (ex ; st+jets s-ch, t-ch, tW-ch, ...). Set to true by default.
 	* useBookTabs ; if true, use command from the latex package booktabs for table lines. Set to false by default.
   */
   void WriteTable(ofstream& fout, float** listTable_, float** listTableError_, bool writeMerged = true, bool useBookTabs = false, bool writeLandscape = false);
   /**
 	Method to display latex-formatted tables into an external file. Display both numbers and their associated errors (binomial approx.)
 	Options :
-	* writeMerged ; if true, display individual contributions for split samples (ex ; st+jets s-ch, t-ch, tW-ch, ...). Set to true by default. 
+	* writeMerged ; if true, display individual contributions for split samples (ex ; st+jets s-ch, t-ch, tW-ch, ...). Set to true by default.
 	* useBookTabs ; use command from the latex package booktabs for table lines. Set to false by default.
 	* writeLandscape ; display tables in landscape mode. Set to false by default.
   */
@@ -70,12 +69,12 @@ class SelectionTable {
   /**
 	Method to display latex-formatted tables into an external file. Display both numbers and their associated errors (correct error calculation)
 	Options :
-	* writeMerged ; if true, display individual contributions for split samples (ex ; st+jets s-ch, t-ch, tW-ch, ...). Set to true by default. 
+	* writeMerged ; if true, display individual contributions for split samples (ex ; st+jets s-ch, t-ch, tW-ch, ...). Set to true by default.
 	* useBookTabs ; if true, use command from the latex package booktabs for table lines. Set to false by default.
 	* writeLandscape ; if true, display tables in landscape mode. Set to false by default.
   */
-  void Write(string filename, bool withError = false, bool writeMerged = true, bool useBookTabs = false, bool addRawNumbers = false, bool addEfficiencies = false, bool addTotalEfficiencies = false, bool writeLandscape = false); 
-  /** 
+  void Write(string filename, bool withError = false, bool writeMerged = true, bool useBookTabs = false, bool addRawNumbers = false, bool addEfficiencies = false, bool addTotalEfficiencies = false, bool writeLandscape = false);
+  /**
 	Write latex-formatted tables into an external file
 	Options :
 	* addRawNumbers ; if true, add a table containing the raw (unrescaled) numbers of selected events. Set to false by default.
@@ -110,7 +109,7 @@ class SelectionTable {
   float**  totalCutEfficiencyErrorHigh_;
   float**  totalCutEfficiencyErrorLow_;
   float**  totalCutEfficiencyError_;
-  
+
   //Merged stuff
   vector<Dataset*> listOfDatasetsMerged_;
   float**  nofEventsRawMerged_;

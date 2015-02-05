@@ -8,40 +8,6 @@ Run2Selection::Run2Selection()
     elecIsoCorrType_ = 2; // 0: no corr, 1: rho corr, 2: dB corr.
     cutHFHadronEnergyFraction_ = false;
 }
-/*
- Selection::Selection(const std::vector<TRootJet*>& jets_, const std::vector<TRootMuon*>& muons_, const std::vector<TRootMET*>& mets_){
- rho_ = 0;
- elecIsoCorrType_ = 1; // 0: no corr, 1: rho corr, 2: dB corr.
- setJetCuts();
- setMuonCuts();
- setDiMuonCuts();
- setElectronCuts();
- setDiElectronCuts();
- setLooseMuonCuts();
- setLooseElectronCuts();
- setLooseDiElectronCuts();
- for(unsigned int i=0;i<jets_.size();i++) jets.push_back(jets_[i]);
- for(unsigned int i=0;i<muons_.size();i++) muons.push_back(muons_[i]);
- for(unsigned int i=0;i<mets_.size();i++) mets.push_back(mets_[i]);
- cutHFHadronEnergyFraction_ = false;
- }
- Selection::Selection(const std::vector<TRootJet*>& jets_, const std::vector<TRootEelctron*>& electrons_, const std::vector<TRootMET*>& mets_){
- rho_ = 0;
- elecIsoCorrType_ = 1; // 0: no corr, 1: rho corr, 2: dB corr.
- setJetCuts();
- setMuonCuts();
- setDiMuonCuts();
- setElectronCuts();
- setDiElectronCuts();
- setLooseMuonCuts();
- setLooseElectronCuts();
- setLooseDiElectronCuts();
- for(unsigned int i=0;i<jets_.size();i++) jets.push_back(jets_[i]);
- for(unsigned int i=0;i<electrons_.size();i++) electrons.push_back(electrons_[i]);
- for(unsigned int i=0;i<mets_.size();i++) mets.push_back(mets_[i]);
- cutHFHadronEnergyFraction_ = false;
- }
-*/
 
 Run2Selection::Run2Selection(const std::vector<TRootJet*>& jets_, const std::vector<TRootMuon*>& muons_, const std::vector<TRootElectron*>& electrons_, const std::vector<TRootMET*>& mets_)
 {
@@ -371,15 +337,15 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedElectrons(string WorkingPo
             //ElectronCollection.insert(ElectronCollection.end(), GetSelectedTightElectronsCutsBasedPHYS14(30, 2.5).begin(), GetSelectedTightElectronsCutsBasedPHYS14(30, 2.5).end());
         }
         else if (PHYS14orCSA14 == "PHYS14" && WorkingPoint == "Loose"){
-            ElectronCollection = GetSelectedLooseElectronsCutsBasedPHYS14(30, 2.5);           
+            ElectronCollection = GetSelectedLooseElectronsCutsBasedPHYS14(30, 2.5);
         }
         else {
             throw std::invalid_argument( "received incorrect args to GetSelectedElectrons" );
             //cout<<"Selected electron error"<<endl;
-        }  
+        }
     }
-    return ElectronCollection;      
-}   
+    return ElectronCollection;
+}
 
 std::vector<TRootElectron*> Run2Selection::GetSelectedTightElectronsCutsBasedPHYS14(float PtThr, float EtaThr) const { //CSA14
     std::vector<TRootElectron*> selectedElectrons;
@@ -387,7 +353,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedTightElectronsCutsBasedPHY
         TRootElectron* el = (TRootElectron*) electrons[i];
         // Using cut-based
         if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr) {
-            if( fabs(el->superClusterEta()) <= 1.479 
+            if( fabs(el->superClusterEta()) <= 1.479
                 && fabs(el->deltaEtaIn()) < 0.006574
                 && fabs(el->deltaPhiIn()) < 0.022868
                 //&& el->e5x5() < 0.01
@@ -402,7 +368,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedTightElectronsCutsBasedPHY
                 selectedElectrons.push_back(electrons[i]);
             }
 
-            else if (fabs(el->superClusterEta()) < 2.5 
+            else if (fabs(el->superClusterEta()) < 2.5
                 && fabs(el->deltaEtaIn()) < 0.005681
                 && fabs(el->deltaPhiIn()) < 0.032046
                 // && if(el->e5x5() < 0.03)
@@ -415,7 +381,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedTightElectronsCutsBasedPHY
                 && el->missingHits() <= 1)
             {
                 selectedElectrons.push_back(electrons[i]);
-            }           
+            }
         }
     }
     std::sort(selectedElectrons.begin(),selectedElectrons.end(),HighestPt());
@@ -428,7 +394,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedLooseElectronsCutsBasedPHY
         TRootElectron* el = (TRootElectron*) electrons[i];
         // Using cut-based
         if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr) {
-            if( fabs(el->superClusterEta()) <= 1.479 
+            if( fabs(el->superClusterEta()) <= 1.479
                 && fabs(el->deltaEtaIn()) < 0.012442
                 && fabs(el->deltaPhiIn()) < 0.072624
                 //&& el->e5x5() < 0.01
@@ -443,7 +409,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedLooseElectronsCutsBasedPHY
                 selectedElectrons.push_back(electrons[i]);
             }
 
-            else if (fabs(el->superClusterEta()) < 2.5 
+            else if (fabs(el->superClusterEta()) < 2.5
                 && fabs(el->deltaEtaIn()) < 0.032602
                 && fabs(el->deltaPhiIn()) < 0.010654
                 // && if(el->e5x5() < 0.03)
@@ -456,7 +422,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedLooseElectronsCutsBasedPHY
                 && el->missingHits() <= 1)
             {
                 selectedElectrons.push_back(electrons[i]);
-            }           
+            }
         }
     }
     std::sort(selectedElectrons.begin(),selectedElectrons.end(),HighestPt());
