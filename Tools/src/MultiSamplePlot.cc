@@ -78,7 +78,7 @@ void MultiSamplePlot::Initialize()
 	maxY_ = -1;
 	minLogY_ = 1.;
 	showNumberEntries_ = true;
-	errorbandfile_ = "";
+	errorbandfile_ = "systematics.root";
 	sqrts_ = 8;
 	prelim_=true;
 }
@@ -149,9 +149,11 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
 	TH1F* hNominal = 0;
   if(addRatioErrorBand || addErrorBand)
 	{
-		   TDirectory* subdir = (TDirectory*) tmpInfile->Get(("MultiSamplePlot_"+label).c_str());
+		   TDirectory* subdir = (TDirectory*) tmpInfile->Get(("MultiSamplePlot_"+plotName_).c_str());
 			 if(subdir)
 			 {
+
+
 			    hErrorPlus = (TH1F*) subdir->Get("Plus")->Clone();
 			    hErrorMinus = (TH1F*) subdir->Get("Minus")->Clone();
 					hNominal = (TH1F*) subdir->Get("Nominal")->Clone();
@@ -720,8 +722,8 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
 		   //make dummy graph for legend; dirty because color/style parameters of the error band now configured in 2 places...
 		   TGraphAsymmErrors* ErrorGraph = new TGraphAsymmErrors();
 		   ErrorGraph->SetFillStyle(3004);//3005 diagonal dashed //3001 ~plain //3013 double diagonal dashed 
-			 ErrorGraph->SetFillColor(kRed);
-	     ErrorGraph->SetLineColor(kRed);
+			 ErrorGraph->SetFillColor(kBlack);
+	     ErrorGraph->SetLineColor(kBlack);
 	     ErrorGraph->SetLineWidth(1);
 			 leg_->AddEntry(ErrorGraph,"Systematic Uncertainty","F");
 	}
