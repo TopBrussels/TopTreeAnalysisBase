@@ -820,13 +820,15 @@ void MultiSamplePlot::DrawStackedPlot(TCanvas* canvas, TCanvas* canvasLogY, THSt
 
 void MultiSamplePlot::DrawErrorBand(TH1F* totalSM, TH1F* hErrorPlus, TH1F* hErrorMinus, TH1F* hNominal, TGraphAsymmErrors*  ErrorGraph, bool ErrorBandAroundTotalInput)
 {
+  cout <<"In draw error band method..."<< endl;
+
   int nbins = totalSM->GetNbinsX()+1;
 	float bins[nbins];
 	float bincontents[nbins];
 	float dummy[nbins];
 	float erroryplus[nbins]; //will be the errors relative to the total histo
 	float erroryminus[nbins]; //will be the errors relative to the total histo
-  float binwidth = totalSM->GetBinCenter(2) - totalSM->GetBinCenter(1); //assumes a fixed bin width...!
+        float binwidth = totalSM->GetBinCenter(2) - totalSM->GetBinCenter(1); //assumes a fixed bin width...!
 	
   if((totalSM->GetNbinsX() != hErrorPlus->GetNbinsX()) || (totalSM->GetNbinsX() != hErrorMinus->GetNbinsX()))
 			cout<<"[MultiSamplePlot::DrawErrorBand] ERROR: error histograms have different binning than total SM histogram!"<<endl;
@@ -834,19 +836,57 @@ void MultiSamplePlot::DrawErrorBand(TH1F* totalSM, TH1F* hErrorPlus, TH1F* hErro
 	for(int iBin=0; iBin < totalSM->GetNbinsX()+1; iBin++)
 	{
 			bins[iBin] = totalSM->GetBinCenter(iBin);
-			if(ErrorBandAroundTotalInput)
+			if(ErrorBandAroundTotalInput){
 			   bincontents[iBin] = totalSM->GetBinContent(iBin); //meaning an error band around whatever is the total MC SM input (can be 'post-fit' (as in the profile likelihood method), the input is then not the 'nominal' expectation anymore w.r.t which the error band is intrinsically defined)
-			else 
+		       
+			   //First deal with the somehwhat rare case where the up/down systematic variation both produce a deviation in the same direction
+			   if ((  bincontents[iBin] > hErrorPlus->GetBinContent(iBin) )  &&  (  bincontents[iBin] > hErrorMinus->GetBinContent(iBin) ) ){
+			     erroryplus[iBin] =0;
+			     if( hErrorMinus->GetBinContent(iBin) <  hErrorPlus->GetBinContent(iBin)){
+			     erroryminus[iBin] =   bincontents[iBin]  -  hErrorMinus->GetBinContent(iBin);
+			     }else {
+			       erroryminus[iBin] =   bincontents[iBin]  -  hErrorPlus->GetBinContent(iBin);
+			     }
+			   }
+			   else if(( bincontents[iBin] < hErrorPlus->GetBinContent(iBin) ) && ( bincontents[iBin] < hErrorMinus->GetBinContent(iBin) ) ){
+			     erroryminus[iBin] =0;
+
+			     if( hErrorMinus->GetBinContent(iBin) <  hErrorPlus->GetBinContent(iBin)){
+			     erroryplus[iBin] =  hErrorPlus->GetBinContent(iBin) - bincontents[iBin] ;
+			     }else {
+			       erroryplus[iBin] =  hErrorMinus->GetBinContent(iBin) - bincontents[iBin] ;
+			     }
+
+			   }
+			   //now the normal case where the nominal sits between the up/down variations
+			   else{
+			     if ( hErrorPlus->GetBinContent(iBin) > bincontents[iBin]){
+			       //'standard' expectation up gives up , down gives down
+			       erroryplus[iBin] = hErrorPlus->GetBinContent(iBin) -  bincontents[iBin];
+                               erroryminus[iBin] =   bincontents[iBin]  -  hErrorMinus->GetBinContent(iBin);
+			     }
+			     else{
+			     //'flipped'  up gives down , down gives up
+			     erroryplus[iBin] = hErrorMinus->GetBinContent(iBin) -  bincontents[iBin];
+                             erroryminus[iBin] =   bincontents[iBin]  -  hErrorPlus->GetBinContent(iBin);
+			   }
+			   }
+			}
+			else {
 			   bincontents[iBin] = hNominal->GetBinContent(iBin);
 			erroryplus[iBin] = hErrorPlus->GetBinContent(iBin) - hNominal->GetBinContent(iBin);
 			erroryminus[iBin] = hNominal->GetBinContent(iBin) - hErrorMinus->GetBinContent(iBin);
+			}
       dummy[iBin] = binwidth/2;
+
+      cout <<"  bin "<<   iBin << " error plus  " <<  hErrorPlus->GetBinContent(iBin)	  <<  " error minus  " << hErrorMinus->GetBinContent(iBin)  <<" SM total  " <<  bincontents[iBin]   << " band up "  <<  erroryplus[iBin]    << "  band down " <<  erroryminus[iBin]  << endl;
+
 	}	
 	
 	ErrorGraph = new TGraphAsymmErrors(nbins,bins,bincontents,dummy,dummy,erroryplus,erroryminus);					
 	ErrorGraph->SetFillStyle(3004);//3005 diagonal dashed //3001 ~plain //3013 double diagonal dashed 
-	ErrorGraph->SetFillColor(kRed);
-	ErrorGraph->SetLineColor(kRed);
+	ErrorGraph->SetFillColor(kBlack);
+	ErrorGraph->SetLineColor(kBlack);
 	ErrorGraph->SetLineWidth(1);
 	ErrorGraph->Draw("2"); 
 }
