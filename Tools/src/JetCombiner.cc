@@ -5,13 +5,13 @@ bool sortMVAValues (MVAValues f1, MVAValues f2) {
     }
 
 struct HighestCVSBtag {
-    bool operator()( TRootJet* j1, TRootJet* j2 ) const {
+    bool operator()( TRootPFJet* j1, TRootPFJet* j2 ) const {
         return j1->btag_combinedSecondaryVertexBJetTags() > j2->btag_combinedSecondaryVertexBJetTags();
         }
     };
 
 struct HighestPt {
-    bool operator()( TRootJet* j1, TRootJet* j2 ) const {
+    bool operator()( TRootPFJet* j1, TRootPFJet* j2 ) const {
         return j1->Pt() > j2->Pt();
         }
     };
@@ -194,7 +194,7 @@ JetCombiner::~JetCombiner() {
     if(computer_) delete computer_;
     }
 
-void JetCombiner::ProcessEvent_SingleHadTop(Dataset* dataSet, const vector<TRootMCParticle*> mcParticles, const vector<TRootJet*> selectedJets, const TLorentzVector* selectedLepton, const TRootGenEvent* genEvt, float scaleFactor) {
+void JetCombiner::ProcessEvent_SingleHadTop(Dataset* dataSet, const vector<TRootMCParticle*> mcParticles, const vector<TRootPFJet*> selectedJets, const TLorentzVector* selectedLepton, const TRootGenEvent* genEvt, float scaleFactor) {
     //initialize stuff for each event
     bool all4PartonsMatched = false; // True if the 4 ttbar semi-lep partons are matched to 4 jets (not necessarily the 4 highest pt jets)
     all4JetsMatched_MCdef_ = false; // True if the 4 highest pt jets are matched to the 4 ttbar semi-lep partons
@@ -211,7 +211,7 @@ void JetCombiner::ProcessEvent_SingleHadTop(Dataset* dataSet, const vector<TRoot
     selectedJets_.clear();
     selectedJets_ = selectedJets;
 
-    vector<TRootJet*> tempselectedJets;
+    vector<TRootPFJet*> tempselectedJets;
 
 
     relDiffEJetParton_b_ = -9999;
@@ -477,7 +477,7 @@ void JetCombiner::ProcessEvent_SingleHadTop(Dataset* dataSet, const vector<TRoot
                     float btag = -9999;
                     if(tempselectedJets.size()>0)
                         btag = tempselectedJets[bj1]->btag_combinedSecondaryVertexBJetTags();
-                    
+
                     //  float  delR =   sqrt(   pow(tempselectedJets[wj1]->Eta() - tempselectedJets[wj2]->Eta(),2) + pow(tempselectedJets[wj1]->Phi() - tempselectedJets[wj2]->Phi(),2 )   ) ;
 
                     //float  delR =  sqrt(   pow(selectedJets[0]->Eta() - selectedJets[1]->Eta(),2) + pow(selectedJets[0]->Phi() - selectedJets[1]->Phi(),2 )   )  +  sqrt(   pow(selectedJets[1]->Eta() - selectedJets[2]->Eta(),2) + pow(selectedJets[1]->Phi() - selectedJets[2]->Phi(),2 )   )  + sqrt(   pow(selectedJets[2]->Eta() - selectedJets[0]->Eta(),2) + pow(selectedJets[2]->Phi() - selectedJets[0]->Phi(),2 )) ;
@@ -783,7 +783,7 @@ void JetCombiner::ProcessEvent_SingleHadTop(Dataset* dataSet, const vector<TRoot
     if(debug) cout <<"jetcombiner: end of single had top method..."<< endl;
     }
 
-void JetCombiner::ProcessEvent(Dataset* dataSet, const vector<TRootMCParticle*> mcParticles, const vector<TRootJet*> selectedJets, const TLorentzVector* selectedLepton, vector<TRootElectron*> vectEl, vector<TRootMuon*> vectMu, const TRootGenEvent* genEvt, float scaleFactor, bool TprimeEvaluation) {
+void JetCombiner::ProcessEvent(Dataset* dataSet, const vector<TRootMCParticle*> mcParticles, const vector<TRootPFJet*> selectedJets, const TLorentzVector* selectedLepton, vector<TRootElectron*> vectEl, vector<TRootMuon*> vectMu, const TRootGenEvent* genEvt, float scaleFactor, bool TprimeEvaluation) {
     //initialize stuff for each event
     bool all4PartonsMatched = false; // True if the 4 ttbar semi-lep partons are matched to 4 jets (not necessarily the 4 highest pt jets)
     all4JetsMatched_MCdef_ = false; // True if the 4 highest pt jets are matched to the 4 ttbar semi-lep partons
@@ -1693,8 +1693,8 @@ void JetCombiner::Write(TFile* fout, bool savePNG, string pathPNG, bool plotMVAs
                 double x[100000], yBadComb[100000], yAllSemiMuBGComb[100000];
                 // set first array value to 0 to avoid warnings
                 x[0]=yBadComb[0]=yAllSemiMuBGComb[0]=0;
-                
-                
+
+
                 int nVals = 0;
 
                 cerr << " post canvas write 2"   << endl;

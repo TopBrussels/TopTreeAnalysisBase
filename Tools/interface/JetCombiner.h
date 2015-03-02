@@ -21,7 +21,7 @@
 #include "TopTreeAnalysisBase/Tools/interface/MultiSamplePlot.h"
 #include "TopTreeAnalysisBase/MCInformation/interface/JetPartonMatching.h"
 
-#include "TopTreeProducer/interface/TRootJet.h"
+#include "TopTreeProducer/interface/TRootPFJet.h"
 #include "TopTreeProducer/interface/TRootMuon.h"
 #include "TopTreeProducer/interface/TRootElectron.h"
 #include "TopTreeProducer/interface/TRootEvent.h"
@@ -41,13 +41,13 @@ struct MVAValues {
 } ;
 
 class JetCombiner {
-    
+
 public:
     JetCombiner(bool trainMVA, float Luminosity, const vector<Dataset*>& datasets, string MVAMethod = "Likelihood", bool Tprime = false, string MVAfilePostfix = "", string postfix = "");
     ~JetCombiner();
-    void ProcessEvent(Dataset* dataSet, const vector<TRootMCParticle*> mcParticles, const vector<TRootJet*> selectedJets, const TLorentzVector* selectedMuon, vector<TRootElectron*> vectEl, vector<TRootMuon*> vectMu, const TRootGenEvent* genEvt, float scaleFactor=1, bool TprimeEvaluation=false);
-    void ProcessEvent_SingleHadTop(Dataset* dataSet, const vector<TRootMCParticle*> mcParticles, const vector<TRootJet*> selectedJets, const TLorentzVector* selectedMuon, const TRootGenEvent* genEvt, float scaleFactor=1);
-    
+    void ProcessEvent(Dataset* dataSet, const vector<TRootMCParticle*> mcParticles, const vector<TRootPFJet*> selectedJets, const TLorentzVector* selectedMuon, vector<TRootElectron*> vectEl, vector<TRootMuon*> vectMu, const TRootGenEvent* genEvt, float scaleFactor=1, bool TprimeEvaluation=false);
+    void ProcessEvent_SingleHadTop(Dataset* dataSet, const vector<TRootMCParticle*> mcParticles, const vector<TRootPFJet*> selectedJets, const TLorentzVector* selectedMuon, const TRootGenEvent* genEvt, float scaleFactor=1);
+
     void ProcessEvent(Dataset* dataSet, const vector<TLorentzVector> mcParticlesForMatching, const vector<TLorentzVector> selectedJets, const vector<float> bTagValues, const TLorentzVector selectedLepton, bool isSemiLep, float scaleFactor, bool TprimeEvaluation);
     void FillResolutions(ResolutionFit* resFitLightJets, ResolutionFit* resFitBJets, ResolutionFit* resFitBJets_B=0, ResolutionFit* resFitBJets_Bbar=0);
     pair<float, vector<unsigned int> > getMVAValue(string MVAMethod, int rank); // rank 1 means the highest MVA value for this method, rank 2 the second highest, ...
@@ -64,39 +64,39 @@ public:
     TLorentzVector GetLeptBQuark();
     void EndJob(); // Do all the stuff which needs to be done after running over all the events has finished (except the plotting stuff)
     void Write(TFile* fout, bool savePNG = false, string pathPNG = string(""), bool plotMVAstuff = true);
-    
+
 private:
     map<string, MultiSamplePlot*> MSPlot_;
     map<string, TH1F*> histo1D_;
     map<string, TH2F*> histo2D_;
     map<string,TGraphAsymmErrors*> graphAsymmErr_;
-    
+
     vector<Dataset*> datasets_;
     float Luminosity_;
-    
+
     bool all4JetsMatched_MCdef_, hadronictopJetsMatched_MCdef_;
     bool all4JetsMatched_MVAdef_, hadronictopJetsMatched_MVAdef_;
-    
+
     bool Tprime_; // true if tprime analysis, false if JES/mtop analysis
     string MVAfilePostfix_;
     string postfix_;
-    
+
     float relDiffEJetParton_b_;
     float relDiffEJetParton_l1_;
     float relDiffEJetParton_l2_;
-    
+
     bool trainMVA_; // true if the MVA needs to be trained, false if the trained MVA will be used to compute stuff
     MVATrainer* trainer_;
     MVAComputer* computer_;
-    
+
     vector<MVAValues> vectorMVA_;
-    
+
     pair<unsigned int, unsigned int> leptonicBJet_, hadronicBJet_, hadronicWJet1_, hadronicWJet2_; //First index is the JET number, second one is the parton
     vector<TRootMCParticle*> mcParticlesMatching_; // MCParticles used for the matching, need to be stored to be used after the ProcessEvent fuction was called
-    vector<TRootJet*> selectedJets_; // need to be stored to be used after the ProcessEvent function was called    
-    
+    vector<TRootPFJet*> selectedJets_; // need to be stored to be used after the ProcessEvent function was called
+
     bool EndJobWasRun_;
-    
+
 };
 
 #endif
