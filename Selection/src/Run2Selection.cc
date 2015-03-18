@@ -97,10 +97,47 @@ std::vector<TRootPFJet*> Run2Selection::GetSelectedJets(float PtThr, float EtaTh
     return selectedJets;
 }
 
+
+std::vector<TRootSubstructureJet*> Run2Selection::GetSelectedFatJets(float PtThr, float EtaThr, bool applyJetID) const
+{
+    std::vector<TRootSubstructureJet*> selectedJets;
+    for(unsigned int i=0; i<jets.size(); i++)
+    {
+        TRootSubstructureJet* init_jet = (TRootSubstructureJet*) jets[i];
+        if (init_jet->jetType() == 2)
+        {
+            // PFJets
+            const TRootSubstructureJet* PFJet = static_cast<const TRootSubstructureJet*>(init_jet);
+
+            if( fabs(PFJet->Eta())<EtaThr && PFJet->Pt()>PtThr )
+            {
+                if ( applyJetID )
+                {
+                    if(passPFJetID8TEV(PFJet))//This is the 8TeV Recommended Loose PFJet ID.  This should be updated when 13TeV recommendations become available.
+                    {
+                        selectedJets.push_back(init_jet);
+                    }
+                }
+                else selectedJets.push_back(init_jet);
+            }
+        }
+    }
+    std::sort(selectedJets.begin(),selectedJets.end(),HighestPt());
+    return selectedJets;
+}
+
+
 std::vector<TRootPFJet*> Run2Selection::GetSelectedJets() const
 {
     return GetSelectedJets(30,2.5,true);
 }
+
+
+std::vector<TRootSubstructureJet*> Run2Selection::GetSelectedFatJets() const
+{
+    return GetSelectedFatJets(30,2.5,true);
+}
+
 
 std::vector<TRootPFJet*> Run2Selection::GetSelectedBJets(const std::vector<TRootPFJet*>& seljets, int& btagAlgo, float& btagCut) const
 {

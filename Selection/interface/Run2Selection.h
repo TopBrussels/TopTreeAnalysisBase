@@ -14,6 +14,7 @@
 #include "TopTreeProducer/interface/TRootJet.h"
 #include "TopTreeProducer/interface/TRootCaloJet.h"
 #include "TopTreeProducer/interface/TRootPFJet.h"
+#include "TopTreeProducer/interface/TRootSubstructureJet.h"
 #include "TopTreeProducer/interface/TRootJPTJet.h"
 #include "TopTreeProducer/interface/TRootElectron.h"
 #include "TopTreeProducer/interface/TRootMET.h"
@@ -82,6 +83,9 @@ public:
     std::vector<TRootPFJet*> GetSelectedBJets(const std::vector<TRootPFJet*>& seljets, Int_t& btagAlgo, Float_t& btagCut) const;
     std::vector<TRootPFJet*> GetSelectedJets() const;
     std::vector<TRootPFJet*> GetSelectedJets(float PtThr, float EtaThr, bool applyJetID = true) const;
+    std::vector<TRootSubstructureJet*> GetSelectedFatJets() const;
+    std::vector<TRootSubstructureJet*> GetSelectedFatJets(float PtThr, float EtaThr, bool applyJetID = true) const;
+
 
 
     void setElectronIsoCorrType(int corrType = 1);
