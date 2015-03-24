@@ -76,7 +76,7 @@ MVAComputer::MVAComputer(std::string Method, std::string TrainerOutputRootFile, 
   Use[Method] = 1;
 
   // create output root-file (it will contain MVA output and the S and B Trees)
- 
+  cout <<"updating root file"<< endl;
   trainingOutput = new TFile(TrainerOutputRootFile_.c_str(),"UPDATE");
 
   // initialise TMVA Reader
@@ -93,9 +93,10 @@ MVAComputer::MVAComputer(std::string Method, std::string TrainerOutputRootFile, 
     
   }
 
+ 
   // book method(s)
   TString prefix = (TString) WeightsPrefix;
-  TString dir = "weights" + postfix_ + "/";
+  TString dir = "MVA/weights" + postfix_ + "/";
 
 	cout << "postfix_" << postfix_ << endl;
   
@@ -147,7 +148,7 @@ void MVAComputer::addMethod(std::string Method) {
   
   // book method(s)
   TString prefix = (TString) WeightsPrefix_;
-  TString dir = "weights" + postfix_ + "/";
+  TString dir = "MVA/weights" + postfix_ + "/";
  
   TString methodName = Method + " method";
   TString weightfile = dir + prefix + "_" + TString(Method) + ".weights.xml";

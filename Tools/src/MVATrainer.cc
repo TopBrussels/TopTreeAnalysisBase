@@ -168,7 +168,7 @@ void MVATrainer::TrainMVA(std::string SplitMode, std::string CutsS, int nTrainS,
   
   std::cout << std::endl << "==> Training the MVA method" << std::endl;
 
-  std::string dirname = "weights" + postfix; 
+  std::string dirname = "MVA/weights" + postfix; 
 	(TMVA::gConfig().GetIONames()).fWeightFileDir = dirname.c_str();
 
 	//std::cout << "dirname changed?" << std::endl;
