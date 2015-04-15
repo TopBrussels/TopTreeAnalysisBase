@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: RuleFitParams.h 40005 2011-06-27 15:29:10Z stelzer $
+// @(#)root/tmva $Id$
 // Author: Andreas Hoecker, Joerg Stelzer, Fredrik Tegenfeldt, Helge Voss
 
 /**********************************************************************************
@@ -33,15 +33,15 @@
 #ifndef ROOT_TMVA_RuleFitParams
 #define ROOT_TMVA_RuleFitParams
 
-#if ROOT_VERSION_CODE >= 364802
+// #if ROOT_VERSION_CODE >= 364802
 #ifndef ROOT_TMathBase
 #include "TMathBase.h"
 #endif
-#else
-#ifndef ROOT_TMath
-#include "TMath.h"
-#endif
-#endif
+// #else
+// #ifndef ROOT_TMath
+// #include "TMath.h"
+// #endif
+// #endif
 
 #ifndef ROOT_TMVA_Event
 #include "TMVA/Event.h"
@@ -135,7 +135,7 @@ namespace TMVA {
    protected:
 
       // typedef of an Event const iterator
-      typedef std::vector<TMVA::Event *>::const_iterator  EventItr;
+      typedef std::vector<const TMVA::Event *>::const_iterator  EventItr;
 
       // init ntuple
       void InitNtuple();

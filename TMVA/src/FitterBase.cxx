@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: FitterBase.cxx 33928 2010-06-15 16:19:31Z stelzer $ 
+// @(#)root/tmva $Id$ 
 // Author: Andreas Hoecker, Peter Speckmayer, Joerg Stelzer, Helge Voss
 
 /**********************************************************************************

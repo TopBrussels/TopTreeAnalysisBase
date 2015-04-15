@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: SimulatedAnnealing.h 40005 2011-06-27 15:29:10Z stelzer $   
+// @(#)root/tmva $Id$   
 // Author: Andreas Hoecker, Joerg Stelzer, Helge Voss, Krzysztof Danielowski, Kamil Kraszewski, Maciej Kruk
 
 /**********************************************************************************

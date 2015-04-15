@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: MsgLogger.h 40005 2011-06-27 15:29:10Z stelzer $
+// @(#)root/tmva $Id$
 // Author: Attila Krasznahorkay, Andreas Hoecker, Joerg Stelzer, Eckhard von Toerne
 
 /**********************************************************************************
@@ -43,6 +43,9 @@
 #include <sstream>
 #include <iostream>
 #include <map>
+#if __cplusplus > 199711L
+#include <atomic>
+#endif
 
 // ROOT include(s)
 #ifndef ROOT_TObject
@@ -75,7 +78,7 @@ namespace TMVA {
       std::string GetPrintedSource()   const;
       std::string GetFormattedSource() const;
 
-      static UInt_t GetMaxSourceSize()                    { return (UInt_t)fgMaxSourceSize; }
+      static UInt_t GetMaxSourceSize()                    { return (const UInt_t)fgMaxSourceSize; }
 
       // Needed for copying
       MsgLogger& operator= ( const MsgLogger& parent );
@@ -113,13 +116,20 @@ namespace TMVA {
       static const std::string fgPrefix;          // the prefix of the source name
       static const std::string fgSuffix;          // suffix following source name
       EMsgType                 fActiveType;       // active type
-      static UInt_t            fgMaxSourceSize;   // maximum length of source name
+      static const UInt_t      fgMaxSourceSize;   // maximum length of source name
+#if __cplusplus > 199711L
+      static std::atomic<Bool_t> fgOutputSupressed; // disable the output globaly (used by generic booster)
+      static std::atomic<Bool_t> fgInhibitOutput;   // flag to suppress all output
+
+      static std::atomic<const std::map<EMsgType, std::string>*> fgTypeMap;   // matches output types with strings
+      static std::atomic<const std::map<EMsgType, std::string>*> fgColorMap;  // matches output types with terminal colors
+#else
       static Bool_t            fgOutputSupressed; // disable the output globaly (used by generic booster)
       static Bool_t            fgInhibitOutput;   // flag to suppress all output
-      static Int_t             fgInstanceCounter; // counts open MsgLogger instances
 
-      static std::map<EMsgType, std::string>* fgTypeMap;   // matches output types with strings
-      static std::map<EMsgType, std::string>* fgColorMap;  // matches output types with terminal colors
+      static const std::map<EMsgType, std::string>* fgTypeMap;   // matches output types with strings
+      static const std::map<EMsgType, std::string>* fgColorMap;  // matches output types with terminal colors
+#endif
       EMsgType                                fMinType;    // minimum type for output
 
       ClassDef(MsgLogger,0) // Ostringstream derivative to redirect and format logging output
@@ -148,11 +158,8 @@ namespace TMVA {
       return *this;
    }
 
-   // Although the proper definition of "Endl" as a function pointer
-   // would be nicer C++-wise, it introduces some "unused variable"
-   // warnings so let's use the #define definition after all...
-   //   static MsgLogger& ( *Endl )( MsgLogger& ) = &MsgLogger::Endmsg;
-#define Endl MsgLogger::Endmsg
+   // Shortcut
+   inline MsgLogger& Endl(MsgLogger& ml) { return MsgLogger::Endmsg(ml); }
 
 }
 

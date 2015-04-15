@@ -18,7 +18,6 @@
 #include "TSystem.h"
 #include "TROOT.h"
 
-#include "TMVAMultiClassGui.C"
 
 #ifndef __CINT__
 #include "TMVA/Tools.h"
@@ -30,7 +29,16 @@ using namespace TMVA;
 void TMVAMulticlass( TString myMethodList = "" )
 {
    
+   // This loads the library
    TMVA::Tools::Instance();
+
+   // to get access to the GUI and all tmva macros
+   TString tmva_dir(TString(gRootDir) + "/tmva");
+   if(gSystem->Getenv("TMVASYS"))
+      tmva_dir = TString(gSystem->Getenv("TMVASYS"));
+   gROOT->SetMacroPath(tmva_dir + "/test/:" + gROOT->GetMacroPath() );
+   gROOT->ProcessLine(".L TMVAMultiClassGui.C");
+
    
    //---------------------------------------------------------------
    // default MVA methods to be trained + tested
@@ -105,7 +113,7 @@ void TMVAMulticlass( TString myMethodList = "" )
    factory->PrepareTrainingAndTestTree( "", "SplitMode=Random:NormMode=NumEvents:!V" );
 
    if (Use["BDTG"]) // gradient boosted decision trees
-      factory->BookMethod( TMVA::Types::kBDT, "BDTG", "!H:!V:NTrees=1000:BoostType=Grad:Shrinkage=0.10:UseBaggedGrad:GradBaggingFraction=0.50:nCuts=20:NNodesMax=8");
+      factory->BookMethod( TMVA::Types::kBDT, "BDTG", "!H:!V:NTrees=1000:BoostType=Grad:Shrinkage=0.10:UseBaggedBoost:BaggedSampleFraction=0.50:nCuts=20:MaxDepth=2");
    if (Use["MLP"]) // neural network
       factory->BookMethod( TMVA::Types::kMLP, "MLP", "!H:!V:NeuronType=tanh:NCycles=1000:HiddenLayers=N+5,5:TestRate=5:EstimatorType=MSE");
    if (Use["FDA_GA"]) // functional discriminant with GA minimizer

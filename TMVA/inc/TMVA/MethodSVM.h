@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: MethodSVM.h 40005 2011-06-27 15:29:10Z stelzer $    
+// @(#)root/tmva $Id$    
 // Author: Marcin Wolter, Andrzej Zemla
 
 /**********************************************************************************

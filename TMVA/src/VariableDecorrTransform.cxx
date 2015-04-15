@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: VariableDecorrTransform.cxx 40005 2011-06-27 15:29:10Z stelzer $
+// @(#)root/tmva $Id$
 // Author: Andreas Hoecker, Joerg Stelzer, Helge Voss, Eckhard von Toerne
 
 /**********************************************************************************
@@ -73,7 +73,7 @@ void TMVA::VariableDecorrTransform::Initialize()
 }
 
 //_______________________________________________________________________
-Bool_t TMVA::VariableDecorrTransform::PrepareTransformation( const std::vector<Event*>& events )
+Bool_t TMVA::VariableDecorrTransform::PrepareTransformation (const std::vector<Event*>& events)
 {
    // calculate the decorrelation matrix and the normalization
    Initialize();
@@ -233,7 +233,7 @@ const TMVA::Event* TMVA::VariableDecorrTransform::InverseTransform( const TMVA::
 
 
 //_______________________________________________________________________
-void TMVA::VariableDecorrTransform::CalcSQRMats( const std::vector<Event*>& events, Int_t maxCls )
+void TMVA::VariableDecorrTransform::CalcSQRMats( const std::vector< Event*>& events, Int_t maxCls )
 {
    // compute square-root matrices for signal and background
 
@@ -401,7 +401,7 @@ void TMVA::VariableDecorrTransform::ReadTransformationFromStream( std::istream& 
 }
 
 //_______________________________________________________________________
-void TMVA::VariableDecorrTransform::PrintTransformation( ostream& ) 
+void TMVA::VariableDecorrTransform::PrintTransformation( std::ostream& ) 
 {
    // prints the transformation matrix
    Int_t cls = 0;

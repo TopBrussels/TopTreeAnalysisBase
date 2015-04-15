@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: IMethod.h 40005 2011-06-27 15:29:10Z stelzer $
+// @(#)root/tmva $Id$
 // Author: Andreas Hoecker, Joerg Stelzer, Helge Voss, Kai Voss
 
 /**********************************************************************************
@@ -93,9 +93,6 @@ namespace TMVA {
 
       // print help message
       virtual void PrintHelpMessage() const = 0;
-
-      // perfrom extra actions during the boosting at different stages
-      virtual Bool_t MonitorBoost( MethodBoost* boost) = 0;
 
       virtual void Init() = 0;
       virtual void DeclareOptions() = 0;

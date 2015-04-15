@@ -12,7 +12,7 @@ enum HistType { MVAType = 0, ProbaType = 1, RarityType = 2, CompareType = 3 };
 
 // input: - Input file (result from TMVA)
 //        - use of TMVA plotting TStyle
-void mvas( TString fin = "TMVA.root", HistType htype = MVAType, Bool_t useTMVAStyle = kTRUE )
+void mvas( TString fin = "TMVA.root", int htype = MVAType, Bool_t useTMVAStyle = kTRUE )
 {
    // set style and remove existing canvas'
    TMVAGlob::Initialize( useTMVAStyle );
@@ -58,7 +58,7 @@ void mvas( TString fin = "TMVA.root", HistType htype = MVAType, Bool_t useTMVASt
          TString methodTitle;
          TMVAGlob::GetMethodTitle(methodTitle,titDir);
 
-         cout << "--- Found directory for method: " << methodName << "::" << methodTitle << flush;
+	 std::cout << "--- Found directory for method: " << methodName << "::" << methodTitle << std::flush;
          TString hname = "MVA_" + methodTitle;
          if      (htype == ProbaType  ) hname += "_Proba";
          else if (htype == RarityType ) hname += "_Rarity";
@@ -196,7 +196,7 @@ void mvas( TString fin = "TMVA.root", HistType htype = MVAType, Bool_t useTMVASt
             bgdOv->SetLineColor( col );
             bgdOv->Draw("e1same");
 
-            ymax = TMath::Max( ymax, TMath::Max( sigOv->GetMaximum(), bgdOv->GetMaximum() )*maxMult );
+            ymax = TMath::Max( ymax, float(TMath::Max( sigOv->GetMaximum(), bgdOv->GetMaximum() )*maxMult ));
             frame->GetYaxis()->SetLimits( 0, ymax );
       
             // for better visibility, plot thinner lines
@@ -205,8 +205,8 @@ void mvas( TString fin = "TMVA.root", HistType htype = MVAType, Bool_t useTMVASt
 
             // perform K-S test
             cout << "--- Perform Kolmogorov-Smirnov tests" << endl;
-            Double_t kolS = sig->KolmogorovTest( sigOv );
-            Double_t kolB = bgd->KolmogorovTest( bgdOv );
+            Double_t kolS = sig->KolmogorovTest( sigOv, "X" );
+            Double_t kolB = bgd->KolmogorovTest( bgdOv, "X" );
             cout << "--- Goodness of signal (background) consistency: " << kolS << " (" << kolB << ")" << endl;
 
             TString probatext = Form( "Kolmogorov-Smirnov test: signal (background) probability = %5.3g (%5.3g)", kolS, kolB );

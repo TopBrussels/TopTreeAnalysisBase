@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: MethodPDERS.h 40005 2011-06-27 15:29:10Z stelzer $
+// @(#)root/tmva $Id$
 // Author: Andreas Hoecker, Yair Mahalalel, Joerg Stelzer, Helge Voss, Kai Voss
 
 /**********************************************************************************
@@ -91,7 +91,7 @@ namespace TMVA {
       void AddWeightsXMLTo( void* parent ) const;
 
       // read weights from file
-      void ReadWeightsFromStream( istream& istr );
+      void ReadWeightsFromStream( std::istream& istr );
       void ReadWeightsFromStream( TFile& istr );
       void ReadWeightsFromXML( void* wghtnode );
 
@@ -219,8 +219,9 @@ namespace TMVA {
       Float_t GetError         ( Float_t countS, Float_t countB,
                                  Float_t sumW2S, Float_t sumW2B ) const;
 
-      // this carrier
-      static MethodPDERS* fgThisPDERS; // this pointer (required by root finder)
+      // This is a workaround for OSx where static thread_local data members are
+      // not supported. The C++ solution would indeed be the following:
+      static MethodPDERS*& GetMethodPDERSThreadLocal() {TTHREAD_TLS(MethodPDERS*) fgThisPDERS(nullptr); return fgThisPDERS;};
       void UpdateThis();
 
       void Init( void );

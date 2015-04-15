@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: Results.h 40005 2011-06-27 15:29:10Z stelzer $
+// @(#)root/tmva $Id$
 // Author: Andreas Hoecker, Peter Speckmayer, Joerg Stelzer, Helge Voss
 
 /**********************************************************************************
@@ -52,6 +52,7 @@
 #endif
 
 class TH1;
+class TH2;
 class TGraph;
 
 namespace TMVA {
@@ -63,7 +64,7 @@ namespace TMVA {
 
    public:
 
-      Results( const DataSetInfo* dsi );
+      Results( const DataSetInfo* dsi, TString resultsName  );
       virtual ~Results();
 
       // setters
@@ -77,8 +78,11 @@ namespace TMVA {
       TList*              GetStorage()     const { return fStorage; }
       TObject*            GetObject(const TString & alias) const;
       TH1*                GetHist(const TString & alias) const;
+      TH2*                GetHist2D(const TString & alias) const;
       TGraph*             GetGraph(const TString & alias) const;
       virtual Types::EAnalysisType  GetAnalysisType() { return Types::kNoAnalysisType; }
+      //test
+      Bool_t              DoesExist(const TString & alias) const;
 
       // delete all stored data
       void Delete();

@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: PDEFoamDensityBase.cxx 44110 2012-05-04 08:34:05Z evt $
+// @(#)root/tmva $Id$
 // Author: Tancredi Carli, Dominik Dannheim, Alexander Voigt
 
 /**********************************************************************************
@@ -66,6 +66,7 @@
 // _____________________________________________________________________
 
 #include <numeric>
+#include <functional>
 
 #ifndef ROOT_TMVA_PDEFoamDensityBase
 #include "TMVA/PDEFoamDensityBase.h"

@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: KDEKernel.cxx 29195 2009-06-24 10:39:49Z brun $ 
+// @(#)root/tmva $Id$ 
 // Author: Asen Christov
 
 /**********************************************************************************
@@ -27,15 +27,15 @@
 #include "TH1F.h"
 #include "TF1.h"
 
-#if ROOT_VERSION_CODE >= 364802
-#ifndef ROOT_TMathBase
-#include "TMathBase.h"
-#endif
-#else
-#ifndef ROOT_TMath
+// #if ROOT_VERSION_CODE >= 364802
+// #ifndef ROOT_TMathBase
+// #include "TMathBase.h"
+// #endif
+// #else
+// #ifndef ROOT_TMath
 #include "TMath.h"
-#endif
-#endif
+// #endif
+// #endif
 
 #include "TMVA/KDEKernel.h"
 #include "TMVA/MsgLogger.h"

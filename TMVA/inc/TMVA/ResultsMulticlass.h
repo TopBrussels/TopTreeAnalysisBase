@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: ResultsMulticlass.h 40005 2011-06-27 15:29:10Z stelzer $
+// @(#)root/tmva $Id$
 // Author: Andreas Hoecker, Peter Speckmayer, Joerg Stelzer, Helge Voss, Jan Therhaag
 
 /**********************************************************************************
@@ -66,7 +66,7 @@ namespace TMVA {
 
    public:
 
-      ResultsMulticlass( const DataSetInfo* dsi );
+      ResultsMulticlass( const DataSetInfo* dsi, TString resultsName  );
       ~ResultsMulticlass();
 
       // setters

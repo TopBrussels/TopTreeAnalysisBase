@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: TMVAMultipleBackgroundExample.cxx 39989 2011-06-27 13:19:22Z stelzer $
+// @(#)root/tmva $Id$
 /**********************************************************************************
  * Project   : TMVA - a Root-integrated toolkit for multivariate data analysis    *
  * Package   : TMVA                                                               *
@@ -85,7 +85,7 @@ void Training(){
 
    // Boosted Decision Trees
    factory->BookMethod( TMVA::Types::kBDT, "BDTG",
-			"!H:!V:NTrees=1000:BoostType=Grad:Shrinkage=0.30:UseBaggedGrad:GradBaggingFraction=0.6:SeparationType=GiniIndex:nCuts=20:NNodesMax=5" );
+			"!H:!V:NTrees=1000:BoostType=Grad:Shrinkage=0.30:UseBaggedBoost:BaggedSampleFraction=0.6:SeparationType=GiniIndex:nCuts=20:MaxDepth=2" );
    factory->TrainAllMethods();
    factory->TestAllMethods();
    factory->EvaluateAllMethods();
@@ -118,7 +118,7 @@ void Training(){
 
    // Boosted Decision Trees
    factory->BookMethod( TMVA::Types::kBDT, "BDTG",
-			"!H:!V:NTrees=1000:BoostType=Grad:Shrinkage=0.30:UseBaggedGrad:GradBaggingFraction=0.6:SeparationType=GiniIndex:nCuts=20:NNodesMax=5" );
+			"!H:!V:NTrees=1000:BoostType=Grad:Shrinkage=0.30:UseBaggedBoost:BaggedSampleFraction=0.6:SeparationType=GiniIndex:nCuts=20:MaxDepth=2" );
    factory->TrainAllMethods();
    factory->TestAllMethods();
    factory->EvaluateAllMethods();
@@ -151,7 +151,7 @@ void Training(){
 
    // Boosted Decision Trees
    factory->BookMethod( TMVA::Types::kBDT, "BDTG",
-			"!H:!V:NTrees=1000:BoostType=Grad:Shrinkage=0.30:UseBaggedGrad:GradBaggingFraction=0.5:SeparationType=GiniIndex:nCuts=20:NNodesMax=5" );
+			"!H:!V:NTrees=1000:BoostType=Grad:Shrinkage=0.30:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:MaxDepth=2" );
    factory->TrainAllMethods();
    factory->TestAllMethods();
    factory->EvaluateAllMethods();

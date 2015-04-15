@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: MethodCuts.h 40005 2011-06-27 15:29:10Z stelzer $
+// @(#)root/tmva $Id$
 // Author: Andreas Hoecker, Matt Jachowski, Peter Speckmayer, Helge Voss, Kai Voss
 
 /**********************************************************************************

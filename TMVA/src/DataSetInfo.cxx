@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: DataSetInfo.cxx 44110 2012-05-04 08:34:05Z evt $
+// @(#)root/tmva $Id$
 // Author: Joerg Stelzer, Peter Speckmeier
 
 /**********************************************************************************
@@ -70,6 +70,10 @@ TMVA::DataSetInfo::DataSetInfo(const TString& name)
      fClasses( 0 ),
      fNormalization( "NONE" ),
      fSplitOptions(""),
+     fTrainingSumSignalWeights(-1),
+     fTrainingSumBackgrWeights(-1),
+     fTestingSumSignalWeights (-1),
+     fTestingSumBackgrWeights (-1),
      fOwnRootDir(0),
      fVerbose( kFALSE ),
      fSignalClass(0),
@@ -460,5 +464,23 @@ Int_t TMVA::DataSetInfo::GetClassNameMaxLength() const
    }
 
    return maxL;
+}
+
+
+Double_t TMVA::DataSetInfo::GetTrainingSumSignalWeights(){
+   if (fTrainingSumSignalWeights<0) Log() << kFATAL << " asking for the sum of training signal event weights which is not initicalised yet" << Endl;
+   return fTrainingSumSignalWeights;
+}
+Double_t TMVA::DataSetInfo::GetTrainingSumBackgrWeights(){
+   if (fTrainingSumBackgrWeights<0) Log() << kFATAL << " asking for the sum of training backgr event weights which is not initicalised yet" << Endl;
+   return fTrainingSumBackgrWeights;
+}
+Double_t TMVA::DataSetInfo::GetTestingSumSignalWeights (){
+   if (fTestingSumSignalWeights<0) Log() << kFATAL << " asking for the sum of testing signal event weights which is not initicalised yet" << Endl;
+   return fTestingSumSignalWeights ;
+}
+Double_t TMVA::DataSetInfo::GetTestingSumBackgrWeights (){
+   if (fTestingSumBackgrWeights<0) Log() << kFATAL << " asking for the sum of testing backgr event weights which is not initicalised yet" << Endl;
+   return fTestingSumBackgrWeights ;
 }
 

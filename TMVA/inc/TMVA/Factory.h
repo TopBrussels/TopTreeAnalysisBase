@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: Factory.h 40005 2011-06-27 15:29:10Z stelzer $   
+// @(#)root/tmva $Id$   
 // Author: Andreas Hoecker, Peter Speckmayer, Joerg Stelzer, Helge Voss, Kai Voss, Eckhard von Toerne, Jan Therhaag 
 
 /**********************************************************************************
@@ -184,8 +184,8 @@ namespace TMVA {
       MethodBase* BookMethod( TMVA::Types::EMVA /*theMethod*/, 
                               TString /*methodTitle*/, 
                               TString /*methodOption*/, 
-                              TMVA::Types::EMVA /*theCommittee*/, 
-                              TString /*committeeOption = ""*/ ) { return 0; } 
+                              TMVA::Types::EMVA /*theComposite*/, 
+                              TString /*compositeOption = ""*/ ) { return 0; } 
 
       // optimize all booked methods (well, if desired by the method)
       void OptimizeAllMethods                 (TString fomType="ROCIntegral", TString fitType="FitGA");

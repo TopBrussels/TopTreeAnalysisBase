@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: TNeuronInputSum.h 40005 2011-06-27 15:29:10Z stelzer $
+// @(#)root/tmva $Id$
 // Author: Matt Jachowski
 
 /**********************************************************************************

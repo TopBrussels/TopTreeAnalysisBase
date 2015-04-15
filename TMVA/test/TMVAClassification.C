@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: TMVAClassification.C 44112 2012-05-04 10:00:41Z evt $
+// @(#)root/tmva $Id$
 /**********************************************************************************
  * Project   : TMVA - a ROOT-integrated toolkit for multivariate data analysis    *
  * Package   : TMVA                                                               *
@@ -40,6 +40,7 @@
 #include "TSystem.h"
 #include "TROOT.h"
 
+
 #if not defined(__CINT__) || defined(__MAKECINT__)
 // needs to be included when makecint runs (ACLIC)
 #include "TMVA/Factory.h"
@@ -68,10 +69,8 @@ void TMVAClassification( TString myMethodList = "" )
    TMVA::Tools::Instance();
 
    // to get access to the GUI and all tmva macros
-   TString tmva_dir(TString(gRootDir) + "/tmva");
-   if(gSystem->Getenv("TMVASYS"))
-      tmva_dir = TString(gSystem->Getenv("TMVASYS"));
-   gROOT->SetMacroPath(tmva_dir + "/test/:" + gROOT->GetMacroPath() );
+   TString thisdir = gSystem->DirName(gInterpreter->GetCurrentMacroName());
+   gROOT->SetMacroPath(thisdir + ":" + gROOT->GetMacroPath());
    gROOT->ProcessLine(".L TMVAGui.C");
 
    // Default MVA methods to be trained + tested
@@ -201,7 +200,7 @@ void TMVAClassification( TString myMethodList = "" )
    TString fname = "./tmva_class_example.root";
    
    if (gSystem->AccessPathName( fname ))  // file does not exist in local directory
-      gSystem->Exec("wget http://root.cern.ch/files/tmva_class_example.root");
+      gSystem->Exec("curl -O http://root.cern.ch/files/tmva_class_example.root");
    
    TFile *input = TFile::Open( fname );
    
@@ -433,24 +432,23 @@ void TMVAClassification( TString myMethodList = "" )
    // Boosted Decision Trees
    if (Use["BDTG"]) // Gradient Boost
       factory->BookMethod( TMVA::Types::kBDT, "BDTG",
-                           "!H:!V:NTrees=1000:BoostType=Grad:Shrinkage=0.10:UseBaggedGrad:GradBaggingFraction=0.5:nCuts=20:NNodesMax=5" );
+                           "!H:!V:NTrees=1000:MinNodeSize=2.5%:BoostType=Grad:Shrinkage=0.10:UseBaggedBoost:BaggedSampleFraction=0.5:nCuts=20:MaxDepth=2" );
 
    if (Use["BDT"])  // Adaptive Boost
       factory->BookMethod( TMVA::Types::kBDT, "BDT",
-                           "!H:!V:NTrees=850:nEventsMin=150:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning" );
-
+                           "!H:!V:NTrees=850:MinNodeSize=2.5%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20" );
 
    if (Use["BDTB"]) // Bagging
       factory->BookMethod( TMVA::Types::kBDT, "BDTB",
-                           "!H:!V:NTrees=400:BoostType=Bagging:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning" );
+                           "!H:!V:NTrees=400:BoostType=Bagging:SeparationType=GiniIndex:nCuts=20" );
 
    if (Use["BDTD"]) // Decorrelation + Adaptive Boost
       factory->BookMethod( TMVA::Types::kBDT, "BDTD",
-                           "!H:!V:NTrees=400:nEventsMin=400:MaxDepth=3:BoostType=AdaBoost:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning:VarTransform=Decorrelate" );
+                           "!H:!V:NTrees=400:MinNodeSize=5%:MaxDepth=3:BoostType=AdaBoost:SeparationType=GiniIndex:nCuts=20:VarTransform=Decorrelate" );
 
    if (Use["BDTF"])  // Allow Using Fisher discriminant in node splitting for (strong) linearly correlated variables
       factory->BookMethod( TMVA::Types::kBDT, "BDTMitFisher",
-                           "!H:!V:NTrees=50:nEventsMin=150:UseFisherCuts:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning" );
+                           "!H:!V:NTrees=50:MinNodeSize=2.5%:UseFisherCuts:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:SeparationType=GiniIndex:nCuts=20" );
 
    // RuleFit -- TMVA implementation of Friedman's method
    if (Use["RuleFit"])
@@ -463,8 +461,9 @@ void TMVAClassification( TString myMethodList = "" )
 
    // ---- Now you can optimize the setting (configuration) of the MVAs using the set of training events
 
+   // ---- STILL EXPERIMENTAL and only implemented for BDT's ! 
    // factory->OptimizeAllMethods("SigEffAt001","Scan");
-   // factory->OptimizeAllMethods("ROCIntegral","GA");
+   // factory->OptimizeAllMethods("ROCIntegral","FitGA");
 
    // --------------------------------------------------------------------------------------------------
 
@@ -490,5 +489,6 @@ void TMVAClassification( TString myMethodList = "" )
    delete factory;
 
    // Launch the GUI for the root macros
-   if (!gROOT->IsBatch()) TMVAGui( outfileName );
+   if (!gROOT->IsBatch())
+      gROOT->ProcessLine(TString::Format("TMVAGui(\"%s\")", outfileName.Data()));
 }

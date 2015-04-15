@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: KDEKernel.h 40005 2011-06-27 15:29:10Z stelzer $ 
+// @(#)root/tmva $Id$ 
 // Author: Asen Christov
 
 /**********************************************************************************
@@ -36,6 +36,10 @@
 // KDE Kernel for "smoothing" the PDFs                                  //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
+
+#ifndef ROOT_Rtypes
+#include "Rtypes.h"
+#endif
 
 class TH1;
 class TH1F;

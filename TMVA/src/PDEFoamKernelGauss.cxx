@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: PDEFoamKernelGauss.cxx 39848 2011-06-21 11:52:58Z evt $
+// @(#)root/tmva $Id$
 // Author: Dominik Dannheim, Alexander Voigt
 
 /**********************************************************************************

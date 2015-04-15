@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: MethodMLP.h 40005 2011-06-27 15:29:10Z stelzer $
+// @(#)root/tmva $Id$
 // Author: Krzysztof Danielowski, Andreas Hoecker, Matt Jachowski, Kamil Kraszewski, Maciej Kruk, Peter Speckmayer, Joerg Stelzer, Eckhard von Toerne, Jan Therhaag, Jiahang Zhong
 
 /**********************************************************************************
@@ -167,7 +167,7 @@ namespace TMVA {
       void     TrainOneEvent( Int_t ievt);
       Double_t GetDesiredOutput( const Event* ev );
       void     UpdateNetwork( Double_t desired, Double_t eventWeight=1.0 );
-      void     UpdateNetwork(std::vector<Float_t>& desired, Double_t eventWeight=1.0);
+      void     UpdateNetwork(const std::vector<Float_t>& desired, Double_t eventWeight=1.0);
       void     CalculateNeuronDeltas();
       void     UpdateSynapses();
       void     AdjustSynapseWeights();

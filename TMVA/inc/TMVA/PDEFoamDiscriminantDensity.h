@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: PDEFoamDiscriminantDensity.h 40005 2011-06-27 15:29:10Z stelzer $
+// @(#)root/tmva $Id$
 // Author: Tancredi Carli, Dominik Dannheim, Alexander Voigt
 
 /**********************************************************************************
@@ -50,7 +50,7 @@ namespace TMVA
       PDEFoamDiscriminantDensity();
       PDEFoamDiscriminantDensity(std::vector<Double_t> box, UInt_t cls);
       PDEFoamDiscriminantDensity(const PDEFoamDiscriminantDensity&);
-      virtual ~PDEFoamDiscriminantDensity() {};
+      virtual ~PDEFoamDiscriminantDensity() {}
 
       // main function used by PDEFoam
       // returns discriminant density N_class/N_total at a given point

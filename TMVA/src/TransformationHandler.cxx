@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: TransformationHandler.cxx 44118 2012-05-04 12:29:18Z evt $
+// @(#)root/tmva $Id$
 // Author: Andreas Hoecker, Peter Speckmayer, Joerg Stelzer, Helge Voss, Eckhard von Toerne, Jan Therhaag
 
 /**********************************************************************************
@@ -76,11 +76,11 @@ TMVA::TransformationHandler::TransformationHandler( DataSetInfo& dsi, const TStr
      fLogger     ( new MsgLogger(TString("TFHandler_" + callerName).Data(), kINFO) )
 {
    // constructor
-
+   
    // produce one entry for each class and one entry for all classes. If there is only one class, 
    // produce only one entry
    fNumC = (dsi.GetNClasses()<= 1) ? 1 : dsi.GetNClasses()+1;
-
+   
    fVariableStats.resize( fNumC );
    for (Int_t i=0; i<fNumC; i++ ) fVariableStats.at(i).resize(dsi.GetNVariables() + dsi.GetNTargets());
 }
@@ -110,7 +110,7 @@ TMVA::VariableTransformBase* TMVA::TransformationHandler::AddTransformation( Var
    trf->Log().SetSource(TString(fCallerName+"_"+tfname+"_TF").Data());
    fTransformations.Add(trf);
    fTransformationsReferenceClasses.push_back( cls );
-  return trf;
+   return trf;
 }
 
 //_______________________________________________________________________
@@ -168,9 +168,9 @@ const TMVA::Event* TMVA::TransformationHandler::InverseTransform( const Event* e
    UInt_t nvars = 0, ntgts = 0, nspcts = 0;
    while (VariableTransformBase *trf = (VariableTransformBase*) trIt() ) { // shouldn't be the transformation called in the inverse order for the inversetransformation?????
       if (trf->IsCreated()) {
-	 trf->CountVariableTypes( nvars, ntgts, nspcts );	 
-	 if( !(suppressIfNoTargets && ntgts==0) )
-	    trEv = trf->InverseTransform(ev, (*rClsIt) );
+         trf->CountVariableTypes( nvars, ntgts, nspcts );	 
+         if( !(suppressIfNoTargets && ntgts==0) )
+            trEv = trf->InverseTransform(ev, (*rClsIt) );
       }
       else break;
       --rClsIt;
@@ -178,87 +178,69 @@ const TMVA::Event* TMVA::TransformationHandler::InverseTransform( const Event* e
    return trEv;
 
 
-//    TListIter trIt(&fTransformations);
-//    std::vector< Int_t >::const_iterator rClsIt = fTransformationsReferenceClasses.begin();
-//    const Event* trEv = ev;
-//    UInt_t nvars = 0, ntgts = 0, nspcts = 0;
-//    while (VariableTransformBase *trf = (VariableTransformBase*) trIt() ) { // shouldn't be the transformation called in the inverse order for the inversetransformation?????
-//       if (trf->IsCreated()) {
-// 	 trf->CountVariableTypes( nvars, ntgts, nspcts );	 
-// 	 if( !(suppressIfNoTargets && ntgts==0) )
-// 	    trEv = trf->InverseTransform(ev, (*rClsIt) );
-//       }
-//       else break;
-//       rClsIt++;
-//    }
-//    return trEv;
+   //    TListIter trIt(&fTransformations);
+   //    std::vector< Int_t >::const_iterator rClsIt = fTransformationsReferenceClasses.begin();
+   //    const Event* trEv = ev;
+   //    UInt_t nvars = 0, ntgts = 0, nspcts = 0;
+   //    while (VariableTransformBase *trf = (VariableTransformBase*) trIt() ) { // shouldn't be the transformation called in the inverse order for the inversetransformation?????
+   //       if (trf->IsCreated()) {
+   // 	 trf->CountVariableTypes( nvars, ntgts, nspcts );	 
+   // 	 if( !(suppressIfNoTargets && ntgts==0) )
+   // 	    trEv = trf->InverseTransform(ev, (*rClsIt) );
+   //       }
+   //       else break;
+   //       rClsIt++;
+   //    }
+   //    return trEv;
 
 }
 
 //_______________________________________________________________________
-std::vector<TMVA::Event*>* TMVA::TransformationHandler::CalcTransformations( const std::vector<Event*>& events, 
-                                                                             Bool_t createNewVector ) 
+const std::vector<TMVA::Event*>* TMVA::TransformationHandler::CalcTransformations( const std::vector<Event*>& events, 
+                                                                                   Bool_t createNewVector ) 
 {
    // computation of transformation
-   std::vector<Event*>* tmpEvents = const_cast<std::vector<Event*>*>(&events);
-   Bool_t replaceColl = kFALSE; // first let TransformCollection create a new vector
+   if (fTransformations.GetEntries() <= 0)
+      return &events;
+
+   // the transformedEvents are initialised with the initial events and then 
+   // subsequently replaced with transformed ones. The n-th transformation will
+   // and on the events as they look like after the (n-1)-the transformation
+   // as intended for the chained transfromations
+   std::vector<Event*> *transformedEvents = new std::vector<TMVA::Event*>(events.size());
+   for ( UInt_t ievt = 0; ievt<events.size(); ievt++)
+      transformedEvents->at(ievt) = new Event(*events.at(ievt));
 
    TListIter trIt(&fTransformations);
    std::vector< Int_t >::iterator rClsIt = fTransformationsReferenceClasses.begin();
    while (VariableTransformBase *trf = (VariableTransformBase*) trIt()) {
-      if (trf->PrepareTransformation(*tmpEvents)) {
-         tmpEvents = TransformCollection(trf, (*rClsIt), tmpEvents, replaceColl);
-         // we now created a new vector, so the next transformations replace the 
-         // events by their transformed versions
-         replaceColl = kTRUE;  
+      if (trf->PrepareTransformation(*transformedEvents)) {
+         for (UInt_t ievt = 0; ievt<transformedEvents->size(); ievt++) {  // loop through all events
+            *(*transformedEvents)[ievt] = *trf->Transform((*transformedEvents)[ievt],(*rClsIt));
+         }
          rClsIt++;
       }
    }
 
-   CalcStats(*tmpEvents);
+   CalcStats(*transformedEvents);
 
    // plot the variables once in this transformation
-   PlotVariables(*tmpEvents);
+   PlotVariables(*transformedEvents);
 
+   //sometimes, the actual transformed event vector is not used for anything but the previous
+   //CalcStat and PlotVariables calles, in that case, we delete it again (and return NULL)
    if (!createNewVector) {  // if we don't want that newly created event vector to persist, then delete it
-      if (replaceColl) {    
-         for ( UInt_t ievt = 0; ievt<tmpEvents->size(); ievt++)
-            delete (*tmpEvents)[ievt];
-         delete tmpEvents;
-      }
-      return 0;
+      for ( UInt_t ievt = 0; ievt<transformedEvents->size(); ievt++)
+         delete (*transformedEvents)[ievt];
+      delete transformedEvents;
+      transformedEvents=NULL;
    }
-   return tmpEvents; // give back the newly created event collection (containing the transformed events)
+
+   return transformedEvents; // give back the newly created event collection (containing the transformed events)
 }
 
 //_______________________________________________________________________
-std::vector<TMVA::Event*>* TMVA::TransformationHandler::TransformCollection( VariableTransformBase* trf,
-                                                                             Int_t cls,
-                                                                             std::vector<TMVA::Event*>* events,
-                                                                             Bool_t replace ) const 
-{
-   // a collection of transformations
-   std::vector<TMVA::Event*>* tmpEvents = 0;
-
-   if (replace) {   // the events should be replaced by their transformed versions
-      tmpEvents = events;
-   } 
-   else {           // a new event vector is created
-      tmpEvents = new std::vector<TMVA::Event*>(events->size());
-   }
-   for (UInt_t ievt = 0; ievt<events->size(); ievt++) {  // loop through all events
-      if (replace) {  // and replace the event by its transformed version
-         *(*tmpEvents)[ievt] = *trf->Transform((*events)[ievt],cls);
-      } 
-      else {         // and create a new event which is the transformed version of the old event
-         (*tmpEvents)[ievt] = new Event(*trf->Transform((*events)[ievt],cls));
-      }
-   }
-   return tmpEvents;
-}
-
-//_______________________________________________________________________
-void TMVA::TransformationHandler::CalcStats( const std::vector<Event*>& events )
+void TMVA::TransformationHandler::CalcStats (const std::vector<Event*>& events )
 {
 
    // method to calculate minimum, maximum, mean, and RMS for all
@@ -293,7 +275,7 @@ void TMVA::TransformationHandler::CalcStats( const std::vector<Event*>& events )
    }
 
    for (UInt_t ievt=0; ievt<nevts; ievt++) {
-      Event* ev  = events[ievt];
+      const Event* ev  = events[ievt];
       Int_t  cls = ev->GetClass();
 
       Double_t weight = ev->GetWeight();
@@ -453,8 +435,9 @@ TString TMVA::TransformationHandler::GetVariableAxisTitle( const VariableInfo& i
    return xtit;
 }
 
+
 //_______________________________________________________________________
-void TMVA::TransformationHandler::PlotVariables( const std::vector<Event*>& events, TDirectory* theDirectory )
+void TMVA::TransformationHandler::PlotVariables (const std::vector<Event*>& events, TDirectory* theDirectory )
 {
    // create histograms from the input variables
    // - histograms for all input variables
@@ -726,7 +709,7 @@ void TMVA::TransformationHandler::PlotVariables( const std::vector<Event*>& even
    else if (fDataSetInfo.GetNClasses() == 2 
             && fDataSetInfo.GetClassInfo("Signal") != NULL 
             && fDataSetInfo.GetClassInfo("Background") != NULL 
-      ) { // TODO: ugly hack.. adapt to new framework
+            ) { // TODO: ugly hack.. adapt to new framework
       fRanking.push_back( new Ranking( GetName() + "Transformation", "Separation" ) );
       for (UInt_t i=0; i<nvar; i++) {   
          Double_t sep = gTools().GetSeparation( hVars.at(fDataSetInfo.GetClassInfo("Signal")    ->GetNumber()).at(i), 
@@ -753,17 +736,17 @@ void TMVA::TransformationHandler::PlotVariables( const std::vector<Event*>& even
       Int_t counter = 0;
       TObject* o = NULL;
       while( (o = fRootBaseDir->FindObject(uniqueOutputDir)) != 0 ){
-	 uniqueOutputDir = outputDir+Form("_%d",counter);
+         uniqueOutputDir = outputDir+Form("_%d",counter);
          Log() << kINFO << "A " << o->ClassName() << " with name " << o->GetName() << " already exists in " 
                << fRootBaseDir->GetPath() << ", I will try with "<<uniqueOutputDir<<"." << Endl;
-	 ++counter;
+         ++counter;
       }
 
-//       TObject* o = fRootBaseDir->FindObject(outputDir);
-//       if (o != 0) {
-//          Log() << kFATAL << "A " << o->ClassName() << " with name " << o->GetName() << " already exists in " 
-//                << fRootBaseDir->GetPath() << "("<<outputDir<<")" << Endl;
-//       }
+      //       TObject* o = fRootBaseDir->FindObject(outputDir);
+      //       if (o != 0) {
+      //          Log() << kFATAL << "A " << o->ClassName() << " with name " << o->GetName() << " already exists in " 
+      //                << fRootBaseDir->GetPath() << "("<<outputDir<<")" << Endl;
+      //       }
       localDir = fRootBaseDir->mkdir( uniqueOutputDir );
       localDir->cd();
    

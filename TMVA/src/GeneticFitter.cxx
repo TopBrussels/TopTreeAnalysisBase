@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: GeneticFitter.cxx 29195 2009-06-24 10:39:49Z brun $ 
+// @(#)root/tmva $Id$ 
 // Author: Peter Speckmayer
 
 /**********************************************************************************

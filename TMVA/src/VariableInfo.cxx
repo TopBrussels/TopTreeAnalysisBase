@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: VariableInfo.cxx 38475 2011-03-17 10:46:00Z evt $
+// @(#)root/tmva $Id$
 // Author: Andreas Hoecker, Peter Speckmayer, Joerg Stelzer, Helge Voss
 
 /**********************************************************************************

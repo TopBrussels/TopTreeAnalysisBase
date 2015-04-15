@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: PDEFoamTargetDensity.h 40005 2011-06-27 15:29:10Z stelzer $
+// @(#)root/tmva $Id$
 // Author: Tancredi Carli, Dominik Dannheim, Alexander Voigt
 
 /**********************************************************************************
@@ -50,7 +50,7 @@ namespace TMVA
       PDEFoamTargetDensity();
       PDEFoamTargetDensity(std::vector<Double_t> box, UInt_t target);
       PDEFoamTargetDensity(const PDEFoamTargetDensity&);
-      virtual ~PDEFoamTargetDensity() {};
+      virtual ~PDEFoamTargetDensity() {}
 
       // main function used by PDEFoam
       // returns event density at a given point by range searching in BST

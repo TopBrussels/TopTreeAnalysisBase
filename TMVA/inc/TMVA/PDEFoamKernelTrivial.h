@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: PDEFoamKernelTrivial.h 40005 2011-06-27 15:29:10Z stelzer $
+// @(#)root/tmva $Id$
 // Author: Dominik Dannheim, Alexander Voigt
 
 /**********************************************************************************
@@ -44,7 +44,7 @@ namespace TMVA
    public:
       PDEFoamKernelTrivial();                 // Constructor
       PDEFoamKernelTrivial(const PDEFoamKernelTrivial&); // Copy Constructor
-      virtual ~PDEFoamKernelTrivial() {};     // Destructor
+      virtual ~PDEFoamKernelTrivial() {}      // Destructor
 
       // kernel estimator
       virtual Float_t Estimate(PDEFoam*, std::vector<Float_t>&, ECellValue);

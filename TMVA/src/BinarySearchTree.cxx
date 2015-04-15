@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: BinarySearchTree.cxx 44112 2012-05-04 10:00:41Z evt $    
+// @(#)root/tmva $Id$    
 // Author: Andreas Hoecker, Joerg Stelzer, Helge Voss, Kai Voss 
 
 /**********************************************************************************
@@ -41,15 +41,16 @@
 #include <queue>
 #include <algorithm>
 
-#if ROOT_VERSION_CODE >= 364802
-#ifndef ROOT_TMathBase
-#include "TMathBase.h"
-#endif
-#else
-#ifndef ROOT_TMath
+// #if ROOT_VERSION_CODE >= 364802
+// #ifndef ROOT_TMathBase
+// #include "TMathBase.h"
+// #endif
+// #else
+// #ifndef ROOT_TMath
 #include "TMath.h"
-#endif
-#endif
+// #endif
+// #endif
+
 #include "TMatrixDBase.h"
 #include "TObjString.h"
 #include "TTree.h"
@@ -62,9 +63,6 @@
 #endif
 #ifndef ROOT_TMVA_Tools
 #include "TMVA/Tools.h"
-#endif
-#ifndef ROOT_TMVA_DataSet
-#include "TMVA/DataSet.h"
 #endif
 #ifndef ROOT_TMVA_Event
 #include "TMVA/Event.h"
@@ -332,13 +330,13 @@ void TMVA::BinarySearchTree::NormalizeTree ( std::vector< std::pair<Double_t, co
 
    Insert( mid->second );
 
-   //    Print(cout);
-   //    cout << endl << endl;
+   //    Print(std::cout);
+   //    std::cout << std::endl << std::endl;
 
    NormalizeTree( leftBound, mid, actDim+1 );
    mid++;
-   //    Print(cout);
-   //    cout << endl << endl;
+   //    Print(std::cout);
+   //    std::cout << std::endl << std::endl;
    NormalizeTree( mid, rightBound, actDim+1 );
 
 

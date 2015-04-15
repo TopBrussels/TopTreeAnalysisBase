@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: Tools.h 40005 2011-06-27 15:29:10Z stelzer $
+// @(#)root/tmva $Id$
 // Author: Andreas Hoecker, Joerg Stelzer, Helge Voss, Kai Voss
 
 /**********************************************************************************
@@ -41,6 +41,9 @@
 #include <sstream>
 #include <iostream>
 #include <iomanip>
+#if __cplusplus > 199711L
+#include <atomic>
+#endif
 
 #ifndef ROOT_TXMLEngine
 #include "TXMLEngine.h"
@@ -100,6 +103,14 @@ namespace TMVA {
       static Tools& Instance();
       static void   DestroyInstance();
 
+
+      template <typename T> Double_t Mean(Long64_t n, const T *a, const Double_t *w=0);
+      template <typename Iterator, typename WeightIterator> Double_t Mean ( Iterator first, Iterator last, WeightIterator w);
+      
+      template <typename T> Double_t RMS(Long64_t n, const T *a, const Double_t *w=0);
+      template <typename Iterator, typename WeightIterator> Double_t RMS(Iterator first, Iterator last, WeightIterator w);
+
+   
       // simple statistics operations on tree entries
       void  ComputeStat( const std::vector<TMVA::Event*>&,
                          std::vector<Float_t>*,
@@ -131,6 +142,7 @@ namespace TMVA {
       // returns the covariance matrix of of the different classes (and the sum) 
       // given the event sample
       std::vector<TMatrixDSym*>* CalcCovarianceMatrices( const std::vector<Event*>& events, Int_t maxCls, VariableTransformBase* transformBase=0 );
+      std::vector<TMatrixDSym*>* CalcCovarianceMatrices( const std::vector<const Event*>& events, Int_t maxCls, VariableTransformBase* transformBase=0 );
 
 
       // turns covariance into correlation matrix
@@ -174,8 +186,8 @@ namespace TMVA {
       void FormattedOutput( const TMatrixD&, const std::vector<TString>& vert, const std::vector<TString>& horiz, 
                             MsgLogger& logger );
 
-      void WriteFloatArbitraryPrecision( Float_t  val, ostream& os );
-      void ReadFloatArbitraryPrecision ( Float_t& val, istream& is );
+      void WriteFloatArbitraryPrecision( Float_t  val, std::ostream& os );
+      void ReadFloatArbitraryPrecision ( Float_t& val, std::istream& is );
 
       // for histogramming
       TString GetXTitleWithUnit( const TString& title, const TString& unit );
@@ -229,7 +241,11 @@ namespace TMVA {
       const TString fRegexp;
       mutable MsgLogger*    fLogger;
       MsgLogger& Log() const { return *fLogger; }
+#if __cplusplus > 199711L
+      static std::atomic<Tools*> fgTools;
+#else
       static Tools* fgTools;
+#endif
 
       // xml tools
 
@@ -259,7 +275,10 @@ namespace TMVA {
       const char* GetName     ( void* node );
 
       TXMLEngine& xmlengine() { return *fXMLEngine; }
+      int xmlenginebuffersize() { return 10000000; }
       TXMLEngine* fXMLEngine;
+
+      TH1*       GetCumulativeDist( TH1* h);
 
    private:
 
@@ -304,5 +323,6 @@ inline Double_t TMVA::Tools::ComputeVariance( Double_t sumx2, Double_t sumx, Int
 }
 
 
+  
 #endif
 

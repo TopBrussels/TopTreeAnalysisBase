@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: TMVAClassificationCategory.cxx 39989 2011-06-27 13:19:22Z stelzer $
+// @(#)root/tmva $Id$
 /**********************************************************************************
  * Project   : TMVA - a Root-integrated toolkit for multivariate data analysis    *
  * Package   : TMVA                                                               *

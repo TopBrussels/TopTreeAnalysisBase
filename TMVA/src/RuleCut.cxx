@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: RuleCut.cxx 36088 2010-10-05 16:50:02Z stelzer $    
+// @(#)root/tmva $Id$    
 // Author: Andreas Hoecker, Joerg Stelzer, Fredrik Tegenfeldt, Helge Voss
 
 /**********************************************************************************

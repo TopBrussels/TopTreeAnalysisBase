@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: TMVAGAexample.cxx 31458 2009-11-30 13:58:20Z stelzer $
+// @(#)root/tmva $Id$
 /**********************************************************************************
  * Project   : TMVA - a Root-integrated toolkit for multivariate data analysis    *
  * Package   : TMVA                                                               *

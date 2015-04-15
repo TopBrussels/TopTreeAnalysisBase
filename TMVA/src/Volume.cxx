@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: Volume.cxx 29122 2009-06-22 06:51:30Z brun $
+// @(#)root/tmva $Id$
 // Author: Andreas Hoecker, Joerg Stelzer, Helge Voss, Kai Voss 
 
 /**********************************************************************************

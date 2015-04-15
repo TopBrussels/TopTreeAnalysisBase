@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: VariableIdentityTransform.h 40005 2011-06-27 15:29:10Z stelzer $
+// @(#)root/tmva $Id$
 // Author: Andreas Hoecker, Joerg Stelzer, Helge Voss
 
 /**********************************************************************************
@@ -50,7 +50,7 @@ namespace TMVA {
       virtual ~VariableIdentityTransform( void ) {}
 
       void   Initialize();
-      Bool_t PrepareTransformation( const std::vector<Event*>& );
+      Bool_t PrepareTransformation (const std::vector<Event*>& );
 
       void WriteTransformationToStream ( std::ostream& ) const {}
       void ReadTransformationFromStream( std::istream&, const TString& ) { SetCreated(); }

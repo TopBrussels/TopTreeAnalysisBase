@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: ResultsClassification.cxx 35727 2010-09-24 21:41:20Z stelzer $
+// @(#)root/tmva $Id$
 // Author: Andreas Hoecker, Peter Speckmayer, Joerg Stelzer, Helge Voss
 
 /**********************************************************************************
@@ -32,10 +32,10 @@
 
 
 //_______________________________________________________________________
-TMVA::ResultsClassification::ResultsClassification( const DataSetInfo* dsi ) 
-   : Results( dsi ),
+TMVA::ResultsClassification::ResultsClassification( const DataSetInfo* dsi, TString resultsName  ) 
+   : Results( dsi,resultsName  ),
      fRet(1),
-     fLogger( new MsgLogger("ResultsClassification", kINFO) )
+     fLogger( new MsgLogger(Form("ResultsClassification%s",resultsName.Data()) , kINFO) )
 {
    // constructor
 }

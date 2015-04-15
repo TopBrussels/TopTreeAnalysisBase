@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: PDF.h 40005 2011-06-27 15:29:10Z stelzer $
+// @(#)root/tmva $Id$
 // Author: Asen Christov, Andreas Hoecker, Joerg Stelzer, Helge Voss, Kai Voss , Jan Therhaag
 
 /**********************************************************************************
@@ -46,6 +46,9 @@
 #ifndef ROOT_TH1
 #include "TH1.h"
 #endif
+#ifndef ROOT_ThreadLocalStorage
+#include "ThreadLocalStorage.h"
+#endif
 #ifndef ROOT_TMVA_KDEKernel
 #include "TMVA/KDEKernel.h"
 #endif
@@ -62,13 +65,13 @@ namespace TMVA {
    class MsgLogger;
 
    class PDF;
-   ostream& operator<< ( ostream& os, const PDF& tree );
-   istream& operator>> ( istream& istr, PDF& tree);
+   std::ostream& operator<< ( std::ostream& os, const PDF& tree );
+   std::istream& operator>> ( std::istream& istr, PDF& tree);
 
    class PDF : public Configurable {
 
-      friend ostream& operator<< ( ostream& os, const PDF& tree );
-      friend istream& operator>> ( istream& istr, PDF& tree);
+      friend std::ostream& operator<< ( std::ostream& os, const PDF& tree );
+      friend std::istream& operator>> ( std::istream& istr, PDF& tree);
       
    public:
 
@@ -95,6 +98,7 @@ namespace TMVA {
 
       // histogram underlying the PDF
       TH1*     GetPDFHist()      const { return fPDFHist; }
+      TGraph*  GetGraph()        const { return fGraph; }
       TH1*     GetOriginalHist() const { return fHistOriginal; }
       TH1*     GetSmoothedHist() const { return fHist; }
       TH1*     GetNSmoothHist()  const { return fNSmoothHist; }
@@ -123,7 +127,7 @@ namespace TMVA {
       void   SetReadingVersion( UInt_t rv ) { fReadingVersion = rv; }      
       UInt_t GetReadingVersion() const { return fReadingVersion; }
 
-      //void WriteOptionsToStream ( ostream& o, const TString& prefix ) const;
+      //void WriteOptionsToStream ( std::ostream& o, const TString& prefix ) const;
       void ProcessOptions();
 
       // reads from and option string the definitions for pdf returns it
@@ -204,7 +208,9 @@ namespace TMVA {
       MsgLogger&               Log() const { return *fLogger; }    
 
       // static pointer to this object
-      static PDF*              fgThisPDF;             // this PDF pointer 
+      // This is a workaround for OSx where static thread_local data members are
+      // not supported. The C++ solution would indeed be the following:
+      static PDF*& GetThisPdfThreadLocal() { TTHREAD_TLS(PDF*) fgThisPDF(nullptr); return fgThisPDF; };
       static PDF*              ThisPDF( void ); 
 
       // external auxiliary functions 

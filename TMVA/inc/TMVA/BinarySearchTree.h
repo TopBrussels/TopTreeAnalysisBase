@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: BinarySearchTree.h 44112 2012-05-04 10:00:41Z evt $    
+// @(#)root/tmva $Id$    
 // Author: Andreas Hoecker, Joerg Stelzer, Helge Voss, Kai Voss 
 
 /**********************************************************************************
@@ -65,7 +65,6 @@ class TTree;
 
 namespace TMVA {
 
-   class DataSet;
    class Event;
    //   class MethodBase;
    

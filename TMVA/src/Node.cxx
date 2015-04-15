@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: Node.cxx 40005 2011-06-27 15:29:10Z stelzer $    
+// @(#)root/tmva $Id$    
 // Author: Andreas Hoecker, Joerg Stelzer, Helge Voss, Kai Voss 
 
 /**********************************************************************************
@@ -121,7 +121,7 @@ Int_t TMVA::Node::CountMeAndAllDaughters() const
 
 // print a node
 //_______________________________________________________________________
-ostream& TMVA::operator<<( ostream& os, const TMVA::Node& node )
+std::ostream& TMVA::operator<<( std::ostream& os, const TMVA::Node& node )
 { 
    // output operator for a node  
    node.Print(os);
@@ -129,7 +129,7 @@ ostream& TMVA::operator<<( ostream& os, const TMVA::Node& node )
 }
 
 //_______________________________________________________________________
-ostream& TMVA::operator<<( ostream& os, const TMVA::Node* node )
+std::ostream& TMVA::operator<<( std::ostream& os, const TMVA::Node* node )
 { 
    // output operator with a pointer to the node (which still prints the node itself)
    if (node!=NULL) node->Print(os);

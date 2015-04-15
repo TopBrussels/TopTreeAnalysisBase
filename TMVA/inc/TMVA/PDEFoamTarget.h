@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: PDEFoamTarget.h 40005 2011-06-27 15:29:10Z stelzer $
+// @(#)root/tmva $Id$
 // Author: Tancredi Carli, Dominik Dannheim, Alexander Voigt
 
 /**********************************************************************************
@@ -56,7 +56,7 @@ namespace TMVA
    public:
       PDEFoamTarget();                  // Default constructor (used only by ROOT streamer)
       PDEFoamTarget(const TString&, UInt_t); // Principal user-defined constructor
-      virtual ~PDEFoamTarget() {};      // Default destructor
+      virtual ~PDEFoamTarget() {}       // Default destructor
 
       // function to fill created cell with given value
       virtual void FillFoamCells(const Event* ev, Float_t wt);

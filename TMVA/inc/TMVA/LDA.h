@@ -1,4 +1,4 @@
-// $Id: LDA.h 40005 2011-06-27 15:29:10Z stelzer $
+// $Id$
 /**********************************************************************************
  * Project: TMVA - a Root-integrated toolkit for multivariate data analysis       *
  * Package: TMVA                                                                  *

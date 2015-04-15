@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: ModulekNN.h 40005 2011-06-27 15:29:10Z stelzer $
+// @(#)root/tmva $Id$
 // Author: Rustem Ospanov
 
 /**********************************************************************************
@@ -48,7 +48,9 @@
 #ifndef ROOT_TRandom
 #include "TRandom3.h"
 #endif
-
+#ifndef ROOT_ThreadLocalStorage
+#include "ThreadLocalStorage.h"
+#endif
 #ifndef ROOT_TMVA_NodekNN
 #include "TMVA/NodekNN.h"
 #endif
@@ -148,7 +150,9 @@ namespace TMVA {
 
       private:
 
-         static TRandom3 fgRndm;
+        // This is a workaround for OSx where static thread_local data members are
+        // not supported. The C++ solution would indeed be the following:
+         static TRandom3& GetRndmThreadLocal() {TTHREAD_TLS_DECL_ARG(TRandom3,fgRndm,1); return fgRndm;};
 
          UInt_t fDimn;
 

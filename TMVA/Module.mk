@@ -13,22 +13,10 @@ TMVADIRS     := $(TMVADIR)/src
 TMVADIRI     := $(TMVADIR)/inc
 
 ##### libTMVA #####
-TMVAL1       := $(MODDIRI)/LinkDef1.h
-TMVAL2       := $(MODDIRI)/LinkDef2.h
-TMVAL3       := $(MODDIRI)/LinkDef3.h
-TMVAL4       := $(MODDIRI)/LinkDef4.h
-TMVADS1      := $(call stripsrc,$(MODDIRS)/G__TMVA1.cxx)
-TMVADS2      := $(call stripsrc,$(MODDIRS)/G__TMVA2.cxx)
-TMVADS3      := $(call stripsrc,$(MODDIRS)/G__TMVA3.cxx)
-TMVADS4      := $(call stripsrc,$(MODDIRS)/G__TMVA4.cxx)
-TMVADO1      := $(TMVADS1:.cxx=.o)
-TMVADO2      := $(TMVADS2:.cxx=.o)
-TMVADO3      := $(TMVADS3:.cxx=.o)
-TMVADO4      := $(TMVADS4:.cxx=.o)
-
-TMVAL        := $(TMVAL1) $(TMVAL2) $(TMVAL3) $(TMVAL4)
-TMVADS       := $(TMVADS1) $(TMVADS2) $(TMVADS3) $(TMVADS4)
-TMVADO       := $(TMVADO1) $(TMVADO2) $(TMVADO3) $(TMVADO4)
+TMVAL0       := $(MODDIRI)/LinkDef.h
+TMVALS       := $(MODDIRI)/LinkDef1.h $(MODDIRI)/LinkDef2.h $(MODDIRI)/LinkDef3.h $(MODDIRI)/LinkDef4.h
+TMVADS       := $(call stripsrc,$(MODDIRS)/G__TMVA.cxx)
+TMVADO       := $(TMVADS:.cxx=.o)
 TMVADH       := $(TMVADS:.cxx=.h)
 
 TMVAH1       := Configurable.h Event.h Factory.h MethodBase.h MethodCompositeBase.h \
@@ -41,9 +29,9 @@ TMVAH2       := TSpline2.h TSpline1.h PDF.h BinaryTree.h BinarySearchTreeNode.h 
 		Timer.h RootFinder.h CrossEntropy.h DecisionTree.h DecisionTreeNode.h MisClassificationError.h \
 		Node.h SdivSqrtSplusB.h SeparationBase.h RegressionVariance.h Tools.h Reader.h \
 		GeneticAlgorithm.h GeneticGenes.h GeneticPopulation.h GeneticRange.h GiniIndex.h \
-		GiniIndexWithLaplace.h SimulatedAnnealing.h
-TMVAH3       := Config.h KDEKernel.h Interval.h FitterBase.h MCFitter.h GeneticFitter.h SimulatedAnnealingFitter.h \
-		MinuitFitter.h MinuitWrapper.h IFitterTarget.h  \
+		GiniIndexWithLaplace.h SimulatedAnnealing.h 
+TMVAH3       := Config.h KDEKernel.h Interval.h LogInterval.h FitterBase.h MCFitter.h GeneticFitter.h \
+		SimulatedAnnealingFitter.h QuickMVAProbEstimator.h MinuitFitter.h MinuitWrapper.h IFitterTarget.h  \
 		PDEFoam.h PDEFoamDecisionTree.h PDEFoamDensityBase.h PDEFoamDiscriminantDensity.h \
 		PDEFoamEventDensity.h PDEFoamTargetDensity.h PDEFoamDecisionTreeDensity.h PDEFoamMultiTarget.h \
 		PDEFoamVect.h PDEFoamCell.h PDEFoamDiscriminant.h PDEFoamEvent.h PDEFoamTarget.h \
@@ -54,7 +42,7 @@ TMVAH4       := TNeuron.h TSynapse.h TActivationChooser.h TActivation.h TActivat
 		TActivationTanh.h TActivationRadial.h TNeuronInputChooser.h TNeuronInput.h TNeuronInputSum.h \
 		TNeuronInputSqSum.h TNeuronInputAbs.h Types.h Ranking.h RuleFit.h RuleFitAPI.h IMethod.h MsgLogger.h \
 		VariableTransformBase.h VariableIdentityTransform.h VariableDecorrTransform.h VariablePCATransform.h \
-		VariableGaussTransform.h VariableNormalizeTransform.h VariableRearrangeTransform.h
+		VariableGaussTransform.h VariableNormalizeTransform.h VariableRearrangeTransform.h ROCCalc.h
 #TMVAH1C      := $(patsubst %,include/TMVA/%,$(TMVAH1))
 #TMVAH2C      := $(patsubst %,include/TMVA/%,$(TMVAH2))
 #TMVAH3C      := $(patsubst %,include/TMVA/%,$(TMVAH3))
@@ -94,28 +82,20 @@ $(TMVALIB):     $(TMVAO) $(TMVADO) $(ORDER_) $(MAINLIBS) $(TMVALIBDEP)
 		   "$(SOFLAGS)" libTMVA.$(SOEXT) $@ "$(TMVAO) $(TMVADO)" \
 		   "$(TMVALIBEXTRA)"
 
-$(TMVADS1):     $(TMVAH1) $(TMVAL1) $(ROOTCINTTMPDEP)
-		$(MAKEDIR)
-		@echo "Generating dictionary $@..."
-		$(ROOTCINTTMP) -f $@ -c $(TMVAH1) $(TMVAL1)
-$(TMVADS2):     $(TMVAH2) $(TMVAL2) $(ROOTCINTTMPDEP)
-		$(MAKEDIR)
-		@echo "Generating dictionary $@..."
-		$(ROOTCINTTMP) -f $@ -c $(TMVAH2) $(TMVAL2)
-$(TMVADS3):     $(TMVAH3) $(TMVAL3) $(ROOTCINTTMPDEP)
-		$(MAKEDIR)
-		@echo "Generating dictionary $@..."
-		$(ROOTCINTTMP) -f $@ -c $(TMVAH3) $(TMVAL3)
-$(TMVADS4):     $(TMVAH4) $(TMVAL4) $(ROOTCINTTMPDEP)
-		$(MAKEDIR)
-		@echo "Generating dictionary $@..."
-		$(ROOTCINTTMP) -f $@ -c $(TMVAH4) $(TMVAL4)
+$(call pcmrule,TMVA)
+	$(noop)
 
-$(TMVAMAP):     $(RLIBMAP) $(MAKEFILEDEP) $(TMVAL)
-		$(RLIBMAP) -o $@ -l $(TMVALIB) \
-		   -d $(TMVALIBDEPM) -c $(TMVAL)
+$(TMVADS):      $(TMVAH) $(TMVAL0) $(TMVALS) $(ROOTCLINGEXE) $(call pcmdep,TMVA)
+		$(MAKEDIR)
+		@echo "Generating dictionary $@..."
+		$(ROOTCLINGSTAGE2) -f $@ $(call dictModule,TMVA) -c -writeEmptyRootPCM -I$(ROOT_SRCDIR) $(TMVAH) $(TMVAL0)
 
-all-$(MODNAME): $(TMVALIB) $(TMVAMAP)
+$(TMVAMAP):     $(TMVAH) $(TMVAL0) $(TMVALS) $(ROOTCLINGEXE) $(call pcmdep,TMVA)
+		$(MAKEDIR)
+		@echo "Generating rootmap $@..."
+		$(ROOTCLINGSTAGE2) -r $(TMVADS) $(call dictModule,TMVA) -c -I$(ROOT_SRCDIR) $(TMVAH) $(TMVAL0)
+
+all-$(MODNAME): $(TMVALIB)
 
 clean-$(MODNAME):
 		@rm -f $(TMVADIRS)/*.o

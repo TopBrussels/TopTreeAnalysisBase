@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: ResultsClassification.h 40005 2011-06-27 15:29:10Z stelzer $
+// @(#)root/tmva $Id$
 // Author: Andreas Hoecker, Peter Speckmayer, Joerg Stelzer, Helge Voss
 
 /**********************************************************************************
@@ -51,7 +51,7 @@ namespace TMVA {
 
    public:
 
-      ResultsClassification( const DataSetInfo* dsi );
+      ResultsClassification( const DataSetInfo* dsi, TString resultsName );
       ~ResultsClassification();
 
       // setters

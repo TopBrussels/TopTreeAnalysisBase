@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: TNeuron.cxx 36966 2010-11-26 09:50:13Z evt $
+// @(#)root/tmva $Id$
 // Author: Matt Jachowski
 
 /**********************************************************************************
@@ -51,13 +51,10 @@ using std::vector;
 
 ClassImp(TMVA::TNeuron)
 
-TMVA::MsgLogger* TMVA::TNeuron::fgLogger = 0;
-
 //______________________________________________________________________________
 TMVA::TNeuron::TNeuron()
 {
    // standard constructor
-   if (!fgLogger) fgLogger = new MsgLogger("TNeuron",kDEBUG);
    InitNeuron();
 }
 
@@ -126,6 +123,7 @@ void TMVA::TNeuron::CalculateDelta()
 
    Double_t error;
 
+
    // output neuron should have error set all ready
    if (IsOutputNeuron()) error = fError;
 
@@ -133,15 +131,17 @@ void TMVA::TNeuron::CalculateDelta()
    else {
       error = 0.0;
       TSynapse* synapse = NULL;
-      TObjArrayIter* iter = (TObjArrayIter*)fLinksOut->MakeIterator();
-
+      // Replaced TObjArrayIter pointer by object, as creating it on the stack
+      // is much faster (5-10% improvement seen) than re-allocating the new
+      // memory for the pointer each time. Thansk to Peter Elmer who pointed this out
+      //      TObjArrayIter* iter = (TObjArrayIter*)fLinksOut->MakeIterator();
+      TObjArrayIter iter(fLinksOut);
       while (true) {
-         synapse = (TSynapse*) iter->Next();
+         synapse = (TSynapse*) iter.Next();
          if (synapse == NULL) break;
          error += synapse->GetWeightedDelta();
       }
 
-      delete iter;
    }
 
    fDelta = error * fActivation->EvalDerivative(GetValue());
@@ -151,7 +151,7 @@ void TMVA::TNeuron::CalculateDelta()
 void TMVA::TNeuron::SetInputCalculator(TNeuronInput* calculator)
 {
    // set input calculator
-   if (fInputCalculator != NULL) delete fInputCalculator; 
+   if (fInputCalculator != NULL) delete fInputCalculator;
    fInputCalculator = calculator;
 }
 
@@ -222,15 +222,13 @@ void TMVA::TNeuron::UpdateSynapsesBatch()
    if (IsInputNeuron()) return;
 
    TSynapse* synapse = NULL;
-   TObjArrayIter* iter = (TObjArrayIter*) fLinksIn->MakeIterator();
-
+   TObjArrayIter iter(fLinksIn);
    while (true) {
-      synapse = (TSynapse*) iter->Next();
+      synapse = (TSynapse*) iter.Next();
       if (synapse == NULL) break;
       synapse->CalculateDelta();
    }
 
-   delete iter;
 }
 
 //______________________________________________________________________________
@@ -242,17 +240,16 @@ void TMVA::TNeuron::UpdateSynapsesSequential()
    if (IsInputNeuron()) return;
 
    TSynapse* synapse = NULL;
-   TObjArrayIter* iter = (TObjArrayIter*) fLinksIn->MakeIterator();
+   TObjArrayIter iter(fLinksIn);
 
    while (true) {
-      synapse = (TSynapse*) iter->Next();
+      synapse = (TSynapse*) iter.Next();
       if (synapse == NULL) break;
       synapse->InitDelta();
       synapse->CalculateDelta();
       synapse->AdjustWeight();
    }
 
-   delete iter;
 }
 
 //______________________________________________________________________________
@@ -264,15 +261,15 @@ void TMVA::TNeuron::AdjustSynapseWeights()
    if (IsInputNeuron()) return;
 
    TSynapse* synapse = NULL;
-   TObjArrayIter* iter = (TObjArrayIter*) fLinksIn->MakeIterator();
+   TObjArrayIter iter(fLinksIn);
+
 
    while (true) {
-      synapse = (TSynapse*) iter->Next();
+      synapse = (TSynapse*) iter.Next();
       if (synapse == NULL) break;
       synapse->AdjustWeight();
    }
 
-   delete iter;
 }
 
 //______________________________________________________________________________
@@ -285,19 +282,19 @@ void TMVA::TNeuron::InitSynapseDeltas()
    if (IsInputNeuron()) return;
 
    TSynapse* synapse = NULL;
-   TObjArrayIter* iter = (TObjArrayIter*) fLinksIn->MakeIterator();
+   TObjArrayIter iter(fLinksIn);
 
    while (true) {
-      synapse = (TSynapse*) iter->Next();
+      synapse = (TSynapse*) iter.Next();
+
       if (synapse == NULL) break;
       synapse->InitDelta();
    }
 
-   delete iter;
 }
 
 //______________________________________________________________________________
-void TMVA::TNeuron::PrintLinks(TObjArray* links) const 
+void TMVA::TNeuron::PrintLinks(TObjArray* links) const
 {
    // print an array of TSynapses, for debugging
 
@@ -311,7 +308,7 @@ void TMVA::TNeuron::PrintLinks(TObjArray* links) const
    Int_t numLinks = links->GetEntriesFast();
    for  (Int_t i = 0; i < numLinks; i++) {
       synapse = (TSynapse*)links->At(i);
-      Log() << kDEBUG <<  
+      Log() << kDEBUG <<
          "\t\t\tweighta: " << synapse->GetWeight()
            << "\t\tw-value: " << synapse->GetWeightedValue()
            << "\t\tw-delta: " << synapse->GetWeightedDelta()
@@ -333,4 +330,11 @@ void TMVA::TNeuron::PrintMessage( EMsgType type, TString message)
 {
    // print message, for debugging
    Log() << type << message << Endl;
+}
+
+//______________________________________________________________________________
+TMVA::MsgLogger& TMVA::TNeuron::Log() const
+{
+   TTHREAD_TLS_DECL_ARG2(MsgLogger,logger,"TNeuron",kDEBUG);    //! message logger, static to save resources
+   return logger;
 }

@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: DataSetFactory.h 40005 2011-06-27 15:29:10Z stelzer $
+// @(#)root/tmva $Id$
 // Author: Andreas Hoecker, Peter Speckmayer, Joerg Stelzer, Eckhard von Toerne, Helge Voss
 
 /**********************************************************************************
@@ -102,16 +102,16 @@ namespace TMVA {
    template<class T>
    struct DeleteFunctor_t
    {
-      DeleteFunctor_t& operator()(T* p) {
+      DeleteFunctor_t& operator()(const T* p) {
          delete p;
          return *this;
       }
    };
 
    template<class T>
-   DeleteFunctor_t<T> DeleteFunctor()
+   DeleteFunctor_t<const T> DeleteFunctor()
    {
-      return DeleteFunctor_t<T>();
+      return DeleteFunctor_t<const T>();
    }
 
 
@@ -207,7 +207,7 @@ namespace TMVA {
 
    class DataSetFactory {
 
-      typedef std::vector< Event* >                             EventVector;
+      typedef std::vector<Event* >                             EventVector;
       typedef std::vector< EventVector >                        EventVectorOfClasses;
       typedef std::map<Types::ETreeType, EventVectorOfClasses > EventVectorOfClassesOfTreeType;
       typedef std::map<Types::ETreeType, EventVector >          EventVectorOfTreeType;
@@ -254,6 +254,8 @@ namespace TMVA {
 
       DataSet* CreateDataSet( DataSetInfo &, DataInputHandler& );
 
+      static DataSetFactory* NewInstance() { return new DataSetFactory(); }
+      static void destroyNewInstance(DataSetFactory* iOther) { delete iOther;}
    protected:
 
       ~DataSetFactory();
@@ -311,9 +313,11 @@ namespace TMVA {
       Bool_t                     fVerbose;           //! Verbosity
       TString                    fVerboseLevel;      //! VerboseLevel
 
+      Bool_t                     fScaleWithPreselEff; //! how to deal with requested #events in connection with preselection cuts 
+
       // the event
-      mutable TTree*             fCurrentTree;       //! the tree, events are currently read from
-      mutable UInt_t             fCurrentEvtIdx;     //! the current event (to avoid reading of the same event)
+      TTree*                     fCurrentTree;       //! the tree, events are currently read from
+      UInt_t                     fCurrentEvtIdx;     //! the current event (to avoid reading of the same event)
 
       // the formulas for reading the original tree
       std::vector<TTreeFormula*> fInputFormulas;   //! input variables
@@ -322,7 +326,7 @@ namespace TMVA {
       std::vector<TTreeFormula*> fWeightFormula;   //! weights
       std::vector<TTreeFormula*> fSpectatorFormulas; //! spectators
 
-      mutable MsgLogger*         fLogger;          //! message logger
+      MsgLogger*                 fLogger;          //! message logger
       MsgLogger& Log() const { return *fLogger; }
    };
 }

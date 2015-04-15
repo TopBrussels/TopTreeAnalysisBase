@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: TNeuronInputAbs.h 40005 2011-06-27 15:29:10Z stelzer $
+// @(#)root/tmva $Id$
 // Author: Matt Jachowski 
 
 /**********************************************************************************
@@ -40,15 +40,15 @@
 // we tried using rootcints -p option, but that causes rootcint to pick up
 // things from the ROOT version of TMVA
 
-#if ROOT_VERSION_CODE >= 364802
+// #if ROOT_VERSION_CODE >= 364802
 #ifndef ROOT_TMathBase
 #include "TMathBase.h"
 #endif
-#else
-#ifndef ROOT_TMath
-#include "TMath.h"
-#endif
-#endif
+// #else
+// #ifndef ROOT_TMath
+// #include "TMath.h"
+// #endif
+// #endif
 
 #ifndef ROOT_TObject
 #include "TObject.h"

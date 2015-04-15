@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: PDEFoamDensityBase.h 40005 2011-06-27 15:29:10Z stelzer $
+// @(#)root/tmva $Id$
 // Author: Tancredi Carli, Dominik Dannheim, Alexander Voigt
 
 /**********************************************************************************

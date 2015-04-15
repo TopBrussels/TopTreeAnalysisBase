@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: TNeuron.h 40005 2011-06-27 15:29:10Z stelzer $
+// @(#)root/tmva $Id$
 // Author: Matt Jachowski
 
 /**********************************************************************************
@@ -163,8 +163,7 @@ namespace TMVA {
       TActivation*  fActivation;              // activation equation
       TNeuronInput* fInputCalculator;         // input calculator
 
-      static MsgLogger* fgLogger;                     //! message logger, static to save resources
-      MsgLogger& Log() const { return *fgLogger; }                       
+      MsgLogger& Log() const;
 
       ClassDef(TNeuron,0) // Neuron class used by MethodANNBase derivative ANNs
    };

@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: PDEFoamKernelGauss.h 40005 2011-06-27 15:29:10Z stelzer $
+// @(#)root/tmva $Id$
 // Author: Dominik Dannheim, Alexander Voigt
 
 /**********************************************************************************
@@ -56,7 +56,7 @@ namespace TMVA
    public:
       PDEFoamKernelGauss(Float_t sigma);    // Constructor
       PDEFoamKernelGauss(const PDEFoamKernelGauss&); // Copy Constructor
-      virtual ~PDEFoamKernelGauss() {};     // Destructor
+      virtual ~PDEFoamKernelGauss() {}      // Destructor
 
       // kernel estimator
       virtual Float_t Estimate(PDEFoam*, std::vector<Float_t>&, ECellValue);

@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: MethodPlugins.cxx 44107 2012-05-04 07:32:54Z evt $ 
+// @(#)root/tmva $Id$ 
 // Author: Andreas Hoecker, Joerg Stelzer, Helge Voss, Kai Voss 
 
 /**********************************************************************************

@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: PDEFoamKernelLinN.h 40005 2011-06-27 15:29:10Z stelzer $
+// @(#)root/tmva $Id$
 // Author: Dominik Dannheim, Alexander Voigt
 
 /**********************************************************************************
@@ -51,7 +51,7 @@ namespace TMVA
    public:
       PDEFoamKernelLinN();                 // Constructor
       PDEFoamKernelLinN(const PDEFoamKernelLinN&); // Copy Constructor
-      virtual ~PDEFoamKernelLinN() {};     // Destructor
+      virtual ~PDEFoamKernelLinN() {}      // Destructor
 
       // kernel estimator
       virtual Float_t Estimate(PDEFoam*, std::vector<Float_t>&, ECellValue);

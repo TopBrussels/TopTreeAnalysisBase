@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: PDF.cxx 38938 2011-04-20 07:12:51Z evt $
+// @(#)root/tmva $Id$
 // Author: Asen Christov, Andreas Hoecker, Joerg Stelzer, Helge Voss, Kai Voss, Jan Therhaag, Eckhard von Toerne
 
 /**********************************************************************************
@@ -49,7 +49,6 @@
 const Int_t    TMVA::PDF::fgNbin_PdfHist      = 10000;
 const Bool_t   TMVA::PDF::fgManualIntegration = kTRUE;
 const Double_t TMVA::PDF::fgEpsilon           = 1.0e-12;
-TMVA::PDF*     TMVA::PDF::fgThisPDF           = 0;
 
 ClassImp(TMVA::PDF)
 
@@ -87,7 +86,7 @@ TMVA::PDF::PDF( const TString& name, Bool_t norm )
 {
    // default constructor needed for ROOT I/O
    fLogger   = new MsgLogger(this);
-   fgThisPDF = this;
+   GetThisPdfThreadLocal() = this;
 }
 
 //_______________________________________________________________________
@@ -244,8 +243,7 @@ TMVA::PDF::~PDF()
 //_______________________________________________________________________
 void TMVA::PDF::BuildPDF( const TH1* hist )
 {
-   fgThisPDF = this;
-
+   GetThisPdfThreadLocal() = this;
    // sanity check
    if (hist == NULL) Log() << kFATAL << "Called without valid histogram pointer!" << Endl;
 
@@ -593,8 +591,8 @@ void TMVA::PDF::ValidatePDF( TH1* originalHist ) const
       if (y > 0) {
          ndof++;
          Double_t d = TMath::Abs( (y - yref*rref)/ey );
-         //         cout << "bin: " << bin << "  val: " << x << "  data(err): " << y << "(" << ey << ")   pdf: " 
-         //              << yref << "  dev(chi2): " << d << "(" << chi2 << ")  rref: " << rref << endl;
+         //         std::cout << "bin: " << bin << "  val: " << x << "  data(err): " << y << "(" << ey << ")   pdf: " 
+         //              << yref << "  dev(chi2): " << d << "(" << chi2 << ")  rref: " << rref << std::endl;
          chi2 += d*d;
          if (d > 1) { nc1++; if (d > 2) { nc2++; if (d > 3) { nc3++; if (d > 6) nc6++; } } }
       }
@@ -1009,7 +1007,7 @@ void TMVA::PDF::ReadXML( void* pdfnode )
 }
 
 //_______________________________________________________________________
-ostream& TMVA::operator<< ( ostream& os, const PDF& pdf )
+std::ostream& TMVA::operator<< ( std::ostream& os, const PDF& pdf )
 {
    // write the pdf
    Int_t dp = os.precision();
@@ -1046,9 +1044,9 @@ ostream& TMVA::operator<< ( ostream& os, const PDF& pdf )
 }
 
 //_______________________________________________________________________
-istream& TMVA::operator>> ( istream& istr, PDF& pdf )
+std::istream& TMVA::operator>> ( std::istream& istr, PDF& pdf )
 {
-   // read the tree from an istream
+   // read the tree from an std::istream
    TString devnullS;
    Int_t   valI;
    Int_t   nbins=-1; // default binning will cause an exit
@@ -1112,5 +1110,5 @@ istream& TMVA::operator>> ( istream& istr, PDF& pdf )
 TMVA::PDF*  TMVA::PDF::ThisPDF( void )
 {
    // return global "this" pointer of PDF
-   return fgThisPDF;
+   return GetThisPdfThreadLocal();
 }

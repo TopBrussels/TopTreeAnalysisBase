@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: MethodCFMlpANN_Utils.cxx 41891 2011-11-10 22:46:31Z pcanal $
+// @(#)root/tmva $Id$
 // Author: Andreas Hoecker, Joerg Stelzer, Helge Voss, Kai Voss
 
 /**********************************************************************************
@@ -72,12 +72,12 @@ using std::endl;
 
 ClassImp(TMVA::MethodCFMlpANN_Utils)
    
-Int_t       TMVA::MethodCFMlpANN_Utils::fg_100         = 100;
-Int_t       TMVA::MethodCFMlpANN_Utils::fg_0           = 0;
-Int_t       TMVA::MethodCFMlpANN_Utils::fg_max_nVar_   = max_nVar_;
-Int_t       TMVA::MethodCFMlpANN_Utils::fg_max_nNodes_ = max_nNodes_;
-Int_t       TMVA::MethodCFMlpANN_Utils::fg_999         = 999;
-const char* TMVA::MethodCFMlpANN_Utils::fg_MethodName  = "--- CFMlpANN                 ";
+Int_t             TMVA::MethodCFMlpANN_Utils::fg_100         = 100;
+Int_t             TMVA::MethodCFMlpANN_Utils::fg_0           = 0;
+const Int_t       TMVA::MethodCFMlpANN_Utils::fg_max_nVar_   = max_nVar_;
+const Int_t       TMVA::MethodCFMlpANN_Utils::fg_max_nNodes_ = max_nNodes_;
+Int_t             TMVA::MethodCFMlpANN_Utils::fg_999         = 999;
+const char* const TMVA::MethodCFMlpANN_Utils::fg_MethodName  = "--- CFMlpANN                 ";
 
 TMVA::MethodCFMlpANN_Utils::MethodCFMlpANN_Utils()
 {
@@ -582,7 +582,7 @@ void TMVA::MethodCFMlpANN_Utils::Innit( char *det, Double_t *tout2, Double_t *ti
    Int_t nevod, layer, ktest, i1, nrest;
    Int_t ievent(0);
    Int_t kkk;
-   Double_t xxx, yyy;
+   Double_t xxx = 0.0, yyy = 0.0;
 
    Leclearn(&ktest, tout2, tin2);
    Lecev2(&ktest, tout2, tin2);

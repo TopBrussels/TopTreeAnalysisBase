@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: TActivationChooser.cxx 29210 2009-06-25 10:44:35Z brun $
+// @(#)root/tmva $Id$
 // Author: Matt Jachowski 
 
 /**********************************************************************************

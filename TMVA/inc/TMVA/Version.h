@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: Version.h 44118 2012-05-04 12:29:18Z evt $   
+// @(#)root/tmva $Id$   
 // Author: Andreas Hoecker, Peter Speckmayer, Joerg Stelzer, Jan Therhaag, Eckhard von Toerne, Helge Voss
 
 /**********************************************************************************
@@ -41,10 +41,10 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
-#define TMVA_RELEASE      "4.1.3"
-#define TMVA_RELEASE_DATE "May 04, 2012"
-#define TMVA_RELEASE_TIME "15:00:00"
-#define TMVA_VERSION_CODE 262403
+#define TMVA_RELEASE      "4.2.0"
+#define TMVA_RELEASE_DATE "Sep 19, 2013"
+#define TMVA_RELEASE_TIME "14:25:28"
+#define TMVA_VERSION_CODE 262656
 #define TMVA_VERSION(a,b,c) (((a) << 16) + ((b) << 8) + (c))
 
 #endif

@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: VariableIdentityTransform.cxx 38475 2011-03-17 10:46:00Z evt $
+// @(#)root/tmva $Id$
 // Author: Andreas Hoecker, Joerg Stelzer, Helge Voss
 
 /**********************************************************************************
@@ -48,7 +48,7 @@ void TMVA::VariableIdentityTransform::Initialize()
 }
 
 //_______________________________________________________________________
-Bool_t TMVA::VariableIdentityTransform::PrepareTransformation( const std::vector<Event*>& events)
+Bool_t TMVA::VariableIdentityTransform::PrepareTransformation (const std::vector<Event*>& events)
 {
    // the identity does not need to be prepared, only calculate the normalization
    Initialize();

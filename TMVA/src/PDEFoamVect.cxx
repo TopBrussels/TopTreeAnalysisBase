@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: PDEFoamVect.cxx 44110 2012-05-04 08:34:05Z evt $
+// @(#)root/tmva $Id$
 // Author: S. Jadach, Tancredi Carli, Dominik Dannheim, Alexander Voigt
 
 /**********************************************************************************
@@ -201,12 +201,12 @@ TMVA::PDEFoamVect& TMVA::PDEFoamVect::operator =(Double_t x)
 void TMVA::PDEFoamVect::Print(Option_t *option) const
 {
    // Printout of all vector components
-   streamsize wid = cout.width(); // saving current field width
+   streamsize wid = std::cout.width(); // saving current field width
    if(!option) Error( "Print ", "No option set \n");
-   cout << "(";
-   for(Int_t i=0; i<fDim-1; i++) 
-      cout << std::setw(12) << *(fCoords+i) << ",";
-   cout << std::setw(12) << *(fCoords+fDim-1);
-   cout << ")";
-   cout.width(wid);
+   std::cout << "(";
+   for(Int_t i=0; i<fDim-1; i++)
+      std::cout << std::setw(12) << *(fCoords+i) << ",";
+   std::cout << std::setw(12) << *(fCoords+fDim-1);
+   std::cout << ")";
+   std::cout.width(wid);
 }

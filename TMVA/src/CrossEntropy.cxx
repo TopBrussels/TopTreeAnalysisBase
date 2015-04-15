@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: CrossEntropy.cxx 39989 2011-06-27 13:19:22Z stelzer $       
+// @(#)root/tmva $Id$       
 // Author: Andreas Hoecker, Joerg Stelzer, Helge Voss, Kai Voss 
 
 /**********************************************************************************

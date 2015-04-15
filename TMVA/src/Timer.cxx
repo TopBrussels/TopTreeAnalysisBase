@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: Timer.cxx 31458 2009-11-30 13:58:20Z stelzer $   
+// @(#)root/tmva $Id$   
 // Author: Andreas Hoecker, Joerg Stelzer, Helge Voss
 
 /**********************************************************************************

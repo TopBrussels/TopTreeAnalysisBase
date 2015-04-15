@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: TMVARegression.C 38475 2011-03-17 10:46:00Z evt $
+// @(#)root/tmva $Id$
 /**********************************************************************************
  * Project   : TMVA - a Root-integrated toolkit for multivariate data analysis    *
  * Package   : TMVA                                                               *
@@ -36,7 +36,6 @@
 #include "TSystem.h"
 #include "TROOT.h"
 
-#include "TMVARegGui.C"
 
 #if not defined(__CINT__) || defined(__MAKECINT__)
 #include "TMVA/Tools.h"
@@ -59,6 +58,14 @@ void TMVARegression( TString myMethodList = "" )
    //---------------------------------------------------------------
    // This loads the library
    TMVA::Tools::Instance();
+
+   // to get access to the GUI and all tmva macros
+   TString tmva_dir(TString(gRootDir) + "/tmva");
+   if(gSystem->Getenv("TMVASYS"))
+      tmva_dir = TString(gSystem->Getenv("TMVASYS"));
+   gROOT->SetMacroPath(tmva_dir + "/test/:" + gROOT->GetMacroPath() );
+   gROOT->ProcessLine(".L TMVARegGui.C");
+
 
    // Default MVA methods to be trained + tested
    std::map<std::string,int> Use;
@@ -251,11 +258,11 @@ void TMVARegression( TString myMethodList = "" )
    // Boosted Decision Trees
    if (Use["BDT"])
      factory->BookMethod( TMVA::Types::kBDT, "BDT",
-                           "!H:!V:NTrees=100:nEventsMin=5:BoostType=AdaBoostR2:SeparationType=RegressionVariance:nCuts=20:PruneMethod=CostComplexity:PruneStrength=30" );
+                           "!H:!V:NTrees=100:MinNodeSize=1.0%:BoostType=AdaBoostR2:SeparationType=RegressionVariance:nCuts=20:PruneMethod=CostComplexity:PruneStrength=30" );
 
    if (Use["BDTG"])
      factory->BookMethod( TMVA::Types::kBDT, "BDTG",
-                           "!H:!V:NTrees=2000::BoostType=Grad:Shrinkage=0.1:UseBaggedGrad:GradBaggingFraction=0.5:nCuts=20:MaxDepth=3:NNodesMax=15" );
+                           "!H:!V:NTrees=2000::BoostType=Grad:Shrinkage=0.1:UseBaggedBoost:BaggedSampleFraction=0.5:nCuts=20:MaxDepth=3:MaxDepth=4" );
    // --------------------------------------------------------------------------------------------------
 
    // ---- Now you can tell the factory to train, test, and evaluate the MVAs

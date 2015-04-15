@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: SeparationBase.h 40005 2011-06-27 15:29:10Z stelzer $
+// @(#)root/tmva $Id$
 // Author: Andreas Hoecker, Joerg Stelzer, Helge Voss, Kai Voss 
 
 /**********************************************************************************
@@ -100,7 +100,7 @@ namespace TMVA {
 
       // Return the gain in separation of the original sample is splitted in two sub-samples
       // (N * Index_parent) - (N_left * Index_left) - (N_right * Index_right)
-      Double_t GetSeparationGain( const Double_t& nSelS, const Double_t& nSelB,
+      virtual Double_t GetSeparationGain( const Double_t& nSelS, const Double_t& nSelB,
                                   const Double_t& nTotS, const Double_t& nTotB );
 
       // Return the separation index (a measure for "purity" of the sample")

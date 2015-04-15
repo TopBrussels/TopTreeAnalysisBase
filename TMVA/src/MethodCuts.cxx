@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: MethodCuts.cxx 38609 2011-03-24 16:06:32Z evt $
+// @(#)root/tmva $Id$
 // Author: Andreas Hoecker, Matt Jachowski, Peter Speckmayer, Eckhard von Toerne, Helge Voss, Kai Voss
 
 /**********************************************************************************
@@ -114,6 +114,8 @@ End_Html */
 #include "TMVA/VariableTransformBase.h"
 #include "TMVA/Results.h"
 
+using std::atof;
+
 REGISTER_METHOD(Cuts)
 
 ClassImp(TMVA::MethodCuts)
@@ -129,6 +131,7 @@ TMVA::MethodCuts::MethodCuts( const TString& jobName,
    MethodBase( jobName, Types::kCuts, methodTitle, theData, theOption, theTargetDir ),
    fFitMethod  ( kUseGeneticAlgorithm ),
    fEffMethod  ( kUseEventSelection ),
+   fFitParams (0),
    fTestSignalEff(0.7),
    fEffSMin    ( 0 ),
    fEffSMax    ( 0 ),
@@ -168,6 +171,7 @@ TMVA::MethodCuts::MethodCuts( DataSetInfo& theData,
    MethodBase( Types::kCuts, theData, theWeightFile, theTargetDir ), 
    fFitMethod  ( kUseGeneticAlgorithm ),
    fEffMethod  ( kUseEventSelection ),
+   fFitParams (0),
    fTestSignalEff(0.7),
    fEffSMin    ( 0 ),
    fEffSMax    ( 0 ),
@@ -222,16 +226,16 @@ void TMVA::MethodCuts::Init( void )
 
    // vector with fit results
    fNpar      = 2*GetNvar();
-   fRangeSign = new vector<Int_t>   ( GetNvar() );
+   fRangeSign = new std::vector<Int_t>   ( GetNvar() );
    for (UInt_t ivar=0; ivar<GetNvar(); ivar++) (*fRangeSign)[ivar] = +1;
 
-   fMeanS     = new vector<Double_t>( GetNvar() ); 
-   fMeanB     = new vector<Double_t>( GetNvar() ); 
-   fRmsS      = new vector<Double_t>( GetNvar() );  
-   fRmsB      = new vector<Double_t>( GetNvar() );  
+   fMeanS     = new std::vector<Double_t>( GetNvar() ); 
+   fMeanB     = new std::vector<Double_t>( GetNvar() ); 
+   fRmsS      = new std::vector<Double_t>( GetNvar() );  
+   fRmsB      = new std::vector<Double_t>( GetNvar() );  
 
    // get the variable specific options, first initialize default
-   fFitParams = new vector<EFitParameters>( GetNvar() );
+   fFitParams = new std::vector<EFitParameters>( GetNvar() );
    for (UInt_t ivar=0; ivar<GetNvar(); ivar++) (*fFitParams)[ivar] = kNotEnforced;
 
    fFitMethod = kUseMonteCarlo;
@@ -505,12 +509,12 @@ void TMVA::MethodCuts::PrintCuts( Double_t effS ) const
    Log() << Endl;
    for (UInt_t ivar=0; ivar<cutsMin.size(); ivar++) {
       Log() << kINFO 
-              << "Cut[" << setw(2) << ivar << "]: " 
-              << setw(10) << cutsMin[ivar] 
+              << "Cut[" << std::setw(2) << ivar << "]: " 
+              << std::setw(10) << cutsMin[ivar] 
               << " < " 
-              << setw(maxL) << (*varVec)[ivar]
+              << std::setw(maxL) << (*varVec)[ivar]
               << " <= " 
-              << setw(10) << cutsMax[ivar] << Endl;
+              << std::setw(10) << cutsMax[ivar] << Endl;
    }
    for (UInt_t i=0; i<maxLine; i++) Log() << "-";
    Log() << Endl;
@@ -606,7 +610,7 @@ void  TMVA::MethodCuts::Train( void )
       else if (xmax < fCutRange[ivar]->GetMax()) fCutRange[ivar]->SetMax( xmax );
    }   
 
-   vector<TH1F*> signalDist, bkgDist;
+   std::vector<TH1F*> signalDist, bkgDist;
 
    // this is important: reset the branch addresses of the training tree to the current event
    delete fEffBvsSLocal;
@@ -624,7 +628,7 @@ void  TMVA::MethodCuts::Train( void )
        fFitMethod == kUseSimulatedAnnealing) {
 
       // ranges
-      vector<Interval*> ranges;
+      std::vector<Interval*> ranges;
 
       for (UInt_t ivar=0; ivar<GetNvar(); ivar++) {
 
@@ -735,7 +739,7 @@ void  TMVA::MethodCuts::Train( void )
             // retrieve signal events
             Bool_t isSignal = kFALSE;
             Int_t    ievt1, ievt2;
-            Double_t evt1, evt2;
+            Double_t evt1 = 0., evt2 = 0.;
             Int_t nbreak = 0;
             while (!isSignal) {
                ievt1 = Int_t(rnd->Uniform(0.,1.)*nevents);
@@ -1072,12 +1076,12 @@ void TMVA::MethodCuts::CreateVariablePDFs( void )
    // for PDF method: create efficiency reference histograms and PDFs
 
    // create list of histograms and PDFs
-   fVarHistS        = new vector<TH1*>( GetNvar() );
-   fVarHistB        = new vector<TH1*>( GetNvar() );
-   fVarHistS_smooth = new vector<TH1*>( GetNvar() );
-   fVarHistB_smooth = new vector<TH1*>( GetNvar() );
-   fVarPdfS         = new vector<PDF*>( GetNvar() );
-   fVarPdfB         = new vector<PDF*>( GetNvar() );
+   fVarHistS        = new std::vector<TH1*>( GetNvar() );
+   fVarHistB        = new std::vector<TH1*>( GetNvar() );
+   fVarHistS_smooth = new std::vector<TH1*>( GetNvar() );
+   fVarHistB_smooth = new std::vector<TH1*>( GetNvar() );
+   fVarPdfS         = new std::vector<PDF*>( GetNvar() );
+   fVarPdfB         = new std::vector<PDF*>( GetNvar() );
 
    Int_t nsmooth = 0;
 
@@ -1178,7 +1182,7 @@ void TMVA::MethodCuts::CreateVariablePDFs( void )
 }
 
 //_______________________________________________________________________
-void  TMVA::MethodCuts::ReadWeightsFromStream( istream& istr )
+void  TMVA::MethodCuts::ReadWeightsFromStream( std::istream& istr )
 {
    // read the cuts from stream
    TString dummy;
@@ -1486,7 +1490,7 @@ Double_t TMVA::MethodCuts::GetTrainingEfficiency(const TString& theString)
    if (NULL == fSplTrainEffBvsS) return 0.0;
 
    // now find signal efficiency that corresponds to required background efficiency
-   Double_t effS, effB, effS_ = 0, effB_ = 0;
+   Double_t effS = 0., effB, effS_ = 0., effB_ = 0.;
    Int_t    nbins_ = 1000;
 
    // loop over efficiency bins until the background eff. matches the requirement
@@ -1668,8 +1672,8 @@ Double_t TMVA::MethodCuts::GetEfficiency( const TString& theString, Types::ETree
 void TMVA::MethodCuts::MakeClassSpecific( std::ostream& fout, const TString& className ) const
 {
    // write specific classifier response
-   fout << "   // not implemented for class: \"" << className << "\"" << endl;
-   fout << "};" << endl;
+   fout << "   // not implemented for class: \"" << className << "\"" << std::endl;
+   fout << "};" << std::endl;
 }
 
 //_______________________________________________________________________

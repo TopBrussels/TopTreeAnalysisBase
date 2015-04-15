@@ -1,4 +1,4 @@
-// @(#)Root/tmva $Id: Factory.cxx 44110 2012-05-04 08:34:05Z evt $
+// @(#)Root/tmva $Id$
 // Author: Andreas Hoecker, Peter Speckmayer, Joerg Stelzer, Helge Voss, Kai Voss, Eckhard von Toerne, Jan Therhaag
 
 /**********************************************************************************
@@ -78,7 +78,7 @@
 #include "TMVA/ResultsMulticlass.h"
 
 const Int_t  MinNoTrainingEvents = 10;
-const Int_t  MinNoTestEvents     = 1;
+//const Int_t  MinNoTestEvents     = 1;
 TFile* TMVA::Factory::fgTargetFile = 0;
 
 ClassImp(TMVA::Factory)
@@ -91,7 +91,7 @@ TMVA::Factory::Factory( TString jobName, TFile* theTargetFile, TString theOption
 : Configurable          ( theOption ),
    fDataSetManager       ( NULL ), //DSMTEST
    fDataInputHandler     ( new DataInputHandler ),
-   fTransformations      ( "" ),
+   fTransformations      ( "I" ),
    fVerbose              ( kFALSE ),
    fJobName              ( jobName ),
    fDataAssignType       ( kAssignEvents ),
@@ -122,8 +122,14 @@ TMVA::Factory::Factory( TString jobName, TFile* theTargetFile, TString theOption
    // directory and hence don't go out of scope when closing the file
    // TH1::AddDirectory(kFALSE);
    Bool_t silent          = kFALSE;
+#ifdef WIN32
+   // under Windows, switch progress bar and color off by default, as the typical windows shell doesn't handle these (would need different sequences..)
+   Bool_t color           = kFALSE;
+   Bool_t drawProgressBar = kFALSE;
+#else
    Bool_t color           = !gROOT->IsBatch();
    Bool_t drawProgressBar = kTRUE;
+#endif
    DeclareOptionRef( fVerbose, "V", "Verbose flag" );
    DeclareOptionRef( color,    "Color", "Flag for coloured screen output (default: True, if in batch mode: False)" );
    DeclareOptionRef( fTransformations, "Transformations", "List of transformations to test; formatting example: \"Transformations=I;D;P;U;G,D\", for identity, decorrelation, PCA, Uniform and Gaussianisation followed by decorrelation transformations" );
@@ -234,6 +240,7 @@ TTree* TMVA::Factory::CreateEventAssignTrees( const TString& name )
 {
    // create the data assignment tree (for event-wise data assignment by user)
    TTree * assignTree = new TTree( name, name );
+   assignTree->SetDirectory(0);
    assignTree->Branch( "type",   &fATreeType,   "ATreeType/I" );
    assignTree->Branch( "weight", &fATreeWeight, "ATreeWeight/F" );
 
@@ -736,6 +743,7 @@ TMVA::MethodBase* TMVA::Factory::BookMethod( TString theMethodName, TString meth
       return 0;
    }
 
+
    method->SetAnalysisType( fAnalysisType );
    method->SetupMethod();
    method->ParseOptions();
@@ -783,6 +791,7 @@ void TMVA::Factory::WriteDataInformation()
 
    DefaultDataSetInfo().GetDataSet(); // builds dataset (including calculation of correlation matrix)
 
+
    // correlation matrix of the default DS
    const TMatrixD* m(0);
    const TH2* h(0);
@@ -823,7 +832,7 @@ void TMVA::Factory::WriteDataInformation()
    
    // some default transformations to evaluate
    // NOTE: all transformations are destroyed after this test
-   TString processTrfs = ""; //"I;N;D;P;U;G,D;"
+   TString processTrfs = "I"; //"I;N;D;P;U;G,D;"
 
    // plus some user defined transformations
    processTrfs = fTransformations;
@@ -877,7 +886,7 @@ void TMVA::Factory::OptimizeAllMethods(TString fomType, TString fitType)
 
    // iterate over methods and optimize
    for( itrMethod = fMethods.begin(); itrMethod != fMethods.end(); ++itrMethod ) {
-
+      Event::SetIsTraining(kTRUE);
       MethodBase* mva = dynamic_cast<MethodBase*>(*itrMethod);
       if (!mva) {
          Log() << kFATAL << "Dynamic cast to MethodBase failed" <<Endl;
@@ -903,7 +912,7 @@ void TMVA::Factory::OptimizeAllMethods(TString fomType, TString fitType)
 
 //_______________________________________________________________________
 void TMVA::Factory::TrainAllMethods() 
-{     
+{  
    // iterates through all booked methods and calls training
 
    if(fDataInputHandler->GetEntries() <=1) { // 0 entries --> 0 events, 1 entry --> dynamical dataset (or one entry)
@@ -937,7 +946,7 @@ void TMVA::Factory::TrainAllMethods()
 
    // iterate over methods and train
    for( itrMethod = fMethods.begin(); itrMethod != fMethods.end(); ++itrMethod ) {
-
+      Event::SetIsTraining(kTRUE);
       MethodBase* mva = dynamic_cast<MethodBase*>(*itrMethod);
       if(mva==0) continue;
 
@@ -1038,6 +1047,7 @@ void TMVA::Factory::TestAllMethods()
    MVector::iterator itrMethod    = fMethods.begin();
    MVector::iterator itrMethodEnd = fMethods.end();
    for (; itrMethod != itrMethodEnd; itrMethod++) {
+      Event::SetIsTraining(kFALSE);
       MethodBase* mva = dynamic_cast<MethodBase*>(*itrMethod);
       if(mva==0) continue;
       Types::EAnalysisType analysisType = mva->GetAnalysisType();
@@ -1107,6 +1117,7 @@ void TMVA::Factory::EvaluateAllVariables( TString options )
 {
    // iterates over all MVA input varables and evaluates them
    Log() << kINFO << "Evaluating all variables..." << Endl;
+   Event::SetIsTraining(kFALSE);
 
    for (UInt_t i=0; i<DefaultDataSetInfo().GetNVariables(); i++) {
       TString s = DefaultDataSetInfo().GetVariableInfo(i).GetLabel();
@@ -1179,6 +1190,7 @@ void TMVA::Factory::EvaluateAllMethods( void )
    MVector::iterator itrMethod    = fMethods.begin();
    MVector::iterator itrMethodEnd = fMethods.end();
    for (; itrMethod != itrMethodEnd; itrMethod++) {
+      Event::SetIsTraining(kFALSE);
       MethodBase* theMethod = dynamic_cast<MethodBase*>(*itrMethod);
       if(theMethod==0) continue;
       if (theMethod->GetMethodType() != Types::kCuts) methodsNoCuts.push_back( *itrMethod );
@@ -1396,7 +1408,7 @@ void TMVA::Factory::EvaluateAllMethods( void )
          DataSet* defDs = DefaultDataSetInfo().GetDataSet();
          defDs->SetCurrentType(Types::kTesting);
          for (Int_t ievt=0; ievt<defDs->GetNEvents(); ievt++) {
-            Event* ev = defDs->GetEvent(ievt);
+            const Event* ev = defDs->GetEvent(ievt);
 
             // for correlations
             TMatrixD* theMat = 0;

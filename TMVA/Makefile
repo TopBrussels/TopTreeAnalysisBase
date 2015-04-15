@@ -37,15 +37,15 @@ DICTH1       := Configurable.h Event.h Factory.h MethodBase.h MethodCompositeBas
 		MethodANNBase.h MethodTMlpANN.h MethodRuleFit.h MethodCuts.h MethodFisher.h \
 		MethodKNN.h MethodCFMlpANN.h MethodCFMlpANN_Utils.h MethodLikelihood.h \
 		MethodHMatrix.h MethodPDERS.h MethodBDT.h MethodDT.h MethodSVM.h MethodBayesClassifier.h \
-		MethodFDA.h MethodMLP.h MethodCommittee.h MethodBoost.h \
+		MethodFDA.h MethodMLP.h MethodBoost.h \
 		MethodPDEFoam.h MethodLD.h MethodCategory.h
 DICTH2       := TSpline2.h TSpline1.h PDF.h BinaryTree.h BinarySearchTreeNode.h BinarySearchTree.h \
 		Timer.h RootFinder.h CrossEntropy.h DecisionTree.h DecisionTreeNode.h MisClassificationError.h \
 		Node.h SdivSqrtSplusB.h SeparationBase.h RegressionVariance.h Tools.h Reader.h \
 		GeneticAlgorithm.h GeneticGenes.h GeneticPopulation.h GeneticRange.h GiniIndex.h \
-		GiniIndexWithLaplace.h SimulatedAnnealing.h
-DICTH3       := Config.h KDEKernel.h Interval.h FitterBase.h MCFitter.h GeneticFitter.h SimulatedAnnealingFitter.h \
-		MinuitFitter.h MinuitWrapper.h IFitterTarget.h \
+		GiniIndexWithLaplace.h SimulatedAnnealing.h QuickMVAProbEstimator.h
+DICTH3       := Config.h KDEKernel.h Interval.h LogInterval.h FitterBase.h MCFitter.h GeneticFitter.h  \
+		SimulatedAnnealingFitter.h MinuitFitter.h MinuitWrapper.h IFitterTarget.h \
 		PDEFoam.h PDEFoamDecisionTree.h PDEFoamDensityBase.h PDEFoamDiscriminantDensity.h \
 		PDEFoamEventDensity.h PDEFoamTargetDensity.h PDEFoamDecisionTreeDensity.h PDEFoamMultiTarget.h \
 		PDEFoamVect.h PDEFoamCell.h PDEFoamDiscriminant.h PDEFoamEvent.h PDEFoamTarget.h \
@@ -56,7 +56,7 @@ DICTH4       := TNeuron.h TSynapse.h TActivationChooser.h TActivation.h TActivat
 		TActivationTanh.h TActivationRadial.h TNeuronInputChooser.h TNeuronInput.h TNeuronInputSum.h \
 		TNeuronInputSqSum.h TNeuronInputAbs.h Types.h Ranking.h RuleFit.h RuleFitAPI.h IMethod.h MsgLogger.h \
 		VariableTransformBase.h VariableIdentityTransform.h VariableDecorrTransform.h VariablePCATransform.h \
-		VariableGaussTransform.h VariableNormalizeTransform.h VariableRearrangeTransform.h
+		VariableGaussTransform.h VariableNormalizeTransform.h VariableRearrangeTransform.h ROCCalc.h  
 DICTH1       := $(patsubst %,inc/TMVA/%,$(DICTH1))
 DICTH2       := $(patsubst %,inc/TMVA/%,$(DICTH2))
 DICTH3       := $(patsubst %,inc/TMVA/%,$(DICTH3))
@@ -69,7 +69,7 @@ SKIPHLIST    := $(DICTHEAD) $(DICTL)
 LIBFILE      := lib/lib$(PACKAGE).a
 SHLIBFILE    := lib$(PACKAGE).$(DllSuf)
 DLLIBFILE    := lib/lib$(PACKAGE).dll
-ROOTMAP      := lib/lib$(PACKAGE).rootmap
+#ROOTMAP      := lib/lib$(PACKAGE).rootmap
 TESTDIR      := test
 UNAME = $(shell uname)
 
@@ -103,20 +103,28 @@ $(OBJDIR)/%.o : src/%.cxx
 dict: sl $(DICTO1) $(DICTO2) $(DICTO3) $(DICTO4)
 
 $(DICTS1):  $(DICTH1) $(DICTL1)
-	@echo "Generating dictionary $@" 
-	$(shell root-config --exec-prefix)/bin/rootcint -f $@ -c -p $(INCLUDES) $^
+	@echo "Generating dictionary and rootmap $@" 
+	@mkdir -p $(LIBDIR)
+	$(shell root-config --exec-prefix)/bin/rootcling -f $@ -c -p $(INCLUDES) -rmf lib/libTMVA1.rootmap -rml libTMVA.so $^
+#	$(shell root-config --exec-prefix)/bin/rootcling -f $@ -c -p $(INCLUDES) -rml libMinuit.so  -rml libMLP.so  -rml libMatrix.so  -rml libTree.so  -rml libGraf.so  -rml libTreePlayer.so  -rml libXMLIO.so -rmf lib/libTMVA1.rootmap $^
 
 $(DICTS2):  $(DICTH2) $(DICTL2)
-	@echo "Generating dictionary $@" 
-	$(shell root-config --exec-prefix)/bin/rootcint -f $@ -c -p $(INCLUDES) $^
+	@echo "Generating dictionary and rootmap $@" 
+	@mkdir -p $(LIBDIR)
+	$(shell root-config --exec-prefix)/bin/rootcling -f $@ -c -p $(INCLUDES) -rmf lib/libTMVA2.rootmap -rml libTMVA.so $^
+#	$(shell root-config --exec-prefix)/bin/rootcling -f $@ -c -p $(INCLUDES) -rml libMinuit.so  -rml libMLP.so  -rml libMatrix.so  -rml libTree.so  -rml libGraf.so  -rml libTreePlayer.so  -rml libXMLIO.so -rmf lib/libTMVA2.rootmap $^
 
 $(DICTS3):  $(DICTH3) $(DICTL3)
-	@echo "Generating dictionary $@" 
-	$(shell root-config --exec-prefix)/bin/rootcint -f $@ -c -p $(INCLUDES) $^
+	@echo "Generating dictionary and rootmap $@" 
+	@mkdir -p $(LIBDIR)
+	$(shell root-config --exec-prefix)/bin/rootcling -f $@ -c -p $(INCLUDES) -rmf lib/libTMVA3.rootmap -rml libTMVA.so $^
+#	$(shell root-config --exec-prefix)/bin/rootcling -f $@ -c -p $(INCLUDES) -rml libMinuit.so  -rml libMLP.so  -rml libMatrix.so  -rml libTree.so  -rml libGraf.so  -rml libTreePlayer.so  -rml libXMLIO.so -rmf lib/libTMVA3.rootmap $^
 
 $(DICTS4):  $(DICTH4) $(DICTL4)
-	@echo "Generating dictionary $@" 
-	$(shell root-config --exec-prefix)/bin/rootcint -f $@ -c -p $(INCLUDES) $^
+	@echo "Generating dictionary and rootmap $@" 
+	@mkdir -p $(LIBDIR)
+	$(shell root-config --exec-prefix)/bin/rootcling -f $@ -c -p $(INCLUDES) -rmf lib/libTMVA4.rootmap -rml libTMVA.so $^
+#	$(shell root-config --exec-prefix)/bin/rootcling -f $@ -c -p $(INCLUDES) -rml libMinuit.so  -rml libMLP.so  -rml libMatrix.so  -rml libTree.so  -rml libGraf.so  -rml libTreePlayer.so  -rml libXMLIO.so -rmf lib/libTMVA4.rootmap $^
 
 $(DICTO1): $(DICTS1)
 	@echo "Compiling dictionary $<"
@@ -189,16 +197,10 @@ $(LIBDIR)/$(SHLIBFILE): $(OLIST) $(DICTO)
 	@printf "Building shared library $(LIBDIR)/$(SHLIBFILE) ... "
 	@mkdir -p $(LIBDIR)
 	@rm -f $(LIBDIR)/$(SHLIBFILE)
-	@$(LD) -L$(shell root-config --libdir) $(SOFLAGS) $(addprefix $(OBJDIR)/,$(OLIST)) $(DICTO) -o $(LIBDIR)/$(SHLIBFILE) -lMinuit -lXMLIO
+	@$(LD) -L$(shell root-config --libdir) $(SOFLAGS) $(addprefix $(OBJDIR)/,$(OLIST)) $(DICTO) -o $(LIBDIR)/$(SHLIBFILE) -lTree -lMinuit -lXMLIO
 #	ln -fs $(SHLIBFILE) lib/lib$(PACKAGE).1.so
 	@echo "Done"
 
-# Rule to combine objects into a unix shared library
-$(ROOTMAP): $(DICTL)
-	@printf "Building $(ROOTMAP) ... "
-	@mkdir -p $(LIBDIR)
-	rlibmap -f -o $@ -l lib$(PACKAGE).1.$(DllSuf) -d libMinuit.so libMLP.so libMatrix.so libTree.so libGraf.so libTreePlayer.so libXMLIO.so -c $^
-	@echo "Done"
 
 # Rule to combine objects into a windows shared library
 $(DLLIBFILE): $(OLIST) $(DICTO)
@@ -210,7 +212,7 @@ $(DLLIBFILE): $(OLIST) $(DICTO)
 # Useful build targets
 lib: $(LIBFILE) 
 
-shlib: $(LIBDIR)/$(SHLIBFILE) $(ROOTMAP)
+shlib: $(LIBDIR)/$(SHLIBFILE) dict
 
 winlib: $(DLLIBFILE)
 
@@ -229,7 +231,8 @@ clean:
 	rm -f $(LIBDIR)/$(SHLIBFILE)
 	rm -f lib/lib$(PACKAGE).1.so
 	rm -f lib/lib$(PACKAGE).1.dylib
-	rm -f $(ROOTMAP)
+#	rm -f $(ROOTMAP)
+	rm -f lib/lib$(PACKAGE)*.rootmap
 	rm -f $(DLLIBFILE)
 
 distclean:
@@ -240,7 +243,8 @@ distclean:
 	rm -f $(LIBDIR)/$(SHLIBFILE	)
 	rm -f lib/lib$(PACKAGE).1.so
 	rm -f lib/lib$(PACKAGE).1.dylib
-	rm -f $(ROOTMAP)
+#	rm -f $(ROOTMAP)
+	rm -f lib/lib$(PACKAGE)*.rootmap
 	rm -f $(DLLIBFILE)
 
 .PHONY : winlib shlib lib default clean

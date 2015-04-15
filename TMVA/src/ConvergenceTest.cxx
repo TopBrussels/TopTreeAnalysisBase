@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: ConvergenceTest.cxx 38475 2011-03-17 10:46:00Z evt $
+// @(#)root/tmva $Id$
 // Author: Andreas Hoecker, Peter Speckmayer, Joerg Stelzer, Helge Voss
 
 /**********************************************************************************
@@ -122,5 +122,5 @@ Float_t TMVA::ConvergenceTest::SpeedControl( UInt_t ofSteps )
       n++;
    }
 
-   return sum/Float_t(n);
+   return  n ? sum/Float_t(n) : 0;
 }

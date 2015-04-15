@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: PDEFoamMultiTarget.h 44112 2012-05-04 10:00:41Z evt $
+// @(#)root/tmva $Id$
 // Author: Tancredi Carli, Dominik Dannheim, Alexander Voigt
 
 /**********************************************************************************
@@ -56,7 +56,7 @@ namespace TMVA
    public:
       PDEFoamMultiTarget();                  // Default constructor (used only by ROOT streamer)
       PDEFoamMultiTarget(const TString&, ETargetSelection); // Principal user-defined constructor
-      virtual ~PDEFoamMultiTarget() {};      // Default destructor
+      virtual ~PDEFoamMultiTarget() {}       // Default destructor
 
       // overridden from PDEFoam: extract the targets from the foam
       virtual std::vector<Float_t> GetCellValue(const std::map<Int_t, Float_t>&, ECellValue);

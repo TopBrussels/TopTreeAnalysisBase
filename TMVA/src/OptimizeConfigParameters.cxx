@@ -42,7 +42,7 @@
 ClassImp(TMVA::OptimizeConfigParameters)
    
 //_______________________________________________________________________
-TMVA::OptimizeConfigParameters::OptimizeConfigParameters(MethodBase * const method, std::map<TString,TMVA::Interval> tuneParameters, TString fomType, TString optimizationFitType) 
+TMVA::OptimizeConfigParameters::OptimizeConfigParameters(MethodBase * const method, std::map<TString,TMVA::Interval*> tuneParameters, TString fomType, TString optimizationFitType) 
 :  fMethod(method),
    fTuneParameters(tuneParameters),
    fFOMType(fomType),
@@ -50,7 +50,8 @@ TMVA::OptimizeConfigParameters::OptimizeConfigParameters(MethodBase * const meth
    fMvaSig(NULL),
    fMvaBkg(NULL),
    fMvaSigFineBin(NULL),
-   fMvaBkgFineBin(NULL)
+   fMvaBkgFineBin(NULL),
+   fNotDoneYet(kFALSE)
 {
    // Constructor which sets either "Classification or Regression"
   std::string name = "OptimizeConfigParameters_";
@@ -64,12 +65,12 @@ TMVA::OptimizeConfigParameters::OptimizeConfigParameters(MethodBase * const meth
    Log() << kINFO << "Automatic optimisation of tuning parameters in " 
          << GetMethod()->GetName() << " uses:" << Endl;
 
-   std::map<TString,TMVA::Interval>::iterator it;
+   std::map<TString,TMVA::Interval*>::iterator it;
    for (it=fTuneParameters.begin(); it!=fTuneParameters.end();it++) {
       Log() << kINFO << it->first 
-            << " in range from: " << it->second.GetMin()
-            << " to: " << it->second.GetMax()
-            << " in : " << it->second.GetNbins()  << " steps"
+            << " in range from: " << it->second->GetMin()
+            << " to: " << it->second->GetMax()
+            << " in : " << it->second->GetNbins()  << " steps"
             << Endl;
    }
    Log() << kINFO << " using the options: " << fFOMType << " and " << fOptimizationFitType << Endl;
@@ -105,6 +106,8 @@ TMVA::OptimizeConfigParameters::~OptimizeConfigParameters()
    gFOMvsIter->Write();
    h->Write();
 
+   delete [] x;
+   delete [] y;
    // delete fFOMvsIter;
 } 
 //_______________________________________________________________________
@@ -120,7 +123,7 @@ std::map<TString,Double_t> TMVA::OptimizeConfigParameters::optimize()
    Log() << kINFO << "For " << GetMethod()->GetName() << " the optimized Parameters are: " << Endl;
    std::map<TString,Double_t>::iterator it;
    for(it=fTunedParameters.begin(); it!= fTunedParameters.end(); it++){
-     Log() << kINFO << it->first << " = " << it->second << Endl;
+      Log() << kINFO << it->first << " = " << it->second << Endl;
    }
    return fTunedParameters;
 
@@ -150,7 +153,7 @@ void TMVA::OptimizeConfigParameters::optimizeScan()
    Double_t      bestFOM=-1000000, currentFOM;
 
    std::map<TString,Double_t> currentParameters;
-   std::map<TString,TMVA::Interval>::iterator it;
+   std::map<TString,TMVA::Interval*>::iterator it;
 
    // for the scan, start at the lower end of the interval and then "move upwards" 
    // initialize all parameters in currentParameter
@@ -158,8 +161,8 @@ void TMVA::OptimizeConfigParameters::optimizeScan()
    fTunedParameters.clear();
 
    for (it=fTuneParameters.begin(); it!=fTuneParameters.end(); it++){
-      currentParameters.insert(std::pair<TString,Double_t>(it->first,it->second.GetMin()));
-      fTunedParameters.insert(std::pair<TString,Double_t>(it->first,it->second.GetMin()));
+      currentParameters.insert(std::pair<TString,Double_t>(it->first,it->second->GetMin()));
+      fTunedParameters.insert(std::pair<TString,Double_t>(it->first,it->second->GetMin()));
    }
    // now loop over all the parameters and get for each combination the figure of merit
 
@@ -169,8 +172,8 @@ void TMVA::OptimizeConfigParameters::optimizeScan()
    std::vector< std::vector <Double_t> > v;
    for (it=fTuneParameters.begin(); it!=fTuneParameters.end(); it++){
       std::vector< Double_t > tmp;
-      for (Int_t k=0; k<it->second.GetNbins(); k++){
-         tmp.push_back(it->second.GetElement(k));
+      for (Int_t k=0; k<it->second->GetNbins(); k++){
+         tmp.push_back(it->second->GetElement(k));
       }
       v.push_back(tmp);
    }
@@ -199,9 +202,11 @@ void TMVA::OptimizeConfigParameters::optimizeScan()
       GetMethod()->SetTuneParameters(currentParameters);
       // now do the training for the current parameters:
       GetMethod()->BaseDir()->cd();
-      GetMethod()->GetTransformationHandler().CalcTransformations(
+      if (i==0) GetMethod()->GetTransformationHandler().CalcTransformations(
                                                                   GetMethod()->Data()->GetEventCollection());
+      Event::SetIsTraining(kTRUE);
       GetMethod()->Train();
+      Event::SetIsTraining(kFALSE);
       currentFOM = GetFOM(); 
       Log() << kINFO << "FOM was found : " << currentFOM << "; current best is " << bestFOM << Endl;
       
@@ -222,12 +227,12 @@ void TMVA::OptimizeConfigParameters::optimizeFit()
 {
    // ranges (intervals) in which the fit varies the parameters
    std::vector<TMVA::Interval*> ranges; // intervals of the fit ranges
-   std::map<TString, TMVA::Interval>::iterator it;
+   std::map<TString, TMVA::Interval*>::iterator it;
    std::vector<Double_t> pars;    // current (starting) fit parameters
 
    for (it=fTuneParameters.begin(); it != fTuneParameters.end(); it++){
-      ranges.push_back(new TMVA::Interval(it->second)); 
-      pars.push_back( (it->second).GetMean() );  // like this the order is "right". Always keep the
+      ranges.push_back(new TMVA::Interval(*(it->second))); 
+      pars.push_back( (it->second)->GetMean() );  // like this the order is "right". Always keep the
                                                  // order in the vector "pars" the same as the iterator
                                                  // iterates through the tuneParameters !!!!
    }
@@ -293,7 +298,7 @@ Double_t TMVA::OptimizeConfigParameters::EstimatorFunction( std::vector<Double_t
       std::map<TString,Double_t> currentParameters;
       Int_t icount =0; // map "pars" to the  map of Tuneparameter, make sure
                        // you never screw up this order!!
-      std::map<TString, TMVA::Interval>::iterator it;
+      std::map<TString, TMVA::Interval*>::iterator it;
       for (it=fTuneParameters.begin(); it!=fTuneParameters.end(); it++){
          currentParameters[it->first] = pars[icount++];
       }
@@ -301,10 +306,15 @@ Double_t TMVA::OptimizeConfigParameters::EstimatorFunction( std::vector<Double_t
       GetMethod()->SetTuneParameters(currentParameters);
       GetMethod()->BaseDir()->cd();
       
-      GetMethod()->GetTransformationHandler().CalcTransformations(
-                                                                  GetMethod()->Data()->GetEventCollection());
-      
+      if (fNotDoneYet){
+         GetMethod()->GetTransformationHandler().
+            CalcTransformations(GetMethod()->Data()->GetEventCollection());
+         fNotDoneYet=kFALSE;
+      }
+      Event::SetIsTraining(kTRUE);
       GetMethod()->Train();
+      Event::SetIsTraining(kFALSE);
+
       
       Double_t currentFOM = GetFOM(); 
       
@@ -329,6 +339,7 @@ Double_t TMVA::OptimizeConfigParameters::GetFOM()
       else if (fFOMType == "ROCIntegral") fom = GetROCIntegral();
       else if (fFOMType == "SigEffAtBkgEff01")  fom = GetSigEffAtBkgEff(0.1);
       else if (fFOMType == "SigEffAtBkgEff001") fom = GetSigEffAtBkgEff(0.01);
+      else if (fFOMType == "SigEffAtBkgEff002") fom = GetSigEffAtBkgEff(0.02);
       else if (fFOMType == "BkgRejAtSigEff05")  fom = GetBkgRejAtSigEff(0.5);
       else if (fFOMType == "BkgEffAtSigEff05")  fom = GetBkgEffAtSigEff(0.5);
       else {
@@ -338,6 +349,7 @@ Double_t TMVA::OptimizeConfigParameters::GetFOM()
       }
    }
    fFOMvsIter.push_back(fom);
+   //   std::cout << "fom="<<fom<<std::endl; // should write that into a debug log (as option)
    return fom;
 }
 
@@ -362,7 +374,7 @@ void TMVA::OptimizeConfigParameters::GetMVADists()
    fMvaSigFineBin = new TH1D("fMvaSigFineBin","",100000,-1.5,1.5);
    fMvaBkgFineBin = new TH1D("fMvaBkgFineBin","",100000,-1.5,1.5);
 
-   const std::vector<Event*> events=fMethod->Data()->GetEventCollection(Types::kTesting);
+   const std::vector< Event*> events=fMethod->Data()->GetEventCollection(Types::kTesting);
    
    UInt_t signalClassNr = fMethod->DataInfo().GetClassInfo("Signal")->GetNumber();
 

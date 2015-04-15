@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: MethodTMlpANN.cxx 38609 2011-03-24 16:06:32Z evt $
+// @(#)root/tmva $Id$
 // Author: Andreas Hoecker, Joerg Stelzer, Helge Voss, Kai Voss, Eckhard von Toerne
 /**********************************************************************************
  * Project: TMVA - a Root-integrated toolkit for multivariate data analysis       *
@@ -65,13 +65,15 @@ End_Html */
 #include "TMVA/Tools.h"
 #endif
 
+using std::atoi;
+
 // some additional TMlpANN options
 const Bool_t EnforceNormalization__=kTRUE;
 #if ROOT_VERSION_CODE > ROOT_VERSION(5,13,06)
-const TMultiLayerPerceptron::ELearningMethod LearningMethod__= TMultiLayerPerceptron::kStochastic;
+//const TMultiLayerPerceptron::ELearningMethod LearningMethod__= TMultiLayerPerceptron::kStochastic;
 // const TMultiLayerPerceptron::ELearningMethod LearningMethod__= TMultiLayerPerceptron::kBatch;
 #else
-const TMultiLayerPerceptron::LearningMethod LearningMethod__= TMultiLayerPerceptron::kStochastic;
+//const TMultiLayerPerceptron::LearningMethod LearningMethod__= TMultiLayerPerceptron::kStochastic;
 #endif
 
 REGISTER_METHOD(TMlpANN)
@@ -86,6 +88,7 @@ TMVA::MethodTMlpANN::MethodTMlpANN( const TString& jobName,
                                     TDirectory* theTargetDir) :
    TMVA::MethodBase( jobName, Types::kTMlpANN, methodTitle, theData, theOption, theTargetDir ),
    fMLP(0),
+   fLocalTrainingTree(0),
    fNcycles(100),
    fValidationFraction(0.5),
    fLearningMethod( "" )
@@ -99,6 +102,7 @@ TMVA::MethodTMlpANN::MethodTMlpANN( DataSetInfo& theData,
                                     TDirectory* theTargetDir ) :
    TMVA::MethodBase( Types::kTMlpANN, theData, theWeightFile, theTargetDir ),
    fMLP(0),
+   fLocalTrainingTree(0),
    fNcycles(100),
    fValidationFraction(0.5),
    fLearningMethod( "" )
@@ -125,7 +129,7 @@ void TMVA::MethodTMlpANN::Init( void )
 //_______________________________________________________________________
 TMVA::MethodTMlpANN::~MethodTMlpANN( void )
 {
-   // destructor 
+   // destructor
    if (fMLP) delete fMLP;
 }
 
@@ -219,7 +223,8 @@ Double_t TMVA::MethodTMlpANN::GetMvaValue( Double_t* err, Double_t* errUpper )
 {
    // calculate the value of the neural net for the current event
    const Event* ev = GetEvent();
-   static Double_t* d = new Double_t[Data()->GetNVariables()];
+   TTHREAD_TLS_DECL_ARG(Double_t*, d, new Double_t[Data()->GetNVariables()]);
+
    for (UInt_t ivar = 0; ivar<Data()->GetNVariables(); ivar++) {
       d[ivar] = (Double_t)ev->GetValue(ivar);
    }
@@ -250,17 +255,17 @@ void TMVA::MethodTMlpANN::Train( void )
    Int_t type;
    Float_t weight;
    const Long_t basketsize = 128000;
-   Float_t* vArr = new Float_t[GetNvar()]; 
+   Float_t* vArr = new Float_t[GetNvar()];
 
    TTree *localTrainingTree = new TTree( "TMLPtrain", "Local training tree for TMlpANN" );
    localTrainingTree->Branch( "type",       &type,        "type/I",        basketsize );
    localTrainingTree->Branch( "weight",     &weight,      "weight/F",      basketsize );
-   
+
    for (UInt_t ivar=0; ivar<GetNvar(); ivar++) {
       const char* myVar = GetInternalVarName(ivar).Data();
       localTrainingTree->Branch( myVar, &vArr[ivar], Form("Var%02i/F", ivar), basketsize );
    }
-   
+
    for (UInt_t ievt=0; ievt<Data()->GetNEvents(); ievt++) {
       const Event *ev = GetEvent(ievt);
       for (UInt_t i=0; i<GetNvar(); i++) {
@@ -391,15 +396,15 @@ void  TMVA::MethodTMlpANN::ReadWeightsFromXML( void* wghtnode )
          }
       }
       if (strcmp(gTools().GetName(ch),"neurons")==0) {
-         fout << "#neurons weights" << std::endl;         
+         fout << "#neurons weights" << std::endl;
          while (content >> temp1) {
             fout << temp1 << std::endl;
          }
       }
       if (strcmp(gTools().GetName(ch),"synapses")==0) {
-         fout << "#synapses weights" ;         
+         fout << "#synapses weights" ;
          while (content >> temp1) {
-            fout << std::endl << temp1 ;                
+            fout << std::endl << temp1 ;
          }
       }
       ch = gTools().GetNextChild(ch);
@@ -408,8 +413,8 @@ void  TMVA::MethodTMlpANN::ReadWeightsFromXML( void* wghtnode )
 
    // Here we create a dummy tree necessary to create a minimal NN
    // to be used for testing, evaluation and application
-   static Double_t* d = new Double_t[Data()->GetNVariables()] ;
-   static Int_t type;
+   TTHREAD_TLS_DECL_ARG(Double_t*, d, new Double_t[Data()->GetNVariables()]);
+   TTHREAD_TLS(Int_t) type;
 
    gROOT->cd();
    TTree * dummyTree = new TTree("dummy","Empty dummy tree", 1);
@@ -423,9 +428,9 @@ void  TMVA::MethodTMlpANN::ReadWeightsFromXML( void* wghtnode )
    fMLP = new TMultiLayerPerceptron( fMLPBuildOptions.Data(), dummyTree );
    fMLP->LoadWeights( fname );
 }
- 
+
 //_______________________________________________________________________
-void  TMVA::MethodTMlpANN::ReadWeightsFromStream( istream& istr )
+void  TMVA::MethodTMlpANN::ReadWeightsFromStream( std::istream& istr )
 {
    // read weights from stream
    // since the MLP can not read from the stream, we
@@ -437,8 +442,8 @@ void  TMVA::MethodTMlpANN::ReadWeightsFromStream( istream& istr )
    // the MLP is already build
    Log() << kINFO << "Load TMLP weights into " << fMLP << Endl;
 
-   Double_t* d = new Double_t[Data()->GetNVariables()] ; 
-   static Int_t type;
+   Double_t* d = new Double_t[Data()->GetNVariables()] ;
+   Int_t type;
    gROOT->cd();
    TTree * dummyTree = new TTree("dummy","Empty dummy tree", 1);
    for (UInt_t ivar = 0; ivar<Data()->GetNVariables(); ivar++) {
@@ -486,7 +491,7 @@ void TMVA::MethodTMlpANN::GetHelpMessage() const
 {
    // get help message text
    //
-   // typical length of text line: 
+   // typical length of text line:
    //         "|--------------------------------------------------------------|"
    Log() << Endl;
    Log() << gTools().Color("bold") << "--- Short description:" << gTools().Color("reset") << Endl;

@@ -1,4 +1,4 @@
-// @(#)Root/tmva $Id: ClassifierFactory.h 40005 2011-06-27 15:29:10Z stelzer $   
+// @(#)Root/tmva $Id$   
 // Author: Andreas Hoecker, Joerg Stelzer, Helge Voss, Kai Voss 
 
 /**********************************************************************************

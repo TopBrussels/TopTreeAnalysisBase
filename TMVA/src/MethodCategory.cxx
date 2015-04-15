@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: MethodCategory.cxx 44112 2012-05-04 10:00:41Z evt $
+// @(#)root/tmva $Id$
 // Author: Andreas Hoecker, Joerg Stelzer, Helge Voss, Eckhard von Toerne
 
 /**********************************************************************************
@@ -69,12 +69,12 @@ REGISTER_METHOD(Category)
 ClassImp(TMVA::MethodCategory)
 
 //_______________________________________________________________________
-TMVA::MethodCategory::MethodCategory( const TString& jobName,
-                                      const TString& methodTitle,
-                                      DataSetInfo& theData,
-                                      const TString& theOption,
-                                      TDirectory* theTargetDir )
- : TMVA::MethodCompositeBase( jobName, Types::kCategory, methodTitle, theData, theOption, theTargetDir ),
+   TMVA::MethodCategory::MethodCategory( const TString& jobName,
+                                         const TString& methodTitle,
+                                         DataSetInfo& theData,
+                                         const TString& theOption,
+                                         TDirectory* theTargetDir )
+   : TMVA::MethodCompositeBase( jobName, Types::kCategory, methodTitle, theData, theOption, theTargetDir ),
    fCatTree(0),
    fDataSetManager(NULL)
 {
@@ -137,25 +137,9 @@ TMVA::IMethod* TMVA::MethodCategory::AddMethod( const TCut& theCut,
 
    Log() << kINFO << "Adding sub-classifier: " << addedMethodName << "::" << theTitle << Endl;
 
-   // add transformation to rearrange the input variables
-   VariableRearrangeTransform* rearrangeTransformation = new VariableRearrangeTransform(DataInfo());
-   TString variables(theVariables);
-   variables.ReplaceAll(":",","); // use ',' as separator between variables
-//   std::cout << "variables " << variables.Data() << std::endl;
-
    DataSetInfo& dsi = CreateCategoryDSI(theCut, theVariables, theTitle);
 
-   rearrangeTransformation->SetOutputDataSetInfo( &dsi );
-   rearrangeTransformation->ToggleInputSortOrder(kFALSE); // kFALSE --> take the order of variables from the option string
-   rearrangeTransformation->SelectInput( variables, kTRUE );
-//   std::cout << "set input done "  << std::endl;
-
-   rearrangeTransformation->SetEnabled(kFALSE);
-   IMethod* addedMethod = ClassifierFactory::Instance().Create(addedMethodName,
-                                                               GetJobName(),
-                                                               theTitle,
-                                                               dsi,
-                                                               theOptions);
+   IMethod* addedMethod = ClassifierFactory::Instance().Create(addedMethodName,GetJobName(),theTitle,dsi,theOptions);
 
    MethodBase *method = (dynamic_cast<MethodBase*>(addedMethod));
    if(method==0) return 0;
@@ -163,7 +147,6 @@ TMVA::IMethod* TMVA::MethodCategory::AddMethod( const TCut& theCut,
    method->SetAnalysisType( fAnalysisType );
    method->SetupMethod();
    method->ParseOptions();
-   method->GetTransformationHandler().AddTransformation( rearrangeTransformation, -1 );
    method->ProcessSetup();
 
    // set or create correct method base dir for added method
@@ -195,8 +178,6 @@ TMVA::IMethod* TMVA::MethodCategory::AddMethod( const TCut& theCut,
                             Form("%s:%s",GetName(),method->GetName()),
                             "pass", 0, 0, 'C' );
 
-   rearrangeTransformation->SetEnabled(kTRUE);
-
    return method;
 }
 
@@ -213,7 +194,7 @@ TMVA::DataSetInfo& TMVA::MethodCategory::CreateCategoryDSI(const TCut& theCut,
    DataSetInfo* dsi = new DataSetInfo(dsiName);
 
    // register the new dsi
-//   DataSetManager::Instance().AddDataSetInfo(*dsi); // DSMTEST replaced by following line
+   //   DataSetManager::Instance().AddDataSetInfo(*dsi); // DSMTEST replaced by following line
    fDataSetManager->AddDataSetInfo(*dsi);
 
    // copy the targets and spectators from the old dsi to the new dsi
@@ -243,8 +224,8 @@ TMVA::DataSetInfo& TMVA::MethodCategory::CreateCategoryDSI(const TCut& theCut,
       // check the variables of the old dsi for the variable that we want to add
       for (itrVarInfo = oldDSI.GetVariableInfos().begin(); itrVarInfo != oldDSI.GetVariableInfos().end(); itrVarInfo++) {
          if((*itrVariables==itrVarInfo->GetLabel()) ) { // || (*itrVariables==itrVarInfo->GetExpression())) { 
-	    // don't compare the expression, since the user might take two times the same expression, but with different labels
-	    // and apply different transformations to the variables.
+            // don't compare the expression, since the user might take two times the same expression, but with different labels
+            // and apply different transformations to the variables.
             dsi->AddVariable(*itrVarInfo);
             varMap.push_back(counter);
             found = kTRUE;
@@ -255,8 +236,8 @@ TMVA::DataSetInfo& TMVA::MethodCategory::CreateCategoryDSI(const TCut& theCut,
       // check the spectators of the old dsi for the variable that we want to add
       for (itrVarInfo = oldDSI.GetSpectatorInfos().begin(); itrVarInfo != oldDSI.GetSpectatorInfos().end(); itrVarInfo++) {
          if((*itrVariables==itrVarInfo->GetLabel()) ) { // || (*itrVariables==itrVarInfo->GetExpression())) {
-	    // don't compare the expression, since the user might take two times the same expression, but with different labels
-	    // and apply different transformations to the variables.
+            // don't compare the expression, since the user might take two times the same expression, but with different labels
+            // and apply different transformations to the variables.
             dsi->AddVariable(*itrVarInfo);
             varMap.push_back(counter);
             found = kTRUE;
@@ -301,6 +282,7 @@ TMVA::DataSetInfo& TMVA::MethodCategory::CreateCategoryDSI(const TCut& theCut,
    dsi->SetNormalization(norm);
 
    DataSetInfo& dsiReference= (*dsi);
+
    return dsiReference;  
 }
 
@@ -406,6 +388,10 @@ void TMVA::MethodCategory::Train()
                << " not trained (training tree has less entries ["
                << mva->Data()->GetNTrainingEvents()
                << "] than required [" << MinNoTrainingEvents << "]" << Endl;
+
+         Log() << kERROR << " w/o training/test events for that category, I better stop here and let you fix " << Endl;
+         Log() << kFATAL << "that one first, otherwise things get too messy later ... " << Endl;
+
       }
    }
 
@@ -554,6 +540,9 @@ const TMVA::Ranking* TMVA::MethodCategory::CreateRanking()
 Bool_t TMVA::MethodCategory::PassesCut( const Event* ev, UInt_t methodIdx )
 {
 
+   // if it's not a simple 'spectator' variable (0 or 1) that the categories are defined by
+   // (but rather some 'formula' (i.e. eta>0), then this formulas are stored in fCatTree and that
+   // one will be evaluated.. (the formulae return 'true' or 'false' 
    if (fCatTree) {
       if (methodIdx>=fCatFormulas.size()) {
          Log() << kFATAL << "Large method index " << methodIdx << ", number of category formulas = "
@@ -562,6 +551,7 @@ Bool_t TMVA::MethodCategory::PassesCut( const Event* ev, UInt_t methodIdx )
       TTreeFormula* f = fCatFormulas[methodIdx];
       return f->EvalInstance(0) > 0.5;
    } 
+   // otherwise, it simply looks if "variable == true"  ("greater 0.5 to be "sure" )
    else {
 
       // checks whether an event lies within a cut
@@ -607,7 +597,9 @@ Double_t TMVA::MethodCategory::GetMvaValue( Double_t* err, Double_t* errUpper )
    }
 
    // get mva value from the suitable sub-classifier
+   ev->SetVariableArrangement(&fVarMaps[methodToUse]);
    Double_t mvaValue = dynamic_cast<MethodBase*>(fMethods[methodToUse])->GetMvaValue(ev,err,errUpper);
+   ev->SetVariableArrangement(0);
 
    return mvaValue;
 }

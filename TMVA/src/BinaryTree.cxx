@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: BinaryTree.cxx 40005 2011-06-27 15:29:10Z stelzer $
+// @(#)root/tmva $Id$
 // Author: Andreas Hoecker, Joerg Stelzer, Helge Voss, Kai Voss, Eckhard von Toerne
 
 /**********************************************************************************
@@ -46,8 +46,6 @@
 
 ClassImp(TMVA::BinaryTree)
 
-TMVA::MsgLogger* TMVA::BinaryTree::fgLogger = 0;
-
 //_______________________________________________________________________
 TMVA::BinaryTree::BinaryTree( void )
    : fRoot  ( NULL ),
@@ -55,7 +53,6 @@ TMVA::BinaryTree::BinaryTree( void )
      fDepth ( 0 )
 {
    // constructor for a yet "empty" tree. Needs to be filled afterwards
-   if (!fgLogger) fgLogger =  new MsgLogger("BinaryTree");
 }
 
 //_______________________________________________________________________
@@ -115,7 +112,7 @@ UInt_t TMVA::BinaryTree::CountNodes(TMVA::Node *n)
 }
 
 //_______________________________________________________________________
-void TMVA::BinaryTree::Print(ostream & os) const
+void TMVA::BinaryTree::Print(std::ostream & os) const
 {
    // recursively print the tree
    this->GetRoot()->PrintRec(os);
@@ -147,7 +144,7 @@ void TMVA::BinaryTree::ReadXML(void* node, UInt_t tmva_Version_Code ) {
 
 
 //_______________________________________________________________________
-ostream& TMVA::operator<< (ostream& os, const TMVA::BinaryTree& tree)
+std::ostream& TMVA::operator<< (std::ostream& os, const TMVA::BinaryTree& tree)
 {
    // print the tree recursinvely using the << operator
    tree.Print(os);
@@ -155,7 +152,7 @@ ostream& TMVA::operator<< (ostream& os, const TMVA::BinaryTree& tree)
 }
 
 //_______________________________________________________________________
-void TMVA::BinaryTree::Read(istream & istr, UInt_t tmva_Version_Code )
+void TMVA::BinaryTree::Read(std::istream & istr, UInt_t tmva_Version_Code )
 {
    // Read the binary tree from an input stream.
    // The input stream format depends on the tree type,
@@ -178,7 +175,7 @@ void TMVA::BinaryTree::Read(istream & istr, UInt_t tmva_Version_Code )
 
       // find parent node
       while( parent!=0 && parent->GetDepth() != currentNode->GetDepth()-1) parent=parent->GetParent();
-      
+
       if (parent!=0) { // link new node to parent
          currentNode->SetParent(parent);
          if (currentNode->GetPos()=='l') parent->SetLeft(currentNode);
@@ -192,9 +189,9 @@ void TMVA::BinaryTree::Read(istream & istr, UInt_t tmva_Version_Code )
 }
 
 //_______________________________________________________________________
-istream& TMVA::operator>> (istream& istr, TMVA::BinaryTree& tree)
-{ 
-   // read the tree from an istream
+std::istream& TMVA::operator>> (std::istream& istr, TMVA::BinaryTree& tree)
+{
+   // read the tree from an std::istream
    tree.Read(istr);
    return istr;
 }
@@ -202,7 +199,7 @@ istream& TMVA::operator>> (istream& istr, TMVA::BinaryTree& tree)
 void TMVA::BinaryTree::SetTotalTreeDepth( Node *n)
 {
    // descend a tree to find all its leaf nodes, fill max depth reached in the
-   // tree at the same time. 
+   // tree at the same time.
 
    if (n == NULL){ //default, start at the tree top, then descend recursively
       n = (Node*) this->GetRoot();
@@ -210,7 +207,7 @@ void TMVA::BinaryTree::SetTotalTreeDepth( Node *n)
          Log() << kFATAL << "SetTotalTreeDepth: started with undefined ROOT node" <<Endl;
          return ;
       }
-   } 
+   }
    if (this->GetLeftDaughter(n) != NULL){
       this->SetTotalTreeDepth( this->GetLeftDaughter(n) );
    }
@@ -220,4 +217,10 @@ void TMVA::BinaryTree::SetTotalTreeDepth( Node *n)
    if (n->GetDepth() > this->GetTotalTreeDepth()) this->SetTotalTreeDepth(n->GetDepth());
 
    return;
+}
+
+//_______________________________________________________________________
+TMVA::MsgLogger& TMVA::BinaryTree::Log() const {
+  TTHREAD_TLS_DECL_ARG(MsgLogger,logger,"BinaryTree");
+  return logger;
 }

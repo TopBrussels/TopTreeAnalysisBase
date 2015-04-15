@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: RuleEnsemble.cxx 41891 2011-11-10 22:46:31Z pcanal $
+// @(#)root/tmva $Id$
 // Author: Andreas Hoecker, Joerg Stelzer, Fredrik Tegenfeldt, Helge Voss
 
 /**********************************************************************************
@@ -234,7 +234,7 @@ void TMVA::RuleEnsemble::GetCoefficients( std::vector< Double_t > & v )
 }
 
 //_______________________________________________________________________
-const std::vector<TMVA::Event*>* TMVA::RuleEnsemble::GetTrainingEvents()  const
+const std::vector<const TMVA::Event*>* TMVA::RuleEnsemble::GetTrainingEvents()  const
 { 
    // get list of training events from the rule fitter
 
@@ -296,7 +296,7 @@ void TMVA::RuleEnsemble::RemoveSimilarRules()
 #if _MSC_VER >= 1400
          fRules.erase( std::vector<Rule *>::iterator(&fRules[ind], &fRules) );
 #else
-         fRules.erase( std::vector<Rule *>::iterator(&fRules[ind]) );
+         fRules.erase( fRules.begin() + ind ); 
 #endif
          delete theRule;
          ind--;
@@ -327,7 +327,7 @@ void TMVA::RuleEnsemble::CleanupRules()
 #if _MSC_VER >= 1400
          fRules.erase( std::vector<Rule *>::iterator(&fRules[ind], &fRules) );
 #else
-         fRules.erase( std::vector<Rule *>::iterator(&fRules[ind]) );
+         fRules.erase( fRules.begin() + ind );
 #endif
          delete therule;
          ind--;
@@ -365,7 +365,7 @@ void TMVA::RuleEnsemble::CalcRuleSupport()
    ttot = 0;
    // reset to default values
    SetAverageRuleSigma(0.4);
-   const std::vector<Event *> *events = GetTrainingEvents();
+   const std::vector<const Event *> *events = GetTrainingEvents();
    Double_t nrules = static_cast<Double_t>(fRules.size());
    Double_t ew;
    //
@@ -374,7 +374,7 @@ void TMVA::RuleEnsemble::CalcRuleSupport()
          s=0.0;
          ssig=0.0;
          sbkg=0.0;
-         for ( std::vector<Event * >::const_iterator itrEvent=events->begin(); itrEvent!=events->end(); itrEvent++ ) {
+         for ( std::vector<const Event * >::const_iterator itrEvent=events->begin(); itrEvent!=events->end(); itrEvent++ ) {
             if ((*itrRule)->EvalEvent( *(*itrEvent) )) {
                ew = (*itrEvent)->GetWeight();
                s += ew;
@@ -560,7 +560,7 @@ void TMVA::RuleEnsemble::MakeRules( const std::vector< const DecisionTree *> & f
       sumn2    += nendn*nendn;
       nrulesCheck += nrules;
    }
-   Double_t nmean = sumnendn/ntrees;
+   Double_t nmean = (ntrees>0) ? sumnendn/ntrees : 0;
    Double_t nsigm = TMath::Sqrt( gTools().ComputeVariance(sumn2,sumnendn,ntrees) );
    Double_t ndev = 2.0*(nmean-2.0-nsigm)/(nmean-2.0+nsigm);
    //
@@ -596,7 +596,7 @@ void TMVA::RuleEnsemble::MakeLinearTerms()
    //
    if (!DoLinear()) return;
 
-   const std::vector<Event *> *events = GetTrainingEvents();
+   const std::vector<const Event *> *events = GetTrainingEvents();
    UInt_t neve  = events->size();
    UInt_t nvars = ((*events)[0])->GetNVariables(); // Event -> GetNVariables();
    Double_t val,ew;
@@ -627,7 +627,7 @@ void TMVA::RuleEnsemble::MakeLinearTerms()
    fLinCoefficients.resize(nvars,0);
    fLinNorm.resize(nvars,0);
 
-   Double_t averageWeight = fRuleFit->GetNEveEff()/static_cast<Double_t>(neve);
+   Double_t averageWeight = neve ? fRuleFit->GetNEveEff()/static_cast<Double_t>(neve) : 0;
    // sort and find limits
    Double_t stdl;
 
@@ -795,7 +795,7 @@ void TMVA::RuleEnsemble::RuleResponseStats()
    // calculate various statistics for this rule
 
    // TODO: NOT YET UPDATED FOR WEIGHTS
-   const std::vector<Event *> *events = GetTrainingEvents();
+   const std::vector<const Event *> *events = GetTrainingEvents();
    const UInt_t neve   = events->size();
    const UInt_t nvars  = GetMethodBase()->GetNvar();
    const UInt_t nrules = fRules.size();
@@ -861,16 +861,18 @@ void TMVA::RuleEnsemble::RuleResponseStats()
          }
       }
       // Fill tagging probabilities
-      fRulePTag.push_back(Double_t(ntag)/Double_t(neve));
-      fRulePSS.push_back(Double_t(nss)/Double_t(ntag));
-      fRulePSB.push_back(Double_t(nsb)/Double_t(ntag));
-      fRulePBS.push_back(Double_t(nbs)/Double_t(ntag));
-      fRulePBB.push_back(Double_t(nbb)/Double_t(ntag));
+      if (ntag>0 && neve > 0) { // should always be the case, but let's make sure and keep coverity quiet
+	 fRulePTag.push_back(Double_t(ntag)/Double_t(neve));
+	 fRulePSS.push_back(Double_t(nss)/Double_t(ntag));
+	 fRulePSB.push_back(Double_t(nsb)/Double_t(ntag));
+	 fRulePBS.push_back(Double_t(nbs)/Double_t(ntag));
+	 fRulePBB.push_back(Double_t(nbb)/Double_t(ntag));
+      }
       //
    }
-   fRuleFSig = static_cast<Double_t>(nsig)/static_cast<Double_t>(nsig+nbkg);
+   fRuleFSig = (nsig>0) ? static_cast<Double_t>(nsig)/static_cast<Double_t>(nsig+nbkg) : 0;
    for ( UInt_t v=0; v<nvars; v++) {
-      fRuleVarFrac[v] =  Double_t(varcnt[v])/Double_t(nrules);
+     fRuleVarFrac[v] =  (nrules>0) ? Double_t(varcnt[v])/Double_t(nrules) : 0;
    }
 }
 
@@ -1032,7 +1034,7 @@ void TMVA::RuleEnsemble::Print() const
 }
 
 //_______________________________________________________________________
-void TMVA::RuleEnsemble::PrintRaw( ostream & os ) const
+void TMVA::RuleEnsemble::PrintRaw( std::ostream & os ) const
 {
    // write rules to stream
    Int_t dp = os.precision();
@@ -1149,7 +1151,7 @@ void TMVA::RuleEnsemble::ReadFromXML( void* wghtnode )
 }
 
 //_______________________________________________________________________
-void TMVA::RuleEnsemble::ReadRaw( istream & istr )
+void TMVA::RuleEnsemble::ReadRaw( std::istream & istr )
 {
    // read rule ensemble from stream
    UInt_t nrules;
@@ -1333,7 +1335,7 @@ TMVA::Rule *TMVA::RuleEnsemble::MakeTheRule( const Node *node )
 }
 
 //_______________________________________________________________________
-void TMVA::RuleEnsemble::MakeRuleMap(const std::vector<Event *> *events, UInt_t ifirst, UInt_t ilast)
+void TMVA::RuleEnsemble::MakeRuleMap(const std::vector<const Event *> *events, UInt_t ifirst, UInt_t ilast)
 {
    // Makes rule map for all events
 
@@ -1384,9 +1386,9 @@ void TMVA::RuleEnsemble::MakeRuleMap(const std::vector<Event *> *events, UInt_t 
 }
 
 //_______________________________________________________________________
-ostream& TMVA::operator<< ( ostream& os, const RuleEnsemble & rules )
+std::ostream& TMVA::operator<< ( std::ostream& os, const RuleEnsemble & rules )
 {
-   // ostream operator
+   // std::ostream operator
    os << "DON'T USE THIS - TO BE REMOVED" << std::endl;
    rules.Print();
    return os;

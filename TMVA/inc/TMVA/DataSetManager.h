@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: DataSetManager.h 40005 2011-06-27 15:29:10Z stelzer $
+// @(#)root/tmva $Id$
 // Author: Andreas Hoecker, Peter Speckmayer, Joerg Stelzer, Helge Voss
 
 /**********************************************************************************
@@ -84,14 +84,14 @@ namespace TMVA {
 /*       DataSetManager(); */ // DSMTEST
 /*       DataSetManager( DataInputHandler& dataInput ); */ // DSMTEST
 
-// //      TMVA::DataSetFactory* fDatasetFactory; // DSMTEST
+      TMVA::DataSetFactory* fDatasetFactory;
 
       // access to input data
       DataInputHandler& DataInput() { return fDataInput; }
 
       DataInputHandler&          fDataInput;             //! source of input data
       TList                      fDataSetInfoCollection; //! all registered dataset definitions
-      mutable MsgLogger*         fLogger;   // message logger
+      MsgLogger*                 fLogger;   // message logger
       MsgLogger& Log() const { return *fLogger; }    
    };
 }
