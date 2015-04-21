@@ -34,6 +34,7 @@ public:
   vector<int> listOfObs;/** the list of observable integers, corresponding to listOfObsInts or listOfObsStrings, according to the value of runOnObsByString*/
 //Branch name
   bool loadGenJetCollection;
+  bool loadFatJetCollection;
   bool loadGenEventCollection;
   bool loadNPGenEventCollection;
   bool loadMCParticles;
@@ -42,6 +43,7 @@ public:
   int METType; //0: TRootMET - 1: CaloMET - 2: PFMET - 3: TCMET
   string PrimaryVertexCollection;
   string JetCollection;
+  string FatJetCollection;
   string METCollection;
   string TrackMETCollection;
   string MuonCollection;

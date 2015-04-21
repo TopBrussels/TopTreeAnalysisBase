@@ -65,6 +65,11 @@ public:
     //Selection(const std::vector<TRootJet*>&, const std::vector<TRootElectron*>&, const std::vector<TRootMET*>&);
     Run2Selection(const std::vector<TRootJet*>&, const std::vector<TRootMuon*>&, const std::vector<TRootElectron*>&,const std::vector<TRootMET*>&);
     Run2Selection(const std::vector<TRootJet*>&, const std::vector<TRootMuon*>&, const std::vector<TRootElectron*>&,const std::vector<TRootMET*>&, const float rho);
+
+    Run2Selection(const std::vector<TRootJet*>&,const std::vector<TRootJet*>&, const std::vector<TRootMuon*>&, const std::vector<TRootElectron*>&,const std::vector<TRootMET*>&);
+    Run2Selection(const std::vector<TRootJet*>&,const std::vector<TRootJet*>&, const std::vector<TRootMuon*>&, const std::vector<TRootElectron*>&,const std::vector<TRootMET*>&, const float rho);
+
+
     Run2Selection(const Run2Selection &);
     ~Run2Selection();
 
@@ -129,6 +134,7 @@ private:
 
     //int JetType;
     std::vector<TRootJet*> jets;
+    std::vector<TRootJet*> fatjets;
     std::vector<TRootElectron*> electrons;
     std::vector<TRootMuon*> muons;
     std::vector<TRootMET*> mets;
