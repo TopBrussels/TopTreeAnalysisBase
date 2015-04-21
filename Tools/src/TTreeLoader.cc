@@ -378,6 +378,8 @@ TTreeLoader::LoadEvent (int ievt, vector<TRootVertex*>& vertex, vector < TRootMu
 	  //  cout << "NOPOINTER EMF " << CaloJet2->ecalEnergyFraction() << " fHPD" << CaloJet2->fHPD() << " n90Hits " << CaloJet2->n90Hits() <<endl;
 	}
 
+	cout <<"returning init jets "<< init_jets.size() << endl;
+
         if(verbose) cout << "Nof jets " << init_jets.size () << endl;
 	return event;
 }
@@ -387,18 +389,12 @@ TTreeLoader::LoadEvent (int ievt, vector<TRootVertex*>& vertex, vector < TRootMu
 TRootEvent*
 TTreeLoader::LoadEvent (int ievt, vector<TRootVertex*>& vertex, vector < TRootMuon* >& init_muons, vector < TRootElectron* >& init_electrons, vector < TRootJet* >& init_jets, vector < TRootJet* >& init_fatjets, vector < TRootMET* >& mets, bool verbose){
         LoadEvent(ievt, vertex, init_muons, init_electrons, init_jets, mets, verbose);
+	cout <<"retrieveing init jets "<< init_jets.size() << endl;
   	init_fatjets.clear();
-
-	cout <<"n entries "<< tcfatjets->GetEntriesFast ()<< endl;
 
   	for (int i = 0; i < tcfatjets->GetEntriesFast (); i++) {
 	  init_fatjets.push_back( (TRootJet *) tcfatjets->At (i));
-
-	  cout << "looping on fat jets" << endl;
-
 	}
-
-cout << "Nof jets " << init_fatjets.size () << endl;
 
         if(verbose) cout << "Nof jets " << init_fatjets.size () << endl;
 	return event;

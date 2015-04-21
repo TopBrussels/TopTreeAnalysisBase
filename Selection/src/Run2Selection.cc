@@ -131,13 +131,9 @@ std::vector<TRootSubstructureJet*> Run2Selection::GetSelectedFatJets(float PtThr
     for(unsigned int i=0; i<fatjets.size(); i++)
     {
 
-       cout <<" looping fatjets "<<endl;
-
-        TRootSubstructureJet* init_jet = (TRootSubstructureJet*) jets[i];
+        TRootSubstructureJet* init_jet = (TRootSubstructureJet*) fatjets[i];
         //if (init_jet->jetType() == 2)
 	  //  {
-
-      cout <<" tested jet type "<<endl;
 
             // PFJets
             const TRootSubstructureJet* PFJet = static_cast<const TRootSubstructureJet*>(init_jet);
