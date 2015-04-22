@@ -42,6 +42,7 @@ void LoadDataset(Dataset* d, AnalysisEnvironment anaEnv);
 void UnLoadDataset();
 void LoadEvent(int ievent,vector<TRootVertex*>&vertex,vector<TRootMuon*>&vmuons,vector<TRootElectron*>&velectrons,vector<TRootMET*>&vmet,bool verbose=false);
 TRootEvent* LoadEvent(int ievent,vector<TRootVertex*>&vertex,vector<TRootMuon*>&vmuons,vector<TRootElectron*>&velectrons,vector<TRootJet*>& vjets, vector<TRootMET*>&vmet,bool verbose=false);
+TRootEvent* LoadEvent(int ievent,vector<TRootVertex*>&vertex,vector<TRootMuon*>&vmuons,vector<TRootElectron*>&velectrons,vector<TRootJet*>& vjets,vector<TRootJet*>& vfatjets, vector<TRootMET*>&vmet,bool verbose=false);
 
 
  TRootGenEvent*          LoadGenEvent (int ievt, bool reloadEvent = true);
@@ -61,6 +62,7 @@ private:
 
   TClonesArray *tcpvertex;/** TCLonesArry with primary vertex*/
   TClonesArray *tcjets;
+  TClonesArray *tcfatjets;
   TClonesArray *tcmuons;
   TClonesArray *tcelectrons;
   TClonesArray *tcmets;

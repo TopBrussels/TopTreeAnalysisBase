@@ -9,7 +9,8 @@ Run2Selection::Run2Selection()
     cutHFHadronEnergyFraction_ = false;
 }
 
-Run2Selection::Run2Selection(const std::vector<TRootJet*>& jets_, const std::vector<TRootMuon*>& muons_, const std::vector<TRootElectron*>& electrons_, const std::vector<TRootMET*>& mets_)
+
+Run2Selection::Run2Selection(const std::vector<TRootJet*>& jets_,  const std::vector<TRootMuon*>& muons_, const std::vector<TRootElectron*>& electrons_, const std::vector<TRootMET*>& mets_)
 {
     rho_ = 0;
     elecIsoCorrType_ = 1; // 0: no corr, 1: rho corr, 2: dB corr.
@@ -20,11 +21,36 @@ Run2Selection::Run2Selection(const std::vector<TRootJet*>& jets_, const std::vec
     cutHFHadronEnergyFraction_ = false;
 }
 
-Run2Selection::Run2Selection(const std::vector<TRootJet*>& jets_, const std::vector<TRootMuon*>& muons_, const std::vector<TRootElectron*>& electrons_, const std::vector<TRootMET*>& mets_, float rho)
+Run2Selection::Run2Selection(const std::vector<TRootJet*>& jets_,  const std::vector<TRootMuon*>& muons_, const std::vector<TRootElectron*>& electrons_, const std::vector<TRootMET*>& mets_, float rho)
 {
     rho_ = rho;
     elecIsoCorrType_ = 1; // 0: no corr, 1: rho corr, 2: dB corr.
     for(unsigned int i=0; i<jets_.size(); i++) jets.push_back(jets_[i]);
+    for(unsigned int i=0; i<muons_.size(); i++) muons.push_back(muons_[i]);
+    for(unsigned int i=0; i<electrons_.size(); i++) electrons.push_back(electrons_[i]);
+    for(unsigned int i=0; i<mets_.size(); i++) mets.push_back(mets_[i]);
+    cutHFHadronEnergyFraction_ = false;
+}
+
+
+Run2Selection::Run2Selection(const std::vector<TRootJet*>& jets_, const std::vector<TRootJet*>& fatjets_,  const std::vector<TRootMuon*>& muons_, const std::vector<TRootElectron*>& electrons_, const std::vector<TRootMET*>& mets_)
+{
+    rho_ = 0;
+    elecIsoCorrType_ = 1; // 0: no corr, 1: rho corr, 2: dB corr.
+    for(unsigned int i=0; i<jets_.size(); i++) jets.push_back(jets_[i]);
+    for(unsigned int i=0; i<fatjets_.size(); i++) fatjets.push_back(fatjets_[i]);
+    for(unsigned int i=0; i<muons_.size(); i++) muons.push_back(muons_[i]);
+    for(unsigned int i=0; i<electrons_.size(); i++) electrons.push_back(electrons_[i]);
+    for(unsigned int i=0; i<mets_.size(); i++) mets.push_back(mets_[i]);
+    cutHFHadronEnergyFraction_ = false;
+}
+
+Run2Selection::Run2Selection(const std::vector<TRootJet*>& jets_, const std::vector<TRootJet*>& fatjets_, const std::vector<TRootMuon*>& muons_, const std::vector<TRootElectron*>& electrons_, const std::vector<TRootMET*>& mets_, float rho)
+{
+    rho_ = rho;
+    elecIsoCorrType_ = 1; // 0: no corr, 1: rho corr, 2: dB corr.
+    for(unsigned int i=0; i<jets_.size(); i++) jets.push_back(jets_[i]);
+    for(unsigned int i=0; i<fatjets_.size(); i++) fatjets.push_back(fatjets_[i]);
     for(unsigned int i=0; i<muons_.size(); i++) muons.push_back(muons_[i]);
     for(unsigned int i=0; i<electrons_.size(); i++) electrons.push_back(electrons_[i]);
     for(unsigned int i=0; i<mets_.size(); i++) mets.push_back(mets_[i]);
@@ -51,6 +77,7 @@ Run2Selection::Run2Selection(const Run2Selection& s)
 Run2Selection::~Run2Selection()
 {
     jets.clear();
+    fatjets.clear();
     electrons.clear();
     muons.clear();
     mets.clear();
@@ -101,30 +128,31 @@ std::vector<TRootPFJet*> Run2Selection::GetSelectedJets(float PtThr, float EtaTh
 std::vector<TRootSubstructureJet*> Run2Selection::GetSelectedFatJets(float PtThr, float EtaThr, bool applyJetID) const
 {
     std::vector<TRootSubstructureJet*> selectedJets;
-    for(unsigned int i=0; i<jets.size(); i++)
+    for(unsigned int i=0; i<fatjets.size(); i++)
     {
-        TRootSubstructureJet* init_jet = (TRootSubstructureJet*) jets[i];
-        if (init_jet->jetType() == 2)
-        {
-            // PFJets
+
+        TRootSubstructureJet* init_jet = (TRootSubstructureJet*) fatjets[i];
+      
             const TRootSubstructureJet* PFJet = static_cast<const TRootSubstructureJet*>(init_jet);
 
             if( fabs(PFJet->Eta())<EtaThr && PFJet->Pt()>PtThr )
             {
-                if ( applyJetID )
-                {
-                    if(passPFJetID8TEV(PFJet))//This is the 8TeV Recommended Loose PFJet ID.  This should be updated when 13TeV recommendations become available.
-                    {
+	      //if ( applyJetID )
+		   //{
+		  //if(passPFJetID8TEV(PFJet))//This is the 8TeV Recommended Loose PFJet ID.  This should be updated when 13TeV recommendations become available.
+		      // {
                         selectedJets.push_back(init_jet);
-                    }
-                }
-                else selectedJets.push_back(init_jet);
+			// }
+		    // }
+	      // else selectedJets.push_back(init_jet);
             }
-        }
     }
     std::sort(selectedJets.begin(),selectedJets.end(),HighestPt());
     return selectedJets;
+
 }
+
+
 
 
 std::vector<TRootPFJet*> Run2Selection::GetSelectedJets() const
@@ -135,7 +163,7 @@ std::vector<TRootPFJet*> Run2Selection::GetSelectedJets() const
 
 std::vector<TRootSubstructureJet*> Run2Selection::GetSelectedFatJets() const
 {
-    return GetSelectedFatJets(30,2.5,true);
+    return GetSelectedFatJets(30,2.5,false);
 }
 
 

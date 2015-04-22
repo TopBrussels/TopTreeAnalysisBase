@@ -5,6 +5,7 @@ TTreeLoader::TTreeLoader ()
 {
   tcpvertex = 0;
   tcjets = 0;
+  tcfatjets = 0;
   tcmuons = 0;
   tcelectrons = 0;
   tcmets = 0;
@@ -210,6 +211,15 @@ TTreeLoader::LoadDataset (Dataset* d, AnalysisEnvironment anaEnv)
   else if(anaEnv.JetType == 3) tcjets = new TClonesArray ("TopTree::TRootJPTJet", 0);
   else                         tcjets = new TClonesArray ("TopTree::TRootJet", 0);
   sprintf(branchStatus,"%s*",anaEnv.JetCollection.c_str());
+
+  cout <<"***************************************************"<<endl;
+  cout <<"***************************************************"<<endl;
+  cout <<"***************************************************"<<endl;
+  cout <<"jet collection "<< anaEnv.JetCollection.c_str() <<endl;
+  cout <<"***************************************************"<<endl;
+  cout <<"***************************************************"<<endl;
+  cout <<"***************************************************"<<endl;
+
   d_->eventTree()->SetBranchStatus(branchStatus,1);
   d_->eventTree()->SetBranchAddress(anaEnv.JetCollection.c_str(),&tcjets);
 
@@ -233,6 +243,14 @@ TTreeLoader::LoadDataset (Dataset* d, AnalysisEnvironment anaEnv)
       sprintf(branchStatus,"%s*",anaEnv.MCParticlesCollection.c_str());
       d_->eventTree()->SetBranchStatus(branchStatus,1);
       d_->eventTree()->SetBranchAddress(anaEnv.MCParticlesCollection.c_str(),&tcmcparticles);
+  }
+
+ if (anaEnv.loadFatJetCollection)
+  {
+      tcfatjets = new TClonesArray ("TopTree::TRootSubstructureJet", 0);
+      sprintf(branchStatus,"%s*",anaEnv.FatJetCollection.c_str());
+      d_->eventTree()->SetBranchStatus(branchStatus,1);
+      d_->eventTree()->SetBranchAddress(anaEnv.FatJetCollection.c_str(),&tcfatjets);
   }
 
   if (anaEnv.loadGenJetCollection)
@@ -299,6 +317,7 @@ TTreeLoader::UnLoadDataset (){
   if(tcmuons)       tcmuons      ->Delete();
   if(tcelectrons)   tcelectrons  ->Delete();
   if(tcjets)        tcjets       ->Delete();
+  if(tcfatjets)     tcfatjets    ->Delete();
   if(tcmets)        tcmets       ->Delete();
   if(tctrackmets)   tctrackmets  ->Delete();
   if(tcmcparticles) tcmcparticles->Delete();
@@ -359,9 +378,29 @@ TTreeLoader::LoadEvent (int ievt, vector<TRootVertex*>& vertex, vector < TRootMu
 	  //  cout << "NOPOINTER EMF " << CaloJet2->ecalEnergyFraction() << " fHPD" << CaloJet2->fHPD() << " n90Hits " << CaloJet2->n90Hits() <<endl;
 	}
 
+
         if(verbose) cout << "Nof jets " << init_jets.size () << endl;
 	return event;
 }
+
+
+
+TRootEvent*
+TTreeLoader::LoadEvent (int ievt, vector<TRootVertex*>& vertex, vector < TRootMuon* >& init_muons, vector < TRootElectron* >& init_electrons, vector < TRootJet* >& init_jets, vector < TRootJet* >& init_fatjets, vector < TRootMET* >& mets, bool verbose){
+        LoadEvent(ievt, vertex, init_muons, init_electrons, init_jets, mets, verbose);
+
+  	init_fatjets.clear();
+
+  	for (int i = 0; i < tcfatjets->GetEntriesFast (); i++) {
+	  init_fatjets.push_back( (TRootJet *) tcfatjets->At (i));
+	}
+
+        if(verbose) cout << "Nof jets " << init_fatjets.size () << endl;
+	return event;
+}
+
+
+
 
 TRootGenEvent*
 TTreeLoader::LoadGenEvent (int ievt, bool reloadEvent)

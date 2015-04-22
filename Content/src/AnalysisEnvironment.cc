@@ -5,6 +5,7 @@ ClassImp(AnalysisEnvironment)
 
 AnalysisEnvironment::AnalysisEnvironment ()
 {
+  loadFatJetCollection = true;
   loadGenJetCollection = false;
   loadGenEventCollection = false;
   loadNPGenEventCollection = false;
@@ -126,6 +127,7 @@ AnalysisEnvironment::~AnalysisEnvironment ()
 AnalysisEnvironment::AnalysisEnvironment (const AnalysisEnvironment & a)
 {
 //branch name 
+  loadFatJetCollection = a.loadFatJetCollection;
   loadGenJetCollection = a.loadGenJetCollection;
   loadGenEventCollection = a.loadGenEventCollection;
   loadNPGenEventCollection = a.loadNPGenEventCollection;
@@ -135,6 +137,7 @@ AnalysisEnvironment::AnalysisEnvironment (const AnalysisEnvironment & a)
   METType = a.METType;
   PrimaryVertexCollection = a.PrimaryVertexCollection;
   JetCollection = a.JetCollection;
+  FatJetCollection = a.FatJetCollection;
   METCollection = a.METCollection;
   MuonCollection = a.MuonCollection;
   ElectronCollection = a.ElectronCollection;
