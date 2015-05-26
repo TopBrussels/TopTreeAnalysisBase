@@ -222,6 +222,38 @@ std::vector<TRootMuon*> Run2Selection::GetSelectedMuons(float PtThr, float EtaTh
     return GetSelectedMuons(PtThr,EtaThr,10,5,0,0.2,0.5,0,1,MuonRelIso);
 }
 
+// displaced muons                                                                                                                                                                  
+std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons(float PtThr, float EtaThr, float NormChi2, int NTrackerLayersWithMeas, int NValidMuonHits, float d0, int NValidPixelHits, int NMatchedStations, float RelIso) const
+{
+  std::vector<TRootMuon*> selectedMuons;
+  for(unsigned int i=0; i<muons.size(); i++)
+    {
+      
+      //float reliso = (muons[i]->chargedHadronIso()+muons[i]->neutralHadronIso()+muons[i]->photonIso())/muons[i]->Pt();                                                          
+      float reliso = (muons[i]->chargedHadronIso() + max( 0.0, muons[i]->neutralHadronIso() + muons[i]->photonIso() - 0.5*muons[i]->puChargedHadronIso() ) ) / muons[i]->Pt(); // dBeta corrected                                                                                                                                                              
+      if(     muons[i]->idGlobalMuonPromptTight() //&& muons[i]->isPFMuon()                                                                                                       
+	      && muons[i]->Pt() > PtThr
+	      && fabs(muons[i]->Eta()) < EtaThr
+	      && muons[i]->chi2() < NormChi2
+	      && muons[i]->nofTrackerLayersWithMeasurement() > NTrackerLayersWithMeas
+	      && muons[i]->nofValidMuHits() > NValidMuonHits
+	      && fabs(muons[i]->d0()) > d0 // displaced!!                                                                                                                         
+	      && muons[i]->nofMatchedStations() > NMatchedStations
+	      && reliso < RelIso)
+	{
+	  selectedMuons.push_back(muons[i]);
+	}
+    }
+    std::sort(selectedMuons.begin(),selectedMuons.end(),HighestPt());
+    return selectedMuons;
+}
+
+std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons() const
+{
+  return GetSelectedDisplacedMuons(30, 2.5, 10, 5, 0, 0.01, 0, 1, 0.12);
+}
+
+
 std::vector<TRootMuon*> Run2Selection::GetSelectedDiMuons(float PtThr, float EtaThr,float MuonRelIso) const
 {
     std::vector<TRootMuon*> selectedMuons;
