@@ -79,17 +79,17 @@ SOURCESTOPFCNCDIC	= $(wildcard ../TopTreeAnalysis/TopFCNC/src/TopFCNC_Evt.cc Con
 HEADERSTOPFCNCDIC	= $(wildcard ../TopTreeAnalysis/TopFCNC/interface/TopFCNC_Evt.h Content/interface/Dataset.h ../TopTreeProducer/interface/TRoot*.h)
 OBJECTSTOPFCNCDIC	= $(SOURCESTOPFCNCDIC:.$(SrcSuf)=.$(ObjSuf))
 
-all:  libTopTreeAna72.$(DllSuf) libTopTreeAnaContent72.$(DllSuf)
-	cp libTopTreeAna72.$(DllSuf) ~/lib/ ; cp libTopTreeAnaContent72.$(DllSuf) ~/lib/
+all:  libTopTreeAna74.$(DllSuf) libTopTreeAnaContent74.$(DllSuf)
+	cp libTopTreeAna74.$(DllSuf) ~/lib/ ; cp libTopTreeAnaContent74.$(DllSuf) ~/lib/
 
-btag: libBtagAnalysis72.$(DllSuf)
-	cp libBtagAnalysis72.$(DllSuf) ~/lib/
+btag: libBtagAnalysis74.$(DllSuf)
+	cp libBtagAnalysis74.$(DllSuf) ~/lib/
 
-mtop: libMtopAnalysis72.$(DllSuf)
-	cp libMtopAnalysis72.$(DllSuf) ~/lib/
+mtop: libMtopAnalysis74.$(DllSuf)
+	cp libMtopAnalysis74.$(DllSuf) ~/lib/
 
-topfcnc: libTopFcncAnalysis72.$(DllSuf)
-	cp libTopFcncAnalysis72.$(DllSuf) ~/lib/
+topfcnc: libTopFcncAnalysis74.$(DllSuf)
+	cp libTopFcncAnalysis74.$(DllSuf) ~/lib/
 
 clean:
 	@echo "Cleaning..."
@@ -103,12 +103,12 @@ Dict.$(SrcSuf): $(HEADERSDIC) ./LinkDef.h
 	@echo "Generating dictionary Dict..."
 	@rootcint -f Dict.$(SrcSuf) -c $(DEFINES) $(HEADERSDIC) ./LinkDef.h
 
-libTopTreeAna72.$(DllSuf): $(OBJECTS) libTopTreeAnaContent72.$(DllSuf)
-	@echo "Building libTopTreeAna72..."
-	$(LD) $(LIBS) -lTopTreeAnaContent72 $(SOFLAGS) $(LDFLAGS) $+ -o $@
+libTopTreeAna74.$(DllSuf): $(OBJECTS) libTopTreeAnaContent74.$(DllSuf)
+	@echo "Building libTopTreeAna74..."
+	$(LD) $(LIBS) -lTopTreeAnaContent74 $(SOFLAGS) $(LDFLAGS) $+ -o $@
 
-libTopTreeAnaContent72.$(DllSuf): $(OBJECTSDIC)  Dict.o  
-	@echo "Building libTopTreeAnaContent72..."
+libTopTreeAnaContent74.$(DllSuf): $(OBJECTSDIC)  Dict.o  
+	@echo "Building libTopTreeAnaContent74..."
 	$(LD) $(LIBS) $(SOFLAGS) $(LDFLAGS) $+ -o $@
 
 # specific stuff for btag eff analysis ONLY
@@ -117,7 +117,7 @@ BtagDict.$(SrcSuf): $(HEADERSBTAGDIC) ./BtagLinkDef.h
 	@echo "Generating dictionary BtagDict..."
 	@rootcint -f BtagDict.$(SrcSuf) -c $(DEFINES) $(HEADERSBTAGDIC) ./BtagLinkDef.h
 
-libBtagAnalysis72.$(DllSuf): $(OBJECTSBTAG) BtagDict.o
+libBtagAnalysis74.$(DllSuf): $(OBJECTSBTAG) BtagDict.o
 	@echo "Building libBtagAnalysis..."
 	$(LD) $(LIBS) $(SOFLAGS) $(LDFLAGS) $+ -o $@
 
@@ -127,7 +127,7 @@ MtopDict.$(SrcSuf): $(HEADERSMTOPDIC) ./MtopLinkDef.h
 	@echo "Generating dictionary MtopDict..."
 	@rootcint -f MtopDict.$(SrcSuf) -c $(DEFINES) $(HEADERSMTOPDIC) ./MtopLinkDef.h
 
-libMtopAnalysis72.$(DllSuf): $(OBJECTSMTOP) MtopDict.o
+libMtopAnalysis74.$(DllSuf): $(OBJECTSMTOP) MtopDict.o
 	@echo "Building libMtopAnalysis..."
 	$(LD) $(LIBS) $(SOFLAGS) $(LDFLAGS) $+ -o $@
 
@@ -137,14 +137,14 @@ TopFcncDict.$(SrcSuf): $(HEADERSTOPFCNCDIC) ./TopFcncLinkDef.h
 	@echo "Generating dictionary TopFcncDict..."
 	@rootcint -f TopFcncDict.$(SrcSuf) -c $(DEFINES) $(HEADERSTOPFCNCDIC) ./TopFcncLinkDef.h
 
-libTopFcncAnalysis72.$(DllSuf): $(OBJECTSTOPFCNC) TopFcncDict.o
+libTopFcncAnalysis74.$(DllSuf): $(OBJECTSTOPFCNC) TopFcncDict.o
 	@echo "Building libTopFcncAnalysis..."
 	$(LD) $(LIBS_NoTMVA) $(SOFLAGS) $(LDFLAGS) $+ -o $@
 
 ADDLIBS_MACROS = -lMLP -lTreePlayer -lXMLIO
 
-macros/%.exe: macros/%.cc $(HEADERS) libTopTreeAna72.$(DllSuf) libTopTreeAnaContent72.$(DllSuf)
-	$(LD) -lTopTreeAna72 -lTopTreeAnaContent72 $(LIBS) $(ADDLIBS_MACROS) -I`root-config --incdir` $< $(LDFLAGS) -o $@
+macros/%.exe: macros/%.cc $(HEADERS) libTopTreeAna74.$(DllSuf) libTopTreeAnaContent74.$(DllSuf)
+	$(LD) -lTopTreeAna74 -lTopTreeAnaContent74 $(LIBS) $(ADDLIBS_MACROS) -I`root-config --incdir` $< $(LDFLAGS) -o $@
 
 SOURCES_MACROS = $(wildcard macros/*.cc)
 
