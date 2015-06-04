@@ -97,6 +97,10 @@ public:
     std::vector<TRootMuon*> GetSelectedMuons(float PtThr, float EtaThr, float MuonRelIso) const;
     std::vector<TRootMuon*> GetSelectedMuons(float PtThr, float EtaThr, float NormChi2, int NTrackerLayersWithMeas, int NValidMuonHits, float d0, float dZ, int NValidPixelHits, int NMatchedStations, float RelIso) const;
 
+    // displaced muons 
+    std::vector<TRootMuon*> GetSelectedDisplacedMuons() const;
+    std::vector<TRootMuon*> GetSelectedDisplacedMuons(float PtThr, float EtaThr, float NormChi2, int NTrackerLayersWithMeas, int NValidMuonHits, float d0, int NValidPixelHits, int NMatchedStations, float RelIso) const;
+
     std::vector<TRootMuon*> GetSelectedDiMuons() const;
     std::vector<TRootMuon*> GetSelectedDiMuons(float PtThr, float EtaThr, float MuonRelIso) const;
     std::vector<TRootMuon*> GetSelectedLooseMuons() const;
