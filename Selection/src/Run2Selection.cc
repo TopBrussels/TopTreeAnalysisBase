@@ -222,6 +222,38 @@ std::vector<TRootMuon*> Run2Selection::GetSelectedMuons(float PtThr, float EtaTh
     return GetSelectedMuons(PtThr,EtaThr,10,5,0,0.2,0.5,0,1,MuonRelIso);
 }
 
+// displaced muons
+std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons(float PtThr, float EtaThr, float NormChi2, int NTrackerLayersWithMeas, int NValidMuonHits, float d0, int NValidPixelHits, int NMatchedStations, float RelIso) const
+{
+  std::vector<TRootMuon*> selectedMuons;
+  for(unsigned int i=0; i<muons.size(); i++)
+    {
+      
+      //float reliso = (muons[i]->chargedHadronIso()+muons[i]->neutralHadronIso()+muons[i]->photonIso())/muons[i]->Pt();                                                          
+      float reliso = (muons[i]->chargedHadronIso() + max( 0.0, muons[i]->neutralHadronIso() + muons[i]->photonIso() - 0.5*muons[i]->puChargedHadronIso() ) ) / muons[i]->Pt(); // dBeta corrected                                                                                                                                                              
+      if(     muons[i]->idGlobalMuonPromptTight() //&& muons[i]->isPFMuon()                                                                                                       
+	      && muons[i]->Pt() > PtThr
+	      && fabs(muons[i]->Eta()) < EtaThr
+	      && muons[i]->chi2() < NormChi2
+	      && muons[i]->nofTrackerLayersWithMeasurement() > NTrackerLayersWithMeas
+	      && muons[i]->nofValidMuHits() > NValidMuonHits
+	      && fabs(muons[i]->d0()) > d0 // displaced!!                                                                                                                         
+	      && muons[i]->nofMatchedStations() > NMatchedStations
+	      && reliso < RelIso)
+	{
+	  selectedMuons.push_back(muons[i]);
+	}
+    }
+    std::sort(selectedMuons.begin(),selectedMuons.end(),HighestPt());
+    return selectedMuons;
+}
+
+std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons() const
+{
+  return GetSelectedDisplacedMuons(30, 2.5, 10, 5, 0, 0.01, 0, 1, 0.12);
+}
+
+
 std::vector<TRootMuon*> Run2Selection::GetSelectedDiMuons(float PtThr, float EtaThr,float MuonRelIso) const
 {
     std::vector<TRootMuon*> selectedMuons;
@@ -411,6 +443,49 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedElectrons(string WorkingPo
     }
     return ElectronCollection;
 }
+
+
+std::vector<TRootElectron*> Run2Selection::GetSelectedDisplacedElectrons(float PtThr, float EtaThr) const { //CSA14
+    std::vector<TRootElectron*> selectedElectrons;
+    for(unsigned int i=0; i<electrons.size(); i++) {
+        TRootElectron* el = (TRootElectron*) electrons[i];
+        // Using cut-based
+        if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr) {
+            if( fabs(el->superClusterEta()) <= 1.479
+                && fabs(el->deltaEtaIn()) < 0.006574
+                && fabs(el->deltaPhiIn()) < 0.022868
+                && el->hadronicOverEm() < 0.037553
+                && fabs(el->d0()) > 0.01 // displaced
+                && fabs(1/el->E() - 1/el->P()) < 0.131191
+                && el->relPfIso(3, 0.5) < 0.074355
+                && el->passConversion()
+                && el->missingHits() <= 1)
+            {
+                selectedElectrons.push_back(electrons[i]);
+            }
+
+            else if (fabs(el->superClusterEta()) < 2.5
+                && fabs(el->deltaEtaIn()) < 0.005681
+                && fabs(el->deltaPhiIn()) < 0.032046
+                && (el->hadronicOverEm() < 0.081902)
+		&& fabs(el->d0()) > 0.01 // displaced
+                && fabs(1/el->E() - 1/el->P()) < 0.106055
+                && el->relPfIso(3, 0.5) < 0.090185
+                && el->passConversion()
+                && el->missingHits() <= 1)
+            {
+                selectedElectrons.push_back(electrons[i]);
+            }
+        }
+    }
+    std::sort(selectedElectrons.begin(),selectedElectrons.end(),HighestPt());
+    return selectedElectrons;
+}
+
+std::vector<TRootElectron*> Run2Selection::GetSelectedDisplacedElectrons() const{
+  return GetSelectedDisplacedElectrons(30, 2.5);
+}
+
 
 std::vector<TRootElectron*> Run2Selection::GetSelectedTightElectronsCutsBasedPHYS14(float PtThr, float EtaThr) const { //CSA14
     std::vector<TRootElectron*> selectedElectrons;
