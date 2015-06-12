@@ -132,7 +132,7 @@ std::vector<TRootSubstructureJet*> Run2Selection::GetSelectedFatJets(float PtThr
     {
 
         TRootSubstructureJet* init_jet = (TRootSubstructureJet*) fatjets[i];
-      
+
             const TRootSubstructureJet* PFJet = static_cast<const TRootSubstructureJet*>(init_jet);
 
             if( fabs(PFJet->Eta())<EtaThr && PFJet->Pt()>PtThr )
@@ -228,16 +228,16 @@ std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons(float PtThr, fl
   std::vector<TRootMuon*> selectedMuons;
   for(unsigned int i=0; i<muons.size(); i++)
     {
-      
-      //float reliso = (muons[i]->chargedHadronIso()+muons[i]->neutralHadronIso()+muons[i]->photonIso())/muons[i]->Pt();                                                          
-      float reliso = (muons[i]->chargedHadronIso() + max( 0.0, muons[i]->neutralHadronIso() + muons[i]->photonIso() - 0.5*muons[i]->puChargedHadronIso() ) ) / muons[i]->Pt(); // dBeta corrected                                                                                                                                                              
-      if(     muons[i]->idGlobalMuonPromptTight() //&& muons[i]->isPFMuon()                                                                                                       
+
+      //float reliso = (muons[i]->chargedHadronIso()+muons[i]->neutralHadronIso()+muons[i]->photonIso())/muons[i]->Pt();
+      float reliso = (muons[i]->chargedHadronIso() + max( 0.0, muons[i]->neutralHadronIso() + muons[i]->photonIso() - 0.5*muons[i]->puChargedHadronIso() ) ) / muons[i]->Pt(); // dBeta corrected
+      if(     muons[i]->idGlobalMuonPromptTight() //&& muons[i]->isPFMuon()
 	      && muons[i]->Pt() > PtThr
 	      && fabs(muons[i]->Eta()) < EtaThr
 	      && muons[i]->chi2() < NormChi2
 	      && muons[i]->nofTrackerLayersWithMeasurement() > NTrackerLayersWithMeas
 	      && muons[i]->nofValidMuHits() > NValidMuonHits
-	      && fabs(muons[i]->d0()) > d0 // displaced!!                                                                                                                         
+	      && fabs(muons[i]->d0()) > d0 // displaced!!
 	      && muons[i]->nofMatchedStations() > NMatchedStations
 	      && reliso < RelIso)
 	{
@@ -535,14 +535,14 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedLooseElectronsCutsBasedPHY
         // Using cut-based
         if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr) {
             if( fabs(el->superClusterEta()) <= 1.479
-                && fabs(el->deltaEtaIn()) < 0.012442
-                && fabs(el->deltaPhiIn()) < 0.072624
+                && fabs(el->deltaEtaIn()) < 0.009277
+                && fabs(el->deltaPhiIn()) < 0.094739
                 //&& el->e5x5() < 0.01
-                && el->hadronicOverEm() < 0.121476
-                && fabs(el->d0()) < 0.022664
-                && fabs(el->dz()) < 0.173670
-                && fabs(1/el->E() - 1/el->P()) < 0.221803
-                && el->relPfIso(3, 0.5) < 0.120026
+                && el->hadronicOverEm() < 0.093068
+                && fabs(el->d0()) < 0.035904
+                && fabs(el->dz()) < 0.075496
+                && fabs(1/el->E() - 1/el->P()) < 0.189968
+                && el->relPfIso(3, 0.5) < 0.130136
                 && el->passConversion()
                 && el->missingHits() <= 1)
             {
@@ -550,14 +550,14 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedLooseElectronsCutsBasedPHY
             }
 
             else if (fabs(el->superClusterEta()) < 2.5
-                && fabs(el->deltaEtaIn()) < 0.032602
-                && fabs(el->deltaPhiIn()) < 0.010654
+                && fabs(el->deltaEtaIn()) < 0.009833
+                && fabs(el->deltaPhiIn()) < 0.149934
                 // && if(el->e5x5() < 0.03)
-                && (el->hadronicOverEm() < 0.131862)
-                && fabs(el->d0()) < 0.097358
-                && fabs(el->dz()) < 0.198444
-                && fabs(1/el->E() - 1/el->P()) < 0.142283
-                && el->relPfIso(3, 0.5) < 0.162914
+                && (el->hadronicOverEm() < 0.115754)
+                && fabs(el->d0()) < 0.099266
+                && fabs(el->dz()) < 0.197897
+                && fabs(1/el->E() - 1/el->P()) < 0.140662
+                && el->relPfIso(3, 0.5) < 0.163368
                 && el->passConversion()
                 && el->missingHits() <= 1)
             {
