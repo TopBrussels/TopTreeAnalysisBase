@@ -80,7 +80,7 @@ HEADERSTOPFCNCDIC	= $(wildcard ../TopTreeAnalysis/TopFCNC/interface/TopFCNC_Evt.
 OBJECTSTOPFCNCDIC	= $(SOURCESTOPFCNCDIC:.$(SrcSuf)=.$(ObjSuf))
 
 all:  libTopTreeAna74.$(DllSuf) libTopTreeAnaContent74.$(DllSuf)
-	cp libTopTreeAna74.$(DllSuf) ~/lib/ ; cp libTopTreeAnaContent74.$(DllSuf) ~/lib/
+	cp libTopTreeAna74.$(DllSuf) ~/lib/ ; cp libTopTreeAnaContent74.$(DllSuf) ~/lib/ ; cp Dict_rdict.pcm ~/lib/
 
 btag: libBtagAnalysis74.$(DllSuf)
 	cp libBtagAnalysis74.$(DllSuf) ~/lib/
