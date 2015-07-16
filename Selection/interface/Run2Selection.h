@@ -94,7 +94,8 @@ public:
 
 
     void setElectronIsoCorrType(int corrType = 1);
-    float GetElectronIsoCorrType(TRootElectron* el);
+    float GetElectronIsoCorrType(TRootElectron* el) const;
+    float pfElectronIso(TRootElectron *el) const;
 // ELECTRON GETTERS ===============================================
     std::vector<TRootElectron*> GetSelectedElectrons(string WorkingPoint, string PHYS14orCSA14, bool CutsBased) const;
     std::vector<TRootElectron*> GetSelectedDisplacedElectrons (float PtThr, float EtaThr) const;
@@ -104,7 +105,7 @@ public:
     std::vector<TRootMuon*> GetSelectedMuons(float PtThr, float EtaThr, float MuonRelIso) const;
     std::vector<TRootMuon*> GetSelectedMuons(float PtThr, float EtaThr, float NormChi2, int NTrackerLayersWithMeas, int NValidMuonHits, float d0, float dZ, int NValidPixelHits, int NMatchedStations, float RelIso) const;
 
-    // displaced muons 
+    // displaced muons
     std::vector<TRootMuon*> GetSelectedDisplacedMuons() const;
     std::vector<TRootMuon*> GetSelectedDisplacedMuons(float PtThr, float EtaThr, float NormChi2, int NTrackerLayersWithMeas, int NValidMuonHits, float d0, int NValidPixelHits, int NMatchedStations, float RelIso) const;
 
