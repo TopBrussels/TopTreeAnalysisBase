@@ -111,7 +111,7 @@ std::vector<TRootPFJet*> Run2Selection::GetSelectedJets(float PtThr, float EtaTh
             {
                 if ( applyJetID )
                 {
-                    if(passPFJetID8TEV(PFJet))//This is the 8TeV Recommended Loose PFJet ID.  This should be updated when 13TeV recommendations become available.
+                    if(passPFJetID13TEV(PFJet))//This is the 8TeV Recommended Loose PFJet ID.  This should be updated when 13TeV recommendations become available.
                     {
                         selectedJets.push_back(init_jet);
                     }
@@ -187,18 +187,19 @@ std::vector<TRootPFJet*> Run2Selection::GetSelectedBJets(const std::vector<TRoot
 
 std::vector<TRootMuon*> Run2Selection::GetSelectedMuons(float PtThr, float EtaThr, float NormChi2, int NTrackerLayersWithMeas, int NValidMuonHits, float d0, float dZ, int NValidPixelHits, int NMatchedStations, float RelIso) const
 {
+    //Thes quality cuts reflect the Tight Muon ID as provided by the MUON POG.  PT, Eta, and Iso thresholds are not tuned as of July 17, 2015.
     std::vector<TRootMuon*> selectedMuons;
     for(unsigned int i=0; i<muons.size(); i++)
     {
 
         //float reliso = (muons[i]->chargedHadronIso()+muons[i]->neutralHadronIso()+muons[i]->photonIso())/muons[i]->Pt();
         float reliso = (muons[i]->chargedHadronIso() + max( 0.0, muons[i]->neutralHadronIso() + muons[i]->photonIso() - 0.5*muons[i]->puChargedHadronIso() ) ) / muons[i]->Pt(); // dBeta corrected
-        if(     muons[i]->idGlobalMuonPromptTight() //&& muons[i]->isPFMuon()
+        if(     muons[i]->isGlobalMuon() && muons[i]->isPFMuon()
                 && muons[i]->Pt()>PtThr
                 && fabs(muons[i]->Eta())<EtaThr
                 && muons[i]->chi2() < NormChi2
                 && muons[i]->nofTrackerLayersWithMeasurement() > NTrackerLayersWithMeas
-                && muons[i]->nofValidMuHits() > NValidMuonHits
+                //&& muons[i]->nofValidMuHits() > NValidMuonHits
                 && fabs(muons[i]->d0()) < d0
                 && fabs(muons[i]->dz()) < dZ
                 && muons[i]->nofValidPixelHits() > NValidPixelHits
@@ -261,6 +262,7 @@ std::vector<TRootMuon*> Run2Selection::GetSelectedDiMuons(float PtThr, float Eta
     {
         float reliso = (muons[i]->chargedHadronIso() + max( 0.0, muons[i]->neutralHadronIso() + muons[i]->photonIso() - 0.5*muons[i]->puChargedHadronIso() ) ) / muons[i]->Pt(); // dBeta corrected
         if((muons[i]->isGlobalMuon() || muons[i]->isTrackerMuon())
+                && muons[i]->isPFMuon()
                 && muons[i]->Pt()>PtThr
                 && fabs(muons[i]->Eta())<EtaThr
                 && reliso < MuonRelIso )
@@ -284,7 +286,7 @@ std::vector<TRootMuon*> Run2Selection::GetSelectedLooseMuons(float PtThr, float 
     {
         float reliso = (muons[i]->chargedHadronIso() + max( 0.0, muons[i]->neutralHadronIso() + muons[i]->photonIso() - 0.5*muons[i]->puChargedHadronIso() ) ) / muons[i]->Pt(); // dBeta corrected
 
-        if((muons[i]->isGlobalMuon() || muons[i]->isTrackerMuon()) && fabs(muons[i]->Eta())<EtaThr && muons[i]->Pt()>PtThr && reliso < MuonRelIso )
+        if((muons[i]->isGlobalMuon() || muons[i]->isTrackerMuon()) && muons[i]->isPFMuon() && fabs(muons[i]->Eta())<EtaThr && muons[i]->Pt()>PtThr && reliso < MuonRelIso )
         {
             selectedMuons.push_back(muons[i]);
         }
@@ -596,6 +598,32 @@ bool Run2Selection::passPFJetID8TEV(const TRootPFJet* PFJet) const
                         if (fabs(PFJet->Eta()) >= 2.4 || PFJet->chargedMultiplicity() > 0)
                         {
                             return true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return false;
+}
+bool Run2Selection::passPFJetID13TEV(const TRootPFJet* PFJet) const
+{
+    if (PFJet->nConstituents() > 1 )
+    {
+        if (PFJet->neutralHadronEnergyFraction() < 0.99)
+        {
+            if (PFJet->neutralEmEnergyFraction() < 0.99 )
+            {
+                if (fabs(PFJet->Eta()) >= 2.4 || PFJet->chargedEmEnergyFraction() < 0.99 )
+                {
+                    if (fabs(PFJet->Eta()) >= 2.4 || PFJet->chargedHadronEnergyFraction() > 0)
+                    {
+                        if (fabs(PFJet->Eta()) >= 2.4 || PFJet->chargedMultiplicity() > 0)
+                        {
+                            if(PFJet->muonEnergyFraction() <= 0.8)
+                            {
+                                return true;
+                            }
                         }
                     }
                 }

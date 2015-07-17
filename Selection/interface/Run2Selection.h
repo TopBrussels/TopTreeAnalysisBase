@@ -161,6 +161,7 @@ private:
     //=======================
 
     bool passPFJetID8TEV(const TRootPFJet* PFJet) const;
+    bool passPFJetID13TEV(const TRootPFJet* PFJet) const;
 
     //muon
     float MuonPtThreshold_;
