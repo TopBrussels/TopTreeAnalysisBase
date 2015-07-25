@@ -442,11 +442,18 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedElectrons(string WorkingPo
             ElectronCollection = GetSelectedTightElectronsCutsBasedPHYS14(30, 2.5);
             //ElectronCollection.insert(ElectronCollection.end(), GetSelectedTightElectronsCutsBasedPHYS14(30, 2.5).begin(), GetSelectedTightElectronsCutsBasedPHYS14(30, 2.5).end());
         }
+        else if (PHYS14orCSA14 == "PHYS14" && WorkingPoint == "Medium"){
+            ElectronCollection = GetSelectedMediumElectronsCutsBasedPHYS14(30, 2.5);
+        }
         else if (PHYS14orCSA14 == "PHYS14" && WorkingPoint == "Loose"){
             ElectronCollection = GetSelectedLooseElectronsCutsBasedPHYS14(30, 2.5);
         }
         else {
-            throw std::invalid_argument( "received incorrect args to GetSelectedElectrons" );
+            string printboolval="Cutbased=true";
+            if(!CutsBased)
+                printboolval="Cutbased=false";
+
+            throw std::invalid_argument( "received incorrect args to GetSelectedElectrons, requested: "+WorkingPoint+", "+PHYS14orCSA14+" "+printboolval);
             //cout<<"Selected electron error"<<endl;
         }
     }
@@ -496,21 +503,25 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedDisplacedElectrons() const
 }
 
 
-std::vector<TRootElectron*> Run2Selection::GetSelectedTightElectronsCutsBasedPHYS14(float PtThr, float EtaThr) const { //CSA14
+std::vector<TRootElectron*> Run2Selection::GetSelectedTightElectronsCutsBasedPHYS14(float PtThr, float EtaThr) const {
+    // (PLEASE UPDATE IF YOU CHANGE THIS CODE)
+    //These quality cuts reflect the recommended Tight cut-based electron ID as provided by the EGM POG. Last updated: 25 July 2015
+    // as these are still in flux, it is probably useful to check them here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2#PHYS14_selection_all_conditions
+
     std::vector<TRootElectron*> selectedElectrons;
     for(unsigned int i=0; i<electrons.size(); i++) {
         TRootElectron* el = (TRootElectron*) electrons[i];
         // Using cut-based
         if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr) {
             if( fabs(el->superClusterEta()) <= 1.479
-                && fabs(el->deltaEtaIn()) < 0.006574
-                && fabs(el->deltaPhiIn()) < 0.022868
-                //&& el->e5x5() < 0.01
-                && el->hadronicOverEm() < 0.037553
-                && fabs(el->d0()) < 0.009924
-                && fabs(el->dz()) < 0.015310
-                && fabs(1/el->E() - 1/el->P()) < 0.131191
-                && pfElectronIso(el) < 0.074355
+                && fabs(el->deltaEtaIn()) < 0.006046
+                && fabs(el->deltaPhiIn()) < 0.028092
+                && el->sigmaIEtaIEta() < 0.009947
+                && el->hadronicOverEm() < 0.045772
+                && fabs(el->d0()) < 0.008790
+                && fabs(el->dz()) < 0.021226
+                && fabs(1/el->E() - 1/el->P()) < 0.020118
+                && pfElectronIso(el) < 0.069537
                 && el->passConversion()
                 && el->missingHits() <= 1)
             {
@@ -518,14 +529,14 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedTightElectronsCutsBasedPHY
             }
 
             else if (fabs(el->superClusterEta()) < 2.5
-                && fabs(el->deltaEtaIn()) < 0.005681
-                && fabs(el->deltaPhiIn()) < 0.032046
-                // && if(el->e5x5() < 0.03)
-                && (el->hadronicOverEm() < 0.081902)
-                && fabs(el->d0()) < 0.027261
-                && fabs(el->dz()) < 0.147154
-                && fabs(1/el->E() - 1/el->P()) < 0.106055
-                && pfElectronIso(el) < 0.090185
+                && fabs(el->deltaEtaIn()) < 0.007057
+                && fabs(el->deltaPhiIn()) < 0.030159
+                && el->sigmaIEtaIEta() < 0.028237
+                && (el->hadronicOverEm() < 0.067778)
+                && fabs(el->d0()) < 0.027984
+                && fabs(el->dz()) < 0.133431
+                && fabs(1/el->E() - 1/el->P()) < 0.098919
+                && pfElectronIso(el) < 0.078265
                 && el->passConversion()
                 && el->missingHits() <= 1)
             {
@@ -537,7 +548,55 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedTightElectronsCutsBasedPHY
     return selectedElectrons;
 }
 
-std::vector<TRootElectron*> Run2Selection::GetSelectedLooseElectronsCutsBasedPHYS14(float PtThr, float EtaThr) const { //CSA14
+std::vector<TRootElectron*> Run2Selection::GetSelectedMediumElectronsCutsBasedPHYS14(float PtThr, float EtaThr) const {
+    // (PLEASE UPDATE IF YOU CHANGE THIS CODE)
+    //These quality cuts reflect the recommended Medium cut-based electron ID as provided by the EGM POG. Last updated: 25 July 2015
+    // as these are still in flux, it is probably useful to check them here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2#PHYS14_selection_all_conditions
+
+    std::vector<TRootElectron*> selectedElectrons;
+    for(unsigned int i=0; i<electrons.size(); i++) {
+        TRootElectron* el = (TRootElectron*) electrons[i];
+        // Using cut-based
+        if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr) {
+            if( fabs(el->superClusterEta()) <= 1.479
+               && fabs(el->deltaEtaIn()) < 0.008925
+               && fabs(el->deltaPhiIn()) < 0.035973
+               && el->sigmaIEtaIEta() < 0.009996
+               && el->hadronicOverEm() < 0.050537
+               && fabs(el->d0()) < 0.012235
+               && fabs(el->dz()) < 0.042020
+               && fabs(1/el->E() - 1/el->P()) < 0.091942
+               && pfElectronIso(el) < 0.107587
+               && el->passConversion()
+               && el->missingHits() <= 1)
+            {
+                selectedElectrons.push_back(electrons[i]);
+            }
+            
+            else if (fabs(el->superClusterEta()) < 2.5
+                     && fabs(el->deltaEtaIn()) < 0.007429
+                     && fabs(el->deltaPhiIn()) < 0.067879
+                     && el->sigmaIEtaIEta() <0.030135
+                     && el->hadronicOverEm() < 0.086782
+                     && fabs(el->d0()) < 0.036719
+                     && fabs(el->dz()) < 0.138142
+                     && fabs(1/el->E() - 1/el->P()) < 0.100683
+                     && pfElectronIso(el) < 0.113254
+                     && el->passConversion()
+                     && el->missingHits() <= 1)
+            {
+                selectedElectrons.push_back(electrons[i]);
+            }
+        }
+    }
+    std::sort(selectedElectrons.begin(),selectedElectrons.end(),HighestPt());
+    return selectedElectrons;
+}
+
+std::vector<TRootElectron*> Run2Selection::GetSelectedLooseElectronsCutsBasedPHYS14(float PtThr, float EtaThr) const {
+    // (PLEASE UPDATE IF YOU CHANGE THIS CODE)
+    // These quality cuts reflect the recommended Loose cut-based electron ID as provided by the EGM POG. Last updated: 25 July 2015
+    // as these are still in flux, it is probably useful to check them here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2#PHYS14_selection_all_conditions
     std::vector<TRootElectron*> selectedElectrons;
     for(unsigned int i=0; i<electrons.size(); i++) {
         TRootElectron* el = (TRootElectron*) electrons[i];
@@ -546,7 +605,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedLooseElectronsCutsBasedPHY
             if( fabs(el->superClusterEta()) <= 1.479
                 && fabs(el->deltaEtaIn()) < 0.009277
                 && fabs(el->deltaPhiIn()) < 0.094739
-                //&& el->e5x5() < 0.01
+                && el->sigmaIEtaIEta() < 0.010331
                 && el->hadronicOverEm() < 0.093068
                 && fabs(el->d0()) < 0.035904
                 && fabs(el->dz()) < 0.075496
@@ -561,7 +620,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedLooseElectronsCutsBasedPHY
             else if (fabs(el->superClusterEta()) < 2.5
                 && fabs(el->deltaEtaIn()) < 0.009833
                 && fabs(el->deltaPhiIn()) < 0.149934
-                // && if(el->e5x5() < 0.03)
+                && el->sigmaIEtaIEta() < 0.031838
                 && (el->hadronicOverEm() < 0.115754)
                 && fabs(el->d0()) < 0.099266
                 && fabs(el->dz()) < 0.197897

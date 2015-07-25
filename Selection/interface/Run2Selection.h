@@ -128,6 +128,7 @@ public:
 
 private:
     std::vector<TRootElectron*> GetSelectedTightElectronsCutsBasedPHYS14(float PtThr, float EtaThr) const;
+    std::vector<TRootElectron*> GetSelectedMediumElectronsCutsBasedPHYS14(float PtThr, float EtaThr) const;
     std::vector<TRootElectron*> GetSelectedLooseElectronsCutsBasedPHYS14(float PtThr, float EtaThr) const;
     std::vector<TRootElectron*> GetSelectedVetoElectronsPHYS14() const;
     std::vector<TRootElectron*> GetSelectedTightElectronsCSA14() const;
