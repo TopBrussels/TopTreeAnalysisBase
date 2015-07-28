@@ -48,7 +48,7 @@ void Trigger::bookTriggers(){
     // }    
 }
 
-void Trigger::checkAvail(int currentRun, vector < Dataset* > datasets, unsigned int d, TRootEvent* event){
+void Trigger::checkAvail(int currentRun, vector < Dataset* > datasets, unsigned int d, TTreeLoader treeLoader, TRootEvent* event){
 
 	redotrigmap=false;
 	currentFilename = datasets[d]->eventTree()->GetFile()->GetName();
