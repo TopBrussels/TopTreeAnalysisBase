@@ -40,6 +40,20 @@ void CutsTable::AddSelections(){
 	//CutsselecTable->push_back(string("HT $\\geq 400 GeV$"));
 }
 
+void CutsTable::AddSelectionsMuons(){
+    CutsselecTable.push_back(string("initial"));
+    CutsselecTable.push_back(string("Is global"));
+    CutsselecTable.push_back(string("Is PFmuon"));    
+    CutsselecTable.push_back(string("pt gt 26"));
+    CutsselecTable.push_back(string("Eta lt 2.1"));
+    CutsselecTable.push_back(string("chi2 lt 10"));
+    CutsselecTable.push_back(string("nofTrackerLayersWithMeasurement 5"));
+    CutsselecTable.push_back(string("d0 0.2 "));
+    CutsselecTable.push_back(string("dz 0.5"));
+    CutsselecTable.push_back(string("nofValidPixelHits 0 "));
+    CutsselecTable.push_back(string("nmatchedstations 1"));
+}
+
 void CutsTable::CreateTable(vector < Dataset* > datasets, float Luminosity){
 
     selecTable = new SelectionTable(CutsselecTable, datasets);
@@ -69,7 +83,7 @@ void CutsTable::FillTable(unsigned int d, bool isGoodPV, bool trigged, float sca
                         if(nJets>=6)
                         {
                             selecTable->Fill(d,5,scaleFactor);
-                            if(nLtags>=1)
+                            if(nMtags>=1)
                             {
                                 selecTable->Fill(d,6,scaleFactor);
                                 if(nMtags>=2)
@@ -101,7 +115,7 @@ void CutsTable::FillTable(unsigned int d, bool isGoodPV, bool trigged, float sca
                         if(nJets>=6)
                         {
                             selecTable->Fill(d,5,scaleFactor);
-                            if(nLtags>=1)
+                            if(nMtags>=1)
                             {
                                 selecTable->Fill(d,6,scaleFactor);
                                 if(nMtags>=2)
@@ -115,6 +129,56 @@ void CutsTable::FillTable(unsigned int d, bool isGoodPV, bool trigged, float sca
             }
         }
     }         
+}
+
+
+void CutsTable::FillTableMuons(unsigned int d, float scaleFactor, vector < TRootMuon* > init_muons){
+
+    for (unsigned int i=0; i<init_muons.size(); i++)  //Muon-Electron Selection Table
+    {
+        selecTable->Fill(d,0,scaleFactor);
+
+        if(init_muons[i]->isGlobalMuon())
+        {
+            selecTable->Fill(d,1,scaleFactor);
+            if (init_muons[i]->isPFMuon())
+            {
+                selecTable->Fill(d,2,scaleFactor);
+                if((init_muons[i]->Pt())>26)
+                {
+                    selecTable->Fill(d,3,scaleFactor);
+                    if((init_muons[i]->Eta())<2.1)
+                    {
+                        selecTable->Fill(d,4,scaleFactor);
+                        if((init_muons[i]->chi2())<10)
+                        {
+                            selecTable->Fill(d,5,scaleFactor);
+                            if((init_muons[i]->nofTrackerLayersWithMeasurement())>5)
+                            {
+                                selecTable->Fill(d,6,scaleFactor);
+                                if((init_muons[i]->d0())<0.2)
+                                {
+                                    selecTable->Fill(d,7,scaleFactor);
+                                    if((init_muons[i]->dz())<0.5){
+
+                                        selecTable->Fill(d,8,scaleFactor);
+                                        if((init_muons[i]->nofValidPixelHits())>0){
+
+                                            selecTable->Fill(d,9,scaleFactor);
+                                            if((init_muons[i]->nofMatchedStations())>1){
+
+                                                selecTable->Fill(d,10,scaleFactor);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 
