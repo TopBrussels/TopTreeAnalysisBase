@@ -444,7 +444,8 @@ std::vector<TRootMuon*> Selection::GetSelectedMuons(float PtThr, float EtaThr,fl
     for(unsigned int i=0; i<muons.size(); i++) {
 
         //float reliso = (muons[i]->chargedHadronIso()+muons[i]->neutralHadronIso()+muons[i]->photonIso())/muons[i]->Pt();
-        float reliso = (muons[i]->chargedHadronIso() + max( 0.0, muons[i]->neutralHadronIso() + muons[i]->photonIso() - 0.5*muons[i]->puChargedHadronIso() ) ) / muons[i]->Pt(); // dBeta corrected
+		// use cone 4 for muons:
+        float reliso = (muons[i]->chargedHadronIso(4) + max( 0.0, muons[i]->neutralHadronIso(4) + muons[i]->photonIso(4) - 0.5*muons[i]->puChargedHadronIso(4) ) ) / muons[i]->Pt(); // dBeta corrected
 
         //    cout << "mu global:  " << muons[i]->isGlobalMuon() << endl;
         //    cout << "mu globalMuPromptTight:  " << muons[i]->idGlobalMuonPromptTight() << endl;
@@ -522,7 +523,7 @@ std::vector<TRootMuon*> Selection::GetSelectedMuons(TRootVertex* vertex, vector<
 std::vector<TRootMuon*> Selection::GetSelectedDiMuons(float PtThr, float EtaThr,float MuonRelIso) const {
     std::vector<TRootMuon*> selectedMuons;
     for(unsigned int i=0; i<muons.size(); i++) {
-        float reliso = (muons[i]->chargedHadronIso() + max( 0.0, muons[i]->neutralHadronIso() + muons[i]->photonIso() - 0.5*muons[i]->puChargedHadronIso() ) ) / muons[i]->Pt(); // dBeta corrected
+        float reliso = (muons[i]->chargedHadronIso(4) + max( 0.0, muons[i]->neutralHadronIso(4) + muons[i]->photonIso(4) - 0.5*muons[i]->puChargedHadronIso(4) ) ) / muons[i]->Pt(); // dBeta corrected
         if((muons[i]->isGlobalMuon() || muons[i]->isTrackerMuon())
                 && muons[i]->Pt()>PtThr
                 && fabs(muons[i]->Eta())<EtaThr
@@ -542,7 +543,7 @@ std::vector<TRootMuon*> Selection::GetSelectedLooseMuons(float PtThr, float EtaT
     std::vector<TRootMuon*> selectedMuons;
     for(unsigned int i=0; i<muons.size(); i++) {
         //float reliso = (muons[i]->chargedHadronIso()+muons[i]->neutralHadronIso()+muons[i]->photonIso())/muons[i]->Pt();
-        float reliso = (muons[i]->chargedHadronIso() + max( 0.0, muons[i]->neutralHadronIso() + muons[i]->photonIso() - 0.5*muons[i]->puChargedHadronIso() ) ) / muons[i]->Pt(); // dBeta corrected
+        float reliso = (muons[i]->chargedHadronIso(4) + max( 0.0, muons[i]->neutralHadronIso(4) + muons[i]->photonIso(4) - 0.5*muons[i]->puChargedHadronIso(4) ) ) / muons[i]->Pt(); // dBeta corrected
 
         //    float reliso = muons[i]->relativeIso03();
         //    cout << "mu global:  " << muons[i]->isGlobalMuon() << endl;
@@ -575,7 +576,7 @@ std::vector<TRootMuon*> Selection::GetSelectedMuonsInvIso(float MuonRelIso, TRoo
             float dRMuJet = init_muons[i]->DeltaR(*selJets.at(j));
             if(dRMuJet < mindRMuJet) mindRMuJet = dRMuJet;
             }
-        float reliso = (init_muons[i]->chargedHadronIso() + max( 0.0, init_muons[i]->neutralHadronIso() + init_muons[i]->photonIso() - 0.5*init_muons[i]->puChargedHadronIso() ) ) / init_muons[i]->Pt(); // dBeta corrected
+        float reliso = (init_muons[i]->chargedHadronIso(4) + max( 0.0, init_muons[i]->neutralHadronIso(4) + init_muons[i]->photonIso(4) - 0.5*init_muons[i]->puChargedHadronIso(4) ) ) / init_muons[i]->Pt(); // dBeta corrected
 //    float reliso = (init_muons[i]->chargedHadronIso()+init_muons[i]->neutralHadronIso()+init_muons[i]->photonIso())/init_muons[i]->Pt();
         if ( fabs(init_muons[i]->dz()) < MuonDz_ && mindRMuJet > MuonDRJetsCut_ && reliso > MuonRelIso )
             selectedMuons.push_back(init_muons[i]);
@@ -597,7 +598,7 @@ std::vector<TRootMuon*> Selection::GetSelectedMuonsIsoRange(float PtThr, float E
     std::vector<TRootMuon*> selectedMuons;
     for(unsigned int i=0; i<init_muons.size(); i++) {
         //Compute isolation
-        float reliso = (init_muons[i]->chargedHadronIso() + max( 0.0, init_muons[i]->neutralHadronIso() + init_muons[i]->photonIso() - 0.5*init_muons[i]->puChargedHadronIso() ) ) / init_muons[i]->Pt(); // dBeta corrected
+        float reliso = (init_muons[i]->chargedHadronIso(4) + max( 0.0, init_muons[i]->neutralHadronIso(4) + init_muons[i]->photonIso(4) - 0.5*init_muons[i]->puChargedHadronIso(4) ) ) / init_muons[i]->Pt(); // dBeta corrected
         if( MuonRelIsoMin < reliso && reliso < MuonRelIsoMax )
             selectedMuons.push_back(muons[i]);
         }
@@ -712,7 +713,7 @@ std::vector<TRootElectron*> Selection::GetSelectedElectrons(float PtThr, float E
         if(elecIsoCorrType_ == 1) // rho correction (default corr)
             isocorr = rho_*EffectiveArea;
         else if(elecIsoCorrType_ == 2) // dB correction
-            isocorr = 0.5*el->puChargedHadronIso();
+            isocorr = 0.5*el->puChargedHadronIso(3);
         else if (elecIsoCorrType_ == 0) // no correction
             isocorr = 0.;
         else {
@@ -724,7 +725,8 @@ std::vector<TRootElectron*> Selection::GetSelectedElectrons(float PtThr, float E
         // Using 2012 MVA ID
         if(mvaID) {
             // Compute the relative isolation
-            float RelIso = (el->chargedHadronIso() + max(0.0 , el->neutralHadronIso() + el->photonIso() - isocorr) )/ el->Pt();
+			// use cone 0.3 for electrons
+            float RelIso = (el->chargedHadronIso(3) + max(0.0 , el->neutralHadronIso(3) + el->photonIso(3) - isocorr) )/ el->Pt();
 
             if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr)
                 if(fabs(el->superClusterEta()) < 1.4442 || fabs(el->superClusterEta()) > 1.5660)
@@ -922,7 +924,7 @@ std::vector<TRootElectron*> Selection::GetSelectedDiElectrons(float PtThr, float
         if(elecIsoCorrType_ == 1) // rho correction (default corr)
             isocorr = rho_*EffectiveArea;
         else if(elecIsoCorrType_ == 2) // dB correction
-            isocorr = 0.5*el->puChargedHadronIso();
+            isocorr = 0.5*el->puChargedHadronIso(3);
         else if (elecIsoCorrType_ == 0) // no correction
             isocorr = 0.;
         else {
@@ -932,7 +934,8 @@ std::vector<TRootElectron*> Selection::GetSelectedDiElectrons(float PtThr, float
             exit(1);
             }
         // Compute the relative isolation
-        float RelIso = (el->chargedHadronIso() + max( el->neutralHadronIso() + el->photonIso()  - isocorr, 0.) )/ el->Pt();
+		// remember: cone 0.3 for electrons
+        float RelIso = (el->chargedHadronIso(3) + max( el->neutralHadronIso(3) + el->photonIso(3)  - isocorr, 0.) )/ el->Pt();
 
         if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr)
             if (fabs(el->d0()) < Electrond0Cut_)
@@ -981,7 +984,7 @@ std::vector<TRootElectron*> Selection::GetSelectedLooseElectrons(float PtThr, fl
         if(elecIsoCorrType_ == 1) // rho correction (default corr)
             isocorr = rho_*EffectiveArea;
         else if(elecIsoCorrType_ == 2) // dB correction
-            isocorr = 0.5*el->puChargedHadronIso();
+            isocorr = 0.5*el->puChargedHadronIso(3);
         else if (elecIsoCorrType_ == 0) // no correction
             isocorr = 0.;
         else {
@@ -991,7 +994,7 @@ std::vector<TRootElectron*> Selection::GetSelectedLooseElectrons(float PtThr, fl
             exit(1);
             }
         // Compute the relative isolation
-        float RelIso = (el->chargedHadronIso() + max( el->neutralHadronIso() + el->photonIso()  - isocorr, 0.) )/ el->Pt();
+        float RelIso = (el->chargedHadronIso(3) + max( el->neutralHadronIso(3) + el->photonIso(3)  - isocorr, 0.) )/ el->Pt();
 
         if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr)
 //      if (fabs(el->superClusterEta()) < 1.4442 || fabs(el->superClusterEta()) > 1.5660)
@@ -1030,7 +1033,7 @@ std::vector<TRootElectron*> Selection::GetSelectedLooseDiElectrons(float PtThr, 
         if(elecIsoCorrType_ == 1) // rho correction (default corr)
             isocorr = rho_*EffectiveArea;
         else if(elecIsoCorrType_ == 2) // dB correction
-            isocorr = 0.5*el->puChargedHadronIso();
+            isocorr = 0.5*el->puChargedHadronIso(3);
         else if (elecIsoCorrType_ == 0) // no correction
             isocorr = 0.;
         else {
@@ -1040,7 +1043,7 @@ std::vector<TRootElectron*> Selection::GetSelectedLooseDiElectrons(float PtThr, 
             exit(1);
             }
         // Compute the relative isolation
-        float RelIso = (el->chargedHadronIso() + max( el->neutralHadronIso() + el->photonIso()  - isocorr, 0.) )/ el->Pt();
+        float RelIso = (el->chargedHadronIso(3) + max( el->neutralHadronIso(3) + el->photonIso(3)  - isocorr, 0.) )/ el->Pt();
 
         if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr)
             if ( RelIso < ElectronRelIso )
@@ -1094,7 +1097,7 @@ std::vector<TRootElectron*> Selection::GetSelectedElectronsInvIso(float Electron
         if(elecIsoCorrType_ == 1) // rho correction (default corr)
             isocorr = rho_*EffectiveArea;
         else if(elecIsoCorrType_ == 2) // dB correction
-            isocorr = 0.5*init_electrons[i]->puChargedHadronIso();
+            isocorr = 0.5*init_electrons[i]->puChargedHadronIso(3);
         else if (elecIsoCorrType_ == 0) // no correction
             isocorr = 0.;
         else {
@@ -1104,7 +1107,7 @@ std::vector<TRootElectron*> Selection::GetSelectedElectronsInvIso(float Electron
             exit(1);
             }
         // Compute the relative isolation
-        float RelIso = (init_electrons[i]->chargedHadronIso() + max( init_electrons[i]->neutralHadronIso() + init_electrons[i]->photonIso()  - isocorr, 0.) )/ init_electrons[i]->Pt();
+        float RelIso = (init_electrons[i]->chargedHadronIso(3) + max( init_electrons[i]->neutralHadronIso(3) + init_electrons[i]->photonIso(3)  - isocorr, 0.) )/ init_electrons[i]->Pt();
 
 //    cout << "reliso = " << RelIso << "  minDR = " << mindRElJet << endl;
 

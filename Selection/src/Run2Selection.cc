@@ -193,7 +193,8 @@ std::vector<TRootMuon*> Run2Selection::GetSelectedMuons(float PtThr, float EtaTh
     {
 
         //float reliso = (muons[i]->chargedHadronIso()+muons[i]->neutralHadronIso()+muons[i]->photonIso())/muons[i]->Pt();
-        float reliso = (muons[i]->chargedHadronIso() + max( 0.0, muons[i]->neutralHadronIso() + muons[i]->photonIso() - 0.5*muons[i]->puChargedHadronIso() ) ) / muons[i]->Pt(); // dBeta corrected
+		// use cone 4 iso for muons:
+        float reliso = (muons[i]->chargedHadronIso(4) + max( 0.0, muons[i]->neutralHadronIso(4) + muons[i]->photonIso(4) - 0.5*muons[i]->puChargedHadronIso(4) ) ) / muons[i]->Pt(); // dBeta corrected
         if(     muons[i]->isGlobalMuon() && muons[i]->isPFMuon()
                 && muons[i]->Pt()>PtThr
                 && fabs(muons[i]->Eta())<EtaThr
@@ -231,7 +232,7 @@ std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons(float PtThr, fl
     {
 
       //float reliso = (muons[i]->chargedHadronIso()+muons[i]->neutralHadronIso()+muons[i]->photonIso())/muons[i]->Pt();
-      float reliso = (muons[i]->chargedHadronIso() + max( 0.0, muons[i]->neutralHadronIso() + muons[i]->photonIso() - 0.5*muons[i]->puChargedHadronIso() ) ) / muons[i]->Pt(); // dBeta corrected
+      float reliso = (muons[i]->chargedHadronIso(4) + max( 0.0, muons[i]->neutralHadronIso(4) + muons[i]->photonIso(4) - 0.5*muons[i]->puChargedHadronIso(4) ) ) / muons[i]->Pt(); // dBeta corrected
       if(     muons[i]->idGlobalMuonPromptTight() //&& muons[i]->isPFMuon()
 	      && muons[i]->Pt() > PtThr
 	      && fabs(muons[i]->Eta()) < EtaThr
@@ -260,7 +261,7 @@ std::vector<TRootMuon*> Run2Selection::GetSelectedDiMuons(float PtThr, float Eta
     std::vector<TRootMuon*> selectedMuons;
     for(unsigned int i=0; i<muons.size(); i++)
     {
-        float reliso = (muons[i]->chargedHadronIso() + max( 0.0, muons[i]->neutralHadronIso() + muons[i]->photonIso() - 0.5*muons[i]->puChargedHadronIso() ) ) / muons[i]->Pt(); // dBeta corrected
+        float reliso = (muons[i]->chargedHadronIso(4) + max( 0.0, muons[i]->neutralHadronIso(4) + muons[i]->photonIso(4) - 0.5*muons[i]->puChargedHadronIso(4) ) ) / muons[i]->Pt(); // dBeta corrected
         if((muons[i]->isGlobalMuon() || muons[i]->isTrackerMuon())
                 && muons[i]->isPFMuon()
                 && muons[i]->Pt()>PtThr
@@ -284,7 +285,8 @@ std::vector<TRootMuon*> Run2Selection::GetSelectedLooseMuons(float PtThr, float 
     std::vector<TRootMuon*> selectedMuons;
     for(unsigned int i=0; i<muons.size(); i++)
     {
-        float reliso = (muons[i]->chargedHadronIso() + max( 0.0, muons[i]->neutralHadronIso() + muons[i]->photonIso() - 0.5*muons[i]->puChargedHadronIso() ) ) / muons[i]->Pt(); // dBeta corrected
+		// use cone 4 iso for muons:
+        float reliso = (muons[i]->chargedHadronIso(4) + max( 0.0, muons[i]->neutralHadronIso(4) + muons[i]->photonIso(4) - 0.5*muons[i]->puChargedHadronIso(4) ) ) / muons[i]->Pt(); // dBeta corrected
 
         if((muons[i]->isGlobalMuon() || muons[i]->isTrackerMuon()) && muons[i]->isPFMuon() && fabs(muons[i]->Eta())<EtaThr && muons[i]->Pt()>PtThr && reliso < MuonRelIso )
         {
@@ -415,7 +417,7 @@ float Run2Selection::GetElectronIsoCorrType(TRootElectron *el) const{
     if(elecIsoCorrType_ == 1) // rho correction (default corr)
         isocorr = rho_*EffectiveArea;
     else if(elecIsoCorrType_ == 2) // dB correction
-        isocorr = 0.5*el->puChargedHadronIso();
+        isocorr = 0.5*el->puChargedHadronIso(3);
     else if (elecIsoCorrType_ == 0) // no correction
         isocorr = 0.;
     else {
