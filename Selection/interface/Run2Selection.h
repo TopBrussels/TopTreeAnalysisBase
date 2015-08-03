@@ -98,6 +98,7 @@ public:
     float pfElectronIso(TRootElectron *el) const;
 // ELECTRON GETTERS ===============================================
     std::vector<TRootElectron*> GetSelectedElectrons(string WorkingPoint, string PHYS14orCSA14, bool CutsBased) const;
+    std::vector<TRootElectron*> GetSelectedDisplacedElectrons (float PtThr, float EtaThr, float d0, float dz) const;
     std::vector<TRootElectron*> GetSelectedDisplacedElectrons (float PtThr, float EtaThr) const;
     std::vector<TRootElectron*> GetSelectedDisplacedElectrons () const;
 // MUON GETTERS ==================================================
@@ -107,7 +108,8 @@ public:
 
     // displaced muons
     std::vector<TRootMuon*> GetSelectedDisplacedMuons() const;
-    std::vector<TRootMuon*> GetSelectedDisplacedMuons(float PtThr, float EtaThr, float NormChi2, int NTrackerLayersWithMeas, int NValidMuonHits, float d0, int NValidPixelHits, int NMatchedStations, float RelIso) const;
+    std::vector<TRootMuon*> GetSelectedDisplacedMuons(float PtThr, float EtaThr, float d0, float dz, float RelIs) const;
+    std::vector<TRootMuon*> GetSelectedDisplacedMuons(float PtThr, float EtaThr, float NormChi2, int NTrackerLayersWithMeas, int NValidMuonHits, float d0, float dz, int NValidPixelHits, int NMatchedStations, float RelIso) const;
 
     std::vector<TRootMuon*> GetSelectedDiMuons() const;
     std::vector<TRootMuon*> GetSelectedDiMuons(float PtThr, float EtaThr, float MuonRelIso) const;
