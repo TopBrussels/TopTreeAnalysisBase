@@ -225,34 +225,34 @@ std::vector<TRootMuon*> Run2Selection::GetSelectedMuons(float PtThr, float EtaTh
 }
 
 // displaced muons
-std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons(float PtThr, float EtaThr, float NormChi2, int NTrackerLayersWithMeas, int NValidMuonHits, float d0, int NValidPixelHits, int NMatchedStations, float RelIso) const
+std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons(float PtThr, float EtaThr, float NormChi2, int NTrackerLayersWithMeas, int NValidMuonHits, float d0, float dZ, int NValidPixelHits, int NMatchedStations, float RelIso) const
 {
-  std::vector<TRootMuon*> selectedMuons;
-  for(unsigned int i=0; i<muons.size(); i++)
-    {
-
-      //float reliso = (muons[i]->chargedHadronIso()+muons[i]->neutralHadronIso()+muons[i]->photonIso())/muons[i]->Pt();
-      float reliso = (muons[i]->chargedHadronIso(4) + max( 0.0, muons[i]->neutralHadronIso(4) + muons[i]->photonIso(4) - 0.5*muons[i]->puChargedHadronIso(4) ) ) / muons[i]->Pt(); // dBeta corrected
-      if(     muons[i]->idGlobalMuonPromptTight() //&& muons[i]->isPFMuon()
-	      && muons[i]->Pt() > PtThr
-	      && fabs(muons[i]->Eta()) < EtaThr
-	      && muons[i]->chi2() < NormChi2
-	      && muons[i]->nofTrackerLayersWithMeasurement() > NTrackerLayersWithMeas
-	      && muons[i]->nofValidMuHits() > NValidMuonHits
-	      && fabs(muons[i]->d0()) > d0 // displaced!!
-	      && muons[i]->nofMatchedStations() > NMatchedStations
-	      && reliso < RelIso)
-	{
-	  selectedMuons.push_back(muons[i]);
+	// start from 'standard' muons with an extremely loose dz and d0 cut
+	std::vector<TRootMuon*> selectedMuons = GetSelectedMuons(PtThr,EtaThr,NormChi2,NTrackerLayersWithMeas,NValidMuonHits,1000,1000,NValidPixelHits,NMatchedStations,RelIso);
+	std::vector<TRootMuon*> chosenMuons;
+	//	and then loop over the list and copy over good ones to the new array, making selection cuts on the beam spot information instead of the 'standard' d0 and dz info
+	for(unsigned int ii=0; ii< selectedMuons.size(); ii++){
+		if(fabs(selectedMuons[ii]->d0BeamSpot())<d0)
+			continue;
+		if(fabs(selectedMuons[ii]->dzBeamSpot())>dZ)
+			continue;
+			
+		chosenMuons.push_back(selectedMuons[ii]);
+		
 	}
-    }
-    std::sort(selectedMuons.begin(),selectedMuons.end(),HighestPt());
-    return selectedMuons;
+	
+	std::sort(chosenMuons.begin(),chosenMuons.end(),HighestPt());
+	return chosenMuons;
+}
+std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons(float PtThr,float EtaThr,float d0, float dz,float MuonRelIso) const
+{
+	return GetSelectedDisplacedMuons(PtThr,EtaThr,10.,5.,0,d0,dz,0,1,MuonRelIso);
+	
 }
 
 std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons() const
 {
-  return GetSelectedDisplacedMuons(30, 2.5, 10, 5, 0, 0.01, 0, 1, 0.12);
+  return GetSelectedDisplacedMuons(30.,2.5,0.02,0.5,0.2);
 }
 
 
@@ -463,41 +463,61 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedElectrons(string WorkingPo
 }
 
 
-std::vector<TRootElectron*> Run2Selection::GetSelectedDisplacedElectrons(float PtThr, float EtaThr) const { //CSA14
-    std::vector<TRootElectron*> selectedElectrons;
-    for(unsigned int i=0; i<electrons.size(); i++) {
-        TRootElectron* el = (TRootElectron*) electrons[i];
-        // Using cut-based
-        if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr) {
-            if( fabs(el->superClusterEta()) <= 1.479
-                && fabs(el->deltaEtaIn()) < 0.006574
-                && fabs(el->deltaPhiIn()) < 0.022868
-                && el->hadronicOverEm() < 0.037553
-                && fabs(el->d0()) > 0.01 // displaced
-                && fabs(1/el->E() - 1/el->P()) < 0.131191
-                && el->relPfIso(3, 0.5) < 0.074355
-                && el->passConversion()
-                && el->missingHits() <= 1)
-            {
-                selectedElectrons.push_back(electrons[i]);
-            }
 
-            else if (fabs(el->superClusterEta()) < 2.5
-                && fabs(el->deltaEtaIn()) < 0.005681
-                && fabs(el->deltaPhiIn()) < 0.032046
-                && (el->hadronicOverEm() < 0.081902)
-		&& fabs(el->d0()) > 0.01 // displaced
-                && fabs(1/el->E() - 1/el->P()) < 0.106055
-                && el->relPfIso(3, 0.5) < 0.090185
-                && el->passConversion()
-                && el->missingHits() <= 1)
-            {
-                selectedElectrons.push_back(electrons[i]);
-            }
-        }
-    }
-    std::sort(selectedElectrons.begin(),selectedElectrons.end(),HighestPt());
-    return selectedElectrons;
+std::vector<TRootElectron*> Run2Selection::GetSelectedDisplacedElectrons(float PtThr, float EtaThr, float d0, float dz) const {
+	
+	// use medium electron ID (cut-based) for now, but with cuts on the beam spot d0 dz . This ID can be in flux, and for now is hard-coded here:
+	
+	//These quality cuts reflect the recommended Medium cut-based electron ID as provided by the EGM POG. Last updated: 25 July 2015
+	// as these are still in flux, it is probably useful to check them here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2#PHYS14_selection_all_conditions
+	
+	std::vector<TRootElectron*> selectedElectrons;
+	for(unsigned int i=0; i<electrons.size(); i++) {
+		TRootElectron* el = (TRootElectron*) electrons[i];
+		// Using cut-based
+		if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr) {
+			if( fabs(el->superClusterEta()) <= 1.479
+			   && fabs(el->deltaEtaIn()) < 0.008925
+			   && fabs(el->deltaPhiIn()) < 0.035973
+			   && el->sigmaIEtaIEta() < 0.009996
+			   && el->hadronicOverEm() < 0.050537
+			   && fabs(el->d0BeamSpot()) > d0
+			   && fabs(el->dzBeamSpot()) < dz
+			   && fabs(1/el->E() - 1/el->P()) < 0.091942
+			   && pfElectronIso(el) < 0.107587
+			   && el->passConversion()
+			   && el->missingHits() <= 1)
+			{
+				selectedElectrons.push_back(electrons[i]);
+			}
+			
+			else if (fabs(el->superClusterEta()) < 2.5
+					 && fabs(el->deltaEtaIn()) < 0.007429
+					 && fabs(el->deltaPhiIn()) < 0.067879
+					 && el->sigmaIEtaIEta() <0.030135
+					 && el->hadronicOverEm() < 0.086782
+					 && fabs(el->d0BeamSpot()) > d0
+					 && fabs(el->dzBeamSpot()) < dz
+					 && fabs(1/el->E() - 1/el->P()) < 0.100683
+					 && pfElectronIso(el) < 0.113254
+					 && el->passConversion()
+					 && el->missingHits() <= 1)
+			{
+				selectedElectrons.push_back(electrons[i]);
+			}
+		}
+	}
+	std::sort(selectedElectrons.begin(),selectedElectrons.end(),HighestPt());
+	return selectedElectrons;
+
+	
+	return selectedElectrons;
+}
+
+
+std::vector<TRootElectron*> Run2Selection::GetSelectedDisplacedElectrons(float PtThr, float EtaThr) const {
+	return GetSelectedDisplacedElectrons(PtThr,EtaThr,0.02,0.2);
+
 }
 
 std::vector<TRootElectron*> Run2Selection::GetSelectedDisplacedElectrons() const{
