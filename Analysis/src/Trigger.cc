@@ -48,7 +48,7 @@ void Trigger::bookTriggers(){
     // }    
 }
 
-void Trigger::checkAvail(int currentRun, vector < Dataset* > datasets, unsigned int d, TTreeLoader treeLoader, TRootEvent* event){
+void Trigger::checkAvail(int currentRun, vector < Dataset* > datasets, unsigned int d, TTreeLoader *treeLoader, TRootEvent* event){
 
 	redotrigmap=false;
 	currentFilename = datasets[d]->eventTree()->GetFile()->GetName();
@@ -56,31 +56,32 @@ void Trigger::checkAvail(int currentRun, vector < Dataset* > datasets, unsigned 
 	    previousFilename = currentFilename;
 	    iFile++;
 	    redotrigmap=true;
-	    cout<<"File changed!!! => iFile = "<<iFile << " new file is " << datasets[d]->eventTree()->GetFile()->GetName() << " in sample " << datasets[d]->Name() << endl;
+	    //cout<<"File changed!!! => iFile = "<<iFile << " new file is " << datasets[d]->eventTree()->GetFile()->GetName() << " in sample " << datasets[d]->Name() << endl;
 	}
 	if(previousRun != currentRun){
 	    previousRun = currentRun;
 	    redotrigmap=true;
 	}
 
-	// // get trigger info:
-	// for(std::map<std::string,std::pair<int,bool> >::iterator iter = triggermap.begin(); iter != triggermap.end(); iter++){
-	//     if(redotrigmap){
-	//         Int_t loc= treeLoader.iTrigger(iter->first, currentRun);
-	//         iter->second.first=loc;
-	//     }
-	//     // and check if it fired:
-	//     if(iter->second.first>=0 && iter->second.first!=9999) // trigger exists
-	//         iter->second.second=event->trigHLT(iter->second.first);
-	//     else
-	//         iter->second.second=false;
-	// }
+	// get trigger info:
+	for(std::map<std::string,std::pair<int,bool> >::iterator iter = triggermap.begin(); iter != triggermap.end(); iter++){
+	    if(redotrigmap){
+	        Int_t loc= treeLoader->iTrigger(iter->first, currentRun);
+	        iter->second.first=loc;
+	    }
+	    // and check if it fired:
+	    if(iter->second.first>=0 && iter->second.first!=9999) // trigger exists
+	        iter->second.second=event->trigHLT(iter->second.first);
+	    else
+	        iter->second.second=false;
+	}
             
 
 }
 
 int Trigger::checkIfFired(){
 	// now check if the appropriate triggers fired for each analysis:
+	trigged =0;
 	if(muon){
 		for(UInt_t itrig=0; itrig<triggerList.size() && trigged==0; itrig++){
 		    if(triggermap[triggerList[itrig]].second)    trigged=1;
