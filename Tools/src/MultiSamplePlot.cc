@@ -881,12 +881,14 @@ void MultiSamplePlot::DrawErrorBand(TH1F* totalSM, TH1F* hErrorPlus, TH1F* hErro
   ErrorGraph->Draw("2");
 }
 
-void MultiSamplePlot::Write(TFile* fout, string label, bool savePNG, string pathPNG, string ext, float magnifyLog) 
+void MultiSamplePlot::Write(TFile* fout, string label, bool savePNG, string pathPNG, string ext, string fileDir, float magnifyLog) 
 {
   if(magnifyLog<=0) magnifyLog=1.3;
 
+  if(fileDir == "") fileDir = "MSPlots";
+
   fout->cd();
-  string dirname = "MultiSamplePlot_"+label;
+  string dirname = fileDir+"/MultiSamplePlot_"+label;   //Changed on 18/03/2015, was originally dirname = "MultiSamplePlot_"+label
   if(fout->Get(dirname.c_str())==0)
     fout->mkdir(dirname.c_str());
 
@@ -896,54 +898,43 @@ void MultiSamplePlot::Write(TFile* fout, string label, bool savePNG, string path
   if(hStackAreaNorm_) hStackAreaNorm_->Write();
   if(hData_) hData_->Write();		 
 
-  if(hCanvas_)
-    {
-      if(savePNG)
-	hCanvas_->SaveAs( (pathPNG+label+"_Normalized."+ext).c_str() );
+  if(hCanvas_){
+      if(savePNG) hCanvas_->SaveAs( (pathPNG+label+"_Normalized."+ext).c_str() );
       hCanvas_->Write();
-    }
+  }
   
-  if(hCanvasStack_)
-    {
+  if(hCanvasStack_){
       if(hStack_) hStack_->SetMinimum(0.001);
       hCanvasStack_->Write();
-      if(savePNG)
-	hCanvasStack_->SaveAs( (pathPNG+label+"_Stack."+ext).c_str() );
-    }
+      if(savePNG) hCanvasStack_->SaveAs( (pathPNG+label+"_Stack."+ext).c_str() );
+  }
   
-  if(hCanvasStackLogY_)
-    {
+  if(hCanvasStackLogY_){
       if(hStack_) {
 	hStack_->SetMinimum(minLogY_);
 	if(maxY_>0 && magnifyLog>0) hStack_->SetMaximum(pow(maxY_,magnifyLog));
       }
       hCanvasStackLogY_->Write();
-      if(savePNG)
-	hCanvasStackLogY_->SaveAs( (pathPNG+label+"_StackLogY."+ext).c_str() );
-    }
+      if(savePNG) hCanvasStackLogY_->SaveAs( (pathPNG+label+"_StackLogY."+ext).c_str() );
+  }
   
-  if(hCanvasStackAreaNorm_ && hData_)
-    {
+  if(hCanvasStackAreaNorm_ && hData_){
       if(hStackAreaNorm_) hStackAreaNorm_->SetMinimum(0.001);
       hCanvasStackAreaNorm_->Write();
-      if(savePNG)
-	hCanvasStackAreaNorm_->SaveAs( (pathPNG+label+"_StackAreaNorm."+ext).c_str() );
-    }
+      if(savePNG) hCanvasStackAreaNorm_->SaveAs( (pathPNG+label+"_StackAreaNorm."+ext).c_str() );
+  }
   
-  if(hCanvasStackAreaNormLogY_ && hData_)
-    {
+  if(hCanvasStackAreaNormLogY_ && hData_){
       if(hStackAreaNorm_) hStackAreaNorm_->SetMinimum(minLogY_);
       hCanvasStackAreaNormLogY_->Write();
-      if(savePNG)
-	hCanvasStackAreaNormLogY_->SaveAs( (pathPNG+label+"_StackAreaNormLogY."+ext).c_str() );
-    }
+      if(savePNG) hCanvasStackAreaNormLogY_->SaveAs( (pathPNG+label+"_StackAreaNormLogY."+ext).c_str() );
+  }
   
   for(unsigned int i=0; i<plots_.size(); i++)
-    if(plots_[i].second->Name().find("data") != 0 && plots_[i].second->Name().find("Data") != 0 && plots_[i].second->Name().find("DATA") != 0 )
-      {
+    if(plots_[i].second->Name().find("data") != 0 && plots_[i].second->Name().find("Data") != 0 && plots_[i].second->Name().find("DATA") != 0 ){
 	plots_[i].first->SetMarkerSize(0.5);			
 	plots_[i].first->Write();
-      } 
+    } 
 }
 
 MultiSamplePlot::MSIntegral MultiSamplePlot::Integrate(Int_t binx1, Int_t binx2, Option_t *option) {
