@@ -227,9 +227,7 @@ void JetTools::correctJetJESUnc(TRootJet* inJet, string direction, float nSigma)
     if(direction == "plus") corr = 1 + unc*nSigma;
     else if(direction == "minus") corr = 1 - unc*nSigma;
     else cout << "JetTools::correctJetJESUnc  unknown direction: " << direction << endl;
-//  cout << "jet:  Pt: " << inJet->Pt() << "  Eta: " << inJet->Eta() << "  unc: " << unc;
     inJet->SetPxPyPzE(inJet->Px()*corr, inJet->Py()*corr, inJet->Pz()*corr, inJet->E()*corr);
-//  cout << "  corrected pt: " << inJet->Pt() << endl;
   }
 }
 
@@ -259,64 +257,101 @@ void JetTools::correctJetJESUnc(vector<TRootJet*> inJets, TRootMET* inMET, strin
 
 void JetTools::correctJetJER(TRootJet* inJet, TRootGenJet* inGenJet, string direction, bool oldnumbers)
 {
-  float corrFactor;
-  bool JER_minus = false, JER_plus = false; // only one of them true! never both of them!
-  if(direction == "minus") JER_minus = true;
-  else if(direction == "plus") JER_plus = true;
-  else if(direction != "nominal") cout << "Unknown JER direction: " << direction << endl;
-  float fabsEta = fabs(inJet->Eta());
+    float corrFactor;   
+    bool JER_minus = false, JER_plus = false; // only one of them true! never both of them!
+    if(direction == "minus") JER_minus = true;
+    else if(direction == "plus") JER_plus = true;
+    else if(direction != "nominal") cout << "Unknown JER direction: " << direction << endl;
+    float fabsEta = fabs(inJet->Eta());
 	
-	if(!oldnumbers)
-	{
-	  //numbers from https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetResolution
-    if(JER_minus)
+    if(!oldnumbers)
     {
-    	if(fabsEta <= 1.1) corrFactor = -0.006;
-    	else if(fabsEta <= 1.7 && fabsEta > 1.1) corrFactor = 0.129;
-			else if(fabsEta <= 2.3 && fabsEta > 1.7) corrFactor = 0.011;
-			else if(fabsEta <= 5.0 && fabsEta > 2.3) corrFactor = -0.033;
-    	else corrFactor = -0.033; //fabsEta > 5.0
+        //New 8 TeV numbers from https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetResolution
+        if(JER_minus)
+        {
+    	    if(fabsEta <= 0.5)                       corrFactor = 0.053;                        
+    	    else if(fabsEta <= 1.1 && fabsEta > 0.5) corrFactor = 0.071;
+	    else if(fabsEta <= 1.7 && fabsEta > 1.1) corrFactor = 0.092;
+	    else if(fabsEta <= 2.3 && fabsEta > 1.7) corrFactor = 0.162;
+	    else if(fabsEta <= 2.8 && fabsEta > 2.3) corrFactor = 0.192;
+	    else if(fabsEta <= 3.2 && fabsEta > 2.8) corrFactor = 0.332;
+	    else if(fabsEta <= 5.0 && fabsEta > 3.2) corrFactor = -0.135;
+    	    else                                     corrFactor = -0.135; //fabsEta > 5.0
   	}
   	else if(JER_plus)
   	{
-    	if(fabsEta <= 1.1) corrFactor = 0.136;
-    	else if(fabsEta <= 1.7 && fabsEta > 1.1) corrFactor = 0.251;
-			else if(fabsEta <= 2.3 && fabsEta > 1.7) corrFactor = 0.176;
-			else if(fabsEta <= 5.0 && fabsEta > 2.3) corrFactor = 0.356;
-    	else corrFactor = 0.356; //fabsEta > 5.0
+    	    if(fabsEta <= 0.5)                       corrFactor = 0.105;
+    	    else if(fabsEta <= 1.1 && fabsEta > 0.5) corrFactor = 0.127;
+	    else if(fabsEta <= 1.7 && fabsEta > 1.1) corrFactor = 0.150;
+	    else if(fabsEta <= 2.3 && fabsEta > 1.7) corrFactor = 0.254;
+	    else if(fabsEta <= 2.8 && fabsEta > 2.3) corrFactor = 0.316;
+	    else if(fabsEta <= 3.2 && fabsEta > 2.8) corrFactor = 0.458;
+	    else if(fabsEta <= 5.0 && fabsEta > 3.2) corrFactor = 0.247;
+    	    else                                     corrFactor = 0.247; //fabsEta > 5.0
   	}
-		else
-		{
-	  	if(fabsEta <= 1.1) corrFactor = 0.066;
-    	else if(fabsEta <= 1.7 && fabsEta > 1.1) corrFactor = 0.191;
-			else if(fabsEta <= 2.3 && fabsEta > 1.7) corrFactor = 0.096;
-			else if(fabsEta <= 5.0 && fabsEta > 2.3) corrFactor = 0.166;
-    	else corrFactor = 0.166; //fabsEta > 5.0
-		}
-	}
-	else
+        else
 	{
-	  if(JER_minus)
-  	{
-    	if(fabsEta <= 1.5) corrFactor = 0.0;
-    	else if(fabsEta < 2.0 && fabsEta > 1.5) corrFactor = -0.05;
-    	else corrFactor = -0.1;
+    	    if(fabsEta <= 0.5)                       corrFactor = 0.079;
+    	    else if(fabsEta <= 1.1 && fabsEta > 0.5) corrFactor = 0.099;
+	    else if(fabsEta <= 1.7 && fabsEta > 1.1) corrFactor = 0.121;
+	    else if(fabsEta <= 2.3 && fabsEta > 1.7) corrFactor = 0.208;
+	    else if(fabsEta <= 2.8 && fabsEta > 2.3) corrFactor = 0.254;
+	    else if(fabsEta <= 3.2 && fabsEta > 2.8) corrFactor = 0.395;
+	    else if(fabsEta <= 5.0 && fabsEta > 3.2) corrFactor = 0.056;
+    	    else                                     corrFactor = 0.056; //fabsEta > 5.0
+	}
+    }
+    else
+    {
+        //numbers from https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetResolution  (2010 result)
+        if(JER_minus)
+        {
+    	    if(fabsEta <= 1.1) corrFactor = -0.006;                        //=0.066-0.072 (factor - -syst)
+    	    else if(fabsEta <= 1.7 && fabsEta > 1.1) corrFactor = 0.129;   //=0.191-0.062
+	    else if(fabsEta <= 2.3 && fabsEta > 1.7) corrFactor = 0.011;   //=0.096-0.085
+	    else if(fabsEta <= 5.0 && fabsEta > 2.3) corrFactor = -0.033;  //=0.166-0.199
+    	    else corrFactor = -0.033; //fabsEta > 5.0
   	}
   	else if(JER_plus)
   	{
-    	if(fabsEta <= 1.5) corrFactor = 0.2;
-    	else if(fabsEta < 2.0 && fabsEta > 1.5) corrFactor = 0.25;
-    	else corrFactor = 0.3;
+    	    if(fabsEta <= 1.1) corrFactor = 0.136;                         //=0.066+0.07 (factor + +syst)
+    	    else if(fabsEta <= 1.7 && fabsEta > 1.1) corrFactor = 0.251;   //=0.191+0.06
+	    else if(fabsEta <= 2.3 && fabsEta > 1.7) corrFactor = 0.176;   //=0.096+0.08
+	    else if(fabsEta <= 5.0 && fabsEta > 2.3) corrFactor = 0.356;   //=0.166+0.19
+    	    else corrFactor = 0.356; //fabsEta > 5.0
   	}
-		else 
-			corrFactor = 0.1;	
+        else
+	{
+	    if(fabsEta <= 1.1) corrFactor = 0.066;
+    	    else if(fabsEta <= 1.7 && fabsEta > 1.1) corrFactor = 0.191;
+	    else if(fabsEta <= 2.3 && fabsEta > 1.7) corrFactor = 0.096;
+	    else if(fabsEta <= 5.0 && fabsEta > 2.3) corrFactor = 0.166;
+    	    else corrFactor = 0.166; //fabsEta > 5.0
 	}
+
+	//Very old --> Scaling of 10%!
+        /*if(JER_minus)
+  	{
+    	    if(fabsEta <= 1.5) corrFactor = 0.0;
+    	    else if(fabsEta < 2.0 && fabsEta > 1.5) corrFactor = -0.05;
+    	    else corrFactor = -0.1;
+  	}
+  	else if(JER_plus)
+  	{
+    	    if(fabsEta <= 1.5) corrFactor = 0.2;
+    	    else if(fabsEta < 2.0 && fabsEta > 1.5) corrFactor = 0.25;
+    	    else corrFactor = 0.3;
+  	}
+	else 
+	    corrFactor = 0.1;	
+	*/
+    }
 		
-  float deltapt = ( inJet->Pt() - inGenJet->Pt() ) * corrFactor;
-  float ptscale = max(0.0, ( inJet->Pt() + deltapt) / inJet->Pt() );
-  if(ptscale > 0.0)
-    inJet->SetPxPyPzE(inJet->Px()*ptscale, inJet->Py()*ptscale, inJet->Pz()*ptscale, inJet->E()*ptscale);
-  else inJet->SetPxPyPzE(0.001, 0.001, 0.001, 0.001); // This jet should not pass any event selection
+    float deltapt = ( inJet->Pt() - inGenJet->Pt() ) * corrFactor;
+    float ptscale = max(0.0, ( inJet->Pt() + deltapt) / inJet->Pt() );
+    if(ptscale > 0.0)
+        inJet->SetPxPyPzE(inJet->Px()*ptscale, inJet->Py()*ptscale, inJet->Pz()*ptscale, inJet->E()*ptscale);
+    else inJet->SetPxPyPzE(0.001, 0.001, 0.001, 0.001); // This jet should not pass any event selection
 }
 
 void JetTools::correctJetJER(vector<TRootJet*> inJets, vector<TRootGenJet*> inGenJets, string direction, bool oldnumbers)
@@ -441,7 +476,7 @@ void JetTools::correctMETTypeOne(TRootJet* inJet, TRootMET* inMET, bool isData) 
   if(!isData) corr = inJet->getJetCorrFactor("L1FastJetL2L3");
   else corr = inJet->getJetCorrFactor("L1FastJetL2L3L23Residual"); //see JetAnalyzer.cc in TopTreeProducer
   float L1corr = inJet->getJetCorrFactor("L1FastJet");
-  inMET->SetPxPyPzE(inMET->Px()-(inJet->Px()-inJet->Px()*L1corr/corr), inMET->Py()-(inJet->Py()-inJet->Py()*L1corr/corr), 0, sqrt(pow(inMET->Px()-(inJet->Px()-inJet->Px()*L1corr/corr),2) + pow(inMET->Py()-(inJet->Py()-inJet->Py()*L1corr/corr),2)) ); //METx_raw = METx_raw + Px_raw - Px_corr    
+  inMET->SetPxPyPzE(inMET->Px()-(inJet->Px()-inJet->Px()*L1corr/corr), inMET->Py()-(inJet->Py()-inJet->Py()*L1corr/corr), 0, sqrt(pow(inMET->Px()-(inJet->Px()-inJet->Px()*L1corr/corr),2) + pow(inMET->Py()-(inJet->Py()-inJet->Py()*L1corr/corr),2)) ); //METx_raw = METx_raw - Px_raw + Px_corr    
 }
 
 void JetTools::correctMETTypeOne(vector<TRootJet*> inJets, TRootMET* inMET, bool isData)

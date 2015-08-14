@@ -405,9 +405,9 @@ ObservablesRanker::ModifyHist (TH1F * &h, Color_t lcolor)
 
   h->SetLineColor (lcolor);
   int nbins=h->GetNbinsX();
-  int nn=1;
+  /*int nn=1;
   
-  /*if (  nbins==50)  nn=2.5;
+  if (  nbins==50)  nn=2.5;
   if (  nbins==100)  nn=4;
   if (  nbins==150)  nn=4;
   if (  nbins>150)  nn=5;
@@ -599,7 +599,7 @@ for (unsigned int h=0;h<overlaps_sorted_.size();h++){
  
 
   //Int_t Entries_Bkg = Branches_Bkg->GetEntries ();
-  Int_t Entries_Bkg = overlaps_sorted_.size();
+  //Int_t Entries_Bkg = overlaps_sorted_.size();
   
 
 //  for (Int_t i = 0; i < Entries_Bkg; i++) {

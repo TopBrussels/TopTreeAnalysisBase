@@ -259,11 +259,12 @@ Observables& ObservablesMCMatcher::getMatchedObservables(TRootNPGenEvent& npgene
 
   }
   for (vector<TRootGenTop>::iterator iter=npgenevt.tops().begin(); iter!=npgenevt.tops().end(); iter++) {
-    if(iter->isLeptonic())
+    if(iter->isLeptonic()){
       if (METMC.type()==0)
         METMC = iter->neutrino();
       else
         METMC += iter->neutrino();
+    }
   }
   for (vector<TRootMCParticle>::iterator iter= npgenevt.invisibleParticles().begin(); iter!= npgenevt.invisibleParticles().end(); iter++)
     METMC += *iter;

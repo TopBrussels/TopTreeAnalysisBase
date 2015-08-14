@@ -446,10 +446,10 @@ void JetCombiner::ProcessEvent_SingleHadTop(Dataset* dataSet, const vector<TRoot
                     
                     float maxMVA_btag = -9999;
                     float maxMVA_AngleThWh = -9999;
-                    float maxMVA_AngleBlMu = -9999;
+                    //float maxMVA_AngleBlMu = -9999;
                     float maxMVA_AngleThBl = -9999;
                     float maxMVA_AngleThBh = -9999;
-                    float maxMVA_AngleThMu = -9999;
+                    //float maxMVA_AngleThMu = -9999;
                     float maxMVA_ThPtOverSumPt = -9999;
                     float maxMVA_HadrWmass = -9999;
  
@@ -477,13 +477,13 @@ void JetCombiner::ProcessEvent_SingleHadTop(Dataset* dataSet, const vector<TRoot
                                         tempselectedJets.push_back(selectedJets_[k]);
                                         float mindeltaR =100.;
                                         float mindeltaR_temp =100.;
-                                        int wj1;
-                                        int wj2;
-                                        int bj1;
+                                        unsigned int wj1 = 0;
+                                        unsigned int wj2 = 0;
+                                        unsigned int bj1 = 0;
                                         
                                         //define the jets from W as the jet pair with smallest deltaR
-                                        for (int m=0; m<tempselectedJets.size(); m++) {
-                                            for (int n=0; n<tempselectedJets.size(); n++) {
+                                        for (unsigned int m=0; m<tempselectedJets.size(); m++) {
+                                            for (unsigned int n=0; n<tempselectedJets.size(); n++) {
                                                 if(n==m) continue;
                                                 TLorentzVector lj1  = *tempselectedJets[m];
                                                 TLorentzVector lj2  = *tempselectedJets[n];
@@ -514,7 +514,7 @@ void JetCombiner::ProcessEvent_SingleHadTop(Dataset* dataSet, const vector<TRoot
                                         TLorentzVector Bh = *tempselectedJets[bj1];
                                         TLorentzVector Th = Wh+Bh;
                                         
-                                        double TopMass = Th.M();
+                                        //double TopMass = Th.M();
                                         
                                        // TLorentzVector Bl = *selectedJets_[l];
                                         //TLorentzVector Mu = *selectedLepton;
@@ -540,7 +540,7 @@ void JetCombiner::ProcessEvent_SingleHadTop(Dataset* dataSet, const vector<TRoot
                                         
                                         
                                         //trying the summed energy of the jets...
-                                        double sumE = (tempselectedJets[wj1]->E())+ (tempselectedJets[wj2]->E()) + (tempselectedJets[bj1]->E()) ;
+                                        //double sumE = (tempselectedJets[wj1]->E())+ (tempselectedJets[wj2]->E()) + (tempselectedJets[bj1]->E()) ;
                                         
                                         
                                         //float AngleThMu = Th.Angle(Mu.Vect());

@@ -145,7 +145,7 @@ void LeptonTools::readMuonSF(string IdFile, string IsoFile, string trigFile)
   inFileID->Close();
   delete inFileID;
 
-	TFile* inFileIso = new TFile(IsoFile.c_str(),"READ");
+  TFile* inFileIso = new TFile(IsoFile.c_str(),"READ");
   TGraphAsymmErrors inIsoEtaLow = *(TGraphAsymmErrors*) inFileIso->Get("DATA_over_MC_combRelIsoPF04dBeta<012_Tight_pt_abseta<0.9")->Clone();
   TGraphAsymmErrors inIsoEtaMed = *(TGraphAsymmErrors*) inFileIso->Get("DATA_over_MC_combRelIsoPF04dBeta<012_Tight_pt_abseta0.9-1.2")->Clone();
   TGraphAsymmErrors inIsoEtaHigh = *(TGraphAsymmErrors*) inFileIso->Get("DATA_over_MC_combRelIsoPF04dBeta<012_Tight_pt_abseta1.2-2.1")->Clone();  
@@ -167,9 +167,9 @@ void LeptonTools::readMuonSF(string IdFile, string IsoFile, string trigFile)
 	
   if(verbose_) cout << "Muon SF!!" << endl;
   
-	ScaleFactor trigSF, idSF, isoSF;
+  ScaleFactor trigSF, idSF, isoSF;
 	
-	//note that there is a mismatch of the number of bins in the trigger and iso/id files -> therefore the getSF method needed to be changed here to the getSFstruct
+  //note that there is a mismatch of the number of bins in the trigger and iso/id files -> therefore the getSF method needed to be changed here to the getSFstruct
   for(int i=0; i<N; i++)
   {
     double low = xBinTmp[i]-inIdEtaLow.GetErrorXlow(i);
@@ -177,21 +177,20 @@ void LeptonTools::readMuonSF(string IdFile, string IsoFile, string trigFile)
     muonPt.push_back( (low+high) / 2. );
     muonPtErr.push_back( (high-low) / 2. );
     
-		//note that the trigger SF for the first two bins ([10-20] and [20-25] do not make sense, since the trigger SF is only determined from 25 GeV onwards)
+    //note that the trigger SF for the first two bins ([10-20] and [20-25] do not make sense, since the trigger SF is only determined from 25 GeV onwards)
     if(verbose_) cout << "bin: " << i << " |  " << low << " <---> " << high << " | " << muonPt[i] << " +- " << muonPtErr[i] << endl;
-    
-		
-		trigSF = getSFstruct(&inTrigEtaLow, low, high);
+    		
+    trigSF = getSFstruct(&inTrigEtaLow, low, high);
     double trigSFEtaLow = trigSF.centralvalue;
     double trigSFEtaLowUncPlus = trigSF.highvalue;
     double trigSFEtaLowUncMinus = trigSF.lowvalue;
     
-		idSF = getSFstruct(&inIdEtaLow, low, high);
+    idSF = getSFstruct(&inIdEtaLow, low, high);
     double idSFEtaLow = idSF.centralvalue;
     double idSFEtaLowUncPlus = idSF.highvalue;
     double idSFEtaLowUncMinus = idSF.lowvalue;
 		
-		isoSF = getSFstruct(&inIsoEtaLow, low, high);
+    isoSF = getSFstruct(&inIsoEtaLow, low, high);
     double isoSFEtaLow = isoSF.centralvalue;
     double isoSFEtaLowUncPlus = isoSF.highvalue;
     double isoSFEtaLowUncMinus = isoSF.lowvalue;
@@ -200,8 +199,7 @@ void LeptonTools::readMuonSF(string IdFile, string IsoFile, string trigFile)
     double totalSFEtaLowUncPlus = sqrt( pow(trigSFEtaLowUncPlus*idSFEtaLow*isoSFEtaLow, 2) + pow(idSFEtaLowUncPlus*trigSFEtaLow*isoSFEtaLow, 2) + pow(isoSFEtaLowUncPlus*trigSFEtaLow*idSFEtaLow, 2) );
     double totalSFEtaLowUncMinus = sqrt( pow(trigSFEtaLowUncMinus*idSFEtaLow*isoSFEtaLow, 2) + pow(idSFEtaLowUncMinus*trigSFEtaLow*isoSFEtaLow, 2) + pow(isoSFEtaLowUncMinus*trigSFEtaLow*idSFEtaLow, 2) );
     if(verbose_) cout << "trigger*id*iso SF -> etaLow: " << totalSFEtaLow << " + " << totalSFEtaLowUncPlus << " - " << totalSFEtaLowUncMinus << endl;    
-    
-		
+    		
     trigSF = getSFstruct(&inTrigEtaMed, low, high);
     double trigSFEtaMed = trigSF.centralvalue;
     double trigSFEtaMedUncPlus = trigSF.highvalue;
@@ -212,7 +210,7 @@ void LeptonTools::readMuonSF(string IdFile, string IsoFile, string trigFile)
     double idSFEtaMedUncPlus = idSF.highvalue;
     double idSFEtaMedUncMinus = idSF.lowvalue;
     
-		isoSF = getSFstruct(&inIsoEtaMed, low, high);
+    isoSF = getSFstruct(&inIsoEtaMed, low, high);
     double isoSFEtaMed = isoSF.centralvalue;
     double isoSFEtaMedUncPlus = isoSF.highvalue;
     double isoSFEtaMedUncMinus = isoSF.lowvalue;
@@ -222,18 +220,17 @@ void LeptonTools::readMuonSF(string IdFile, string IsoFile, string trigFile)
     double totalSFEtaMedUncMinus = sqrt( pow(trigSFEtaMedUncMinus*idSFEtaMed*isoSFEtaMed, 2) + pow(idSFEtaMedUncMinus*trigSFEtaMed*isoSFEtaMed, 2) + pow(isoSFEtaMedUncMinus*trigSFEtaMed*idSFEtaMed, 2) );
     if(verbose_) cout << "trigger*id*iso SF -> etaMed: " << totalSFEtaMed << " + " << totalSFEtaMedUncPlus << " - " << totalSFEtaMedUncMinus << endl;    
     
-    
-		trigSF = getSFstruct(&inTrigEtaHigh, low, high);
+    trigSF = getSFstruct(&inTrigEtaHigh, low, high);
     double trigSFEtaHigh = trigSF.centralvalue;
     double trigSFEtaHighUncPlus = trigSF.highvalue;
     double trigSFEtaHighUncMinus = trigSF.lowvalue;
 
     idSF = getSFstruct(&inIdEtaHigh, low, high);
-		double idSFEtaHigh = idSF.centralvalue;
+    double idSFEtaHigh = idSF.centralvalue;
     double idSFEtaHighUncPlus = idSF.highvalue;
     double idSFEtaHighUncMinus = idSF.lowvalue;
     
-		isoSF = getSFstruct(&inIsoEtaHigh, low, high);
+    isoSF = getSFstruct(&inIsoEtaHigh, low, high);
     double isoSFEtaHigh = isoSF.centralvalue;
     double isoSFEtaHighUncPlus = isoSF.highvalue;
     double isoSFEtaHighUncMinus = isoSF.lowvalue;
@@ -243,7 +240,7 @@ void LeptonTools::readMuonSF(string IdFile, string IsoFile, string trigFile)
     double totalSFEtaHighUncMinus = sqrt( pow(trigSFEtaHighUncMinus*idSFEtaHigh*isoSFEtaHigh, 2) + pow(idSFEtaHighUncMinus*trigSFEtaHigh*isoSFEtaHigh, 2) + pow(isoSFEtaHighUncMinus*trigSFEtaHigh*idSFEtaHigh, 2) );
     if(verbose_) cout << "trigger*id*iso SF -> etaHigh: " << totalSFEtaHigh << " + " << totalSFEtaHighUncPlus << " - " << totalSFEtaHighUncMinus << endl;    
     								
-		//total trigger*id*iso SF
+    //total trigger*id*iso SF
     muonSFEtaLow.push_back( totalSFEtaLow );
     muonSFEtaLowUncPlus.push_back( totalSFEtaLowUncPlus );
     muonSFEtaLowUncMinus.push_back( totalSFEtaLowUncMinus );
@@ -253,7 +250,6 @@ void LeptonTools::readMuonSF(string IdFile, string IsoFile, string trigFile)
     muonSFEtaHigh.push_back( totalSFEtaHigh );
     muonSFEtaHighUncPlus.push_back( totalSFEtaHighUncPlus );
     muonSFEtaHighUncMinus.push_back( totalSFEtaHighUncMinus );
-
 
     //now only trigger SF (needed for jets with Pt in [300,500], no id or iso isolation is measured for those jets)
     muonTrigSFEtaLow.push_back( trigSFEtaLow );
@@ -266,39 +262,38 @@ void LeptonTools::readMuonSF(string IdFile, string IsoFile, string trigFile)
     muonTrigSFEtaHighUncPlus.push_back( trigSFEtaHighUncPlus );
     muonTrigSFEtaHighUncMinus.push_back( trigSFEtaHighUncMinus );
 		
-
-		//now only id*iso SF				
-		double idisoSFEtaLow = idSFEtaLow*isoSFEtaLow;
+    //now only id*iso SF				
+    double idisoSFEtaLow = idSFEtaLow*isoSFEtaLow;
     double idisoSFEtaLowUncPlus = sqrt( pow(idSFEtaLowUncPlus*isoSFEtaLow, 2) + pow(isoSFEtaLowUncPlus*idSFEtaLow, 2) );
     double idisoSFEtaLowUncMinus = sqrt( pow(idSFEtaLowUncMinus*isoSFEtaLow, 2) + pow(isoSFEtaLowUncMinus*idSFEtaLow, 2) );		
     if(verbose_) cout << "id*iso SF -> etaLow: " << idisoSFEtaLow << " + " << idisoSFEtaLowUncPlus << " - " << idisoSFEtaLowUncMinus << endl; 
 		
-		double idisoSFEtaMed = idSFEtaMed*isoSFEtaMed;
+    double idisoSFEtaMed = idSFEtaMed*isoSFEtaMed;
     double idisoSFEtaMedUncPlus = sqrt( pow(idSFEtaMedUncPlus*isoSFEtaMed, 2) + pow(isoSFEtaMedUncPlus*idSFEtaMed, 2) );
     double idisoSFEtaMedUncMinus = sqrt( pow(idSFEtaMedUncMinus*isoSFEtaMed, 2) + pow(isoSFEtaMedUncMinus*idSFEtaMed, 2) );	
-		if(verbose_) cout << "id*iso SF -> etaMed: " << idisoSFEtaMed << " + " << idisoSFEtaMedUncPlus << " - " << idisoSFEtaMedUncMinus << endl; 
+    if(verbose_) cout << "id*iso SF -> etaMed: " << idisoSFEtaMed << " + " << idisoSFEtaMedUncPlus << " - " << idisoSFEtaMedUncMinus << endl; 
 		
-		double idisoSFEtaHigh = idSFEtaHigh*isoSFEtaHigh;
+    double idisoSFEtaHigh = idSFEtaHigh*isoSFEtaHigh;
     double idisoSFEtaHighUncPlus = sqrt( pow(idSFEtaHighUncPlus*isoSFEtaHigh, 2) + pow(isoSFEtaHighUncPlus*idSFEtaHigh, 2) );
     double idisoSFEtaHighUncMinus = sqrt( pow(idSFEtaHighUncMinus*isoSFEtaHigh, 2) + pow(isoSFEtaHighUncMinus*idSFEtaHigh, 2) );	
-		if(verbose_) cout << "id*iso SF -> etaHigh: " << idisoSFEtaHigh << " + " << idisoSFEtaHighUncPlus << " - " << idisoSFEtaHighUncMinus << endl;    		
+    if(verbose_) cout << "id*iso SF -> etaHigh: " << idisoSFEtaHigh << " + " << idisoSFEtaHighUncPlus << " - " << idisoSFEtaHighUncMinus << endl;    		
 
     idSF = getSFstruct(&inIdEtaVeryHigh, low, high);
-		double idSFEtaVeryHigh = idSF.centralvalue;
+    double idSFEtaVeryHigh = idSF.centralvalue;
     double idSFEtaVeryHighUncPlus = idSF.highvalue;
     double idSFEtaVeryHighUncMinus = idSF.lowvalue;
 		
     isoSF = getSFstruct(&inIsoEtaVeryHigh, low, high);
-		double isoSFEtaVeryHigh = isoSF.centralvalue;
+    double isoSFEtaVeryHigh = isoSF.centralvalue;
     double isoSFEtaVeryHighUncPlus = isoSF.highvalue;
     double isoSFEtaVeryHighUncMinus = isoSF.lowvalue; 
 		
     double idisoSFEtaVeryHigh = idSFEtaVeryHigh*isoSFEtaVeryHigh;
     double idisoSFEtaVeryHighUncPlus = sqrt( pow(idSFEtaVeryHighUncPlus*isoSFEtaVeryHigh, 2) + pow(isoSFEtaVeryHighUncPlus*idSFEtaVeryHigh, 2) );
     double idisoSFEtaVeryHighUncMinus = sqrt( pow(idSFEtaVeryHighUncMinus*isoSFEtaVeryHigh, 2) + pow(isoSFEtaVeryHighUncMinus*idSFEtaVeryHigh, 2) );		
-		if(verbose_) cout << "id*iso SF -> etaVeryHigh: " << idisoSFEtaVeryHigh << " + " << idisoSFEtaVeryHighUncPlus << " - " << idisoSFEtaVeryHighUncMinus << endl;    		
+    if(verbose_) cout << "id*iso SF -> etaVeryHigh: " << idisoSFEtaVeryHigh << " + " << idisoSFEtaVeryHighUncPlus << " - " << idisoSFEtaVeryHighUncMinus << endl;    		
 		
-		//total id*iso SF (no trigger)
+    //total id*iso SF (no trigger)
     muonIdIsoSFEtaLow.push_back( idisoSFEtaLow );
     muonIdIsoSFEtaLowUncPlus.push_back( idisoSFEtaLowUncPlus );
     muonIdIsoSFEtaLowUncMinus.push_back( idisoSFEtaLowUncMinus );
@@ -308,91 +303,89 @@ void LeptonTools::readMuonSF(string IdFile, string IsoFile, string trigFile)
     muonIdIsoSFEtaHigh.push_back( idisoSFEtaHigh );
     muonIdIsoSFEtaHighUncPlus.push_back( idisoSFEtaHighUncPlus );
     muonIdIsoSFEtaHighUncMinus.push_back( idisoSFEtaHighUncMinus );
-		muonIdIsoSFEtaVeryHigh.push_back( idisoSFEtaVeryHigh );
+    muonIdIsoSFEtaVeryHigh.push_back( idisoSFEtaVeryHigh );
     muonIdIsoSFEtaVeryHighUncPlus.push_back( idisoSFEtaVeryHighUncPlus );
     muonIdIsoSFEtaVeryHighUncMinus.push_back( idisoSFEtaVeryHighUncMinus );
   }
 
 }
 
-
-
 double LeptonTools::getMuonSF(double eta, double pt, string syst)
 {
-  if(muonPt.size() == 0) cout << "LeptonTools::getMuonSF :  No SF are loaded!!!" << endl;
-  if(pt > 500) return 1.; // No trigger SF available above 500 GeV
-  bool foundPt = false;
-	bool VeryHighPt = false;
-  for(unsigned int i=0; i<muonPt.size(); i++)
-  {
-	  //cout<<" muonPt["<<i<<"] = "<<muonPt[i]<<", muonPtErr["<<i<<"] = "<<muonPtErr[i]<<endl;
-    if( (fabs(muonPt[i] - pt) <= muonPtErr[i]) || (ReReco_ && i==muonPt.size()-1 && pt > 300))  //300 GeV is the edge of the determination of the Id and Iso SFs with the 2012 ReReco data (not for trigger SF, that goes up to 500)    
+    if(muonPt.size() == 0) cout << "LeptonTools::getMuonSF :  No SF are loaded!!!" << endl;
+    if(pt > 500) return 1.; // No trigger SF available above 500 GeV
+    bool foundPt = false;
+    bool VeryHighPt = false;
+    for(unsigned int i=0; i<muonPt.size(); i++)
     {
-		  foundPt = true;
-			if(ReReco_ && i==muonPt.size()-1 && pt > 300) VeryHighPt = true;
+        //cout<<" muonPt["<<i<<"] = "<<muonPt[i]<<", muonPtErr["<<i<<"] = "<<muonPtErr[i]<<endl;
+        if( (fabs(muonPt[i] - pt) <= muonPtErr[i]) || (ReReco_ && i==muonPt.size()-1 && pt > 300))  //300 GeV is the edge of the determination of the Id and Iso SFs with the 2012 ReReco data (not for trigger SF, that goes up to 500)    
+        {
+	    foundPt = true;
+	    if(ReReco_ && i==muonPt.size()-1 && pt > 300) VeryHighPt = true;
 			
-      if( fabs(eta) < 0.9 )
-      {
-        if(syst == "Nominal")
-				{
-				   if(VeryHighPt) return muonTrigSFEtaLow[i];
-				   else return muonSFEtaLow[i];
-				}
-        else if(syst == "Plus")
-				{
-				   if(VeryHighPt) return muonTrigSFEtaLow[i]+muonTrigSFEtaLowUncPlus[i];
-				   else return muonSFEtaLow[i]+muonSFEtaLowUncPlus[i];
-				}
-        else if(syst == "Minus")
-				{
-				   if(VeryHighPt) return muonTrigSFEtaLow[i]-muonTrigSFEtaLowUncMinus[i];
-				   else return muonSFEtaLow[i]-muonSFEtaLowUncMinus[i];
-				}
-        else cout << "LeptonTools::getMuonSF :  unknown systematic: " << syst << endl;
-      }
-      else if( fabs(eta) >= 0.9 && fabs(eta) < 1.2 )
-      {
-        if(syst == "Nominal")
-				{
-				   if(VeryHighPt) return muonTrigSFEtaMed[i];
-				   else return muonSFEtaMed[i];
-				}
-        else if(syst == "Plus")
-				{
-				   if(VeryHighPt) return muonTrigSFEtaMed[i]+muonTrigSFEtaMedUncPlus[i];
-				   else return muonSFEtaMed[i]+muonSFEtaMedUncPlus[i];
-				}
-        else if(syst == "Minus")
-				{
-				   if(VeryHighPt) return muonTrigSFEtaMed[i]-muonTrigSFEtaMedUncMinus[i];
-				   else return muonSFEtaMed[i]-muonSFEtaMedUncMinus[i];
-				}
-        else cout << "LeptonTools::getMuonSF :  unknown systematic: " << syst << endl;
-      }
-      else if( fabs(eta) >= 1.2 && fabs(eta) < 2.1 )
-      {
-        if(syst == "Nominal")
-				{
-				   if(VeryHighPt) return muonTrigSFEtaHigh[i];
-				   else return muonSFEtaHigh[i];
-				}
-        else if(syst == "Plus")
-				{
-				   if(VeryHighPt) return muonTrigSFEtaHigh[i]+muonTrigSFEtaHighUncPlus[i];
-				   else return muonSFEtaHigh[i]+muonSFEtaHighUncPlus[i];
-			  }
-        else if(syst == "Minus")
-				{
-				   if(VeryHighPt) return muonTrigSFEtaHigh[i]-muonTrigSFEtaHighUncMinus[i];
-				   else return muonSFEtaHigh[i]-muonSFEtaHighUncMinus[i];
-				}
-        else cout << "LeptonTools::getMuonSF :  unknown systematic: " << syst << endl;
-      }
+            if( fabs(eta) < 0.9 )
+            {
+                if(syst == "Nominal")
+		{
+		    if(VeryHighPt) return muonTrigSFEtaLow[i];
+		    else return muonSFEtaLow[i];
+		}
+                else if(syst == "Plus")
+		{
+		    if(VeryHighPt) return muonTrigSFEtaLow[i]+muonTrigSFEtaLowUncPlus[i];
+		    else return muonSFEtaLow[i]+muonSFEtaLowUncPlus[i];
+		}
+                else if(syst == "Minus")
+		{
+		    if(VeryHighPt) return muonTrigSFEtaLow[i]-muonTrigSFEtaLowUncMinus[i];
+		    else return muonSFEtaLow[i]-muonSFEtaLowUncMinus[i];
+		}
+                else cout << "LeptonTools::getMuonSF :  unknown systematic: " << syst << endl;
+            }
+            else if( fabs(eta) >= 0.9 && fabs(eta) < 1.2 )
+            {
+                if(syst == "Nominal")
+		{
+		    if(VeryHighPt) return muonTrigSFEtaMed[i];
+		    else return muonSFEtaMed[i];
+		}
+                else if(syst == "Plus")
+		{
+		    if(VeryHighPt) return muonTrigSFEtaMed[i]+muonTrigSFEtaMedUncPlus[i];
+		    else return muonSFEtaMed[i]+muonSFEtaMedUncPlus[i];
+		}
+                else if(syst == "Minus")
+		{
+		    if(VeryHighPt) return muonTrigSFEtaMed[i]-muonTrigSFEtaMedUncMinus[i];
+		    else return muonSFEtaMed[i]-muonSFEtaMedUncMinus[i];
+	        }
+                else cout << "LeptonTools::getMuonSF :  unknown systematic: " << syst << endl;
+            }
+            else if( fabs(eta) >= 1.2 && fabs(eta) < 2.1 )
+            {
+                if(syst == "Nominal")
+		{
+		    if(VeryHighPt) return muonTrigSFEtaHigh[i];
+		    else return muonSFEtaHigh[i];
+	        }
+                else if(syst == "Plus")
+	        {
+		    if(VeryHighPt) return muonTrigSFEtaHigh[i]+muonTrigSFEtaHighUncPlus[i];
+		    else return muonSFEtaHigh[i]+muonSFEtaHighUncPlus[i];
+	        }
+                else if(syst == "Minus")
+		{
+		    if(VeryHighPt) return muonTrigSFEtaHigh[i]-muonTrigSFEtaHighUncMinus[i];
+		    else return muonSFEtaHigh[i]-muonSFEtaHighUncMinus[i];
+		}
+                else cout << "LeptonTools::getMuonSF :  unknown systematic: " << syst << endl;
+            }
+        }
     }
-  }
-  if(!foundPt) cout << "LeptonTools::getMuonSF :  Unknown Pt bin: " << pt << endl;
-  exit(-1);
-  return 1.;
+    if(!foundPt) cout << "LeptonTools::getMuonSF :  Unknown Pt bin: " << pt << endl;
+    exit(-1);
+    return 1.;
 }
 
 double LeptonTools::getMuonIdIsoSF(double eta, double pt, string syst)
@@ -447,7 +440,7 @@ void LeptonTools::readElectronSF()
   electronPt.push_back(35);
   electronPt.push_back(45);
   electronPt.push_back(125);
-	electronPtErr.push_back(5);
+  electronPtErr.push_back(5);
   electronPtErr.push_back(5);
   electronPtErr.push_back(5);
   electronPtErr.push_back(75);
@@ -462,12 +455,12 @@ void LeptonTools::readElectronSF()
   for(unsigned int i=0; i<sfIdIso.size(); i++)
   {
     if(i<sfTrig.size())
-		{
-		   electronSFEtaLow.push_back(sfIdIso[i+1]*sfTrig[i]);
-       electronSFEtaLowUnc.push_back( sqrt( pow(uncTrig[i]*sfIdIso[i+1], 2) + pow(uncIdIso[i+1]*sfTrig[i], 2) ) );
-		}
-		electronIdIsoSFEtaLow.push_back(sfIdIso[i]);
-		electronIdIsoSFEtaLowUnc.push_back(uncIdIso[i]);
+    {
+	electronSFEtaLow.push_back(sfIdIso[i+1]*sfTrig[i]);
+        electronSFEtaLowUnc.push_back( sqrt( pow(uncTrig[i]*sfIdIso[i+1], 2) + pow(uncIdIso[i+1]*sfTrig[i], 2) ) );
+    }
+    electronIdIsoSFEtaLow.push_back(sfIdIso[i]);
+    electronIdIsoSFEtaLowUnc.push_back(uncIdIso[i]);
   }	
   sfIdIso.clear();   uncIdIso.clear();    sfTrig.clear();   uncTrig.clear();
   
@@ -478,12 +471,12 @@ void LeptonTools::readElectronSF()
   for(unsigned int i=0; i<sfIdIso.size(); i++)
   {
     if(i<sfTrig.size())
-		{
-		   electronSFEtaMed.push_back(sfIdIso[i+1]*sfTrig[i]);
-       electronSFEtaMedUnc.push_back( sqrt( pow(uncTrig[i]*sfIdIso[i+1], 2) + pow(uncIdIso[i+1]*sfTrig[i], 2) ) );
-		}
-		electronIdIsoSFEtaMed.push_back(sfIdIso[i]);
-		electronIdIsoSFEtaMedUnc.push_back(uncIdIso[i]);
+    {
+	electronSFEtaMed.push_back(sfIdIso[i+1]*sfTrig[i]);
+        electronSFEtaMedUnc.push_back( sqrt( pow(uncTrig[i]*sfIdIso[i+1], 2) + pow(uncIdIso[i+1]*sfTrig[i], 2) ) );
+    }
+    electronIdIsoSFEtaMed.push_back(sfIdIso[i]);
+    electronIdIsoSFEtaMedUnc.push_back(uncIdIso[i]);
   }	
   sfIdIso.clear();   uncIdIso.clear();    sfTrig.clear();   uncTrig.clear();
   
@@ -494,12 +487,12 @@ void LeptonTools::readElectronSF()
   for(unsigned int i=0; i<sfIdIso.size(); i++)
   {
     if(i<sfTrig.size())
-		{
-		   electronSFEtaHigh.push_back(sfIdIso[i+1]*sfTrig[i]);
-       electronSFEtaHighUnc.push_back( sqrt( pow(uncTrig[i]*sfIdIso[i+1], 2) + pow(uncIdIso[i+1]*sfTrig[i], 2) ) );
-		}
-		electronIdIsoSFEtaHigh.push_back(sfIdIso[i]);
-		electronIdIsoSFEtaHighUnc.push_back(uncIdIso[i]);
+    {
+	electronSFEtaHigh.push_back(sfIdIso[i+1]*sfTrig[i]);
+        electronSFEtaHighUnc.push_back( sqrt( pow(uncTrig[i]*sfIdIso[i+1], 2) + pow(uncIdIso[i+1]*sfTrig[i], 2) ) );
+    }
+    electronIdIsoSFEtaHigh.push_back(sfIdIso[i]);
+    electronIdIsoSFEtaHighUnc.push_back(uncIdIso[i]);
   }	
   
   if(verbose_)
@@ -507,18 +500,18 @@ void LeptonTools::readElectronSF()
     cout << "Electron trigger*idiso SF!!" << endl;
     for(unsigned int i=0; i<electronSFEtaLow.size(); i++)
     {        
-		   cout << "bin: " << i << " |  " << electronPt[i+1]-electronPtErr[i+1] << " <---> " << electronPt[i+1]+electronPtErr[i+1] << " | " << electronPt[i+1] << " +- " << electronPtErr[i+1] << endl;
-       cout << "EtaLow: " << electronSFEtaLow[i] << " +- " << electronSFEtaLowUnc[i] << endl;
-       cout << "EtaMed: " << electronSFEtaMed[i] << " +- " << electronSFEtaMedUnc[i] << endl;
-       cout << "EtaHigh: " << electronSFEtaHigh[i] << " +- " << electronSFEtaHighUnc[i] << endl;
+	cout << "bin: " << i << " |  " << electronPt[i+1]-electronPtErr[i+1] << " <---> " << electronPt[i+1]+electronPtErr[i+1] << " | " << electronPt[i+1] << " +- " << electronPtErr[i+1] << endl;
+        cout << "EtaLow: " << electronSFEtaLow[i] << " +- " << electronSFEtaLowUnc[i] << endl;
+        cout << "EtaMed: " << electronSFEtaMed[i] << " +- " << electronSFEtaMedUnc[i] << endl;
+        cout << "EtaHigh: " << electronSFEtaHigh[i] << " +- " << electronSFEtaHighUnc[i] << endl;
     }
-		cout << "Electron idiso SF!!" << endl;
+    cout << "Electron idiso SF!!" << endl;
     for(unsigned int i=0; i<electronIdIsoSFEtaLow.size(); i++)
     {        
-		   cout << "bin: " << i << " |  " << electronPt[i]-electronPtErr[i] << " <---> " << electronPt[i]+electronPtErr[i] << " | " << electronPt[i] << " +- " << electronPtErr[i] << endl;
-       cout << "EtaLow: " << electronIdIsoSFEtaLow[i] << " +- " << electronIdIsoSFEtaLowUnc[i] << endl;
-       cout << "EtaMed: " << electronIdIsoSFEtaMed[i] << " +- " << electronIdIsoSFEtaMedUnc[i] << endl;
-       cout << "EtaHigh: " << electronIdIsoSFEtaHigh[i] << " +- " << electronIdIsoSFEtaHighUnc[i] << endl;
+	cout << "bin: " << i << " |  " << electronPt[i]-electronPtErr[i] << " <---> " << electronPt[i]+electronPtErr[i] << " | " << electronPt[i] << " +- " << electronPtErr[i] << endl;
+        cout << "EtaLow: " << electronIdIsoSFEtaLow[i] << " +- " << electronIdIsoSFEtaLowUnc[i] << endl;
+        cout << "EtaMed: " << electronIdIsoSFEtaMed[i] << " +- " << electronIdIsoSFEtaMedUnc[i] << endl;
+        cout << "EtaHigh: " << electronIdIsoSFEtaHigh[i] << " +- " << electronIdIsoSFEtaHighUnc[i] << endl;
     }
   }
 }
@@ -620,12 +613,12 @@ LeptonTools::ScaleFactor LeptonTools::getSFstruct(TGraphAsymmErrors* graph, doub
     double xTmp = 0, yTmp = 0;
     graph->GetPoint(i, xTmp, yTmp);
     if( xTmp > low && xTmp < high )
-		{
-      SF.centralvalue = yTmp;
-			SF.highvalue = graph->GetErrorYhigh(i);
-			SF.lowvalue = graph->GetErrorYlow(i);
-			//if(verbose_) cout<<"  [LeptonTools::getSF] i = "<<i<<", SF.centralvalue = "<<SF.centralvalue<<", SF.highvalue = "<<SF.highvalue<<", SF.lowvalue = "<<SF.lowvalue<<endl;
-		}
+    {
+        SF.centralvalue = yTmp;
+        SF.highvalue = graph->GetErrorYhigh(i);
+	SF.lowvalue = graph->GetErrorYlow(i);
+        //if(verbose_) cout<<"  [LeptonTools::getSF] i = "<<i<<", SF.centralvalue = "<<SF.centralvalue<<", SF.highvalue = "<<SF.highvalue<<", SF.lowvalue = "<<SF.lowvalue<<endl;
+    }
   }
   return SF;
 }
