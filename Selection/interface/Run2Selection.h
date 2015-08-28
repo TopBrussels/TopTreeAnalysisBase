@@ -87,7 +87,7 @@ public:
 // JET GETTERS ====================================================
     std::vector<TRootPFJet*> GetSelectedBJets(const std::vector<TRootPFJet*>& seljets, Int_t& btagAlgo, Float_t& btagCut) const;
     std::vector<TRootPFJet*> GetSelectedJets() const;
-    std::vector<TRootPFJet*> GetSelectedJets(float PtThr, float EtaThr, bool applyJetID = true) const;
+    std::vector<TRootPFJet*> GetSelectedJets(float PtThr, float EtaThr, bool applyJetID = true, std::string TightLoose = "Loose") const;
     std::vector<TRootSubstructureJet*> GetSelectedFatJets() const;
     std::vector<TRootSubstructureJet*> GetSelectedFatJets(float PtThr, float EtaThr, bool applyJetID = true) const;
 
@@ -167,7 +167,8 @@ private:
     //=======================
 
     bool passPFJetID8TEV(const TRootPFJet* PFJet) const;
-    bool passPFJetID13TEV(const TRootPFJet* PFJet) const;
+    bool passLoosePFJetID13TeV(const TRootPFJet* PFJet) const;
+    bool passTightPFJetID13TeV(const TRootPFJet* PFJet) const;
 
     //muon
     float MuonPtThreshold_;
@@ -208,3 +209,4 @@ private:
 };
 
 #endif
+

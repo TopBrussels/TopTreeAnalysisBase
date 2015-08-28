@@ -96,7 +96,7 @@ Run2Selection::~Run2Selection()
 // ______________JETS_________________________________________________//
 
 // This should be the Standard getter function for Jets in Run-II.  The use of non PF objects should be discouraged.
-std::vector<TRootPFJet*> Run2Selection::GetSelectedJets(float PtThr, float EtaThr, bool applyJetID) const
+std::vector<TRootPFJet*> Run2Selection::GetSelectedJets(float PtThr, float EtaThr, bool applyJetID, std::string TightLoose) const
 {
     std::vector<TRootPFJet*> selectedJets;
     for(unsigned int i=0; i<jets.size(); i++)
@@ -111,12 +111,20 @@ std::vector<TRootPFJet*> Run2Selection::GetSelectedJets(float PtThr, float EtaTh
             {
                 if ( applyJetID )
                 {
-                    if(passPFJetID13TEV(PFJet))//This is the 8TeV Recommended Loose PFJet ID.  This should be updated when 13TeV recommendations become available.
+                    if(TightLoose == "Loose" && passLoosePFJetID13TeV(PFJet))//This is the 13TeV Recommended Loose PFJet ID.  https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID
                     {
                         selectedJets.push_back(init_jet);
                     }
-                }
-                else selectedJets.push_back(init_jet);
+                	else if(TightLoose == "Tight" && passTightPFJetID13TeV(PFJet))//This is the 13TeV Recommended Loose PFJet ID.  https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID
+                    {
+                        selectedJets.push_back(init_jet);
+                    }
+                    else
+                    {
+                    	cerr << " - no valid jetID applied: " << endl;
+                    }
+			}
+            else selectedJets.push_back(init_jet);
             }
         }
     }
@@ -157,7 +165,7 @@ std::vector<TRootSubstructureJet*> Run2Selection::GetSelectedFatJets(float PtThr
 
 std::vector<TRootPFJet*> Run2Selection::GetSelectedJets() const
 {
-    return GetSelectedJets(30,2.5,true);
+    return GetSelectedJets(30,2.5,true,"Loose");
 }
 
 
@@ -834,30 +842,78 @@ bool Run2Selection::passPFJetID8TEV(const TRootPFJet* PFJet) const
     }
     return false;
 }
-bool Run2Selection::passPFJetID13TEV(const TRootPFJet* PFJet) const
+bool Run2Selection::passLoosePFJetID13TeV(const TRootPFJet* PFJet) const
 {
-    if (PFJet->nConstituents() > 1 )
+	if (fabs(PFJet->Eta()) <= 3.0)
+	{
+		if (PFJet->nConstituents() > 1 )
+		{
+		    if (PFJet->neutralHadronEnergyFraction() < 0.99)
+		    {
+		        if (PFJet->neutralEmEnergyFraction() < 0.99 )
+		        {
+		            if (fabs(PFJet->Eta()) >= 2.4 || PFJet->chargedEmEnergyFraction() < 0.99 )
+		            {
+		                if (fabs(PFJet->Eta()) >= 2.4 || PFJet->chargedHadronEnergyFraction() > 0)
+		                {
+		                    if (fabs(PFJet->Eta()) >= 2.4 || PFJet->chargedMultiplicity() > 0)
+		                    {
+		                        if(PFJet->muonEnergyFraction() <= 0.8)
+		                        {
+		                            return true;
+		                        }
+		                    }
+		                }
+		            }
+		        }
+		    }
+		}
+	}
+	else if (PFJet->neutralEmEnergyFraction() < 0.9 )
+	{
+		if(PFJet->neutralMultiplicity() > 10)
+		{
+			return true;
+		}
+	}
+    return false;
+}
+bool Run2Selection::passTightPFJetID13TeV(const TRootPFJet* PFJet) const
+{
+    if(fabs(PFJet->Eta()) <= 3.0)
     {
-        if (PFJet->neutralHadronEnergyFraction() < 0.99)
-        {
-            if (PFJet->neutralEmEnergyFraction() < 0.99 )
-            {
-                if (fabs(PFJet->Eta()) >= 2.4 || PFJet->chargedEmEnergyFraction() < 0.99 )
-                {
-                    if (fabs(PFJet->Eta()) >= 2.4 || PFJet->chargedHadronEnergyFraction() > 0)
-                    {
-                        if (fabs(PFJet->Eta()) >= 2.4 || PFJet->chargedMultiplicity() > 0)
-                        {
-                            if(PFJet->muonEnergyFraction() <= 0.8)
-                            {
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+		if (PFJet->nConstituents() > 1 )
+		{
+		    if (PFJet->neutralHadronEnergyFraction() < 0.9)
+		    {
+		        if (PFJet->neutralEmEnergyFraction() < 0.9 )
+		        {
+		            if (fabs(PFJet->Eta()) >= 2.4 || PFJet->chargedEmEnergyFraction() < 0.9 )
+		            {
+		                if (fabs(PFJet->Eta()) >= 2.4 || PFJet->chargedHadronEnergyFraction() > 0)
+		                {
+		                    if (fabs(PFJet->Eta()) >= 2.4 || PFJet->chargedMultiplicity() > 0)
+		                    {
+		                        if(PFJet->muonEnergyFraction() <= 0.8)
+		                        {
+		                            return true;
+		                        }
+		                    }
+		                }
+		            }
+		        }
+		    }
+		}
+	}
+	else if (PFJet->neutralEmEnergyFraction() < 0.9 )
+	{
+		if(PFJet->neutralMultiplicity() > 10)
+		{
+			return true;
+		}
+	}
+
+	
     return false;
 }
 
@@ -870,3 +926,4 @@ bool Run2Selection::isPVSelected(const std::vector<TRootVertex*>& vertex, int Nd
     }
 
 //______________________________________________________________________//
+
