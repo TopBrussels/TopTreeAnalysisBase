@@ -119,10 +119,6 @@ std::vector<TRootPFJet*> Run2Selection::GetSelectedJets(float PtThr, float EtaTh
                     {
                         selectedJets.push_back(init_jet);
                     }
-                    else
-                    {
-                    	cerr << " - no valid jetID applied: " << endl;
-                    }
 			}
             else selectedJets.push_back(init_jet);
             }
