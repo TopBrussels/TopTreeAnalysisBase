@@ -97,14 +97,10 @@ public:
     float GetElectronIsoCorrType(TRootElectron* el) const;
     float pfElectronIso(TRootElectron *el) const;
 // ELECTRON GETTERS ===============================================
-    std::vector<TRootElectron*> GetSelectedElectrons(string WorkingPoint, string PHYS14orCSA14, bool CutsBased) const;
-    std::vector<TRootElectron*> GetSelectedTightElectronsCutsBasedPHYS14(float PtThr, float EtaThr) const;
-    std::vector<TRootElectron*> GetSelectedMediumElectronsCutsBasedPHYS14(float PtThr, float EtaThr) const;
-    std::vector<TRootElectron*> GetSelectedLooseElectronsCutsBasedPHYS14(float PtThr, float EtaThr) const;
-    std::vector<TRootElectron*> GetSelectedTightElectronsCutsBasedSpring15_50ns(float PtThr, float EtaThr) const;
-    std::vector<TRootElectron*> GetSelectedMediumElectronsCutsBasedSpring15_50ns(float PtThr, float EtaThr) const;
-    std::vector<TRootElectron*> GetSelectedLooseElectronsCutsBasedSpring15_50ns(float PtThr, float EtaThr) const;
-    std::vector<TRootElectron*> GetSelectedDisplacedElectrons (float PtThr, float EtaThr, float d0, float dz) const;
+	std::vector<TRootElectron*> GetSelectedElectrons(string WorkingPoint, string PHYS14orCSA14, bool CutsBased) const;
+	std::vector<TRootElectron*> GetSelectedElectrons(float PTthr, float EtaThr, string WorkingPoint, string PHYS14orCSA14, bool CutsBased) const;
+
+	std::vector<TRootElectron*> GetSelectedDisplacedElectrons (float PtThr, float EtaThr, float d0, float dz) const;
     std::vector<TRootElectron*> GetSelectedDisplacedElectrons (float PtThr, float EtaThr) const;
     std::vector<TRootElectron*> GetSelectedDisplacedElectrons () const;
 // MUON GETTERS ==================================================
@@ -135,11 +131,16 @@ public:
     };
 
 private:
-    std::vector<TRootElectron*> GetSelectedVetoElectronsPHYS14() const;
-    std::vector<TRootElectron*> GetSelectedTightElectronsCSA14() const;
-    std::vector<TRootElectron*> GetSelectedMediumElectronsCSA14() const;
-    std::vector<TRootElectron*> GetSelectedLooseElectronsCSA14() const;
-    std::vector<TRootElectron*> GetSelectedVetoElectronsCSA14() const;
+
+	std::vector<TRootElectron*> GetSelectedTightElectronsCutsBasedPHYS14(float PtThr, float EtaThr) const;
+	std::vector<TRootElectron*> GetSelectedMediumElectronsCutsBasedPHYS14(float PtThr, float EtaThr) const;
+	std::vector<TRootElectron*> GetSelectedLooseElectronsCutsBasedPHYS14(float PtThr, float EtaThr) const;
+	std::vector<TRootElectron*> GetSelectedTightElectronsCutsBasedSpring15_50ns(float PtThr, float EtaThr) const;
+	std::vector<TRootElectron*> GetSelectedMediumElectronsCutsBasedSpring15_50ns(float PtThr, float EtaThr) const;
+	std::vector<TRootElectron*> GetSelectedLooseElectronsCutsBasedSpring15_50ns(float PtThr, float EtaThr) const;
+
+	
+
 
     float rho_;
     int elecIsoCorrType_;
