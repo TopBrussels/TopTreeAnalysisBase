@@ -45,18 +45,19 @@ TRootEvent* LoadEvent(int ievent,vector<TRootVertex*>&vertex,vector<TRootMuon*>&
 TRootEvent* LoadEvent(int ievent,vector<TRootVertex*>&vertex,vector<TRootMuon*>&vmuons,vector<TRootElectron*>&velectrons,vector<TRootJet*>& vjets,vector<TRootJet*>& vfatjets, vector<TRootMET*>&vmet,bool verbose=false);
 
 
- TRootGenEvent*          LoadGenEvent (int ievt, bool reloadEvent = true);
- vector<TRootGenJet*>     LoadGenJet   (int ievt, bool reloadEvent = true);
- vector<TRootMCParticle*> LoadMCPart   (int ievt, bool reloadEvent = true);
- vector<TRootTrackMET*> LoadTrackMET   (int ievt);
- 
- void LoadMCEvent(int ievent, TRootGenEvent *genEvt, TRootNPGenEvent* npgenEvent, bool reloadEvent = true);
- void LoadMCEvent(int ievent, TRootGenEvent *genEvt, TRootNPGenEvent* npgenEvent, vector<TRootMCParticle*>& vmcparticles, bool reloadEvent = true);
+TRootGenEvent*          LoadGenEvent (int ievt, bool reloadEvent = true);
+vector<TRootGenJet*>     LoadGenJet   (int ievt, bool reloadEvent = true);
+vector<TRootMCParticle*> LoadMCPart   (int ievt, bool reloadEvent = true);
+vector<TRootTrackMET*> LoadTrackMET   (int ievt);
+
+void LoadMCEvent(int ievent, TRootGenEvent *genEvt, TRootNPGenEvent* npgenEvent, bool reloadEvent = true);
+void LoadMCEvent(int ievent, TRootGenEvent *genEvt, TRootNPGenEvent* npgenEvent, vector<TRootMCParticle*>& vmcparticles, bool reloadEvent = true);
 
 bool EventTrigged(int itrigger); /** return true if event is trigged. This method can only be applied if LoadEvent was called first*/
 bool EventPassedJSON(int runID, int lumiBlockID);
 
-int iTrigger(string TriggerName, int runID, int iFile=0);/** return the integer corresponding to the trigger name */
+int iTrigger(string TriggerName, int runID, int iFile);/** return the integer corresponding to the trigger name */
+void ListTriggers(int runID, int iFile);
 
 private:
 

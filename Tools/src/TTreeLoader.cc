@@ -496,10 +496,11 @@ TTreeLoader::EventPassedJSON(int runID, int lumiBlockID)
 }
 
 int
-TTreeLoader::iTrigger (string triggerName, int runID, int iFile)
+TTreeLoader::iTrigger (string triggerName, int runID, int iFile) //iFile starts from 0!!
 {
   //    cout << "Number of Entries on the runTree: " << d_->runTree()->GetEntries() << endl;
-  int rBytes = d_->runTree()->GetEntry();
+  //int rBytes = d_->runTree()->GetEntry(iFile-1);
+  d_->runTree()->GetEntry(iFile);
   //  cout << "Bytes read out by GetEntry: " << rBytes << endl;
 
   if (runInfos == 0) return -9999;
@@ -511,3 +512,12 @@ bool TTreeLoader::EventTrigged (int itrigger)
 {
   return (event->trigHLT (itrigger));
 }
+
+void TTreeLoader::ListTriggers(int runID, int iFile){ //iFile starts from 0!!
+  d_->runTree()->GetEntry(iFile);
+
+  cout<<"Listing Triggers for run: "<<runID<<endl;
+  runInfos->getHLTinfo(runID).gethltNameList();
+
+}
+
