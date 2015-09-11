@@ -66,7 +66,7 @@ Run2Selection::Run2Selection(const Run2Selection& s)
 	electrons = s.electrons;
 	muons = s.muons;
 	mets = s.mets;
-	
+
 	cutHFHadronEnergyFraction_ = false;
 }
 
@@ -106,7 +106,7 @@ std::vector<TRootPFJet*> Run2Selection::GetSelectedJets(float PtThr, float EtaTh
 		{
 			// PFJets
 			const TRootPFJet* PFJet = static_cast<const TRootPFJet*>(init_jet);
-			
+
 			if( fabs(PFJet->Eta())<EtaThr && PFJet->Pt()>PtThr )
 			{
 				if ( applyJetID )
@@ -134,11 +134,11 @@ std::vector<TRootSubstructureJet*> Run2Selection::GetSelectedFatJets(float PtThr
 	std::vector<TRootSubstructureJet*> selectedJets;
 	for(unsigned int i=0; i<fatjets.size(); i++)
 	{
-		
+
 		TRootSubstructureJet* init_jet = (TRootSubstructureJet*) fatjets[i];
-		
+
 		const TRootSubstructureJet* PFJet = static_cast<const TRootSubstructureJet*>(init_jet);
-		
+
 		if( fabs(PFJet->Eta())<EtaThr && PFJet->Pt()>PtThr )
 		{
 			//if ( applyJetID )
@@ -153,7 +153,7 @@ std::vector<TRootSubstructureJet*> Run2Selection::GetSelectedFatJets(float PtThr
 	}
 	std::sort(selectedJets.begin(),selectedJets.end(),HighestPt());
 	return selectedJets;
-	
+
 }
 
 
@@ -195,7 +195,7 @@ std::vector<TRootMuon*> Run2Selection::GetSelectedMuons(float PtThr, float EtaTh
 	std::vector<TRootMuon*> selectedMuons;
 	for(unsigned int i=0; i<muons.size(); i++)
 	{
-		
+
 		//float reliso = (muons[i]->chargedHadronIso()+muons[i]->neutralHadronIso()+muons[i]->photonIso())/muons[i]->Pt();
 		// use cone 4 iso for muons:
 		float reliso = (muons[i]->chargedHadronIso(4) + max( 0.0, muons[i]->neutralHadronIso(4) + muons[i]->photonIso(4) - 0.5*muons[i]->puChargedHadronIso(4) ) ) / muons[i]->Pt(); // dBeta corrected
@@ -220,12 +220,14 @@ std::vector<TRootMuon*> Run2Selection::GetSelectedMuons(float PtThr, float EtaTh
 
 std::vector<TRootMuon*> Run2Selection::GetSelectedMuons() const
 {
-	return GetSelectedMuons(26,2.1,0.12);
+        //Default Muon selection method.  This method should be updated to the most recent set of recommended cuts regularly.  Currently it points to the MUON POG Medium working point with Pt, Eta, and dBeta RelIso thresholds set as in the TOP PAG selection TWiki for single lepton event ID.
+	return GetSelectedMediumMuonsJuly2015(26,2.1,0.12);
 }
 
 std::vector<TRootMuon*> Run2Selection::GetSelectedMuons(float PtThr, float EtaThr,float MuonRelIso) const
 {
-	return GetSelectedMuons(PtThr,EtaThr,10,5,0,0.2,0.5,0,1,MuonRelIso);
+        //Default User defined threshold Muon selection method.  This method should be updated to the most recent set of recommended cuts regularly.  Currently it points to the MUON POG Medium working point with Pt, Eta, and dBeta RelIso thresholds set by the user.
+	return GetSelectedMediumMuonsJuly2015(PtThr,EtaThr,MuonRelIso);
 }
 
 // displaced muons
@@ -240,18 +242,18 @@ std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons(float PtThr, fl
 			continue;
 		if(fabs(selectedMuons[ii]->dzBeamSpot())>dZ)
 			continue;
-		
+
 		chosenMuons.push_back(selectedMuons[ii]);
-		
+
 	}
-	
+
 	std::sort(chosenMuons.begin(),chosenMuons.end(),HighestPt());
 	return chosenMuons;
 }
 std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons(float PtThr,float EtaThr,float d0, float dz,float MuonRelIso) const
 {
 	return GetSelectedDisplacedMuons(PtThr,EtaThr,10.,5.,0,d0,dz,0,1,MuonRelIso);
-	
+
 }
 
 std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons() const
@@ -291,7 +293,7 @@ std::vector<TRootMuon*> Run2Selection::GetSelectedLooseMuons(float PtThr, float 
 	{
 		// use cone 4 iso for muons:
 		float reliso = (muons[i]->chargedHadronIso(4) + max( 0.0, muons[i]->neutralHadronIso(4) + muons[i]->photonIso(4) - 0.5*muons[i]->puChargedHadronIso(4) ) ) / muons[i]->Pt(); // dBeta corrected
-		
+
 		if((muons[i]->isGlobalMuon() || muons[i]->isTrackerMuon()) && muons[i]->isPFMuon() && fabs(muons[i]->Eta())<EtaThr && muons[i]->Pt()>PtThr && reliso < MuonRelIso )
 		{
 			selectedMuons.push_back(muons[i]);
@@ -306,6 +308,86 @@ std::vector<TRootMuon*> Run2Selection::GetSelectedLooseMuons() const
 	return GetSelectedLooseMuons(10, 2.5, 0.20);
 }
 
+std::vector<TRootMuon*> Run2Selection::GetSelectedLooseMuonsJuly2015(float PtThr, float EtaThr,float MuonRelIso) const
+{
+	//Thes quality cuts reflect the LooseMuon ID as provided by the MUON POG.  PT, Eta, and Iso thresholds are not tuned as of July 17, 2015.
+	std::vector<TRootMuon*> selectedMuons;
+	for(unsigned int i=0; i<muons.size(); i++)
+	{
+
+		//float reliso = (muons[i]->chargedHadronIso()+muons[i]->neutralHadronIso()+muons[i]->photonIso())/muons[i]->Pt();
+		// use cone 4 iso for muons:
+		float reliso = (muons[i]->chargedHadronIso(4) + max( 0.0, muons[i]->neutralHadronIso(4) + muons[i]->photonIso(4) - 0.5*muons[i]->puChargedHadronIso(4) ) ) / muons[i]->Pt(); // dBeta corrected
+		if(     (muons[i]->isGlobalMuon() || muons[i]->isTrackerMuon()) && muons[i]->isPFMuon()
+		   && muons[i]->Pt()>PtThr
+		   && fabs(muons[i]->Eta())<EtaThr
+		   && reliso < MuonRelIso)
+		{
+			selectedMuons.push_back(muons[i]);
+		}
+	}
+	std::sort(selectedMuons.begin(),selectedMuons.end(),HighestPt());
+	return selectedMuons;
+}
+
+std::vector<TRootMuon*> Run2Selection::GetSelectedMediumMuonsJuly2015(float PtThr, float EtaThr,float MuonRelIso) const
+{
+    //These quality cuts reflect the Medium Muon ID as provided by the MUON POG.  PT, Eta, and Iso thresholds are not tuned as of July 17, 2015.
+	std::vector<TRootMuon*> selectedMuons;
+	for(unsigned int i=0; i<muons.size(); i++)
+	{
+
+		//float reliso = (muons[i]->chargedHadronIso()+muons[i]->neutralHadronIso()+muons[i]->photonIso())/muons[i]->Pt();
+		// use cone 4 iso for muons:
+		float reliso = (muons[i]->chargedHadronIso(4) + max( 0.0, muons[i]->neutralHadronIso(4) + muons[i]->photonIso(4) - 0.5*muons[i]->puChargedHadronIso(4) ) ) / muons[i]->Pt(); // dBeta corrected
+                bool goodGlob = (muons[i]->isGlobalMuon() 
+                              && muons[i]->chi2() < 3 
+                              && muons[i]->chi2LocalPosition() < 12 
+                              && muons[i]->trkKink() < 20); 
+
+		if(     (muons[i]->isGlobalMuon() || muons[i]->isTrackerMuon()) && muons[i]->isPFMuon()
+		   && muons[i]->Pt()>PtThr
+		   && fabs(muons[i]->Eta())<EtaThr
+		   && reliso < MuonRelIso
+		   && muons[i]->validFraction() > 0.8
+                   && muons[i]->segmentCompatibility() > (goodGlob ? 0.303 : 0.451))
+		{
+			selectedMuons.push_back(muons[i]);
+		}
+	}
+	std::sort(selectedMuons.begin(),selectedMuons.end(),HighestPt());
+	return selectedMuons;
+}
+
+std::vector<TRootMuon*> Run2Selection::GetSelectedTightMuonsJuly2015(float PtThr, float EtaThr,float MuonRelIso) const
+{
+		//Thes quality cuts reflect the Tight Muon ID as provided by the MUON POG.  PT, Eta, and Iso thresholds are not tuned as of July 17, 2015.
+	std::vector<TRootMuon*> selectedMuons;
+	for(unsigned int i=0; i<muons.size(); i++)
+	{
+
+		//float reliso = (muons[i]->chargedHadronIso()+muons[i]->neutralHadronIso()+muons[i]->photonIso())/muons[i]->Pt();
+		// use cone 4 iso for muons:
+		float reliso = (muons[i]->chargedHadronIso(4) + max( 0.0, muons[i]->neutralHadronIso(4) + muons[i]->photonIso(4) - 0.5*muons[i]->puChargedHadronIso(4) ) ) / muons[i]->Pt(); // dBeta corrected
+		if(     muons[i]->isGlobalMuon() && muons[i]->isPFMuon()
+		   && muons[i]->Pt()>PtThr
+		   && fabs(muons[i]->Eta())<EtaThr
+		   && muons[i]->chi2() < 10
+		   && muons[i]->nofTrackerLayersWithMeasurement() > 5
+		   && muons[i]->nofValidMuHits() > 0
+		   && fabs(muons[i]->d0()) < 0.2
+		   && fabs(muons[i]->dz()) < 0.5
+		   && muons[i]->nofValidPixelHits() > 0
+		   && muons[i]->nofMatchedStations()> 1
+		   && reliso < MuonRelIso)
+		{
+			selectedMuons.push_back(muons[i]);
+		}
+	}
+	std::sort(selectedMuons.begin(),selectedMuons.end(),HighestPt());
+	return selectedMuons;
+
+}
 
 
 // ______________ELECTRONS____________________________________________//
@@ -416,7 +498,7 @@ float Run2Selection::GetElectronIsoCorrType(TRootElectron *el) const{
 	if (fabs(el->superClusterEta()) >= 2.0   && fabs(el->superClusterEta()) < 2.2   ) EffectiveArea = 0.0842;
 	if (fabs(el->superClusterEta()) >= 2.2   && fabs(el->superClusterEta()) < 2.5   ) EffectiveArea = 0.1530;
 	if (fabs(el->superClusterEta()) >= 2.5) EffectiveArea = -9999;
-	
+
 	double isocorr = 0;
 	if(elecIsoCorrType_ == 1) // rho correction (default corr)
 		isocorr = rho_*EffectiveArea;
@@ -436,9 +518,9 @@ float Run2Selection::GetElectronIsoCorrType(TRootElectron *el) const{
 float Run2Selection::pfElectronIso(TRootElectron *el) const{
 	float isoCorr = (el->neutralHadronIso(3) + el->photonIso(3) - GetElectronIsoCorrType(el));
 	float isolation = (el->chargedHadronIso(3) + (isoCorr > 0.0 ? isoCorr : 0.0))/(el->Pt());
-	
+
 	return isolation;
-	
+
 }
 
 std::vector<TRootElectron*> Run2Selection::GetSelectedElectrons(string WorkingPoint, string ProductionCampaign, bool CutsBased) const {
@@ -470,7 +552,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedElectrons(float PtThr, flo
 			string printboolval="Cutbased=true";
 			if(!CutsBased)
 				printboolval="Cutbased=false";
-			
+
 			throw std::invalid_argument( "received incorrect args to GetSelectedElectrons, requested: "+WorkingPoint+", "+ProductionCampaign+" "+printboolval);
 		}
 	}
@@ -480,12 +562,12 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedElectrons(float PtThr, flo
 
 
 std::vector<TRootElectron*> Run2Selection::GetSelectedDisplacedElectrons(float PtThr, float EtaThr, float d0, float dz) const {
-	
+
 	// use medium electron ID (cut-based) for now, but with cuts on the beam spot d0 dz . This ID can be in flux, and for now is hard-coded here:
-	
+
 	//These quality cuts reflect the recommended Medium cut-based electron ID as provided by the EGM POG. Last updated: 25 July 2015
 	// as these are still in flux, it is probably useful to check them here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2#PHYS14_selection_all_conditions
-	
+
 	std::vector<TRootElectron*> selectedElectrons;
 	for(unsigned int i=0; i<electrons.size(); i++) {
 		TRootElectron* el = (TRootElectron*) electrons[i];
@@ -505,7 +587,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedDisplacedElectrons(float P
 			{
 				selectedElectrons.push_back(electrons[i]);
 			}
-			
+
 			else if (fabs(el->superClusterEta()) < 2.5
 					 && fabs(el->deltaEtaIn()) < 0.007429
 					 && fabs(el->deltaPhiIn()) < 0.067879
@@ -524,15 +606,15 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedDisplacedElectrons(float P
 	}
 	std::sort(selectedElectrons.begin(),selectedElectrons.end(),HighestPt());
 	return selectedElectrons;
-	
-	
+
+
 	return selectedElectrons;
 }
 
 
 std::vector<TRootElectron*> Run2Selection::GetSelectedDisplacedElectrons(float PtThr, float EtaThr) const {
 	return GetSelectedDisplacedElectrons(PtThr,EtaThr,0.02,0.2);
-	
+
 }
 
 std::vector<TRootElectron*> Run2Selection::GetSelectedDisplacedElectrons() const{
@@ -543,7 +625,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedTightElectronsCutsBasedSpr
 	// (PLEASE UPDATE IF YOU CHANGE THIS CODE)
 	//These quality cuts reflect the recommended Tight cut-based electron ID as provided by the EGM POG. Last updated: 26 August 2015
 	// as these are still in flux, it is probably useful to check them here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2#Spring15_selection_50ns
-	
+
 	std::vector<TRootElectron*> selectedElectrons;
 	for(unsigned int i=0; i<electrons.size(); i++) {
 		TRootElectron* el = (TRootElectron*) electrons[i];
@@ -589,7 +671,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedMediumElectronsCutsBasedSp
 	// (PLEASE UPDATE IF YOU CHANGE THIS CODE)
 	//These quality cuts reflect the recommended Tight cut-based electron ID as provided by the EGM POG. Last updated: 26 August 2015
 	// as these are still in flux, it is probably useful to check them here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2#Spring15_selection_50ns
-	
+
 	std::vector<TRootElectron*> selectedElectrons;
 	for(unsigned int i=0; i<electrons.size(); i++) {
 		TRootElectron* el = (TRootElectron*) electrons[i];
@@ -609,7 +691,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedMediumElectronsCutsBasedSp
 			{
 				selectedElectrons.push_back(electrons[i]);
 			}
-			
+
 			else if (fabs(el->superClusterEta()) < 2.5
 					 && fabs(el->deltaEtaIn()) <  0.00773
 					 && fabs(el->deltaPhiIn()) < 0.148
@@ -635,7 +717,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedLooseElectronsCutsBasedSpr
 	// (PLEASE UPDATE IF YOU CHANGE THIS CODE)
 	//These quality cuts reflect the recommended Tight cut-based electron ID as provided by the EGM POG. Last updated: 26 August 2015
 	// as these are still in flux, it is probably useful to check them here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2#Spring15_selection_50ns
-	
+
 	std::vector<TRootElectron*> selectedElectrons;
 	for(unsigned int i=0; i<electrons.size(); i++) {
 		TRootElectron* el = (TRootElectron*) electrons[i];
@@ -655,7 +737,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedLooseElectronsCutsBasedSpr
 			{
 				selectedElectrons.push_back(electrons[i]);
 			}
-			
+
 			else if (fabs(el->superClusterEta()) < 2.5
 					 && fabs(el->deltaEtaIn()) <  0.00952
 					 && fabs(el->deltaPhiIn()) < 0.181
@@ -681,7 +763,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedTightElectronsCutsBasedPHY
 	// (PLEASE UPDATE IF YOU CHANGE THIS CODE)
 	//These quality cuts reflect the recommended Tight cut-based electron ID as provided by the EGM POG. Last updated: 25 July 2015
 	// as these are still in flux, it is probably useful to check them here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2#PHYS14_selection_all_conditions
-	
+
 	std::vector<TRootElectron*> selectedElectrons;
 	for(unsigned int i=0; i<electrons.size(); i++) {
 		TRootElectron* el = (TRootElectron*) electrons[i];
@@ -701,7 +783,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedTightElectronsCutsBasedPHY
 			{
 				selectedElectrons.push_back(electrons[i]);
 			}
-			
+
 			else if (fabs(el->superClusterEta()) < 2.5
 					 && fabs(el->deltaEtaIn()) < 0.007057
 					 && fabs(el->deltaPhiIn()) < 0.030159
@@ -726,7 +808,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedMediumElectronsCutsBasedPH
 	// (PLEASE UPDATE IF YOU CHANGE THIS CODE)
 	//These quality cuts reflect the recommended Medium cut-based electron ID as provided by the EGM POG. Last updated: 25 July 2015
 	// as these are still in flux, it is probably useful to check them here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2#PHYS14_selection_all_conditions
-	
+
 	std::vector<TRootElectron*> selectedElectrons;
 	for(unsigned int i=0; i<electrons.size(); i++) {
 		TRootElectron* el = (TRootElectron*) electrons[i];
@@ -746,7 +828,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedMediumElectronsCutsBasedPH
 			{
 				selectedElectrons.push_back(electrons[i]);
 			}
-			
+
 			else if (fabs(el->superClusterEta()) < 2.5
 					 && fabs(el->deltaEtaIn()) < 0.007429
 					 && fabs(el->deltaPhiIn()) < 0.067879
@@ -790,7 +872,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedLooseElectronsCutsBasedPHY
 			{
 				selectedElectrons.push_back(electrons[i]);
 			}
-			
+
 			else if (fabs(el->superClusterEta()) < 2.5
 					 && fabs(el->deltaEtaIn()) < 0.009833
 					 && fabs(el->deltaPhiIn()) < 0.149934
@@ -909,8 +991,8 @@ bool Run2Selection::passTightPFJetID13TeV(const TRootPFJet* PFJet) const
 			return true;
 		}
 	}
-	
-	
+
+
 	return false;
 }
 
