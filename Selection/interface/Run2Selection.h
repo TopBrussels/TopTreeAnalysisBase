@@ -118,6 +118,11 @@ public:
     std::vector<TRootMuon*> GetSelectedLooseMuons() const;
     std::vector<TRootMuon*> GetSelectedLooseMuons(float PtThr, float EtaThr, float MuonRelIso) const;
 
+    //July 2015 Muon Getters
+    std::vector<TRootMuon*> GetSelectedLooseMuonsJuly2015(float PtThr, float EtaThr,float MuonRelIso) const;
+    std::vector<TRootMuon*> GetSelectedMediumMuonsJuly2015(float PtThr, float EtaThr,float MuonRelIso) const;
+    std::vector<TRootMuon*> GetSelectedTightMuonsJuly2015(float PtThr, float EtaThr,float MuonRelIso) const;
+
 // SELECTION BOOLEANS =============================================
     bool isThere1Muon() const
     {
