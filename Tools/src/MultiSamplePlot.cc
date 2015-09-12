@@ -78,7 +78,9 @@ void MultiSamplePlot::Initialize()
 	maxY_ = -1;
 	minLogY_ = 1.;
 	showNumberEntries_ = true;
-	errorbandfile_ = "systematics.root";
+	//errorbandfile_ = "systematics.root";
+	errorbandfile_ = "errorbands.root";
+	dosystfile_ = false;
 	sqrts_ = 13;
 	prelim_=true;
 }
@@ -192,7 +194,12 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
     (plots_[i].first)->SetMarkerColor((plots_[i].second)->Color());
 		(plots_[i].first)->SetLineStyle((plots_[i].second)->LineStyle());
 		(plots_[i].first)->SetLineWidth((plots_[i].second)->LineWidth());
-
+    //making sure that the overflow is transferred to the last 'visible' bin; analogously for underflow...
+		(plots_[i].first)->SetBinContent(Nbins_,(plots_[i].first)->GetBinContent(Nbins_)+(plots_[i].first)->GetBinContent(Nbins_+1));
+		(plots_[i].first)->SetBinContent(Nbins_+1,0);
+		(plots_[i].first)->SetBinContent(1,(plots_[i].first)->GetBinContent(0)+(plots_[i].first)->GetBinContent(1));
+		(plots_[i].first)->SetBinContent(0,0);
+		
 		if(!histocreated)
 		{
 		    TH1F* MergedProcesses = (TH1F*) plots_[i].first->Clone();
@@ -200,11 +207,6 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
 				if(plots_[i].second->Name().find("NP_overlay_")==0) datasetName = "NP_overlay_"+datasetName;
 				else if(plots_[i].second->Name().find("NP_")==0) datasetName = "NP_"+datasetName;
 				Dataset* dataSet = new Dataset(datasetName,datasetTitle,true,plots_[i].second->Color(),plots_[i].second->LineStyle(),plots_[i].second->LineWidth(),1.,1.);
-				//making sure that the overflow is transferred to the last 'visible' bin; analogously for underflow...
-		    MergedProcesses->SetBinContent(Nbins_,MergedProcesses->GetBinContent(Nbins_)+MergedProcesses->GetBinContent(Nbins_+1));
-		    MergedProcesses->SetBinContent(Nbins_+1,0);
-				MergedProcesses->SetBinContent(1,MergedProcesses->GetBinContent(0)+MergedProcesses->GetBinContent(1));
-		    MergedProcesses->SetBinContent(0,0);
 				MergedProcesses->GetXaxis()->SetTitle(plots_[i].first->GetXaxis()->GetTitle());
 				MergedProcesses->GetYaxis()->SetTitle(plots_[i].first->GetYaxis()->GetTitle());
 			  SetsOfMergedProcesses.push_back(pair<TH1F*,Dataset*>(MergedProcesses,dataSet));
@@ -390,7 +392,9 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
   //regular 'luminosity normalized'
   name = "CanvasStack_"+label;
 	hCanvasStack_ = new TCanvas(name.c_str(), name.c_str(), 1000, 700);
+	hCanvasStack_->SetRightMargin(0.035);
 	hCanvasStackLogY_ = new TCanvas((name+"_LogY").c_str(), (name+"_LogY").c_str(), 1000, 700);
+	hCanvasStackLogY_->SetRightMargin(0.035);
 	float ymax = 0;
 	if(hStack_)
 	{
@@ -410,7 +414,9 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
   //'area normalized'
 	name = "CanvasStackAreaNorm_"+label;
 	hCanvasStackAreaNorm_ = new TCanvas(name.c_str(), name.c_str(), 1000, 700);
+	hCanvasStackAreaNorm_->SetRightMargin(0.035);
 	hCanvasStackAreaNormLogY_ = new TCanvas((name+"_LogY").c_str(), (name+"_LogY").c_str(), 1000, 700);
+	hCanvasStackAreaNormLogY_->SetRightMargin(0.035);
 	float ymaxAreaNorm = 0;
 	if(hStackAreaNorm_)
 	{
@@ -448,7 +454,7 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
           ratio->SetMinimum(0.5);
 			 }
 			 else if(RatioType==2)
-			 {
+			 { 
 			    ratio->Add(totalSM,-1);
 			    ratio->Divide(totalSM); //ratio = (data-MC)/MC
 					ratio->GetYaxis()->SetTitle("(Data-MC)/MC");
@@ -470,6 +476,7 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
     pad->SetFillColor(0); // was 1 but could have been related to the problem of black canvases
     pad->SetFillStyle(0); // was 1 but could have been related to the problem of black canvases
     pad->SetGridy(1);
+		pad->SetRightMargin(0.035);
     padLogY = (TPad*) pad->Clone();
   }
 
@@ -614,6 +621,7 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
       padAreaNorm->SetFillColor(0);
       padAreaNorm->SetFillStyle(0);
       padAreaNorm->SetGridy(1);
+			padAreaNorm->SetRightMargin(0.035);
       padAreaNormLogY = (TPad*) padAreaNorm->Clone();
 	}
 
@@ -742,13 +750,26 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
 	if(hStack_)	hStack_->SetMaximum(ymax);
 	if(hStackAreaNorm_) hStackAreaNorm_->SetMaximum(ymaxAreaNorm);
 
-	hCanvasStack_->cd(0);
+/*	if(pad) pad->cd(0); //otherwise the legend disappears when saving the canvas...
+	else hCanvasStack_->cd(0);
+	leg_->Draw();
+	if(padLogY) padLogY->cd(0); //otherwise the legend disappears when saving the canvas...
+	else hCanvasStackLogY_->cd(0);
+	leg_->Draw(); 
+	if(padAreaNorm) padAreaNorm->cd(0); //otherwise the legend disappears when saving the canvas...
+	else hCanvasStackAreaNorm_->cd(0);			
+	legAreaNorm_->Draw();
+	if(padAreaNormLogY) padAreaNormLogY->cd(0); //otherwise the legend disappears when saving the canvas...
+	else hCanvasStackAreaNormLogY_->cd(0);			
+	legAreaNorm_->Draw();
+*/
+  hCanvasStack_->cd(0);
 	leg_->Draw();
 	hCanvasStackLogY_->cd(0);
-	leg_->Draw();
-	hCanvasStackAreaNorm_->cd(0);
+	leg_->Draw(); 
+	hCanvasStackAreaNorm_->cd(0);			
 	legAreaNorm_->Draw();
-	hCanvasStackAreaNormLogY_->cd(0);
+	hCanvasStackAreaNormLogY_->cd(0);			
 	legAreaNorm_->Draw();
 
   //if(tmpInfile) tmpInfile->Close(); //causes a crash when trying to write hData_ in the Write method...?
@@ -775,7 +796,7 @@ void MultiSamplePlot::DrawStackedPlot(TCanvas* canvas, TCanvas* canvasLogY, THSt
 	hstack->Draw("HIST");
 	hstack->GetXaxis()->SetTitle(xaxistitle);
 	hstack->GetYaxis()->SetTitle(yaxistitle);
-	hstack->GetYaxis()->SetTitleOffset(1.1);
+	hstack->GetYaxis()->SetTitleOffset(1.1);  //or 1.4
 
   if(RatioType>0)
 	{
@@ -820,7 +841,7 @@ void MultiSamplePlot::DrawStackedPlot(TCanvas* canvas, TCanvas* canvasLogY, THSt
 
 void MultiSamplePlot::DrawErrorBand(TH1F* totalSM, TH1F* hErrorPlus, TH1F* hErrorMinus, TH1F* hNominal, TGraphAsymmErrors*  ErrorGraph, bool ErrorBandAroundTotalInput)
 {
-  cout <<"In draw error band method..."<< endl;
+  //cout <<"In draw error band method..."<< endl;
 
   int nbins = totalSM->GetNbinsX()+1;
 	float bins[nbins];
@@ -828,7 +849,7 @@ void MultiSamplePlot::DrawErrorBand(TH1F* totalSM, TH1F* hErrorPlus, TH1F* hErro
 	float dummy[nbins];
 	float erroryplus[nbins]; //will be the errors relative to the total histo
 	float erroryminus[nbins]; //will be the errors relative to the total histo
-        float binwidth = totalSM->GetBinCenter(2) - totalSM->GetBinCenter(1); //assumes a fixed bin width...!
+	float binwidth = totalSM->GetBinCenter(2) - totalSM->GetBinCenter(1); //assumes a fixed bin width...!
 
   if((totalSM->GetNbinsX() != hErrorPlus->GetNbinsX()) || (totalSM->GetNbinsX() != hErrorMinus->GetNbinsX()))
 			cout<<"[MultiSamplePlot::DrawErrorBand] ERROR: error histograms have different binning than total SM histogram!"<<endl;
@@ -836,10 +857,13 @@ void MultiSamplePlot::DrawErrorBand(TH1F* totalSM, TH1F* hErrorPlus, TH1F* hErro
 	for(int iBin=0; iBin < totalSM->GetNbinsX()+1; iBin++)
 	{
 			bins[iBin] = totalSM->GetBinCenter(iBin);
-			if(ErrorBandAroundTotalInput){
+			if(dosystfile_)
+			{
+			 //we still have to take into account if the systematic shifted histogram bin(s) are above the nominal or below, since the input root file contains histograms of just 'raw' systematic shifted distribution(s)
+//			 if(ErrorBandAroundTotalInput){
 			   bincontents[iBin] = totalSM->GetBinContent(iBin); //meaning an error band around whatever is the total MC SM input (can be 'post-fit' (as in the profile likelihood method), the input is then not the 'nominal' expectation anymore w.r.t which the error band is intrinsically defined)
 
-			   //First deal with the somehwhat rare case where the up/down systematic variation both produce a deviation in the same direction
+			   //First deal with the somewhat rare case where the up/down systematic variation both produce a deviation in the same direction
 			   if ((  bincontents[iBin] > hErrorPlus->GetBinContent(iBin) )  &&  (  bincontents[iBin] > hErrorMinus->GetBinContent(iBin) ) ){
 			     erroryplus[iBin] =0;
 			     if( hErrorMinus->GetBinContent(iBin) <  hErrorPlus->GetBinContent(iBin)){
@@ -871,13 +895,25 @@ void MultiSamplePlot::DrawErrorBand(TH1F* totalSM, TH1F* hErrorPlus, TH1F* hErro
                              erroryminus[iBin] =   bincontents[iBin]  -  hErrorPlus->GetBinContent(iBin);
 			   }
 			   }
+//			 }
+//			 else {
+//			   bincontents[iBin] = hNominal->GetBinContent(iBin);
+//			   erroryplus[iBin] = hErrorPlus->GetBinContent(iBin) - hNominal->GetBinContent(iBin);
+//			   erroryminus[iBin] = hNominal->GetBinContent(iBin) - hErrorMinus->GetBinContent(iBin);
+//			 }
+       dummy[iBin] = binwidth/2;
 			}
-			else {
-			   bincontents[iBin] = hNominal->GetBinContent(iBin);
-			erroryplus[iBin] = hErrorPlus->GetBinContent(iBin) - hNominal->GetBinContent(iBin);
-			erroryminus[iBin] = hNominal->GetBinContent(iBin) - hErrorMinus->GetBinContent(iBin);
+			else
+			{
+			  //The input systematic shifted histogram has already been produced in the form of the histograms that can directly be used as 'up' and 'down' bands, above and below the nominal, respectively.
+			  if(ErrorBandAroundTotalInput)
+			    bincontents[iBin] = totalSM->GetBinContent(iBin); //meaning an error band around whatever is the total MC SM input (can be 'post-fit' (as in the profile likelihood method), the input is then not the 'nominal' expectation anymore w.r.t which the error band is intrinsically defined)
+			  else 
+			    bincontents[iBin] = hNominal->GetBinContent(iBin);
+			  erroryplus[iBin] = hErrorPlus->GetBinContent(iBin) - hNominal->GetBinContent(iBin);
+			  erroryminus[iBin] = hNominal->GetBinContent(iBin) - hErrorMinus->GetBinContent(iBin);
+        dummy[iBin] = binwidth/2;			
 			}
-      dummy[iBin] = binwidth/2;
 
       cout <<"  bin "<<   iBin << " error plus  " <<  hErrorPlus->GetBinContent(iBin)	  <<  " error minus  " << hErrorMinus->GetBinContent(iBin)  <<" SM total  " <<  bincontents[iBin]   << " band up "  <<  erroryplus[iBin]    << "  band down " <<  erroryminus[iBin]  << endl;
 
@@ -907,7 +943,7 @@ void MultiSamplePlot::Write(TFile* fout, string label, bool savePNG, string path
 	if(hCanvas_)
 	{
 	  if(savePNG)
-	    hCanvas_->SaveAs( (pathPNG+label+"_Normalized."+ext).c_str() );
+	    hCanvas_->SaveAs( (pathPNG+"/"+label+"_Normalized."+ext).c_str() );
 	  hCanvas_->Write();
 	}
 
@@ -916,7 +952,7 @@ void MultiSamplePlot::Write(TFile* fout, string label, bool savePNG, string path
 	  if(hStack_) hStack_->SetMinimum(0.001);
 	  hCanvasStack_->Write();
 	  if(savePNG)
-	    hCanvasStack_->SaveAs( (pathPNG+label+"_Stack."+ext).c_str() );
+	    hCanvasStack_->SaveAs( (pathPNG+"/"+label+"_Stack."+ext).c_str() );
 	}
 
 	if(hCanvasStackLogY_)
@@ -924,7 +960,7 @@ void MultiSamplePlot::Write(TFile* fout, string label, bool savePNG, string path
 	  if(hStack_) hStack_->SetMinimum(minLogY_);
 	  hCanvasStackLogY_->Write();
 	  if(savePNG)
-	    hCanvasStackLogY_->SaveAs( (pathPNG+label+"_StackLogY."+ext).c_str() );
+	    hCanvasStackLogY_->SaveAs( (pathPNG+"/"+label+"_StackLogY."+ext).c_str() );
 	}
 
 	if(hCanvasStackAreaNorm_ && hData_)
@@ -932,7 +968,7 @@ void MultiSamplePlot::Write(TFile* fout, string label, bool savePNG, string path
 	  if(hStackAreaNorm_) hStackAreaNorm_->SetMinimum(0.001);
 	  hCanvasStackAreaNorm_->Write();
 	  if(savePNG)
-	    hCanvasStackAreaNorm_->SaveAs( (pathPNG+label+"_StackAreaNorm."+ext).c_str() );
+	    hCanvasStackAreaNorm_->SaveAs( (pathPNG+"/"+label+"_StackAreaNorm."+ext).c_str() );
 	}
 
 	if(hCanvasStackAreaNormLogY_ && hData_)
@@ -940,7 +976,7 @@ void MultiSamplePlot::Write(TFile* fout, string label, bool savePNG, string path
 	  if(hStackAreaNorm_) hStackAreaNorm_->SetMinimum(minLogY_);
 	  hCanvasStackAreaNormLogY_->Write();
 	  if(savePNG)
-	    hCanvasStackAreaNormLogY_->SaveAs( (pathPNG+label+"_StackAreaNormLogY."+ext).c_str() );
+	    hCanvasStackAreaNormLogY_->SaveAs( (pathPNG+"/"+label+"_StackAreaNormLogY."+ext).c_str() );
 	}
 
 	for(unsigned int i=0; i<plots_.size(); i++)

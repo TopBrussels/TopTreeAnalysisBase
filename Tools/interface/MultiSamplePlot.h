@@ -26,8 +26,8 @@ The dataset containing data should be called "data" or "Data" or "DATA".\\
 class MultiSamplePlot{
 
 	public:
-		MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int Nbins, float Min, float Max, string XaxisLabel = string("Variable"), string YaxisLabel = string("#Events"), string AddText = string(""));
-		MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int Nbins, float* binsX, string XaxisLabel = string("Variable"), string YaxisLabel = string("#Events"), string AddText = string(""));
+		MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int Nbins, float Min, float Max, string XaxisLabel = string("Variable"), string YaxisLabel = string("Events"), string AddText = string(""));
+		MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int Nbins, float* binsX, string XaxisLabel = string("Variable"), string YaxisLabel = string("Events"), string AddText = string(""));
 		MultiSamplePlot(vector<pair<TH1F*,Dataset*> > vec, string PlotName, string XaxisLabel, string YaxisLabel, string AddText);
 		~MultiSamplePlot();
 
@@ -44,7 +44,7 @@ class MultiSamplePlot{
 		void setMinLogY(float y) { minLogY_ = y; } /**set minimum value of log-scale y-axis*/
 		void addText(string text) { text_ = text; } /**add some text on the plot (as alternative to specifying it in the constructor)*/
 		string getplotName() {return plotName_; }
-		void setErrorBandFile(string errorbandfile) { errorbandfile_ = errorbandfile;} /**set the file where to look for the errorbands*/
+		void setErrorBandFile(string errorbandfile, bool dosystfile = false) { errorbandfile_ = errorbandfile; dosystfile_ = dosystfile;} /**set the file where to look for the errorbands. If systfile is set to true, this file actually only contains systematic shifted histograms, not yet the actual error 'band'*/
 	
 	private:
 	  void Initialize(); /**initialize some private members common for all MultiSamplePlot constructors*/
@@ -66,6 +66,7 @@ class MultiSamplePlot{
 		TString text_;
 		bool showNumberEntries_;
 		string errorbandfile_;
+		bool dosystfile_;
 		TLegend* leg_;
 		TLegend* legAreaNorm_;
 		int      Nbins_;
