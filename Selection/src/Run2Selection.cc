@@ -340,10 +340,10 @@ std::vector<TRootMuon*> Run2Selection::GetSelectedMediumMuonsJuly2015(float PtTh
 		//float reliso = (muons[i]->chargedHadronIso()+muons[i]->neutralHadronIso()+muons[i]->photonIso())/muons[i]->Pt();
 		// use cone 4 iso for muons:
 		float reliso = (muons[i]->chargedHadronIso(4) + max( 0.0, muons[i]->neutralHadronIso(4) + muons[i]->photonIso(4) - 0.5*muons[i]->puChargedHadronIso(4) ) ) / muons[i]->Pt(); // dBeta corrected
-                bool goodGlob = (muons[i]->isGlobalMuon() 
-                              && muons[i]->chi2() < 3 
-                              && muons[i]->chi2LocalPosition() < 12 
-                              && muons[i]->trkKink() < 20); 
+                bool goodGlob = (muons[i]->isGlobalMuon()
+                              && muons[i]->chi2() < 3
+                              && muons[i]->chi2LocalPosition() < 12
+                              && muons[i]->trkKink() < 20);
 
 		if(     (muons[i]->isGlobalMuon() || muons[i]->isTrackerMuon()) && muons[i]->isPFMuon()
 		   && muons[i]->Pt()>PtThr
@@ -548,6 +548,15 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedElectrons(float PtThr, flo
 		else if (ProductionCampaign == "Spring15_50ns" && WorkingPoint == "Loose"){
 			ElectronCollection = GetSelectedLooseElectronsCutsBasedSpring15_50ns(PtThr, etaThr);
 		}
+		else if (ProductionCampaign == "Spring15_25ns" && WorkingPoint == "Tight"){
+			ElectronCollection = GetSelectedTightElectronsCutsBasedSpring15_25ns(PtThr, etaThr);
+		}
+		else if (ProductionCampaign == "Spring15_25ns" && WorkingPoint == "Medium"){
+			ElectronCollection = GetSelectedMediumElectronsCutsBasedSpring15_25ns(PtThr, etaThr);
+		}
+		else if (ProductionCampaign == "Spring15_25ns" && WorkingPoint == "Loose"){
+			ElectronCollection = GetSelectedLooseElectronsCutsBasedSpring15_25ns(PtThr, etaThr);
+		}
 		else {
 			string printboolval="Cutbased=true";
 			if(!CutsBased)
@@ -634,7 +643,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedTightElectronsCutsBasedSpr
 			if( fabs(el->superClusterEta()) <= 1.479
 			   && fabs(el->deltaEtaIn()) <  0.0095
 			   && fabs(el->deltaPhiIn()) < 0.0291
-			   && el->sigmaIEtaIEta() < 0.0101
+			   && el->sigmaIEtaIEta_full5x5() < 0.0101
 			   && el->hadronicOverEm() < 0.0372
 			   && fabs(el->d0()) < 0.0144
 			   && fabs(el->dz()) < 0.323
@@ -649,7 +658,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedTightElectronsCutsBasedSpr
 			else if (fabs(el->superClusterEta()) < 2.5
 					 && fabs(el->deltaEtaIn()) <  0.00762
 					 && fabs(el->deltaPhiIn()) <  0.0439
-					 && el->sigmaIEtaIEta() <  0.0287
+					 && el->sigmaIEtaIEta_full5x5() <  0.0287
 					 && (el->hadronicOverEm() < 0.0544)
 					 && fabs(el->d0()) < 0.0377
 					 && fabs(el->dz()) < 0.571
@@ -680,7 +689,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedMediumElectronsCutsBasedSp
 			if( fabs(el->superClusterEta()) <= 1.479
 			   && fabs(el->deltaEtaIn()) < 0.0094
 			   && fabs(el->deltaPhiIn()) < 0.0296
-			   && el->sigmaIEtaIEta() < 0.0101
+			   && el->sigmaIEtaIEta_full5x5() < 0.0101
 			   && el->hadronicOverEm() < 0.0372
 			   && fabs(el->d0()) < 0.0151
 			   && fabs(el->dz()) < 0.238
@@ -695,12 +704,12 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedMediumElectronsCutsBasedSp
 			else if (fabs(el->superClusterEta()) < 2.5
 					 && fabs(el->deltaEtaIn()) <  0.00773
 					 && fabs(el->deltaPhiIn()) < 0.148
-					 && el->sigmaIEtaIEta() < 0.028237
-					 && (el->hadronicOverEm() < 0.0287)
+					 && el->sigmaIEtaIEta_full5x5() < 0.0287
+					 && (el->hadronicOverEm() < 0.0546)
 					 && fabs(el->d0()) < 0.0535
 					 && fabs(el->dz()) < 0.572
-					 && fabs(1/el->E() - 1/el->P()) < 0.098919
-					 && pfElectronIso(el) < 0.104
+					 && fabs(1/el->E() - 1/el->P()) < 0.104
+					 && pfElectronIso(el) < 0.0902
 					 && el->passConversion()
 					 && el->missingHits() <= 1)
 			{
@@ -726,7 +735,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedLooseElectronsCutsBasedSpr
 			if( fabs(el->superClusterEta()) <= 1.479
 			   && fabs(el->deltaEtaIn()) < 0.00976
 			   && fabs(el->deltaPhiIn()) < 0.0929
-			   && el->sigmaIEtaIEta() <  0.0105
+			   && el->sigmaIEtaIEta_full5x5() <  0.0105
 			   && el->hadronicOverEm() < 0.0765
 			   && fabs(el->d0()) <  0.0227
 			   && fabs(el->dz()) <  0.379
@@ -741,7 +750,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedLooseElectronsCutsBasedSpr
 			else if (fabs(el->superClusterEta()) < 2.5
 					 && fabs(el->deltaEtaIn()) <  0.00952
 					 && fabs(el->deltaPhiIn()) < 0.181
-					 && el->sigmaIEtaIEta() <  0.0318
+					 && el->sigmaIEtaIEta_full5x5() <  0.0318
 					 && (el->hadronicOverEm() < 0.0824)
 					 && fabs(el->d0()) <  0.242
 					 && fabs(el->dz()) <  0.921
@@ -757,6 +766,144 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedLooseElectronsCutsBasedSpr
 	std::sort(selectedElectrons.begin(),selectedElectrons.end(),HighestPt());
 	return selectedElectrons;
 }
+
+std::vector<TRootElectron*> Run2Selection::GetSelectedTightElectronsCutsBasedSpring15_25ns(float PtThr, float EtaThr) const {
+	// (PLEASE UPDATE IF YOU CHANGE THIS CODE)
+	//These quality cuts reflect the recommended Tight cut-based electron ID as provided by the EGM POG. Last updated: 26 August 2015
+	// as these are still in flux, it is probably useful to check them here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2#Spring15_selection_50ns
+
+	std::vector<TRootElectron*> selectedElectrons;
+	for(unsigned int i=0; i<electrons.size(); i++) {
+		TRootElectron* el = (TRootElectron*) electrons[i];
+		// Using cut-based, BARREL:
+		if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr) {
+			if( fabs(el->superClusterEta()) <= 1.479
+			   && fabs(el->deltaEtaIn()) <  0.00926
+			   && fabs(el->deltaPhiIn()) < 0.0336
+			   && el->sigmaIEtaIEta_full5x5() < 0.0101
+			   && el->hadronicOverEm() < 0.0597
+			   && fabs(el->d0()) < 0.0111
+			   && fabs(el->dz()) < 0.0466
+			   && fabs(1/el->E() - 1/el->P()) < 0.012
+			   && pfElectronIso(el) <  0.0354
+			   && el->passConversion()
+			   && el->missingHits() <= 2)
+			{
+				selectedElectrons.push_back(electrons[i]);
+			}
+			// using cut-based, ENDCAP:
+			else if (fabs(el->superClusterEta()) < 2.5
+					 && fabs(el->deltaEtaIn()) <  0.00724
+					 && fabs(el->deltaPhiIn()) <  0.0918
+					 && el->sigmaIEtaIEta_full5x5() <  0.0279
+					 && (el->hadronicOverEm() < 0.0615)
+					 && fabs(el->d0()) < 0.0351
+					 && fabs(el->dz()) < 0.417
+					 && fabs(1/el->E() - 1/el->P()) < 0.0898
+					 && pfElectronIso(el) < 0.0646
+					 && el->passConversion()
+					 && el->missingHits() <= 1)
+			{
+				selectedElectrons.push_back(electrons[i]);
+			}
+		}
+	}
+	std::sort(selectedElectrons.begin(),selectedElectrons.end(),HighestPt());
+	return selectedElectrons;
+}
+
+
+std::vector<TRootElectron*> Run2Selection::GetSelectedMediumElectronsCutsBasedSpring15_25ns(float PtThr, float EtaThr) const {
+	// (PLEASE UPDATE IF YOU CHANGE THIS CODE)
+	//These quality cuts reflect the recommended Tight cut-based electron ID as provided by the EGM POG. Last updated: 26 August 2015
+	// as these are still in flux, it is probably useful to check them here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2#Spring15_selection_50ns
+
+	std::vector<TRootElectron*> selectedElectrons;
+	for(unsigned int i=0; i<electrons.size(); i++) {
+		TRootElectron* el = (TRootElectron*) electrons[i];
+		// Using cut-based
+		if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr) {
+			if( fabs(el->superClusterEta()) <= 1.479
+			   && fabs(el->deltaEtaIn()) < 0.0103
+			   && fabs(el->deltaPhiIn()) < 0.0336
+			   && el->sigmaIEtaIEta_full5x5() < 0.0101
+			   && el->hadronicOverEm() < 0.0876
+			   && fabs(el->d0()) < 0.0118
+			   && fabs(el->dz()) < 0.373
+			   && fabs(1/el->E() - 1/el->P()) < 0.0174
+			   && pfElectronIso(el) < 0.0766
+			   && el->passConversion()
+			   && el->missingHits() <= 2)
+			{
+				selectedElectrons.push_back(electrons[i]);
+			}
+
+			else if (fabs(el->superClusterEta()) < 2.5
+					 && fabs(el->deltaEtaIn()) <  0.00733
+					 && fabs(el->deltaPhiIn()) < 0.114
+					 && el->sigmaIEtaIEta_full5x5() < 0.0283
+					 && (el->hadronicOverEm() < 0.0678)
+					 && fabs(el->d0()) < 0.0739
+					 && fabs(el->dz()) < 0.602
+					 && fabs(1/el->E() - 1/el->P()) < 0.0898
+					 && pfElectronIso(el) < 0.0678
+					 && el->passConversion()
+					 && el->missingHits() <= 1)
+			{
+				selectedElectrons.push_back(electrons[i]);
+			}
+		}
+	}
+	std::sort(selectedElectrons.begin(),selectedElectrons.end(),HighestPt());
+	return selectedElectrons;
+}
+
+
+std::vector<TRootElectron*> Run2Selection::GetSelectedLooseElectronsCutsBasedSpring15_25ns(float PtThr, float EtaThr) const {
+	// (PLEASE UPDATE IF YOU CHANGE THIS CODE)
+	//These quality cuts reflect the recommended Tight cut-based electron ID as provided by the EGM POG. Last updated: 26 August 2015
+	// as these are still in flux, it is probably useful to check them here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2#Spring15_selection_50ns
+
+	std::vector<TRootElectron*> selectedElectrons;
+	for(unsigned int i=0; i<electrons.size(); i++) {
+		TRootElectron* el = (TRootElectron*) electrons[i];
+		// Using cut-based
+		if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr) {
+			if( fabs(el->superClusterEta()) <= 1.479
+			   && fabs(el->deltaEtaIn()) < 0.0105
+			   && fabs(el->deltaPhiIn()) < 0.115
+			   && el->sigmaIEtaIEta_full5x5() <  0.0103
+			   && el->hadronicOverEm() < 0.104
+			   && fabs(el->d0()) <  0.0261
+			   && fabs(el->dz()) <  0.41
+			   && fabs(1/el->E() - 1/el->P()) <  0.102
+			   && pfElectronIso(el) <  0.0893
+			   && el->passConversion()
+			   && el->missingHits() <= 2)
+			{
+				selectedElectrons.push_back(electrons[i]);
+			}
+
+			else if (fabs(el->superClusterEta()) < 2.5
+					 && fabs(el->deltaEtaIn()) <  0.00814
+					 && fabs(el->deltaPhiIn()) < 0.182
+					 && el->sigmaIEtaIEta_full5x5() <  0.0301
+					 && (el->hadronicOverEm() < 0.0897)
+					 && fabs(el->d0()) <  0.118
+					 && fabs(el->dz()) <  0.822
+					 && fabs(1/el->E() - 1/el->P()) <  0.126
+					 && pfElectronIso(el) <  0.121
+					 && el->passConversion()
+					 && el->missingHits() <= 1)
+			{
+				selectedElectrons.push_back(electrons[i]);
+			}
+		}
+	}
+	std::sort(selectedElectrons.begin(),selectedElectrons.end(),HighestPt());
+	return selectedElectrons;
+}
+
 
 
 std::vector<TRootElectron*> Run2Selection::GetSelectedTightElectronsCutsBasedPHYS14(float PtThr, float EtaThr) const {
