@@ -189,10 +189,38 @@ std::vector<TRootPFJet*> Run2Selection::GetSelectedBJets(const std::vector<TRoot
 
 // ______________MUONS________________________________________________//
 
-std::vector<TRootMuon*> Run2Selection::GetSelectedMuons(float PtThr, float EtaThr, float NormChi2, int NTrackerLayersWithMeas, int NValidMuonHits, float d0, float dZ, int NValidPixelHits, int NMatchedStations, float RelIso) const
+
+std::vector<TRootMuon*> Run2Selection::GetSelectedMuons() const
 {
-	//Thes quality cuts reflect the Tight Muon ID as provided by the MUON POG.  PT, Eta, and Iso thresholds are not tuned as of July 17, 2015.
-	std::vector<TRootMuon*> selectedMuons;
+        //Default Muon selection method.  This method should be updated to the most recent set of recommended cuts regularly.  Currently it points to the MUON POG Medium working point with Pt, Eta, and dBeta RelIso thresholds set as in the TOP PAG selection TWiki for single lepton event ID.
+	return GetSelectedMuons(26,2.1,0.12, "Tight", "Spring15");
+}
+
+std::vector<TRootMuon*> Run2Selection::GetSelectedMuons(float PtThr, float etaThr, float relIso, string WorkingPoint, string ProductionCampaign) const
+{
+	std::vector<TRootMuon* > MuonCollection;
+
+		if (ProductionCampaign == "Spring15" && WorkingPoint == "Tight"){
+			MuonCollection = GetSelectedTightMuonsJuly2015(PtThr, etaThr, relIso);
+		}
+		else if (ProductionCampaign == "Spring15" && WorkingPoint == "Medium"){
+			MuonCollection = GetSelectedMediumMuonsJuly2015(PtThr, etaThr, relIso);
+		}
+		else if (ProductionCampaign == "Spring15" && WorkingPoint == "Loose"){
+			MuonCollection = GetSelectedLooseMuonsJuly2015(PtThr, etaThr, relIso);
+		}
+		else {
+			throw std::invalid_argument( "received incorrect args to GetSelectedElectrons, requested: "+WorkingPoint+", "+ProductionCampaign);
+		}
+
+	return MuonCollection;
+}
+
+// displaced muons
+std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons(float PtThr, float EtaThr, float NormChi2, int NTrackerLayersWithMeas, int NValidMuonHits, float d0, float dZ, int NValidPixelHits, int NMatchedStations, float RelIso) const
+{
+	// start from 'standard' muons with an extremely loose dz and d0 cut
+std::vector<TRootMuon*> selectedMuons;
 	for(unsigned int i=0; i<muons.size(); i++)
 	{
 
@@ -205,8 +233,8 @@ std::vector<TRootMuon*> Run2Selection::GetSelectedMuons(float PtThr, float EtaTh
 		   && muons[i]->chi2() < NormChi2
 		   && muons[i]->nofTrackerLayersWithMeasurement() > NTrackerLayersWithMeas
 		   //&& muons[i]->nofValidMuHits() > NValidMuonHits
-		   && fabs(muons[i]->d0()) < d0
-		   && fabs(muons[i]->dz()) < dZ
+		   && fabs(muons[i]->d0()) < 1000
+		   && fabs(muons[i]->dz()) < 1000
 		   && muons[i]->nofValidPixelHits() > NValidPixelHits
 		   && muons[i]->nofMatchedStations()> NMatchedStations
 		   && reliso < RelIso)
@@ -214,28 +242,7 @@ std::vector<TRootMuon*> Run2Selection::GetSelectedMuons(float PtThr, float EtaTh
 			selectedMuons.push_back(muons[i]);
 		}
 	}
-	std::sort(selectedMuons.begin(),selectedMuons.end(),HighestPt());
-	return selectedMuons;
-}
-
-std::vector<TRootMuon*> Run2Selection::GetSelectedMuons() const
-{
-        //Default Muon selection method.  This method should be updated to the most recent set of recommended cuts regularly.  Currently it points to the MUON POG Medium working point with Pt, Eta, and dBeta RelIso thresholds set as in the TOP PAG selection TWiki for single lepton event ID.
-	return GetSelectedMediumMuonsJuly2015(26,2.1,0.12);
-}
-
-std::vector<TRootMuon*> Run2Selection::GetSelectedMuons(float PtThr, float EtaThr,float MuonRelIso) const
-{
-        //Default User defined threshold Muon selection method.  This method should be updated to the most recent set of recommended cuts regularly.  Currently it points to the MUON POG Medium working point with Pt, Eta, and dBeta RelIso thresholds set by the user.
-	return GetSelectedMediumMuonsJuly2015(PtThr,EtaThr,MuonRelIso);
-}
-
-// displaced muons
-std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons(float PtThr, float EtaThr, float NormChi2, int NTrackerLayersWithMeas, int NValidMuonHits, float d0, float dZ, int NValidPixelHits, int NMatchedStations, float RelIso) const
-{
-	// start from 'standard' muons with an extremely loose dz and d0 cut
-	std::vector<TRootMuon*> selectedMuons = GetSelectedMuons(PtThr,EtaThr,NormChi2,NTrackerLayersWithMeas,NValidMuonHits,1000,1000,NValidPixelHits,NMatchedStations,RelIso);
-	std::vector<TRootMuon*> chosenMuons;
+	std::sort(selectedMuons.begin(),selectedMuons.end(),HighestPt());	std::vector<TRootMuon*> chosenMuons;
 	//	and then loop over the list and copy over good ones to the new array, making selection cuts on the beam spot information instead of the 'standard' d0 and dz info
 	for(unsigned int ii=0; ii< selectedMuons.size(); ii++){
 		if(fabs(selectedMuons[ii]->d0BeamSpot())<d0)
@@ -259,53 +266,6 @@ std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons(float PtThr,flo
 std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons() const
 {
 	return GetSelectedDisplacedMuons(30.,2.5,0.02,0.5,0.2);
-}
-
-
-std::vector<TRootMuon*> Run2Selection::GetSelectedDiMuons(float PtThr, float EtaThr,float MuonRelIso) const
-{
-	std::vector<TRootMuon*> selectedMuons;
-	for(unsigned int i=0; i<muons.size(); i++)
-	{
-		float reliso = (muons[i]->chargedHadronIso(4) + max( 0.0, muons[i]->neutralHadronIso(4) + muons[i]->photonIso(4) - 0.5*muons[i]->puChargedHadronIso(4) ) ) / muons[i]->Pt(); // dBeta corrected
-		if((muons[i]->isGlobalMuon() || muons[i]->isTrackerMuon())
-		   && muons[i]->isPFMuon()
-		   && muons[i]->Pt()>PtThr
-		   && fabs(muons[i]->Eta())<EtaThr
-		   && reliso < MuonRelIso )
-		{
-			selectedMuons.push_back(muons[i]);
-		}
-	}
-	std::sort(selectedMuons.begin(),selectedMuons.end(),HighestPt());
-	return selectedMuons;
-}
-
-std::vector<TRootMuon*> Run2Selection::GetSelectedDiMuons() const
-{
-	return GetSelectedDiMuons(20,2.4,0.20);
-}
-
-std::vector<TRootMuon*> Run2Selection::GetSelectedLooseMuons(float PtThr, float EtaThr,float MuonRelIso) const
-{
-	std::vector<TRootMuon*> selectedMuons;
-	for(unsigned int i=0; i<muons.size(); i++)
-	{
-		// use cone 4 iso for muons:
-		float reliso = (muons[i]->chargedHadronIso(4) + max( 0.0, muons[i]->neutralHadronIso(4) + muons[i]->photonIso(4) - 0.5*muons[i]->puChargedHadronIso(4) ) ) / muons[i]->Pt(); // dBeta corrected
-
-		if((muons[i]->isGlobalMuon() || muons[i]->isTrackerMuon()) && muons[i]->isPFMuon() && fabs(muons[i]->Eta())<EtaThr && muons[i]->Pt()>PtThr && reliso < MuonRelIso )
-		{
-			selectedMuons.push_back(muons[i]);
-		}
-	}
-	std::sort(selectedMuons.begin(),selectedMuons.end(),HighestPt());
-	return selectedMuons;
-}
-
-std::vector<TRootMuon*> Run2Selection::GetSelectedLooseMuons() const
-{
-	return GetSelectedLooseMuons(10, 2.5, 0.20);
 }
 
 std::vector<TRootMuon*> Run2Selection::GetSelectedLooseMuonsJuly2015(float PtThr, float EtaThr,float MuonRelIso) const
