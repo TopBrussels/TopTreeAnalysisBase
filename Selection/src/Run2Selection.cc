@@ -247,7 +247,7 @@ std::vector<TRootMuon*> selectedMuons;
 	for(unsigned int ii=0; ii< selectedMuons.size(); ii++){
 		if(fabs(selectedMuons[ii]->d0BeamSpot())<d0)
 			continue;
-		if(fabs(selectedMuons[ii]->dzBeamSpot())>dZ)
+		if(fabs(selectedMuons[ii]->dzBeamSpot())<dZ)
 			continue;
 
 		chosenMuons.push_back(selectedMuons[ii]);
