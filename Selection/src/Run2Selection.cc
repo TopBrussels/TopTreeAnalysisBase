@@ -200,13 +200,13 @@ std::vector<TRootMuon*> Run2Selection::GetSelectedMuons(float PtThr, float etaTh
 {
 	std::vector<TRootMuon* > MuonCollection;
 
-		if (ProductionCampaign == "Spring_15" && WorkingPoint == "Tight"){
+		if (ProductionCampaign == "Spring15" && WorkingPoint == "Tight"){
 			MuonCollection = GetSelectedTightMuonsJuly2015(PtThr, etaThr, relIso);
 		}
-		else if (ProductionCampaign == "Spring_15" && WorkingPoint == "Medium"){
+		else if (ProductionCampaign == "Spring15" && WorkingPoint == "Medium"){
 			MuonCollection = GetSelectedMediumMuonsJuly2015(PtThr, etaThr, relIso);
 		}
-		else if (ProductionCampaign == "Spring_15" && WorkingPoint == "Loose"){
+		else if (ProductionCampaign == "Spring15" && WorkingPoint == "Loose"){
 			MuonCollection = GetSelectedLooseMuonsJuly2015(PtThr, etaThr, relIso);
 		}
 		else {
@@ -481,6 +481,10 @@ float Run2Selection::pfElectronIso(TRootElectron *el) const{
 
 	return isolation;
 
+}
+
+std::vector<TRootElectron*> Run2Selection::GetSelectedElectrons() const {
+	return GetSelectedElectrons(30,2.5,"Tight","Spring15_25ns",true);
 }
 
 std::vector<TRootElectron*> Run2Selection::GetSelectedElectrons(string WorkingPoint, string ProductionCampaign, bool CutsBased) const {
