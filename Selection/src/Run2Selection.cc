@@ -193,24 +193,24 @@ std::vector<TRootPFJet*> Run2Selection::GetSelectedBJets(const std::vector<TRoot
 std::vector<TRootMuon*> Run2Selection::GetSelectedMuons() const
 {
         //Default Muon selection method.  This method should be updated to the most recent set of recommended cuts regularly.  Currently it points to the MUON POG Medium working point with Pt, Eta, and dBeta RelIso thresholds set as in the TOP PAG selection TWiki for single lepton event ID.
-	return GetSelectedMuons(26,2.1,0.12, "Tight", "Spring15");
+	return GetSelectedMuons(26,2.1,0.12, "Tight", "Spring_15");
 }
 
 std::vector<TRootMuon*> Run2Selection::GetSelectedMuons(float PtThr, float etaThr, float relIso, string WorkingPoint, string ProductionCampaign) const
 {
 	std::vector<TRootMuon* > MuonCollection;
 
-		if (ProductionCampaign == "Spring15" && WorkingPoint == "Tight"){
+		if (ProductionCampaign == "Spring_15" && WorkingPoint == "Tight"){
 			MuonCollection = GetSelectedTightMuonsJuly2015(PtThr, etaThr, relIso);
 		}
-		else if (ProductionCampaign == "Spring15" && WorkingPoint == "Medium"){
+		else if (ProductionCampaign == "Spring_15" && WorkingPoint == "Medium"){
 			MuonCollection = GetSelectedMediumMuonsJuly2015(PtThr, etaThr, relIso);
 		}
-		else if (ProductionCampaign == "Spring15" && WorkingPoint == "Loose"){
+		else if (ProductionCampaign == "Spring_15" && WorkingPoint == "Loose"){
 			MuonCollection = GetSelectedLooseMuonsJuly2015(PtThr, etaThr, relIso);
 		}
 		else {
-			throw std::invalid_argument( "received incorrect args to GetSelectedElectrons, requested: "+WorkingPoint+", "+ProductionCampaign);
+			throw std::invalid_argument( "received incorrect args to GetSelectedMuons, requested: "+WorkingPoint+", "+ProductionCampaign);
 		}
 
 	return MuonCollection;
@@ -452,11 +452,11 @@ bool Run2Selection::foundZCandidate(std::vector<TRootMuon*>& muons1, std::vector
 float Run2Selection::GetElectronIsoCorrType(TRootElectron *el) const{
 	double EffectiveArea = 0.;
 	// Updated to 2015 EA from https://indico.cern.ch/event/370494/contribution/2/attachments/736984/1011061/Rami_update_on_CB_ELE_ID_PHYS14PU20bx25.pdf
-	if (fabs(el->superClusterEta()) >= 0.0   && fabs(el->superClusterEta()) < 0.8   ) EffectiveArea = 0.1013;
-	if (fabs(el->superClusterEta()) >= 0.8   && fabs(el->superClusterEta()) < 1.3 ) EffectiveArea = 0.0988;
-	if (fabs(el->superClusterEta()) >= 1.3 && fabs(el->superClusterEta()) < 2.0   ) EffectiveArea = 0.0572;
-	if (fabs(el->superClusterEta()) >= 2.0   && fabs(el->superClusterEta()) < 2.2   ) EffectiveArea = 0.0842;
-	if (fabs(el->superClusterEta()) >= 2.2   && fabs(el->superClusterEta()) < 2.5   ) EffectiveArea = 0.1530;
+	if (fabs(el->superClusterEta()) >= 0.0   && fabs(el->superClusterEta()) < 0.8   ) EffectiveArea = 0.0973;
+	if (fabs(el->superClusterEta()) >= 0.8   && fabs(el->superClusterEta()) < 1.3   ) EffectiveArea = 0.0954;
+	if (fabs(el->superClusterEta()) >= 1.3   && fabs(el->superClusterEta()) < 2.0   ) EffectiveArea = 0.0632;
+	if (fabs(el->superClusterEta()) >= 2.0   && fabs(el->superClusterEta()) < 2.2   ) EffectiveArea = 0.0727;
+	if (fabs(el->superClusterEta()) >= 2.2   && fabs(el->superClusterEta()) < 2.5   ) EffectiveArea = 0.1337;
 	if (fabs(el->superClusterEta()) >= 2.5) EffectiveArea = -9999;
 
 	double isocorr = 0;
@@ -601,14 +601,14 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedTightElectronsCutsBasedSpr
 		// Using cut-based, BARREL:
 		if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr) {
 			if( fabs(el->superClusterEta()) <= 1.479
-			   && fabs(el->deltaEtaIn()) <  0.0095
-			   && fabs(el->deltaPhiIn()) < 0.0291
+			   && fabs(el->deltaEtaIn()) <  0.00864
+			   && fabs(el->deltaPhiIn()) < 0.0286
 			   && el->sigmaIEtaIEta_full5x5() < 0.0101
-			   && el->hadronicOverEm() < 0.0372
-			   && fabs(el->d0()) < 0.0144
-			   && fabs(el->dz()) < 0.323
-			   && fabs(1/el->E() - 1/el->P()) < 0.0174
-			   && pfElectronIso(el) <  0.0468
+			   && el->hadronicOverEm() < 0.0342
+			   && fabs(el->d0()) < 0.0103
+			   && fabs(el->dz()) < 0.170
+			   && fabs(1/el->E() - 1/el->P()) < 0.0116
+			   && pfElectronIso(el) <  0.0591
 			   && el->passConversion()
 			   && el->missingHits() <= 2)
 			{
