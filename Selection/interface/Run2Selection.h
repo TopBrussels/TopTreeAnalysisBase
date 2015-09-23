@@ -97,7 +97,7 @@ public:
     float GetElectronIsoCorrType(TRootElectron* el) const;
     float pfElectronIso(TRootElectron *el) const;
 // ELECTRON GETTERS ===============================================
-    std::vector<TRootElectron*> Run2Selection::GetSelectedElectrons() const;
+    std::vector<TRootElectron*> GetSelectedElectrons() const;
 	std::vector<TRootElectron*> GetSelectedElectrons(string WorkingPoint, string ProductionCampaign, bool CutsBased) const;
 	std::vector<TRootElectron*> GetSelectedElectrons(float PTthr, float EtaThr, string WorkingPoint, string ProductionCampaign, bool CutsBased) const;
 
