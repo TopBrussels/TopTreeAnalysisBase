@@ -1,6 +1,6 @@
 #ifndef PlotTrigger_h
 #define PlotTrigger_h
-#include "Selection.h"
+#include "Run1Selection.h"
 #include "TopTreeAnalysisBase/Tools/interface/Efficiency.h"
 #include "TopTreeProducer/interface/TRootRun.h"
 
@@ -15,9 +15,9 @@ using namespace TopTree;
 
 class PlotTrigger {
 
-  
+
  public:
-  
+
   PlotTrigger();
   PlotTrigger(string labelVariable_, char* name, char* title, int nbins, float min, float max, int lineWidth = 2, int lineColor = 1);
   PlotTrigger(const PlotTrigger& psel);
@@ -43,9 +43,9 @@ class PlotTrigger {
   Efficiency eff_HLT_IsoMu15;
   Efficiency eff_HLT_IsoMu7_Jet40;
   Efficiency eff_HLT_Mu5_TripleJet30;
- 
+
   string labelVariable_;
-       
+
 };
 
 #endif

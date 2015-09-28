@@ -1,6 +1,6 @@
 #ifndef PlotSelection_h
 #define PlotSelection_h
-#include "Selection.h"
+#include "Run1Selection.h"
 #include "TopTreeAnalysisBase/Tools/interface/Efficiency.h"
 
 #include <iostream>
@@ -12,9 +12,9 @@ using namespace std;
 
 class PlotSelection {
 
-  
+
  public:
-  
+
   PlotSelection();
   PlotSelection(string labelVariable_, char* name, char* title, int nbins, float min, float max, int lineWidth = 2, int lineColor = 1);
   PlotSelection(const PlotSelection& psel);
@@ -24,7 +24,7 @@ class PlotSelection {
   string GetLabelVariable() const{ return labelVariable_;};
   void SetLabel();
   void SetLabelVariable(string label);
-	  
+
 
   void Fill(const Selection& sel, float var);
   void Write(TFile* fout);
@@ -35,10 +35,10 @@ class PlotSelection {
   Efficiency eff1MuonIso;
   Efficiency eff4Jets;
   Efficiency effAll;
- 
+
   string label_;
   string labelVariable_;
-       
+
 };
 
 #endif

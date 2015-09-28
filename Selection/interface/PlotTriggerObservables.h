@@ -1,6 +1,6 @@
 #ifndef PlotTriggerObservables_h
 #define PlotTriggerObservables_h
-#include "Selection.h"
+#include "Run1Selection.h"
 #include "TopTreeAnalysisBase/Tools/interface/Efficiency.h"
 #include "PlotTrigger.h"
 #include "TopTreeAnalysisBase/Reconstruction/interface/Observables.h"
@@ -13,9 +13,9 @@ using namespace std;
 
 class PlotTriggerObservables {
 
-  
+
  public:
-  
+
   PlotTriggerObservables();
   PlotTriggerObservables(const Observables& obs);
   PlotTriggerObservables(const PlotTriggerObservables& ptrig);
@@ -27,7 +27,7 @@ class PlotTriggerObservables {
  private:
 
   vector<PlotTrigger> PlotTrig;
-       
+
 };
 
 #endif

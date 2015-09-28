@@ -1,6 +1,6 @@
 #ifndef PlotSelectionObservables_h
 #define PlotSelectionObservables_h
-#include "Selection.h"
+#include "Run1Selection.h"
 #include "TopTreeAnalysisBase/Tools/interface/Efficiency.h"
 #include "PlotSelection.h"
 #include "TopTreeAnalysisBase/Reconstruction/interface/Observables.h"
@@ -13,9 +13,9 @@ using namespace std;
 
 class PlotSelectionObservables {
 
-  
+
  public:
-  
+
   PlotSelectionObservables();
   PlotSelectionObservables(const Observables& obs);
   PlotSelectionObservables(const PlotSelectionObservables& psel);
@@ -27,7 +27,7 @@ class PlotSelectionObservables {
  private:
 
   vector<PlotSelection> PlotSel;
-       
+
 };
 
 #endif
