@@ -178,7 +178,7 @@ void BTagWeightTools::FillMCEfficiencyHistos(vector< TopTree::TRootPFJet* > allS
 
 
 
-float BTagWeightTools::getMCEventWeight(vector< TopTree::TRootPFJet* > jetsPerEvent, TFile *histo_file) // https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods#1a_Event_reweighting_using_scale
+float BTagWeightTools::getMCEventWeight(vector< TopTree::TRootPFJet* > jetsPerEvent, TFile *histo_file,bool usePartonFlavour) // https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods#1a_Event_reweighting_using_scale
 {
 			if (!histo_file){
 				std::cerr << "ERROR in BTagWeigtTools::getTagEff: Could not open the file for the 2D histogram input." << std::endl;
@@ -191,8 +191,20 @@ float BTagWeightTools::getMCEventWeight(vector< TopTree::TRootPFJet* > jetsPerEv
 			float btagSF = 1.;
 			for (unsigned int i=0; i < jetsPerEvent.size(); i++) 
 			{
-						tagEff = getTagEff(jetsPerEvent[i]->Pt(), jetsPerEvent[i]->Eta(), jetsPerEvent[i]->hadronFlavour(),histo_file);											
-						btagSF = _reader->eval(jetsPerEvent[i]);
+						if (usePartonFlavour){
+							int partonFlavour = std::abs(jetsPerEvent[i]->partonFlavour());
+							if (partonFlavour!= 5 && partonFlavour!=4){partonFlavour = 0;} // to be consistent with the hadronFlavour numbers
+							tagEff = getTagEff(jetsPerEvent[i]->Pt(), jetsPerEvent[i]->Eta(), partonFlavour ,histo_file);
+  							BTagEntry::JetFlavor jf;
+  							if (partonFlavour == 5){jf = BTagEntry::FLAV_B;}
+  							else if (partonFlavour == 4){jf = BTagEntry::FLAV_C;}
+  							else {jf = BTagEntry::FLAV_UDSG;}
+							btagSF = _reader->eval(jf,jetsPerEvent[i]->Eta(),jetsPerEvent[i]->Pt(),jetsPerEvent[i]->btag_combinedInclusiveSecondaryVertexV2BJetTags());
+						}
+						else{
+							tagEff = getTagEff(jetsPerEvent[i]->Pt(), jetsPerEvent[i]->Eta(), jetsPerEvent[i]->hadronFlavour(),histo_file);											
+							btagSF = _reader->eval(jetsPerEvent[i]);
+						}
 						//cout << "TEST: BTag SF: " << btagSF << std::endl;
 						//cout << "TEST: BTag Eff: " << tagEff << std::endl;
 						//cout<<"  btagSF = "<<btagSF<<", tagEff = "<<tagEff<<", syst = "<<syst<<endl;	
@@ -240,6 +252,8 @@ float BTagWeightTools::getMCEventWeight(vector< TopTree::TRootPFJet* > jetsPerEv
 			float Weight = probData/probMC;
 			return Weight;
 }
+
+
 
 
 float BTagWeightTools::getTagEff(float pt, float eta, int flavor, TFile* histo_file)

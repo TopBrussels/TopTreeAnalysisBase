@@ -59,7 +59,7 @@ class BTagWeightTools
   
   void InitializeMCEfficiencyHistos(map<string,TH2F*> &m, int NofPtBins=15,float PtMin=30.,float PtMax=999.,int NofEtaBins=2);  //the binning is more or less arbitrary; but you should have enough statistics in each bin
   void FillMCEfficiencyHistos(vector< TopTree::TRootPFJet* > allSelectedJets);
-  float getMCEventWeight(vector< TopTree::TRootPFJet* > jetsPerEvent, TFile* histo_file);
+  float getMCEventWeight(vector< TopTree::TRootPFJet* > jetsPerEvent, TFile* histo_file,bool usePartonFlavour = false);
   
   float getTagEff(float pt, float eta, int flavor, TFile* histo_file);
 
