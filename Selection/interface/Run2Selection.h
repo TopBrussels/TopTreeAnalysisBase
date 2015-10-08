@@ -94,8 +94,8 @@ public:
 
 
     void setElectronIsoCorrType(int corrType = 1);
-    float GetElectronIsoCorrType(TRootElectron* el) const;
-    float pfElectronIso(TRootElectron *el) const;
+    float GetElectronIsoCorrType(TRootElectron* el, bool bx25) const;
+    float pfElectronIso(TRootElectron *el, bool bx25 = true) const;
 // ELECTRON GETTERS ===============================================
     std::vector<TRootElectron*> GetSelectedElectrons() const;
 	std::vector<TRootElectron*> GetSelectedElectrons(string WorkingPoint, string ProductionCampaign, bool CutsBased) const;

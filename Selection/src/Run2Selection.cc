@@ -449,14 +449,29 @@ bool Run2Selection::foundZCandidate(std::vector<TRootMuon*>& muons1, std::vector
 
 // ______________ELECTRONS______________________________________________//
 
-float Run2Selection::GetElectronIsoCorrType(TRootElectron *el) const{
+float Run2Selection::GetElectronIsoCorrType(TRootElectron *el, bool bx25) const{
 	double EffectiveArea = 0.;
-	// Updated to 2015 EA from https://indico.cern.ch/event/370494/contribution/2/attachments/736984/1011061/Rami_update_on_CB_ELE_ID_PHYS14PU20bx25.pdf
-	if (fabs(el->superClusterEta()) >= 0.0   && fabs(el->superClusterEta()) < 0.8   ) EffectiveArea = 0.0973;
-	if (fabs(el->superClusterEta()) >= 0.8   && fabs(el->superClusterEta()) < 1.3   ) EffectiveArea = 0.0954;
-	if (fabs(el->superClusterEta()) >= 1.3   && fabs(el->superClusterEta()) < 2.0   ) EffectiveArea = 0.0632;
-	if (fabs(el->superClusterEta()) >= 2.0   && fabs(el->superClusterEta()) < 2.2   ) EffectiveArea = 0.0727;
-	if (fabs(el->superClusterEta()) >= 2.2   && fabs(el->superClusterEta()) < 2.5   ) EffectiveArea = 0.1337;
+	if(bx25)
+    {
+        // Updated to Spring 2015 EA from https://github.com/cms-sw/cmssw/blob/CMSSW_7_4_14/RecoEgamma/ElectronIdentification/data/Spring15/effAreaElectrons_cone03_pfNeuHadronsAndPhotons_25ns.txt#L8
+        if (fabs(el->superClusterEta()) >= 0.0   && fabs(el->superClusterEta()) < 1.0   ) EffectiveArea = 0.1752;
+        if (fabs(el->superClusterEta()) >= 1.0   && fabs(el->superClusterEta()) < 1.479 ) EffectiveArea = 0.1862;
+        if (fabs(el->superClusterEta()) >= 1.479 && fabs(el->superClusterEta()) < 2.0   ) EffectiveArea = 0.1411;
+        if (fabs(el->superClusterEta()) >= 2.0   && fabs(el->superClusterEta()) < 2.2   ) EffectiveArea = 0.1534;
+        if (fabs(el->superClusterEta()) >= 2.2   && fabs(el->superClusterEta()) < 2.3   ) EffectiveArea = 0.1903;
+        if (fabs(el->superClusterEta()) >= 2.3   && fabs(el->superClusterEta()) < 2.4   ) EffectiveArea = 0.2243;
+        if (fabs(el->superClusterEta()) >= 2.4   && fabs(el->superClusterEta()) < 5.0   ) EffectiveArea = 0.2687;
+    }
+    else
+    {
+        // Updated to Spring 2015 EA from https://github.com/cms-sw/cmssw/blob/CMSSW_7_4_14/RecoEgamma/ElectronIdentification/data/Spring15/effAreaElectrons_cone03_pfNeuHadronsAndPhotons_50ns.txt
+        if (fabs(el->superClusterEta()) >= 0.0   && fabs(el->superClusterEta()) < 0.8   ) EffectiveArea = 0.0973;
+        if (fabs(el->superClusterEta()) >= 0.8   && fabs(el->superClusterEta()) < 1.3   ) EffectiveArea = 0.0954;
+        if (fabs(el->superClusterEta()) >= 1.3   && fabs(el->superClusterEta()) < 2.0   ) EffectiveArea = 0.0632;
+        if (fabs(el->superClusterEta()) >= 2.0   && fabs(el->superClusterEta()) < 2.2   ) EffectiveArea = 0.0727;
+        if (fabs(el->superClusterEta()) >= 2.2   && fabs(el->superClusterEta()) < 5.0   ) EffectiveArea = 0.1337;
+    }
+
 	if (fabs(el->superClusterEta()) >= 2.5) EffectiveArea = -9999;
 
 	double isocorr = 0;
@@ -475,8 +490,10 @@ float Run2Selection::GetElectronIsoCorrType(TRootElectron *el) const{
 	return isocorr;
 }
 
-float Run2Selection::pfElectronIso(TRootElectron *el) const{
-	float isoCorr = (el->neutralHadronIso(3) + el->photonIso(3) - GetElectronIsoCorrType(el));
+//This function gets the PF based Isolation for an Electron.  Since the Effective Areas for rho*effArea Isolation
+//are different for 25 and 50 ns samples, a boolean must be supplied to indicate which bx scenario.  true -> 25 ns.  false -> 50 ns
+float Run2Selection::pfElectronIso(TRootElectron *el, bool bx25) const{
+	float isoCorr = (el->neutralHadronIso(3) + el->photonIso(3) - GetElectronIsoCorrType(el, bx25));
 	float isolation = (el->chargedHadronIso(3) + (isoCorr > 0.0 ? isoCorr : 0.0))/(el->Pt());
 
 	return isolation;
@@ -612,7 +629,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedTightElectronsCutsBasedSpr
 			   && fabs(el->d0()) < 0.0103
 			   && fabs(el->dz()) < 0.170
 			   && fabs(1/el->E() - 1/el->P()) < 0.0116
-			   && pfElectronIso(el) <  0.0591
+			   && pfElectronIso(el, false) <  0.0591
 			   && el->passConversion()
 			   && el->missingHits() <= 2)
 			{
@@ -627,7 +644,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedTightElectronsCutsBasedSpr
 					 && fabs(el->d0()) < 0.0377
 					 && fabs(el->dz()) < 0.571
 					 && fabs(1/el->E() - 1/el->P()) < 0.01
-					 && pfElectronIso(el) < 0.0759
+					 && pfElectronIso(el, false) < 0.0759
 					 && el->passConversion()
 					 && el->missingHits() <= 1)
 			{
@@ -658,7 +675,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedMediumElectronsCutsBasedSp
 			   && fabs(el->d0()) < 0.0151
 			   && fabs(el->dz()) < 0.238
 			   && fabs(1/el->E() - 1/el->P()) < 0.118
-			   && pfElectronIso(el) < 0.0987
+			   && pfElectronIso(el, false) < 0.0987
 			   && el->passConversion()
 			   && el->missingHits() <= 2)
 			{
@@ -673,7 +690,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedMediumElectronsCutsBasedSp
 					 && fabs(el->d0()) < 0.0535
 					 && fabs(el->dz()) < 0.572
 					 && fabs(1/el->E() - 1/el->P()) < 0.104
-					 && pfElectronIso(el) < 0.0902
+					 && pfElectronIso(el, false) < 0.0902
 					 && el->passConversion()
 					 && el->missingHits() <= 1)
 			{
@@ -704,7 +721,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedLooseElectronsCutsBasedSpr
 			   && fabs(el->d0()) <  0.0227
 			   && fabs(el->dz()) <  0.379
 			   && fabs(1/el->E() - 1/el->P()) <  0.184
-			   && pfElectronIso(el) <  0.118
+			   && pfElectronIso(el, false) <  0.118
 			   && el->passConversion()
 			   && el->missingHits() <= 2)
 			{
@@ -719,7 +736,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedLooseElectronsCutsBasedSpr
 					 && fabs(el->d0()) <  0.242
 					 && fabs(el->dz()) <  0.921
 					 && fabs(1/el->E() - 1/el->P()) <  0.125
-					 && pfElectronIso(el) <  0.118
+					 && pfElectronIso(el, false) <  0.118
 					 && el->passConversion()
 					 && el->missingHits() <= 1)
 			{
@@ -749,7 +766,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedTightElectronsCutsBasedSpr
 			   && fabs(el->d0()) < 0.0111
 			   && fabs(el->dz()) < 0.0466
 			   && fabs(1/el->E() - 1/el->P()) < 0.012
-			   && pfElectronIso(el) <  0.0354
+			   && pfElectronIso(el, true) <  0.0354
 			   && el->passConversion()
 			   && el->missingHits() <= 2)
 			{
@@ -764,7 +781,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedTightElectronsCutsBasedSpr
 					 && fabs(el->d0()) < 0.0351
 					 && fabs(el->dz()) < 0.417
 					 && fabs(1/el->E() - 1/el->P()) < 0.0898
-					 && pfElectronIso(el) < 0.0646
+					 && pfElectronIso(el, true) < 0.0646
 					 && el->passConversion()
 					 && el->missingHits() <= 1)
 			{
@@ -795,7 +812,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedMediumElectronsCutsBasedSp
 			   && fabs(el->d0()) < 0.0118
 			   && fabs(el->dz()) < 0.373
 			   && fabs(1/el->E() - 1/el->P()) < 0.0174
-			   && pfElectronIso(el) < 0.0766
+			   && pfElectronIso(el, true) < 0.0766
 			   && el->passConversion()
 			   && el->missingHits() <= 2)
 			{
@@ -810,7 +827,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedMediumElectronsCutsBasedSp
 					 && fabs(el->d0()) < 0.0739
 					 && fabs(el->dz()) < 0.602
 					 && fabs(1/el->E() - 1/el->P()) < 0.0898
-					 && pfElectronIso(el) < 0.0678
+					 && pfElectronIso(el, true) < 0.0678
 					 && el->passConversion()
 					 && el->missingHits() <= 1)
 			{
@@ -841,7 +858,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedLooseElectronsCutsBasedSpr
 			   && fabs(el->d0()) <  0.0261
 			   && fabs(el->dz()) <  0.41
 			   && fabs(1/el->E() - 1/el->P()) <  0.102
-			   && pfElectronIso(el) <  0.0893
+			   && pfElectronIso(el, true) <  0.0893
 			   && el->passConversion()
 			   && el->missingHits() <= 2)
 			{
@@ -856,7 +873,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedLooseElectronsCutsBasedSpr
 					 && fabs(el->d0()) <  0.118
 					 && fabs(el->dz()) <  0.822
 					 && fabs(1/el->E() - 1/el->P()) <  0.126
-					 && pfElectronIso(el) <  0.121
+					 && pfElectronIso(el, true) <  0.121
 					 && el->passConversion()
 					 && el->missingHits() <= 1)
 			{
@@ -888,7 +905,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedTightElectronsCutsBasedPHY
 			   && fabs(el->d0()) < 0.008790
 			   && fabs(el->dz()) < 0.021226
 			   && fabs(1/el->E() - 1/el->P()) < 0.020118
-			   && pfElectronIso(el) < 0.069537
+			   && pfElectronIso(el, true) < 0.069537
 			   && el->passConversion()
 			   && el->missingHits() <= 1)
 			{
@@ -903,7 +920,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedTightElectronsCutsBasedPHY
 					 && fabs(el->d0()) < 0.027984
 					 && fabs(el->dz()) < 0.133431
 					 && fabs(1/el->E() - 1/el->P()) < 0.098919
-					 && pfElectronIso(el) < 0.078265
+					 && pfElectronIso(el, true) < 0.078265
 					 && el->passConversion()
 					 && el->missingHits() <= 1)
 			{
@@ -933,7 +950,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedMediumElectronsCutsBasedPH
 			   && fabs(el->d0()) < 0.012235
 			   && fabs(el->dz()) < 0.042020
 			   && fabs(1/el->E() - 1/el->P()) < 0.091942
-			   && pfElectronIso(el) < 0.107587
+			   && pfElectronIso(el, true) < 0.107587
 			   && el->passConversion()
 			   && el->missingHits() <= 1)
 			{
@@ -948,7 +965,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedMediumElectronsCutsBasedPH
 					 && fabs(el->d0()) < 0.036719
 					 && fabs(el->dz()) < 0.138142
 					 && fabs(1/el->E() - 1/el->P()) < 0.100683
-					 && pfElectronIso(el) < 0.113254
+					 && pfElectronIso(el, true) < 0.113254
 					 && el->passConversion()
 					 && el->missingHits() <= 1)
 			{
@@ -977,7 +994,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedLooseElectronsCutsBasedPHY
 			   && fabs(el->d0()) < 0.035904
 			   && fabs(el->dz()) < 0.075496
 			   && fabs(1/el->E() - 1/el->P()) < 0.189968
-			   && pfElectronIso(el) < 0.130136
+			   && pfElectronIso(el, true) < 0.130136
 			   && el->passConversion()
 			   && el->missingHits() <= 1)
 			{
@@ -992,7 +1009,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedLooseElectronsCutsBasedPHY
 					 && fabs(el->d0()) < 0.099266
 					 && fabs(el->dz()) < 0.197897
 					 && fabs(1/el->E() - 1/el->P()) < 0.140662
-					 && pfElectronIso(el) < 0.163368
+					 && pfElectronIso(el, true) < 0.163368
 					 && el->passConversion()
 					 && el->missingHits() <= 1)
 			{
