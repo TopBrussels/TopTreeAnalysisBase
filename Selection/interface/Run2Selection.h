@@ -108,9 +108,9 @@ public:
     std::vector<TRootMuon*> GetSelectedMuons(float PtThr, float EtaThr, float MuonRelIso, string WorkingPoint, string ProductionCampaign) const;
 
     // displaced muons
+    std::vector<TRootMuon*> GetSelectedDisplacedMuons(float PtThr, float EtaThr, float NormChi2, int NTrackerLayersWithMeas, int NValidMuonHits, int NValidPixelHits, int NMatchedStations, float RelIso) const;
+    std::vector<TRootMuon*> GetSelectedDisplacedMuons(float PtThr, float EtaThr, float RelIs) const;
     std::vector<TRootMuon*> GetSelectedDisplacedMuons() const;
-    std::vector<TRootMuon*> GetSelectedDisplacedMuons(float PtThr, float EtaThr, float d0, float dz, float RelIs) const;
-    std::vector<TRootMuon*> GetSelectedDisplacedMuons(float PtThr, float EtaThr, float NormChi2, int NTrackerLayersWithMeas, int NValidMuonHits, float d0, float dz, int NValidPixelHits, int NMatchedStations, float RelIso) const;
 
 
 
