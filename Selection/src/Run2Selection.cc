@@ -578,7 +578,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedDisplacedElectrons(float P
 }
 
 std::vector<TRootElectron*> Run2Selection::GetSelectedDisplacedElectrons() const{
-	return GetSelectedDisplacedElectrons();
+  return GetSelectedDisplacedElectrons(40.0, 2.4);
 }
 
 std::vector<TRootElectron*> Run2Selection::GetSelectedTightElectronsCutsBasedSpring15_50ns(float PtThr, float EtaThr) const {
