@@ -2,8 +2,9 @@
 
 
 // muonSFweight constructor
-MuonSFWeight::MuonSFWeight (const string &sfFile, const string &dataOverMC, const bool &debug)
+MuonSFWeight::MuonSFWeight (const string &sfFile, const string &dataOverMC, const bool &debug, const bool &printWarning)
 {
+  printWarning_ = printWarning;
   debug_ = debug;
   if (debug_)std::cout << "MuonSFWeight constuctor being called!!" << std::endl << endl;
   TFile *fin = TFile::Open (sfFile.c_str ());
@@ -67,7 +68,8 @@ MuonSFWeight::at(const double &eta, const double &pt, const int &shiftUpDown)
   
   Int_t foundBin = muonSFWeight_->FindBin(abs(eta_hist),pt_hist);
   double SF = muonSFWeight_->GetBinContent(foundBin) + shiftUpDown * muonSFWeight_->GetBinError(foundBin);
-  if (SF == 0.) {
+    Bool_t printWarning_ = false;
+  if (SF == 0. && printWarning_) {
     cout << "WARNING. The value of the SF for the muon is equal to 0. This probably means that your are outside the range of the histogram " << endl;
     cout << "range in eta is " << muonSFWeight_->GetXaxis()->GetBinLowEdge(1) << " ---> " << muonSFWeight_->GetXaxis()->GetBinUpEdge(muonSFWeight_->GetNbinsX()) << endl;
     cout << "range in pt is " << muonSFWeight_->GetYaxis()->GetBinLowEdge(1) << " ---> " << muonSFWeight_->GetYaxis()->GetBinUpEdge(muonSFWeight_->GetNbinsY()) << endl;
@@ -86,8 +88,9 @@ MuonSFWeight::~MuonSFWeight ()
 
 
 // electronSFweight constructor
-ElectronSFWeight::ElectronSFWeight (const string &sfFile, const string &dataOverMC, const bool &debug)
+ElectronSFWeight::ElectronSFWeight (const string &sfFile, const string &dataOverMC, const bool &debug, const bool &printWarning)
 {
+  printWarning_ = printWarning;
   debug_ = debug;
   if (debug_)std::cout << "ElectronSFWeight constuctor being called!!" << std::endl << endl;
   TFile *fin = TFile::Open (sfFile.c_str ());
@@ -150,7 +153,8 @@ ElectronSFWeight::at(const double &eta, const double &pt, const int &shiftUpDown
   
   Int_t foundBin = electronSFWeight_->FindBin(abs(eta_hist),pt_hist);
   double SF = electronSFWeight_->GetBinContent(foundBin) + shiftUpDown * electronSFWeight_->GetBinError(foundBin);
-  if (SF == 0.) {
+  
+  if (SF == 0. && printWarning_) {
     cout << "WARNING. The value of the SF for the electron is equal to 0. This probably means that your are outside the range of the histogram " << endl;
     cout << "range in eta is " << electronSFWeight_->GetXaxis()->GetBinLowEdge(1) << " ---> " << electronSFWeight_->GetXaxis()->GetBinUpEdge(electronSFWeight_->GetNbinsX()) << endl;
     cout << "range in pt is " << electronSFWeight_->GetYaxis()->GetBinLowEdge(1) << " ---> " << electronSFWeight_->GetYaxis()->GetBinUpEdge(electronSFWeight_->GetNbinsY()) << endl;
