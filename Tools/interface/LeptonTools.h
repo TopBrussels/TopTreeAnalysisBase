@@ -22,7 +22,7 @@ class MuonSFWeight
   MuonSFWeight () {};
   MuonSFWeight (const string &, const string &, const bool &debug = false, const bool &printWarning = true);
   ~MuonSFWeight ();
-  double at (const double &, const double &, const int &shiftUpDown = 0);
+  double at (const double &eta, const double &pt, const int &shiftUpDown = 0);
 
  private:
   TH2 *muonSFWeight_;
@@ -37,7 +37,7 @@ class ElectronSFWeight
   ElectronSFWeight () {};
   ElectronSFWeight (const string &, const string &, const bool &debug = false, const bool &printWarning = true);
   ~ElectronSFWeight ();
-  double at (const double &, const double &, const int &shiftUpDown = 0);
+  double at (const double &eta, const double &pt, const int &shiftUpDown = 0);
 
  private:
   TH2 *electronSFWeight_;
