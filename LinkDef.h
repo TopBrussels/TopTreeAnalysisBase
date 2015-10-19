@@ -1,6 +1,7 @@
 #ifdef __CINT__
 #include "TopTreeProducer/interface/TRootRun.h"
 #include "TopTreeProducer/interface/TRootHLTInfo.h"
+#include "TopTreeProducer/interface/TRootWeightInfo.h"
 #include "TopTreeProducer/interface/TRootEvent.h"
 #include "TopTreeProducer/interface/TRootParticle.h"
 #include "TopTreeProducer/interface/TRootMCParticle.h"
@@ -32,6 +33,7 @@
 #else
 #include "TopTreeProducer/interface/TRootRun.h"
 #include "TopTreeProducer/interface/TRootHLTInfo.h"
+#include "TopTreeProducer/interface/TRootWeightInfo.h"
 #include "TopTreeProducer/interface/TRootEvent.h"
 #include "TopTreeProducer/interface/TRootParticle.h"
 #include "TopTreeProducer/interface/TRootMCParticle.h"
@@ -65,36 +67,37 @@
 #pragma link off all classes;
 #pragma link off all functions;
 
-#pragma link C++ class TRootRun;
-#pragma link C++ class TRootHLTInfo;
-#pragma link C++ class TRootEvent;
-#pragma link C++ class TRootParticle;
-#pragma link C++ class TRootMCParticle;
-#pragma link C++ class TRootJet;
-#pragma link C++ class TRootCaloJet;
-#pragma link C++ class TRootPFJet;
-#pragma link C++ class TRootJPTJet;
-#pragma link C++ class TRootGenJet;
-#pragma link C++ class TRootLepton;
-#pragma link C++ class TRootPhoton;
-#pragma link C++ class TRootMuon;
-#pragma link C++ class TRootElectron;
-#pragma link C++ class TRootMET;
-#pragma link C++ class TRootSubstructureJet;
-#pragma link C++ class TRootCaloMET;
-#pragma link C++ class TRootPFMET;
-#pragma link C++ class TRootTrackMET;
-#pragma link C++ class TRootGenEvent;
-#pragma link C++ class TRootNPGenEvent;
-#pragma link C++ class TRootGenTop;
-#pragma link C++ class TRootSpinCorrGen;
-#pragma link C++ class TRootVertex;
-#pragma link C++ class MCExpectation;
-#pragma link C++ class MCObsExpectation;
-#pragma link C++ class Dataset;
-#pragma link C++ class AnalysisEnvironment;
-#pragma link C++ class BinningFirstGuess;
-#pragma link C++ class Container;
+#pragma link C++ class TRootRun+;
+#pragma link C++ class TRootHLTInfo+;
+#pragma link C++ class TRootWeightInfo+;
+#pragma link C++ class TRootEvent+;
+#pragma link C++ class TRootParticle+;
+#pragma link C++ class TRootMCParticle+;
+#pragma link C++ class TRootJet+;
+#pragma link C++ class TRootCaloJet+;
+#pragma link C++ class TRootPFJet+;
+#pragma link C++ class TRootJPTJet+;
+#pragma link C++ class TRootGenJet+;
+#pragma link C++ class TRootLepton+;
+#pragma link C++ class TRootPhoton+;
+#pragma link C++ class TRootMuon+;
+#pragma link C++ class TRootElectron+;
+#pragma link C++ class TRootMET+;
+#pragma link C++ class TRootSubstructureJet+;
+#pragma link C++ class TRootCaloMET+;
+#pragma link C++ class TRootPFMET+;
+#pragma link C++ class TRootTrackMET+;
+#pragma link C++ class TRootGenEvent+;
+#pragma link C++ class TRootNPGenEvent+;
+#pragma link C++ class TRootGenTop+;
+#pragma link C++ class TRootSpinCorrGen+;
+#pragma link C++ class TRootVertex+;
+#pragma link C++ class MCExpectation+;
+#pragma link C++ class MCObsExpectation+;
+#pragma link C++ class Dataset+;
+#pragma link C++ class AnalysisEnvironment+;
+#pragma link C++ class BinningFirstGuess+;
+#pragma link C++ class Container+;
 
 #pragma link C++ struct TopTree::triggeredObject;
 

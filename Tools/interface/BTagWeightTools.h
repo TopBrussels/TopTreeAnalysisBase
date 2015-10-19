@@ -53,11 +53,11 @@ class BTagWeightTools
 
 
   // constructors, destructors
-  BTagWeightTools();
-  BTagWeightTools(const BTagCalibrationReader *reader,float minpt = 30, float maxpt = 999, float maxeta = 2.4);
+  BTagWeightTools(string histoFileName="HistosPtEta.root");
+  BTagWeightTools(const BTagCalibrationReader *reader,float minpt = 30, float maxpt = 999, float maxeta = 2.4, string histoFileName="HistosPtEta.root");
   ~BTagWeightTools();
   
-  void InitializeMCEfficiencyHistos(map<string,TH2F*> &m, int NofPtBins=15,float PtMin=30.,float PtMax=999.,int NofEtaBins=2);  //the binning is more or less arbitrary; but you should have enough statistics in each bin
+  void InitializeMCEfficiencyHistos(int NofPtBins=15,float PtMin=30.,float PtMax=999.,int NofEtaBins=2);  //the binning is more or less arbitrary; but you should have enough statistics in each bin
   void FillMCEfficiencyHistos(vector< TopTree::TRootPFJet* > allSelectedJets);
   float getMCEventWeight(vector< TopTree::TRootPFJet* > jetsPerEvent, TFile* histo_file,bool usePartonFlavour = false);
   
@@ -70,6 +70,8 @@ class BTagWeightTools
   float _ptmax;
   float _etamax;
   const BTagCalibrationReader* _reader;
+  TFile* _f;
+  map<string,TH2F*> _histo2D;
 	
 };
 
