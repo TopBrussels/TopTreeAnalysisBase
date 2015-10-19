@@ -193,7 +193,7 @@ std::vector<TRootPFJet*> Run2Selection::GetSelectedBJets(const std::vector<TRoot
 std::vector<TRootMuon*> Run2Selection::GetSelectedMuons() const
 {
         //Default Muon selection method.  This method should be updated to the most recent set of recommended cuts regularly.  Currently it points to the MUON POG Medium working point with Pt, Eta, and dBeta RelIso thresholds set as in the TOP PAG selection TWiki for single lepton event ID.
-	return GetSelectedMuons(26,2.1,0.12, "Tight", "Spring15");
+	return GetSelectedMuons(26,2.1,0.15, "Tight", "Spring15");
 }
 
 std::vector<TRootMuon*> Run2Selection::GetSelectedMuons(float PtThr, float etaThr, float relIso, string WorkingPoint, string ProductionCampaign) const
@@ -536,17 +536,17 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedElectrons(float PtThr, flo
 }
 
 std::vector<TRootElectron*> Run2Selection::GetSelectedDisplacedElectrons(float PtThr, float EtaThr) const {
-  
-  // use tight electron ID (cut-based) for now, but without cuts on  d0 dz . This ID can be in flux, and for now is hard-coded here:                                                                         
-  
-  //These quality cuts reflect the recommended Tight cut-based electron ID as provided by the EGM POG. Last updated: 23 September 2015                                                                       
-  // as these are still in flux, it is probably useful to check them here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2#Spring15_selection_25ns (revision 27)             
-  
+
+  // use tight electron ID (cut-based) for now, but without cuts on  d0 dz . This ID can be in flux, and for now is hard-coded here:
+
+  //These quality cuts reflect the recommended Tight cut-based electron ID as provided by the EGM POG. Last updated: 23 September 2015
+  // as these are still in flux, it is probably useful to check them here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2#Spring15_selection_25ns (revision 27)
+
   std::vector<TRootElectron*> selectedElectrons;
   for(unsigned int i=0; i<electrons.size(); i++) {
     TRootElectron* el = (TRootElectron*) electrons[i];
     if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr) {
-      // For the Barrel                                                                                                                                                                                      
+      // For the Barrel
       if( fabs(el->superClusterEta()) <= 1.479
           && el->sigmaIEtaIEta() < 0.0101
 	  && fabs(el->deltaEtaIn()) < 0.00926
@@ -559,7 +559,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedDisplacedElectrons(float P
         {
           selectedElectrons.push_back(electrons[i]);
         }
-      // For the endcap                                                                                                                                                                                      
+      // For the endcap
       else if (fabs(el->superClusterEta()) < 2.5
 	       && el->sigmaIEtaIEta() < 0.0279
 	       && fabs(el->deltaEtaIn()) < 0.00724
