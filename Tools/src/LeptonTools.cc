@@ -68,7 +68,7 @@ MuonSFWeight::at(const double &eta, const double &pt, const int &shiftUpDown)
   
   Int_t foundBin = muonSFWeight_->FindBin(abs(eta_hist),pt_hist);
   double SF = muonSFWeight_->GetBinContent(foundBin) + shiftUpDown * muonSFWeight_->GetBinError(foundBin);
-    Bool_t printWarning_ = false;
+
   if (SF == 0. && printWarning_) {
     cout << "WARNING. The value of the SF for the muon is equal to 0. This probably means that your are outside the range of the histogram " << endl;
     cout << "range in eta is " << muonSFWeight_->GetXaxis()->GetBinLowEdge(1) << " ---> " << muonSFWeight_->GetXaxis()->GetBinUpEdge(muonSFWeight_->GetNbinsX()) << endl;
