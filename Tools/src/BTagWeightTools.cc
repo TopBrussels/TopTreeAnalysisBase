@@ -81,22 +81,22 @@ _histo2D()
 
 // destructor:
 BTagWeightTools::~BTagWeightTools(){
-    // for(map<string,TH2F*>::const_iterator it = _histo2D.begin(); it != _histo2D.end(); it++)
-    // {
-    //     string name = it->first;
-    //     it->second->Write();
-    //     //temp->Write();
+    for(map<string,TH2F*>::const_iterator it = _histo2D.begin(); it != _histo2D.end(); it++)
+    {
+        string name = it->first;
+        TH2F * temp = it->second;
+        temp->Write();
 
-		  //   //_histo2D.erase(name);
-    // }
+		    //_histo2D.erase(name);
+    }
 	_f->cd();
-  _histo2D["BtaggedJets"]->Write();
-  _histo2D["BtaggedBJets"]->Write();
-  _histo2D["BtaggedCJets"]->Write();
-  _histo2D["BtaggedLightJets"]->Write();
-  _histo2D["TotalNofBJets"]->Write();
-  _histo2D["TotalNofCJets"]->Write();
-  _histo2D["TotalNofLightJets"]->Write();
+  // _histo2D["BtaggedJets"]->Write();
+  // _histo2D["BtaggedBJets"]->Write();
+  // _histo2D["BtaggedCJets"]->Write();
+  // _histo2D["BtaggedLightJets"]->Write();
+  // _histo2D["TotalNofBJets"]->Write();
+  // _histo2D["TotalNofCJets"]->Write();
+  // _histo2D["TotalNofLightJets"]->Write();
   _f->Close();
   delete _f;
   //_histo2D.clear();
