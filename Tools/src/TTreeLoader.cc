@@ -324,6 +324,7 @@ TTreeLoader::UnLoadDataset (){
   if(tcgenEvt)      tcgenEvt     ->Delete();
   if(tcgenjets)     tcgenjets    ->Delete();
   if(tcnpgenEvt)    tcnpgenEvt   ->Delete();
+  if(d_)            d_           ->Delete();
 }
 
 void
