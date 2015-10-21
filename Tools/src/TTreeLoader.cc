@@ -175,7 +175,7 @@ TTreeLoader::LoadDatasets (vector < Dataset* >& datasets, const char *xmlfilenam
 void
 TTreeLoader::LoadDataset (Dataset* d, AnalysisEnvironment anaEnv)
 {
-  d_ = d;
+  d_ = new Dataset(*d);
   char branchStatus[100];
 
   //d_->runTree()  ->SetBranchStatus ("*",0);
