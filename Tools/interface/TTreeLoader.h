@@ -56,7 +56,7 @@ void LoadMCEvent(int ievent, TRootGenEvent *genEvt, TRootNPGenEvent* npgenEvent,
 bool EventTrigged(int itrigger); /** return true if event is trigged. This method can only be applied if LoadEvent was called first*/
 bool EventPassedJSON(int runID, int lumiBlockID);
 
-int iTrigger(string TriggerName, int runID, int iFile);/** return the integer corresponding to the trigger name */
+int iTrigger(std::string TriggerName, int runID, int iFile);/** return the integer corresponding to the trigger name */
 void ListTriggers(int runID, int iFile);
 
 private:
