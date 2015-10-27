@@ -248,13 +248,16 @@ namespace reweight {
 
 	  //Data_distr_ = new TH1(  *(static_cast<TH1*>(dataFile_->Get( DataHistName_.c_str() )->Clone() )) );
 	  //MC_distr_ = new TH1(  *(static_cast<TH1*>(generatedFile_->Get( GenHistName_.c_str() )->Clone() )) );
-           Data_distr_ = (TH1*) (dataFile_->Get( DataHistName_.c_str() )->Clone());
+		Data_distr_ = (TH1*) (dataFile_->Get( DataHistName_.c_str() )->Clone());
 	   MC_distr_ = (TH1*) (generatedFile_->Get( GenHistName_.c_str() )->Clone());
 
 	  // normalize both histograms first                                                                            
+		std::cout << "normalising data and MC to :" << Data_distr_->Integral() << " and " << MC_distr_->Integral() << std::endl;
+		Data_distr_->Scale( 1.0/ sqrt(Data_distr_->Integral()) );
+		Data_distr_->Scale( 1.0/ sqrt(Data_distr_->Integral()) );
+		MC_distr_->Scale( 1.0/ sqrt(MC_distr_->Integral()) );
+		MC_distr_->Scale( 1.0/ sqrt(MC_distr_->Integral()) );
 
-	  Data_distr_->Scale( 1.0/ Data_distr_->Integral() );
-	  MC_distr_->Scale( 1.0/ MC_distr_->Integral() );
 
 	  //weights_ = new TH1( *(Data_distr_)) ;
            weights_ = (TH1*) Data_distr_->Clone();

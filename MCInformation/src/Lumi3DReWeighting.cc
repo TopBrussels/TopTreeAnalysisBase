@@ -58,7 +58,8 @@ Lumi3DReWeighting::Lumi3DReWeighting( std::string generatedFile,
   // MC * data/MC = data, so the weights are data/MC:
   
   // normalize both histograms first
-  
+	
+	
   Data_distr_->Scale( 1.0/ Data_distr_->Integral() );
   MC_distr_->Scale( 1.0/ MC_distr_->Integral() );
   
@@ -71,11 +72,11 @@ Lumi3DReWeighting::Lumi3DReWeighting( std::vector< float > MC_distr, std::vector
   
   Int_t NMCBins = MC_distr.size();
 
-  MC_distr_ = boost::shared_ptr<TH1> ( new TH1F("MC_distr","MC dist",NMCBins,0., float(NMCBins)) );
+  MC_distr_ = boost::shared_ptr<TH1> ( new TH1D("MC_distr","MC dist",NMCBins,0., float(NMCBins)) );
 
   Int_t NDBins = Lumi_distr.size();
 
-  Data_distr_ = boost::shared_ptr<TH1> ( new TH1F("Data_distr","Data dist",NDBins,0., float(NDBins)) );
+  Data_distr_ = boost::shared_ptr<TH1> ( new TH1D("Data_distr","Data dist",NDBins,0., float(NDBins)) );
 
   for(int ibin = 1; ibin<NMCBins+1; ++ibin ) {
     MC_distr_->SetBinContent(ibin,MC_distr[ibin-1]);
@@ -353,7 +354,7 @@ void Lumi3DReWeighting::weight3D_init( float ScaleFactor ) {
 void Lumi3DReWeighting::weight3D_init( std::string WeightFileName ) { 
 
   TFile *infile = new TFile(WeightFileName.c_str());
-  TH1F *WHist = (TH1F*)infile->Get("WHist");
+  TH1D *WHist = (TH1D*)infile->Get("WHist");
 
   // Check if the histogram exists           
   if (!WHist) {
