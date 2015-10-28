@@ -137,6 +137,7 @@ private:
 	std::vector<TRootElectron*> GetSelectedTightElectronsCutsBasedSpring15_25ns(float PtThr, float EtaThr) const;
 	std::vector<TRootElectron*> GetSelectedMediumElectronsCutsBasedSpring15_25ns(float PtThr, float EtaThr) const;
 	std::vector<TRootElectron*> GetSelectedLooseElectronsCutsBasedSpring15_25ns(float PtThr, float EtaThr) const;
+	std::vector<TRootElectron*> GetSelectedVetoElectronsCutsBasedSpring15_25ns(float PtThr, float EtaThr) const;
 
 	//July 2015 Muon Getters
     std::vector<TRootMuon*> GetSelectedLooseMuonsJuly2015(float PtThr, float EtaThr,float MuonRelIso) const;
