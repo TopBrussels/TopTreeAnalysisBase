@@ -514,7 +514,6 @@ bool TTreeLoader::EventTrigged (int itrigger)
 
 void TTreeLoader::ListTriggers(int runID, int iFile){ //iFile starts from 0!!
   d_->runTree()->GetEntry(iFile);
-
   cout<<"Listing Triggers for run: "<<runID<<endl;
   runInfos->getHLTinfo(runID).gethltNameList();
 }
