@@ -58,11 +58,10 @@ JetTools::~JetTools()
 void JetTools::unCorrectJet(TRootJet* inJet, bool isData)
 {
   float corr;
-	if(!isData)
-	  corr = inJet->getJetCorrFactor("L1FastJetL2L3");
-	else
-	  corr = inJet->getJetCorrFactor("L1FastJetL2L3L23Residual");
-//  cout << "Uncorrecting!  With factor: " << corr << endl;
+  if(!isData)
+    corr = inJet->getJetCorrFactor("L1FastJetL2L3");
+  else
+    corr = inJet->getJetCorrFactor("L1FastJetL2L3L23Residual");
   inJet->SetPxPyPzE(inJet->Px()/corr, inJet->Py()/corr, inJet->Pz()/corr, inJet->E()/corr);
 }
 
@@ -112,19 +111,19 @@ void JetTools::correctJet(TRootJet* inJet, float rhoPU, bool isData)
   JEC_->setJetA(inJet->jetArea());
   JEC_->setRho(rhoPU);
 	
-	//set the correction factors for the type 1 MET correction
-	std::vector<float> SubCorrections = JEC_->getSubCorrections(); //0: L1FastJet, 1: L1FastJetL2, 2: L1FastJetL2L3, and if data: 3: L1FastJetL2L3L23Residual  
-	/*for(unsigned int c=0; c<SubCorrections.size(); c++)
-	  	cout<<"SubCorrections["<<c<<"] = "<<SubCorrections[c]<<endl;	
+  //set the correction factors for the type 1 MET correction
+  std::vector<float> SubCorrections = JEC_->getSubCorrections(); //0: L1FastJet, 1: L1FastJetL2, 2: L1FastJetL2L3, and if data: 3: L1FastJetL2L3L23Residual  
+  /*for(unsigned int c=0; c<SubCorrections.size(); c++)
+  cout<<"SubCorrections["<<c<<"] = "<<SubCorrections[c]<<endl;	
   */
-	inJet->setJetCorrFactor(0,"L1FastJet",SubCorrections[0]);
+  inJet->setJetCorrFactor(0,"L1FastJet",SubCorrections[0]);
   inJet->setJetCorrFactor(1,"L1FastJetL2",SubCorrections[1]);
-	inJet->setJetCorrFactor(2,"L1FastJetL2L3",SubCorrections[2]);
-	if(isData)
-	  inJet->setJetCorrFactor(3,"L1FastJetL2L3L23Residual",SubCorrections[3]);
+  inJet->setJetCorrFactor(2,"L1FastJetL2L3",SubCorrections[2]);
+  if(isData)
+  inJet->setJetCorrFactor(3,"L1FastJetL2L3L23Residual",SubCorrections[3]);
  
   //float corr = JEC_->getCorrection(); //strangely enough, this starts complaining when JEC_->getSubCorrections() is called first
-	float corr = SubCorrections[SubCorrections.size()-1]; //this is the correction UP TO the last level; so the complete correction
+  float corr = SubCorrections[SubCorrections.size()-1]; //this is the correction UP TO the last level; so the complete correction
 //	cout << "Apply new JES correction:  " << corr << endl;
   inJet->SetPxPyPzE(inJet->Px()*corr, inJet->Py()*corr, inJet->Pz()*corr, inJet->E()*corr);
 }
@@ -328,23 +327,6 @@ void JetTools::correctJetJER(TRootJet* inJet, TRootGenJet* inGenJet, string dire
 	    else if(fabsEta <= 5.0 && fabsEta > 2.3) corrFactor = 0.166;
     	    else corrFactor = 0.166; //fabsEta > 5.0
 	}
-
-	//Very old --> Scaling of 10%!
-        /*if(JER_minus)
-  	{
-    	    if(fabsEta <= 1.5) corrFactor = 0.0;
-    	    else if(fabsEta < 2.0 && fabsEta > 1.5) corrFactor = -0.05;
-    	    else corrFactor = -0.1;
-  	}
-  	else if(JER_plus)
-  	{
-    	    if(fabsEta <= 1.5) corrFactor = 0.2;
-    	    else if(fabsEta < 2.0 && fabsEta > 1.5) corrFactor = 0.25;
-    	    else corrFactor = 0.3;
-  	}
-	else 
-	    corrFactor = 0.1;	
-	*/
     }
 		
     float deltapt = ( inJet->Pt() - inGenJet->Pt() ) * corrFactor;

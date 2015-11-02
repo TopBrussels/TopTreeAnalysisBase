@@ -13,7 +13,7 @@ Selection::Selection() {
   setLooseMuonCuts();
   setLooseElectronCuts();
   setLooseDiElectronCuts();
-	cutHFHadronEnergyFraction_ = false;
+  cutHFHadronEnergyFraction_ = false;
 }
 /*
  Selection::Selection(const std::vector<TRootJet*>& jets_, const std::vector<TRootMuon*>& muons_, const std::vector<TRootMET*>& mets_){
@@ -284,16 +284,16 @@ std::vector<TRootJet*> Selection::GetSelectedJets(float PtThr, float EtaThr, boo
 	{ // PFJets
 	  const TRootPFJet* PFJet = static_cast<const TRootPFJet*>(init_jet);
       
-	        //cout << "jet pT:  " << PFJet->Pt() << "  cutValue: " << PtThr << endl;
-	        //cout << "jet Eta:  " << fabs(PFJet->Eta()) << "  cutValue: " << EtaThr << endl;
-	        //cout << "jet nConstituents:  " << PFJet->nConstituents() << endl;
-	        //cout << "jet chargedEmEnergyFraction:  " << PFJet->chargedEmEnergyFraction() << endl;
-	        //cout << "jet neutralHadronEnergyFraction:  " << PFJet->neutralHadronEnergyFraction() << endl;
+	  //cout << "jet pT:  " << PFJet->Pt() << "  cutValue: " << PtThr << endl;
+	  //cout << "jet Eta:  " << fabs(PFJet->Eta()) << "  cutValue: " << EtaThr << endl;
+	  //cout << "jet nConstituents:  " << PFJet->nConstituents() << endl;
+	  //cout << "jet chargedEmEnergyFraction:  " << PFJet->chargedEmEnergyFraction() << endl;
+	  //cout << "jet neutralHadronEnergyFraction:  " << PFJet->neutralHadronEnergyFraction() << endl;
           //if(cutHFHadronEnergyFraction_) cout << "jet HFHadronEnergyFraction:  " << PFJet->HFHadronEnergyFraction() << endl;
-	        //cout << "jet neutralEmEnergyFraction:  " << PFJet->neutralEmEnergyFraction() << endl;
-	        //cout << "jet chargedHadronEnergyFraction:  " << PFJet->chargedHadronEnergyFraction() << endl;
-	        //cout << "jet chargedMultiplicity:  " << PFJet->chargedMultiplicity() << endl;
-					//if(cutHFHadronEnergyFraction_) cout << "sum of jet neutralHadronEnergyFraction and HFHadronEnergyFraction: " << (PFJet->neutralHadronEnergyFraction() + PFJet->HFHadronEnergyFraction()) << endl;
+	  //cout << "jet neutralEmEnergyFraction:  " << PFJet->neutralEmEnergyFraction() << endl;
+	  //cout << "jet chargedHadronEnergyFraction:  " << PFJet->chargedHadronEnergyFraction() << endl;
+	  //cout << "jet chargedMultiplicity:  " << PFJet->chargedMultiplicity() << endl;
+      	  //if(cutHFHadronEnergyFraction_) cout << "sum of jet neutralHadronEnergyFraction and HFHadronEnergyFraction: " << (PFJet->neutralHadronEnergyFraction() + PFJet->HFHadronEnergyFraction()) << endl;
       
 	  if( fabs(PFJet->Eta())<EtaThr && PFJet->Pt()>PtThr )
 	    {
@@ -306,7 +306,6 @@ std::vector<TRootJet*> Selection::GetSelectedJets(float PtThr, float EtaThr, boo
 			  if (fabs(PFJet->Eta()) >= 2.4 || PFJet->chargedHadronEnergyFraction() > 0) 
 			    if (fabs(PFJet->Eta()) >= 2.4 || PFJet->chargedMultiplicity() > 0)
 			      {
-				//		                  cout << "  -->  OK!" << endl;
 				selectedJets.push_back(init_jet);
 			      }
 		}
@@ -350,8 +349,10 @@ std::vector<TRootJet*> Selection::GetSelectedJets(float PtThr, float EtaThr, vec
       if ( dr < minDrElJet ) minDrElJet = dr;
     }
   
-    if (minDrElJet >= dRLeptonJet)
+    if (minDrElJet >= dRLeptonJet){
       selectedJets.push_back(init_jets[i]);
+      std::cout << " Jet not surviving the lepton-jet deltaR veto .... " << std::endl;
+    }
   }
   std::sort(selectedJets.begin(),selectedJets.end(),HighestPt());
   return selectedJets;
