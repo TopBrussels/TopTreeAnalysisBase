@@ -142,7 +142,7 @@ std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons(float PtThr, fl
 
 std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons(float PtThr,float EtaThr,float MuonRelIso) const
 {
-  return GetSelectedDisplacedMuons(PtThr,EtaThr,10.,5.,0,0,1,MuonRelIso);
+  return muonSelector->GetSelectedDisplacedMuons(PtThr,EtaThr,0.02,0.5,MuonRelIso);
 }
 
 std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons() const
