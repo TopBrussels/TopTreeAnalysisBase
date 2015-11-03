@@ -84,7 +84,7 @@ private:
 	std::vector<TRootElectron*> GetSelectedTightElectronsCutsBasedSpring15_25ns(float PtThr, float EtaThr) const;
 	std::vector<TRootElectron*> GetSelectedMediumElectronsCutsBasedSpring15_25ns(float PtThr, float EtaThr) const;
 	std::vector<TRootElectron*> GetSelectedLooseElectronsCutsBasedSpring15_25ns(float PtThr, float EtaThr) const;
-
+	std::vector<TRootElectron*> GetSelectedVetoElectronsCutsBasedSpring15_25ns(float PtThr, float EtaThr) const;
 
     float rho_;
     int elecIsoCorrType_;
