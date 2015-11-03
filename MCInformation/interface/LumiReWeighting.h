@@ -268,13 +268,10 @@ namespace reweight {
 
 	  weights_->Divide( den );  // so now the average weight should be 1.0
 
-	  std::cout << " Lumi/Pileup Reweighting: Computed Weights per In-Time Nint " << std::endl;
-
-	  int NBins = weights_->GetNbinsX();
-
-	  for(int ibin = 1; ibin<NBins+1; ++ibin){
-	    std::cout << "   " << ibin-1 << " " << weights_->GetBinContent(ibin) << std::endl;
-	  }
+	  //std::cout << " Lumi/Pileup Reweighting: Computed Weights per In-Time Nint " << std::endl;
+	  //for(int ibin = 1; ibin<weights_->GetNbinsX()+1; ++ibin){
+	  //  std::cout << "   " << ibin-1 << " " << weights_->GetBinContent(ibin) << std::endl;
+	  //}
 
 	  weightOOT_init();
 
@@ -405,16 +402,10 @@ namespace reweight {
 						  << " Please Check.  Terminating." << std::endl;
 	  }
 
-
-	  if(mean==0.){
-	    Expval = 1.;
-	  }
-	  else {
-	    Expval = exp(-1.*mean);
-	  }
+	  if(mean==0.) Expval = 1.;
+	  else         Expval = exp(-1.*mean);
 
 	  base = 1.;
-
 	  for (int i = 1; i<50; ++i) {
 	    base = base*mean;
 	    PowerSer[i] = base; // PowerSer is mean^i                        
@@ -447,15 +438,10 @@ namespace reweight {
 						  << " Please Check.  Terminating." << std::endl;
 	  }
 
-	  if(mean==0.){
-	    Expval = 1.;
-	  }
-	  else {
-	    Expval = exp(-1.*mean);
-	  }
+	  if(mean==0.) Expval = 1.;
+	  else         Expval = exp(-1.*mean);
 
 	  base = 1.;
-
 	  for (int i = 1; i<50; ++i) {
 	    base = base*mean;
 	    PowerSer[i] = base;
