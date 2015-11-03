@@ -5,7 +5,7 @@
 #include <iomanip>
 #include <vector>
 #include <cmath>
-
+#include "TH2.h"
 #include <TGraphAsymmErrors.h>
 #include <TFile.h>
 
@@ -16,46 +16,34 @@
 using namespace std;
 using namespace TopTree;
 
-class LeptonTools
+class MuonSFWeight
 {
-  public:
-    LeptonTools(bool verbose = false);
-    ~LeptonTools();
-    
-    void readMuonSF(string IdIsoFile, string trigFileAB, string trigFileC, string trigFileD);
-    double getMuonSF(double eta, double pt, string syst = "Nominal");
-    
-    void readElectronSF(); // hard-coded SF's
-    double getElectronSF(double eta, double pt, string syst = "Nominal");
-    
-  private:
-    double getSF(TGraphAsymmErrors* graph, double low, double high);
-    
-    vector<double> muonPt;
-    vector<double> muonPtErr;
-    
-    vector<double> muonSFEtaLow;
-    vector<double> muonSFEtaLowUncPlus;
-    vector<double> muonSFEtaLowUncMinus;
-    vector<double> muonSFEtaMed;
-    vector<double> muonSFEtaMedUncPlus;
-    vector<double> muonSFEtaMedUncMinus;
-    vector<double> muonSFEtaHigh;
-    vector<double> muonSFEtaHighUncPlus;
-    vector<double> muonSFEtaHighUncMinus;
-    
-    vector<double> electronPt;
-    vector<double> electronPtErr;
-    
-    vector<double> electronSFEtaLow;
-    vector<double> electronSFEtaLowUnc;
-    vector<double> electronSFEtaMed;
-    vector<double> electronSFEtaMedUnc;
-    vector<double> electronSFEtaHigh;
-    vector<double> electronSFEtaHighUnc;
-    
-    bool verbose_;
-    
+ public:
+  MuonSFWeight () {};
+  MuonSFWeight (const string &, const string &, const bool &debug = false, const bool &printWarning = true);
+  ~MuonSFWeight ();
+  double at (const double &eta, const double &pt, const int &shiftUpDown = 0);
+
+ private:
+  TH2 *muonSFWeight_;
+  bool debug_;
+  bool printWarning_;
 };
+
+
+class ElectronSFWeight
+{
+ public:
+  ElectronSFWeight () {};
+  ElectronSFWeight (const string &, const string &, const bool &debug = false, const bool &printWarning = true);
+  ~ElectronSFWeight ();
+  double at (const double &eta, const double &pt, const int &shiftUpDown = 0);
+
+ private:
+  TH2 *electronSFWeight_;
+  bool debug_;
+  bool printWarning_;
+};
+
 
 #endif

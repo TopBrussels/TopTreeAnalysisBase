@@ -74,7 +74,9 @@ Run2Selection::~Run2Selection()
 
 //__EXTRA METHODS_______________________________________________________//
 
-//____SELECTION GETTERS_________________________________________________//
+//______________________________________________________________________//
+
+
 
 // ______________JETS_________________________________________________//
 
@@ -137,15 +139,15 @@ std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons(float PtThr, fl
 {
 	return muonSelector->GetSelectedDisplacedMuons(PtThr,EtaThr,NormChi2,NTrackerLayersWithMeas,NValidMuonHits,d0,dz,NValidPixelHits,NMatchedStations,MuonRelIso);
 }
-std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons(float PtThr,float EtaThr,float d0, float dz,float MuonRelIso) const
-{
-	return GetSelectedDisplacedMuons(PtThr,EtaThr,10.,5.,0,d0,dz,0,1,MuonRelIso);
 
+std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons(float PtThr,float EtaThr,float MuonRelIso) const
+{
+  return GetSelectedDisplacedMuons(PtThr,EtaThr,10.,5.,0,0,1,MuonRelIso);
 }
 
 std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons() const
 {
-	return GetSelectedDisplacedMuons(30.,2.5,0.02,0.5,0.2);
+	return GetSelectedDisplacedMuons(35.,2.4,0.12);
 }
 
 
@@ -249,14 +251,29 @@ bool Run2Selection::foundZCandidate(std::vector<TRootMuon*>& muons1, std::vector
 
 // ______________ELECTRONS______________________________________________//
 
-float Run2Selection::GetElectronIsoCorrType(TRootElectron *el) const{
+float Run2Selection::GetElectronIsoCorrType(TRootElectron *el, bool bx25) const{
 	double EffectiveArea = 0.;
-	// Updated to 2015 EA from https://indico.cern.ch/event/370494/contribution/2/attachments/736984/1011061/Rami_update_on_CB_ELE_ID_PHYS14PU20bx25.pdf
-	if (fabs(el->superClusterEta()) >= 0.0   && fabs(el->superClusterEta()) < 0.8   ) EffectiveArea = 0.0973;
-	if (fabs(el->superClusterEta()) >= 0.8   && fabs(el->superClusterEta()) < 1.3   ) EffectiveArea = 0.0954;
-	if (fabs(el->superClusterEta()) >= 1.3   && fabs(el->superClusterEta()) < 2.0   ) EffectiveArea = 0.0632;
-	if (fabs(el->superClusterEta()) >= 2.0   && fabs(el->superClusterEta()) < 2.2   ) EffectiveArea = 0.0727;
-	if (fabs(el->superClusterEta()) >= 2.2   && fabs(el->superClusterEta()) < 2.5   ) EffectiveArea = 0.1337;
+	if(bx25)
+    {
+        // Updated to Spring 2015 EA from https://github.com/cms-sw/cmssw/blob/CMSSW_7_4_14/RecoEgamma/ElectronIdentification/data/Spring15/effAreaElectrons_cone03_pfNeuHadronsAndPhotons_25ns.txt#L8
+        if (fabs(el->superClusterEta()) >= 0.0   && fabs(el->superClusterEta()) < 1.0   ) EffectiveArea = 0.1752;
+        if (fabs(el->superClusterEta()) >= 1.0   && fabs(el->superClusterEta()) < 1.479 ) EffectiveArea = 0.1862;
+        if (fabs(el->superClusterEta()) >= 1.479 && fabs(el->superClusterEta()) < 2.0   ) EffectiveArea = 0.1411;
+        if (fabs(el->superClusterEta()) >= 2.0   && fabs(el->superClusterEta()) < 2.2   ) EffectiveArea = 0.1534;
+        if (fabs(el->superClusterEta()) >= 2.2   && fabs(el->superClusterEta()) < 2.3   ) EffectiveArea = 0.1903;
+        if (fabs(el->superClusterEta()) >= 2.3   && fabs(el->superClusterEta()) < 2.4   ) EffectiveArea = 0.2243;
+        if (fabs(el->superClusterEta()) >= 2.4   && fabs(el->superClusterEta()) < 5.0   ) EffectiveArea = 0.2687;
+    }
+    else
+    {
+        // Updated to Spring 2015 EA from https://github.com/cms-sw/cmssw/blob/CMSSW_7_4_14/RecoEgamma/ElectronIdentification/data/Spring15/effAreaElectrons_cone03_pfNeuHadronsAndPhotons_50ns.txt
+        if (fabs(el->superClusterEta()) >= 0.0   && fabs(el->superClusterEta()) < 0.8   ) EffectiveArea = 0.0973;
+        if (fabs(el->superClusterEta()) >= 0.8   && fabs(el->superClusterEta()) < 1.3   ) EffectiveArea = 0.0954;
+        if (fabs(el->superClusterEta()) >= 1.3   && fabs(el->superClusterEta()) < 2.0   ) EffectiveArea = 0.0632;
+        if (fabs(el->superClusterEta()) >= 2.0   && fabs(el->superClusterEta()) < 2.2   ) EffectiveArea = 0.0727;
+        if (fabs(el->superClusterEta()) >= 2.2   && fabs(el->superClusterEta()) < 5.0   ) EffectiveArea = 0.1337;
+    }
+
 	if (fabs(el->superClusterEta()) >= 2.5) EffectiveArea = -9999;
 
 	double isocorr = 0;
@@ -275,8 +292,10 @@ float Run2Selection::GetElectronIsoCorrType(TRootElectron *el) const{
 	return isocorr;
 }
 
-float Run2Selection::pfElectronIso(TRootElectron *el) const{
-	float isoCorr = (el->neutralHadronIso(3) + el->photonIso(3) - GetElectronIsoCorrType(el));
+//This function gets the PF based Isolation for an Electron.  Since the Effective Areas for rho*effArea Isolation
+//are different for 25 and 50 ns samples, a boolean must be supplied to indicate which bx scenario.  true -> 25 ns.  false -> 50 ns
+float Run2Selection::pfElectronIso(TRootElectron *el, bool bx25) const{
+	float isoCorr = (el->neutralHadronIso(3) + el->photonIso(3) - GetElectronIsoCorrType(el, bx25));
 	float isolation = (el->chargedHadronIso(3) + (isoCorr > 0.0 ? isoCorr : 0.0))/(el->Pt());
 
 	return isolation;
@@ -302,12 +321,49 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedDisplacedElectrons(float P
 }
 
 std::vector<TRootElectron*> Run2Selection::GetSelectedDisplacedElectrons(float PtThr, float EtaThr) const {
-	return GetSelectedDisplacedElectrons(PtThr,EtaThr,0.02,0.2);
 
+  // use tight electron ID (cut-based) for now, but without cuts on  d0 dz . This ID can be in flux, and for now is hard-coded here:
+
+  //These quality cuts reflect the recommended Tight cut-based electron ID as provided by the EGM POG. Last updated: 23 September 2015
+  // as these are still in flux, it is probably useful to check them here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2#Spring15_selection_25ns (revision 27)
+
+  std::vector<TRootElectron*> selectedElectrons;
+  for(unsigned int i=0; i<electrons.size(); i++) {
+    TRootElectron* el = (TRootElectron*) electrons[i];
+    if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr) {
+      // For the Barrel
+      if( fabs(el->superClusterEta()) <= 1.479
+          && el->sigmaIEtaIEta() < 0.0101
+	  && fabs(el->deltaEtaIn()) < 0.00926
+          && fabs(el->deltaPhiIn()) < 0.0336
+	  && el->hadronicOverEm() < 0.0597
+          && pfElectronIso(el) < 0.0354
+          && fabs(1/el->E() - 1/el->P()) < 0.012
+          && el->missingHits() <= 2 // check wrt to expectedMissingInnerHits
+          && el->passConversion())
+        {
+          selectedElectrons.push_back(electrons[i]);
+        }
+      // For the endcap
+      else if (fabs(el->superClusterEta()) < 2.5
+	       && el->sigmaIEtaIEta() < 0.0279
+	       && fabs(el->deltaEtaIn()) < 0.00724
+	       && fabs(el->deltaPhiIn()) < 0.0918
+	       && el->hadronicOverEm() < 0.0615
+	       && pfElectronIso(el) < 0.0646
+	       && fabs(1/el->E() - 1/el->P()) < 0.00999
+	       && el->missingHits() <= 1 // check wrt to expectedMissingInnerHits
+	       && el->passConversion())
+        {
+          selectedElectrons.push_back(electrons[i]);
+        }
+    }
+  }
+  return selectedElectrons;
 }
 
 std::vector<TRootElectron*> Run2Selection::GetSelectedDisplacedElectrons() const{
-	return GetSelectedDisplacedElectrons(30, 2.5);
+  return GetSelectedDisplacedElectrons(40.0, 2.4);
 }
 
 //____________IS SELECTED_______________________________________________//

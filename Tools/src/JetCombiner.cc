@@ -1616,7 +1616,7 @@ void JetCombiner::EndJob() {
     EndJobWasRun_ = true;
 
     if(trainMVA_)
-        trainer_->TrainMVA("Block","",0,0,"",0,0,postfix_);
+        trainer_->TrainMVA("Block","",0,0,"",0,0,postfix_, false);
 
     graphAsymmErr_["PtJetCutEfficiency"] = GraphRatio(histo1D_["PtJetCut_nEventsAfter"],histo1D_["PtJetCut_nEventsBefore"],"PtJetCutEfficiency","cut on p_{T}^{4 leading jets}","Fraction with >= 4 jets");
     graphAsymmErr_["PtJetCut4PartonsMatchingEfficiency"] = GraphRatio(histo1D_["PtJetCut_nEvents4PartonsMatchedAfter"],histo1D_["PtJetCut_nEventsAfter"],"PtJetCut4PartonsMatchingEfficiency","cut on p_{T}^{jets}","Fraction with >= 4 matched jets");

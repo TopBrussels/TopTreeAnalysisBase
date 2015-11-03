@@ -324,6 +324,7 @@ TTreeLoader::UnLoadDataset (){
   if(tcgenEvt)      tcgenEvt     ->Delete();
   if(tcgenjets)     tcgenjets    ->Delete();
   if(tcnpgenEvt)    tcnpgenEvt   ->Delete();
+  if(d_)            d_           ->Delete();
 }
 
 void
@@ -495,6 +496,7 @@ TTreeLoader::EventPassedJSON(int runID, int lumiBlockID)
   return eventPassed;
 }
 
+
 int TTreeLoader::iTrigger (std::string triggerName, int runID, int iFile) //iFile starts from 0!!
 {
 //    cout << "Number of Entries on the runTree: " << d_->runTree()->GetEntries() << endl;
@@ -507,6 +509,7 @@ int TTreeLoader::iTrigger (std::string triggerName, int runID, int iFile) //iFil
 //    cout << "nHLTEvents: " << runInfos->nHLTEvents() << endl;
   if (runInfos == 0) return -9999;
     cout << "Getting HLT Path Info" << endl;
+
   return runInfos->getHLTinfo(runID).hltPath(triggerName);
 }
 
@@ -517,9 +520,7 @@ bool TTreeLoader::EventTrigged (int itrigger)
 
 void TTreeLoader::ListTriggers(int runID, int iFile){ //iFile starts from 0!!
   d_->runTree()->GetEntry(iFile);
-
   cout<<"Listing Triggers for run: "<<runID<<endl;
   runInfos->getHLTinfo(runID).gethltNameList();
-
 }
 
