@@ -2,7 +2,7 @@
 //
 // Package:    TopTreeAnalysisBase/Tools
 // Class:      BTagWeightTools
-//
+// 
 /**\class BTagWeightTools TopBrussels/TopTreeAnalysisBase/Tools/interface/BTagWeightTools.cxx TopBrussels/Tools/interface/BTagWeightTools.h
 
  Description: Container class to parse BTV POG payloads which can be updated from https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagPOG
@@ -36,62 +36,54 @@ using namespace TopTree;
 
 
 // constructor
-
-BTagWeightTools::BTagWeightTools(string histoFileName):
+BTagWeightTools::BTagWeightTools(string histoFileName, bool verbose):
 _ptmin(9999),
 _ptmax(-999),
 _etamax(2.4),
 _reader(new BTagCalibrationReader()),
-_f((TFile*)TFile::Open(histoFileName.c_str(),"RECREATE")),
-_histo2D()
+_histo2D(),
+_verbose(verbose),
+_histogramsFilled(false)
 
 {
   InitializeMCEfficiencyHistos();
-  //InitializeMCEfficiencyHistos(_histo2D,10,_ptmin,_ptmax,2);
+  _f = TFile::Open(histoFileName.c_str(),"READ");
+  if (!_f){_f = TFile::Open(histoFileName.c_str(),"RECREATE");}
+  else if (!(_f->GetListOfKeys()->FindObject("BtaggedJets"))){_f->ReOpen("UPDATE");}
+  
 }
 
-BTagWeightTools::BTagWeightTools(const BTagCalibrationReader *reader, float minpt, float maxpt, float maxeta, string histoFileName):
+BTagWeightTools::BTagWeightTools(const BTagCalibrationReader *reader, string histoFileName, bool verbose, float minpt, float maxpt, float maxeta):
 _ptmin(9999),
 _ptmax(-999),
 _etamax(2.4),
 _reader(new BTagCalibrationReader()),
-_f((TFile*)TFile::Open(histoFileName.c_str(),"RECREATE")),
-_histo2D()
+_histo2D(),
+_verbose(verbose),
+_histogramsFilled(false)
 {
   _ptmax = maxpt;
   _ptmin = minpt;
   _etamax = maxeta;
   _reader = reader;
-
   InitializeMCEfficiencyHistos(10,_ptmin,_ptmax,2);
-
-  // Try and set ptmax and ptmin for the given selectedJets, to avoid ending up with empty pT bins
-  /*for (size_t i = 0; i < selectedJets.size(); i++){
-  	if (selectedJets[i]->Pt() > _ptmax){_ptmax = selectedJets[i]->Pt();}
-	if (selectedJets[i]->Pt() < _ptmin){_ptmin = selectedJets[i]->Pt();}
-  }
-
-  // abs(eta) we fix at two bins from 0 to 2.4
-  _etamax = 2.4;
-  _reader = reader;
-  _allSelectedJets = selectedJets;
-  InitializeMCEfficiencyHistos(10,_ptmin,_ptmax,2);
-
-  FillMCEfficiencyHistos();*/
+  _f = TFile::Open(histoFileName.c_str(),"READ");
+  if (!_f){_f = TFile::Open(histoFileName.c_str(),"RECREATE");}
+  else if (!(_f->GetListOfKeys()->FindObject("BtaggedJets"))){_f->ReOpen("UPDATE");}
+  
 }
 
 
 // destructor:
 BTagWeightTools::~BTagWeightTools(){
-    // for(map<string,TH2F*>::const_iterator it = _histo2D.begin(); it != _histo2D.end(); it++)
-    // {
-    //     string name = it->first;
-    //     TH2F * temp = it->second;
-    //     temp->Write();
-
-		  //   //_histo2D.erase(name);
-    // }
-	_f->cd();
+    
+  _f->cd();
+  if (_histogramsFilled){
+  TString opt = _f->GetOption();
+  if (opt == "READ"){
+  	_f->ReOpen("UPDATE");
+	if (_verbose){cout << "BTagWeightTools::Destructor WARNING: Histograms are being added to already existing file (NOT A NEW FILE)" << endl;}
+  }
   _histo2D["BtaggedJets"]->Write();
   _histo2D["BtaggedBJets"]->Write();
   _histo2D["BtaggedCJets"]->Write();
@@ -99,11 +91,14 @@ BTagWeightTools::~BTagWeightTools(){
   _histo2D["TotalNofBJets"]->Write();
   _histo2D["TotalNofCJets"]->Write();
   _histo2D["TotalNofLightJets"]->Write();
+  }
+  
+
   _f->Close();
   delete _f;
   //_histo2D.clear();
   //_allSelectedJets.clear();
-
+  
 }
 
 
@@ -122,18 +117,14 @@ void BTagWeightTools::InitializeMCEfficiencyHistos(int NofPtBins,float PtMin,flo
 
 void BTagWeightTools::FillMCEfficiencyHistos(vector< TopTree::TRootPFJet* > allSelectedJets)
 {
-	for (unsigned int i = 0; i < allSelectedJets.size(); i++){
-  		if (allSelectedJets[i]->Pt() > _ptmax){_ptmax = allSelectedJets[i]->Pt();}
-		if (allSelectedJets[i]->Pt() < _ptmin){_ptmin = allSelectedJets[i]->Pt();}
-  	}
 
-	// InitializeMCEfficiencyHistos(_histo2D,10,_ptmin,_ptmax,2);
-
-	//TFile* f = (TFile*)TFile::Open("HistosPtEta.root","RECREATE");
-  	if (!_f){
+  	  if (!_f){
 		std::cerr << "ERROR in BTagWeigtTools::FillMCEfficiencyHistos: Could not open the file for the 2D histogram output." << std::endl;
 		throw std::exception();
-	}
+	  }
+	  
+	  
+	  
 	  for (unsigned int i=0; i < allSelectedJets.size(); i++)
 	  {
 		float localPt = allSelectedJets[i]->Pt();
@@ -141,7 +132,7 @@ void BTagWeightTools::FillMCEfficiencyHistos(vector< TopTree::TRootPFJet* > allS
 		//cout << "pT: " << localPt << " eta: " << localEta << endl;
 		if (localPt >= _ptmax) localPt = _ptmax-1;
 		if (localEta >= 2.4) localEta = 2.4-0.01;
-
+		
 		if (fabs(allSelectedJets[i]->hadronFlavour()) == 5.) {	//b-jet
 			_histo2D["TotalNofBJets"]->Fill(localPt,localEta);
 		}
@@ -149,35 +140,36 @@ void BTagWeightTools::FillMCEfficiencyHistos(vector< TopTree::TRootPFJet* > allS
 			_histo2D["TotalNofCJets"]->Fill(localPt,localEta);
 		}
 		else if (fabs(allSelectedJets[i]->hadronFlavour()) == 0.) {
-			//cout << "Eventnr.: " << ievt << ", Jetnr.: " << i << ", pdgId: " << allSelectedJets[i]->hadronFlavour() << ". Is pileup jet -> consider as light jet." << endl;
 			_histo2D["TotalNofLightJets"]->Fill(localPt,localEta);
 		}
 		else {
-			//cout << "Eventnr.: " << ievt << ", Jetnr.: " << i << ", pdgId: " << allSelectedJets[i]->hadronFlavour() << ". Is hadron -> consider as light jet." << endl;
 			_histo2D["TotalNofLightJets"]->Fill(localPt,localEta);
 		}
-
+		
 		// Get the correct BJetTags value (discriminator value)
 		float btagValue = -100.;
 		std::string tagger_name = (_reader->calib)->tagger();
 		if (tagger_name.find("CSVv2") != std::string::npos || tagger_name.find("csvv2") != std::string::npos){btagValue = allSelectedJets[i]->btag_combinedInclusiveSecondaryVertexV2BJetTags();}
-			else if (tagger_name.find("JP") != std::string::npos || tagger_name.find("jp") != std::string::npos){btagValue = allSelectedJets[i]->btag_jetProbabilityBJetTags();}
-			else if (tagger_name.find("SC") != std::string::npos || tagger_name.find("sc") != std::string::npos){
-				std::cerr << "Warning in BTagWeightTools: SC discriminator values not yet been included!!!" << std::endl
+		else if (tagger_name.find("JP") != std::string::npos || tagger_name.find("jp") != std::string::npos){btagValue = allSelectedJets[i]->btag_jetProbabilityBJetTags();}
+		else if (tagger_name.find("SC") != std::string::npos || tagger_name.find("sc") != std::string::npos){
+				if (_verbose){
+					std::cerr << "Warning in BTagWeightTools: SC discriminator values not yet been included!!!" << std::endl
 						  << "Uses CSVv2 instead, please choose another tagger (or update the script)." << std::endl;
+				}
 				btagValue = allSelectedJets[i]->btag_combinedInclusiveSecondaryVertexV2BJetTags();
+		}
+		else{
+			if (_verbose){std::cerr << "Warning in BTagCalibration: Tagger " << tagger_name << " is not CSVv2, JP, or SC." << std::endl
+						<< "Please define your BTagCalibration object with one of these tagger names." << std::endl
+						<< "CSVv2 discriminator is used instead!!!" << std::endl;
 			}
-			else{
-				std::cerr << "Warning in BTagCalibration: Tagger " << tagger_name << " is not CSVv2, JP, or SC." << std::endl
-			<< "Please define your BTagCalibration object with one of these tagger names." << std::endl
-			<< "CSVv2 discriminator is used instead!!!" << std::endl;
 			btagValue = allSelectedJets[i]->btag_combinedInclusiveSecondaryVertexV2BJetTags();
 		}
-
+	
 		// fill the corresponding histograms for b-tagged jets
 		if (btagValue > _reader->op_cutvalue()) {
 			_histo2D["BtaggedJets"]->Fill(localPt,localEta);
-
+			
 			if (fabs(allSelectedJets[i]->hadronFlavour()) == 5.) {	//b-jet
 				_histo2D["BtaggedBJets"]->Fill(localPt,localEta);
 			}
@@ -185,37 +177,41 @@ void BTagWeightTools::FillMCEfficiencyHistos(vector< TopTree::TRootPFJet* > allS
 				_histo2D["BtaggedCJets"]->Fill(localPt,localEta);
 			}
 			else if (fabs(allSelectedJets[i]->hadronFlavour()) == 0.) {
-				//cout << "Eventnr.: " << ievt << ", Jetnr.: " << i << ", pdgId: " << allSelectedJets[i]->hadronFlavour() << ". Is pileup jet -> consider as light jet." << endl;
 				_histo2D["BtaggedLightJets"]->Fill(localPt,localEta);
 			}
 			else {
-				//cout << "Eventnr.: " << ievt << ", Jetnr.: " << i << ", pdgId: " << allSelectedJets[i]->hadronFlavour() << ". Is hadron -> consider as light jet." << endl;
 				_histo2D["BtaggedLightJets"]->Fill(localPt,localEta);
 			}
 		}
 	  }
+	  
+	  _histogramsFilled = true;
+	
 
-}
+} 
 
 
 
-float BTagWeightTools::getMCEventWeight(vector< TopTree::TRootPFJet* > jetsPerEvent, TFile *histo_file,bool usePartonFlavour) // https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods#1a_Event_reweighting_using_scale
+float BTagWeightTools::getMCEventWeight(vector< TopTree::TRootPFJet* > jetsPerEvent,bool usePartonFlavour) // https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods#1a_Event_reweighting_using_scale
 {
-			if (!histo_file){
-				std::cerr << "ERROR in BTagWeigtTools::getTagEff: Could not open the file for the 2D histogram input." << std::endl;
+
+			TString opt = _f->GetOption();
+			if (opt == "RECREATE" || opt == "CREATE" || opt == "UPDATE"){ // the file was recreated so it is empty!
+				std::cerr << "ERROR in BTagWeigtTools::getMCEventWight --> file does not contain correct histograms, check if the filename exists" << std::endl;
 				throw std::exception();
 			}
 
+	
 			float probMC = 1.;
 			float probData = 1.;
 			float tagEff = 1.;
 			float btagSF = 1.;
-			for (unsigned int i=0; i < jetsPerEvent.size(); i++)
+			for (unsigned int i=0; i < jetsPerEvent.size(); i++) 
 			{
 						if (usePartonFlavour){
 							int partonFlavour = std::abs(jetsPerEvent[i]->partonFlavour());
 							if (partonFlavour!= 5 && partonFlavour!=4){partonFlavour = 0;} // to be consistent with the hadronFlavour numbers
-							tagEff = getTagEff(jetsPerEvent[i]->Pt(), jetsPerEvent[i]->Eta(), partonFlavour ,histo_file);
+							tagEff = getTagEff(jetsPerEvent[i]->Pt(), jetsPerEvent[i]->Eta(), partonFlavour);
   							BTagEntry::JetFlavor jf;
   							if (partonFlavour == 5){jf = BTagEntry::FLAV_B;}
   							else if (partonFlavour == 4){jf = BTagEntry::FLAV_C;}
@@ -223,44 +219,43 @@ float BTagWeightTools::getMCEventWeight(vector< TopTree::TRootPFJet* > jetsPerEv
 							btagSF = _reader->eval(jf,jetsPerEvent[i]->Eta(),jetsPerEvent[i]->Pt(),jetsPerEvent[i]->btag_combinedInclusiveSecondaryVertexV2BJetTags());
 						}
 						else{
-							tagEff = getTagEff(jetsPerEvent[i]->Pt(), jetsPerEvent[i]->Eta(), jetsPerEvent[i]->hadronFlavour(),histo_file);
+							tagEff = getTagEff(jetsPerEvent[i]->Pt(), jetsPerEvent[i]->Eta(), jetsPerEvent[i]->hadronFlavour());											
 							btagSF = _reader->eval(jetsPerEvent[i]);
 						}
-						//cout << "TEST: BTag SF: " << btagSF << std::endl;
-						//cout << "TEST: BTag Eff: " << tagEff << std::endl;
-						//cout<<"  btagSF = "<<btagSF<<", tagEff = "<<tagEff<<", syst = "<<syst<<endl;
-
+													
 						if (tagEff == 0.)
 						{
-								cout << endl << "BTagWeightTools::getMCEventWeight WARNING: Tag efficiency is zero!" << endl;
+								if (_verbose){cout << endl << "BTagWeightTools::getMCEventWeight WARNING: Tag efficiency is zero!" << endl;}
 								continue;
 						}
 						if (btagSF == 0.)
 						{
-								cout << endl << "BTagWeightTools::getMCEventWeight WARNING: Btag scalefactor is zero!" << endl;
+								if (_verbose){cout << endl << "BTagWeightTools::getMCEventWeight WARNING: Btag scalefactor is zero!" << endl;}
 								continue;
-						}
-
-						// Get BTag discriminator value
+						}	
+						
+						// Get BTag discriminator value													
 						float btagValue = -100.;
 						std::string tagger_name = (_reader->calib)->tagger();
 						if (tagger_name.find("CSVv2") != std::string::npos || tagger_name.find("csvv2") != std::string::npos){btagValue = jetsPerEvent[i]->btag_combinedInclusiveSecondaryVertexV2BJetTags();}
   						else if (tagger_name.find("JP") != std::string::npos || tagger_name.find("jp") != std::string::npos){btagValue = jetsPerEvent[i]->btag_jetProbabilityBJetTags();}
   						else if (tagger_name.find("SC") != std::string::npos || tagger_name.find("sc") != std::string::npos){
-    							std::cerr << "Warning in BTagWeightTools: SC discriminator values not yet been included!!!" << std::endl
-	      						  	  << "Uses CSVv2 instead, please choose another tagger (or update the script)." << std::endl;
+    							if (_verbose){std::cerr << "Warning in BTagWeightTools: SC discriminator values not yet been included!!!" << std::endl
+	      						  	  		<< "Uses CSVv2 instead, please choose another tagger (or update the script)." << std::endl;
+							}
     							btagValue = jetsPerEvent[i]->btag_combinedInclusiveSecondaryVertexV2BJetTags();
   						}
   						else{
-  							std::cerr << "Warning in BTagCalibration: Tagger " << tagger_name << " is not CSVv2, JP, or SC." << std::endl
-							<< "Please define your BTagCalibration object with one of these tagger names." << std::endl
-							<< "CSVv2 discriminator is used instead!!!" << std::endl;
+  							if (_verbose){std::cerr << "Warning in BTagCalibration: Tagger " << tagger_name << " is not CSVv2, JP, or SC." << std::endl
+										<< "Please define your BTagCalibration object with one of these tagger names." << std::endl
+										<< "CSVv2 discriminator is used instead!!!" << std::endl;
+							}
 							btagValue = jetsPerEvent[i]->btag_combinedInclusiveSecondaryVertexV2BJetTags();
-						}
-
+						}							
+						
 						// Update the probabilities
 						if (btagValue > _reader->op_cutvalue()) //tagged
-						{
+						{	
 						    		probMC = probMC*tagEff;
 								probData = probData*btagSF*tagEff;
 						}
@@ -277,78 +272,71 @@ float BTagWeightTools::getMCEventWeight(vector< TopTree::TRootPFJet* > jetsPerEv
 
 
 
-float BTagWeightTools::getTagEff(float pt, float eta, int flavor, TFile* histo_file)
+float BTagWeightTools::getTagEff(float pt, float eta, int flavor)
 {
-					if (!histo_file){
-						std::cerr << "ERROR in BTagWeigtTools::getTagEff: Could not open the file for the 2D histogram input." << std::endl;
-						throw std::exception();
-					}
-
-
+				
 					float tagEff = 1.;
           				int xBin = 0, yBin = 0;
 					if (pt >= _ptmax)
-							xBin = ((TH2F*)histo_file->Get("TotalNofBJets"))->GetXaxis()->FindBin(_ptmax-1);
+							xBin = ((TH2F*)_f->Get("TotalNofBJets"))->GetXaxis()->FindBin(_ptmax-1);
 					else if (pt <= _ptmin)
-							xBin = ((TH2F*)histo_file->Get("TotalNofBJets"))->GetXaxis()->FindBin(_ptmin+1);
+							xBin = ((TH2F*)_f->Get("TotalNofBJets"))->GetXaxis()->FindBin(_ptmin+1);		
 					else
-							xBin = ((TH2F*)histo_file->Get("TotalNofBJets"))->GetXaxis()->FindBin(pt);
+							xBin = ((TH2F*)_f->Get("TotalNofBJets"))->GetXaxis()->FindBin(pt);
 					if (fabs(eta) >= _etamax)
-							yBin = ((TH2F*)histo_file->Get("TotalNofBJets"))->GetYaxis()->FindBin(_etamax - 0.01);
-					else
-							yBin = ((TH2F*)histo_file->Get("TotalNofBJets"))->GetYaxis()->FindBin(fabs(eta));
-
-					if (fabs(flavor) == 5.)
+							yBin = ((TH2F*)_f->Get("TotalNofBJets"))->GetYaxis()->FindBin(_etamax - 0.01);
+					else 
+							yBin = ((TH2F*)_f->Get("TotalNofBJets"))->GetYaxis()->FindBin(fabs(eta));
+					
+					
+					if (fabs(flavor) == 5.) 
 					{
-							float NofBJets = ((TH2F*)histo_file->Get("TotalNofBJets"))->GetBinContent(xBin,yBin);
+							float NofBJets = ((TH2F*)_f->Get("TotalNofBJets"))->GetBinContent(xBin,yBin);
 							if (NofBJets == 0.)
 							{
-									cout << "BTagWeightTools::getMCEventWeight WARNING: No b jets for bin (" << xBin << "," << yBin << ")!" << endl;
+									if (_verbose){cout << "BTagWeightTools::getMCEventWeight WARNING: No b jets for bin (" << xBin << "," << yBin << ")!" << endl;}
 									return -1;
 							}
-							float NofTaggedBJets = ((TH2F*)histo_file->Get("BtaggedBJets"))->GetBinContent(xBin,yBin);
+							float NofTaggedBJets = ((TH2F*)_f->Get("BtaggedBJets"))->GetBinContent(xBin,yBin);
 							tagEff = NofTaggedBJets/NofBJets;
 					}
 					else if (fabs(flavor) == 4.)
 					{
 					    //cout<<" C"<<endl;
-							float NofCJets = ((TH2F*)histo_file->Get("TotalNofCJets"))->GetBinContent(xBin,yBin);
+							float NofCJets = ((TH2F*)_f->Get("TotalNofCJets"))->GetBinContent(xBin,yBin);
 							if (NofCJets == 0.)
 							{
-							    cout << "BTagWeightTools::getMCEventWeight WARNING: No c jets for bin (" << xBin << "," << yBin << ")." << endl;
+							    	if (_verbose){cout << "BTagWeightTools::getMCEventWeight WARNING: No c jets for bin (" << xBin << "," << yBin << ")." << endl;}
 									return -1;
 							}
-							float NofTaggedCJets = ((TH2F*)histo_file->Get("BtaggedCJets"))->GetBinContent(xBin,yBin);
+							float NofTaggedCJets = ((TH2F*)_f->Get("BtaggedCJets"))->GetBinContent(xBin,yBin);
 							tagEff = NofTaggedCJets/NofCJets;
 					 }
 					 else if (fabs(flavor) == 0.)
 					 {
-					    //cout<<" PU?"<<endl;
-							//cout << "Eventnr.: " << ievt << ", Jetnr.: " << i << ", pdgId: " << flavor << ". Is pileup jet -> consider as light jet." << endl;
-							float NofLightJets = ((TH2F*)histo_file->Get("TotalNofLightJets"))->GetBinContent(xBin,yBin);
+					        float NofLightJets = ((TH2F*)_f->Get("TotalNofLightJets"))->GetBinContent(xBin,yBin);
 							if (NofLightJets == 0.)
 							{
-									cout << "BTagWeightTools::getMCEventWeight WARNING: No light jets for bin (" << xBin << "," << yBin << ")." << endl;
+									if (_verbose){cout << "BTagWeightTools::getMCEventWeight WARNING: No light jets for bin (" << xBin << "," << yBin << ")." << endl;}
 									return -1;
 							}
-							float NofTaggedLightJets = ((TH2F*)histo_file->Get("BtaggedLightJets"))->GetBinContent(xBin,yBin);
+							float NofTaggedLightJets = ((TH2F*)_f->Get("BtaggedLightJets"))->GetBinContent(xBin,yBin);
 							tagEff = NofTaggedLightJets/NofLightJets;
 					 }
-					 else
+					 else 
 					 {
-					     		cout << endl << "BTagWeightTools::getMCEventWeight WARNING: Jet not identified! PdgId: " << flavor << endl
-					     		     << "Using Light Jet Instead!!!!" << endl;
-					     		 float NofLightJets = ((TH2F*)histo_file->Get("TotalNofLightJets"))->GetBinContent(xBin,yBin);
+					     		 if (_verbose){cout << endl << "BTagWeightTools::getMCEventWeight WARNING: Jet not identified! PdgId: " << flavor << endl
+					     		     << "Using Light Jet Instead!!!!" << endl;}
+					     		 float NofLightJets = ((TH2F*)_f->Get("TotalNofLightJets"))->GetBinContent(xBin,yBin);
 							 if (NofLightJets == 0.)
 							 {
-								  cout << "BTagWeightTools::getMCEventWeight WARNING: No light jets for bin (" << xBin << "," << yBin << ")." << endl;
+								  if (_verbose){cout << "BTagWeightTools::getMCEventWeight WARNING: No light jets for bin (" << xBin << "," <<yBin << ")." << endl;}
 									return -1;
 							 }
-							 float NofTaggedLightJets = ((TH2F*)histo_file->Get("BtaggedLightJets"))->GetBinContent(xBin,yBin);
+							 float NofTaggedLightJets = ((TH2F*)_f->Get("BtaggedLightJets"))->GetBinContent(xBin,yBin);
 							 tagEff = NofTaggedLightJets/NofLightJets;
 					}
-
-
+					
 					return tagEff;
 
 }
