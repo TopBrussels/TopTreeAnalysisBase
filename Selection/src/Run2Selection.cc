@@ -135,14 +135,14 @@ std::vector<TRootMuon*> Run2Selection::GetSelectedMuons(float PtThr, float etaTh
 }
 
 // displaced muons
-std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons(float PtThr, float EtaThr, float NormChi2, int NTrackerLayersWithMeas, int NValidMuonHits, float d0, float dz, int NValidPixelHits, int NMatchedStations, float MuonRelIso) const
+std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons(float PtThr, float EtaThr, float NormChi2, int NTrackerLayersWithMeas, int NValidMuonHits, int NValidPixelHits, int NMatchedStations, float MuonRelIso) const
 {
-	return muonSelector->GetSelectedDisplacedMuons(PtThr,EtaThr,NormChi2,NTrackerLayersWithMeas,NValidMuonHits,d0,dz,NValidPixelHits,NMatchedStations,MuonRelIso);
+  return muonSelector->GetSelectedDisplacedMuons(PtThr,EtaThr,NormChi2,NTrackerLayersWithMeas,NValidMuonHits,NValidPixelHits,NMatchedStations,MuonRelIso);
 }
 
 std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons(float PtThr,float EtaThr,float MuonRelIso) const
 {
-  return muonSelector->GetSelectedDisplacedMuons(PtThr,EtaThr,0.02,0.5,MuonRelIso);
+  return muonSelector->GetSelectedDisplacedMuons(PtThr,EtaThr,MuonRelIso);
 }
 
 std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons() const
@@ -313,11 +313,6 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedElectrons(string WorkingPo
 std::vector<TRootElectron*> Run2Selection::GetSelectedElectrons(float PtThr, float etaThr, string WorkingPoint, string ProductionCampaign, bool CutsBased) const {
 
     return electronSelector->GetSelectedElectrons(PtThr, etaThr, WorkingPoint, ProductionCampaign, CutsBased);
-}
-
-std::vector<TRootElectron*> Run2Selection::GetSelectedDisplacedElectrons(float PtThr, float EtaThr, float d0, float dz) const {
-
-	return electronSelector->GetSelectedDisplacedElectrons(PtThr, EtaThr, d0, dz);
 }
 
 std::vector<TRootElectron*> Run2Selection::GetSelectedDisplacedElectrons(float PtThr, float EtaThr) const {

@@ -197,66 +197,52 @@ std::vector<TRootElectron*> ElectronSelection::GetSelectedElectrons(float PtThr,
 	return ElectronCollection;
 }
 
-
-
-std::vector<TRootElectron*> ElectronSelection::GetSelectedDisplacedElectrons(float PtThr, float EtaThr, float d0, float dz) const {
-
-	// use medium electron ID (cut-based) for now, but with cuts on the beam spot d0 dz . This ID can be in flux, and for now is hard-coded here:
-
-	//These quality cuts reflect the recommended Medium cut-based electron ID as provided by the EGM POG. Last updated: 25 July 2015
-	// as these are still in flux, it is probably useful to check them here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationElectron#PHYS14_selection_all_conditions
-
-	std::vector<TRootElectron*> selectedElectrons;
-	for(unsigned int i=0; i<electrons.size(); i++) {
-		TRootElectron* el = (TRootElectron*) electrons[i];
-		// Using cut-based
-		if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr) {
-			if( fabs(el->superClusterEta()) <= 1.479
-			   && fabs(el->deltaEtaIn()) < 0.008925
-			   && fabs(el->deltaPhiIn()) < 0.035973
-			   && el->sigmaIEtaIEta() < 0.009996
-			   && el->hadronicOverEm() < 0.050537
-			   && fabs(el->d0BeamSpot()) > d0
-			   && fabs(el->dzBeamSpot()) < dz
-			   && fabs(1/el->E() - 1/el->P()) < 0.091942
-			   && pfElectronIso(el) < 0.107587
-			   && el->passConversion()
-			   && el->missingHits() <= 1)
-			{
-				selectedElectrons.push_back(electrons[i]);
-			}
-
-			else if (fabs(el->superClusterEta()) < 2.5
-					 && fabs(el->deltaEtaIn()) < 0.007429
-					 && fabs(el->deltaPhiIn()) < 0.067879
-					 && el->sigmaIEtaIEta() <0.030135
-					 && el->hadronicOverEm() < 0.086782
-					 && fabs(el->d0BeamSpot()) > d0
-					 && fabs(el->dzBeamSpot()) < dz
-					 && fabs(1/el->E() - 1/el->P()) < 0.100683
-					 && pfElectronIso(el) < 0.113254
-					 && el->passConversion()
-					 && el->missingHits() <= 1)
-			{
-				selectedElectrons.push_back(electrons[i]);
-			}
-		}
-	}
-	std::sort(selectedElectrons.begin(),selectedElectrons.end(),HighestElectronPt());
-	return selectedElectrons;
-
-
-	return selectedElectrons;
-}
-
-
+// displaced electrons
 std::vector<TRootElectron*> ElectronSelection::GetSelectedDisplacedElectrons(float PtThr, float EtaThr) const {
-	return GetSelectedDisplacedElectrons(PtThr,EtaThr,0.02,0.2);
 
+  // use tight electron ID (cut-based) for now, but without cuts on  d0 dz . This ID can be in flux, and for now is hard-coded here
+  //These quality cuts reflect the recommended Tight cut-based electron ID as provided by the EGM POG. Last updated: 23 September 2015
+  // as these are still in flux, it is probably useful to check them here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2#Spring15_selection_25n (revision 27)
+
+    std::vector<TRootElectron*> selectedElectrons;
+  for(unsigned int i=0; i<electrons.size(); i++) {
+    TRootElectron* el = (TRootElectron*) electrons[i];
+    if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr) {
+      // For the Barrel                                                                                                                                                     
+
+      if( fabs(el->superClusterEta()) <= 1.479
+          && el->sigmaIEtaIEta() < 0.0101
+          && fabs(el->deltaEtaIn()) < 0.00926
+          && fabs(el->deltaPhiIn()) < 0.0336
+          && el->hadronicOverEm() < 0.0597
+          && pfElectronIso(el) < 0.0354
+          && fabs(1/el->E() - 1/el->P()) < 0.012
+          && el->missingHits() <= 2 // check wrt to expectedMissingInnerHits
+          && el->passConversion())
+        {
+          selectedElectrons.push_back(electrons[i]);
+        }
+      // For the endcap
+
+      else if (fabs(el->superClusterEta()) < 2.5
+               && el->sigmaIEtaIEta() < 0.0279
+               && fabs(el->deltaEtaIn()) < 0.00724
+               && fabs(el->deltaPhiIn()) < 0.0918
+               && el->hadronicOverEm() < 0.0615
+               && pfElectronIso(el) < 0.0646
+               && fabs(1/el->E() - 1/el->P()) < 0.00999
+               && el->missingHits() <= 1 // check wrt to expectedMissingInnerHits
+               && el->passConversion())
+        {
+          selectedElectrons.push_back(electrons[i]);
+        }
+    }
+  }
+  return selectedElectrons;
 }
 
 std::vector<TRootElectron*> ElectronSelection::GetSelectedDisplacedElectrons() const{
-	return GetSelectedDisplacedElectrons(30, 2.5);
+  return GetSelectedDisplacedElectrons(40.0, 2.4);
 }
 
 std::vector<TRootElectron*> ElectronSelection::GetSelectedTightElectronsCutsBasedSpring15_50ns(float PtThr, float EtaThr) const {

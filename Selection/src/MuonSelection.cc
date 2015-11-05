@@ -60,55 +60,41 @@ std::vector<TRootMuon*> MuonSelection::GetSelectedMuons(float PtThr, float etaTh
 }
 
 // displaced muons
-std::vector<TRootMuon*> MuonSelection::GetSelectedDisplacedMuons(float PtThr, float EtaThr, float NormChi2, int NTrackerLayersWithMeas, int NValidMuonHits, float d0, float dZ, int NValidPixelHits, int NMatchedStations, float RelIso) const
+std::vector<TRootMuon*> MuonSelection::GetSelectedDisplacedMuons(float PtThr, float EtaThr, float NormChi2, int NTrackerLayersWithMeas, int NValidMuonHits, int NValidPixelHits, int NMatchedStations, float RelIso) const
 {
-	// start from 'standard' muons with an extremely loose dz and d0 cut
-std::vector<TRootMuon*> selectedMuons;
-	for(unsigned int i=0; i<muons.size(); i++)
-	{
-
-		//float reliso = (muons[i]->chargedHadronIso()+muons[i]->neutralHadronIso()+muons[i]->photonIso())/muons[i]->Pt();
-		// use cone 4 iso for muons:
-		float reliso = (muons[i]->chargedHadronIso(4) + max( 0.0, muons[i]->neutralHadronIso(4) + muons[i]->photonIso(4) - 0.5*muons[i]->puChargedHadronIso(4) ) ) / muons[i]->Pt(); // dBeta corrected
-		if(     muons[i]->isGlobalMuon() && muons[i]->isPFMuon()
-		   && muons[i]->Pt()>PtThr
-		   && fabs(muons[i]->Eta())<EtaThr
-		   && muons[i]->chi2() < NormChi2
-		   && muons[i]->nofTrackerLayersWithMeasurement() > NTrackerLayersWithMeas
-		   //&& muons[i]->nofValidMuHits() > NValidMuonHits
-		   && fabs(muons[i]->d0()) < 1000
-		   && fabs(muons[i]->dz()) < 1000
-		   && muons[i]->nofValidPixelHits() > NValidPixelHits
-		   && muons[i]->nofMatchedStations()> NMatchedStations
-		   && reliso < RelIso)
-		{
-			selectedMuons.push_back(muons[i]);
-		}
-	}
-	std::sort(selectedMuons.begin(),selectedMuons.end(),HighestMuonPt());	std::vector<TRootMuon*> chosenMuons;
-	//	and then loop over the list and copy over good ones to the new array, making selection cuts on the beam spot information instead of the 'standard' d0 and dz info
-	for(unsigned int ii=0; ii< selectedMuons.size(); ii++){
-		if(fabs(selectedMuons[ii]->d0BeamSpot())<d0)
-			continue;
-		if(fabs(selectedMuons[ii]->dzBeamSpot())<dZ)
-			continue;
-
-		chosenMuons.push_back(selectedMuons[ii]);
-
-	}
-
-	std::sort(chosenMuons.begin(),chosenMuons.end(),HighestMuonPt());
-	return chosenMuons;
+  // start from 'standard' muons with an extremely loose dz and d0 cut
+  std::vector<TRootMuon*> selectedMuons;
+  for(unsigned int i=0; i<muons.size(); i++)
+    {
+      //float reliso = (muons[i]->chargedHadronIso()+muons[i]->neutralHadronIso()+muons[i]->photonIso())/muons[i]->Pt()
+      // use cone 4 iso for muons:
+      float reliso = (muons[i]->chargedHadronIso(4) + max( 0.0, muons[i]->neutralHadronIso(4) + muons[i]->photonIso(4) - 0.5*muons[i]->puChargedHadronIso(4) ) ) / muons[i]->Pt();
+      // dBeta corrected
+      if(     muons[i]->isGlobalMuon() && muons[i]->isPFMuon()
+              && muons[i]->Pt()>PtThr
+              && fabs(muons[i]->Eta())<EtaThr
+              && muons[i]->chi2() < NormChi2
+              && muons[i]->nofTrackerLayersWithMeasurement() > NTrackerLayersWithMeas
+              //&& muons[i]->nofValidMuHits() > NValidMuonHits
+              && muons[i]->nofValidPixelHits() > NValidPixelHits
+              && muons[i]->nofMatchedStations()> NMatchedStations
+              && reliso < RelIso)
+        {
+          selectedMuons.push_back(muons[i]);
+        }
+    }
+  
+  return selectedMuons;
 }
-std::vector<TRootMuon*> MuonSelection::GetSelectedDisplacedMuons(float PtThr,float EtaThr,float d0, float dz,float MuonRelIso) const
-{
-	return GetSelectedDisplacedMuons(PtThr,EtaThr,10.,5.,0,d0,dz,0,1,MuonRelIso);
 
+std::vector<TRootMuon*> MuonSelection::GetSelectedDisplacedMuons(float PtThr,float EtaThr,float MuonRelIso) const
+{
+  return GetSelectedDisplacedMuons(PtThr,EtaThr,10.,5.,0,0,1,MuonRelIso);
 }
 
 std::vector<TRootMuon*> MuonSelection::GetSelectedDisplacedMuons() const
 {
-	return GetSelectedDisplacedMuons(30.,2.5,0.02,0.5,0.2);
+  return GetSelectedDisplacedMuons(35.,2.4,0.12);
 }
 
 std::vector<TRootMuon*> MuonSelection::GetSelectedLooseMuonsJuly2015(float PtThr, float EtaThr,float MuonRelIso) const
