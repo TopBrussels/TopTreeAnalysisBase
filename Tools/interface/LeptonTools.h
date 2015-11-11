@@ -24,7 +24,7 @@ class LeptonTools
     ~LeptonTools();
     
     void readMuonSF(string IdIsoFile, string trigFileAB, string trigFileC, string trigFileD);
-		void readMuonSF(string IdFile, string IsoFile, string trigFile);  //for full 2012 ReReco data; https://twiki.cern.ch/twiki/bin/viewauth/CMS/MuonReferenceEffs#Muon_reconstruction_identificati
+    void readMuonSF(string IdFile, string IsoFile, string trigFile);  //for full 2012 ReReco data; https://twiki.cern.ch/twiki/bin/viewauth/CMS/MuonReferenceEffs#Muon_reconstruction_identificati
     double getMuonSF(double eta, double pt, string syst = "Nominal");
     double getMuonIdIsoSF(double eta, double pt, string syst = "Nominal");
 		
@@ -35,7 +35,7 @@ class LeptonTools
   private:
     double getSF(TGraphAsymmErrors* graph, double low, double high);
     ScaleFactor getSFstruct(TGraphAsymmErrors* graph, double low, double high);
-		ScaleFactor SF;
+    ScaleFactor SF;
 		
     vector<double> muonPt;
     vector<double> muonPtErr;
@@ -50,7 +50,7 @@ class LeptonTools
     vector<double> muonSFEtaHighUncPlus;
     vector<double> muonSFEtaHighUncMinus;
 		
-		vector<double> muonTrigSFEtaLow;
+    vector<double> muonTrigSFEtaLow;
     vector<double> muonTrigSFEtaLowUncPlus;
     vector<double> muonTrigSFEtaLowUncMinus;
     vector<double> muonTrigSFEtaMed;
@@ -60,7 +60,7 @@ class LeptonTools
     vector<double> muonTrigSFEtaHighUncPlus;
     vector<double> muonTrigSFEtaHighUncMinus;
 		
-		vector<double> muonIdIsoSFEtaLow;
+    vector<double> muonIdIsoSFEtaLow;
     vector<double> muonIdIsoSFEtaLowUncPlus;
     vector<double> muonIdIsoSFEtaLowUncMinus;
     vector<double> muonIdIsoSFEtaMed;
@@ -69,7 +69,7 @@ class LeptonTools
     vector<double> muonIdIsoSFEtaHigh;
     vector<double> muonIdIsoSFEtaHighUncPlus;
     vector<double> muonIdIsoSFEtaHighUncMinus;
-		vector<double> muonIdIsoSFEtaVeryHigh;
+    vector<double> muonIdIsoSFEtaVeryHigh;
     vector<double> muonIdIsoSFEtaVeryHighUncPlus;
     vector<double> muonIdIsoSFEtaVeryHighUncMinus;
     
@@ -83,14 +83,14 @@ class LeptonTools
     vector<double> electronSFEtaHigh;
     vector<double> electronSFEtaHighUnc;
 		
-		vector<double> electronIdIsoSFEtaLow;
+    vector<double> electronIdIsoSFEtaLow;
     vector<double> electronIdIsoSFEtaLowUnc;
     vector<double> electronIdIsoSFEtaMed;
     vector<double> electronIdIsoSFEtaMedUnc;
     vector<double> electronIdIsoSFEtaHigh;
     vector<double> electronIdIsoSFEtaHighUnc;
     
-		bool ReReco_;
+    bool ReReco_;
     bool verbose_;
     
 };

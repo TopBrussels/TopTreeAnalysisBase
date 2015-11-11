@@ -30,8 +30,8 @@ class MultiSamplePlot{
   
   typedef pair< string , vector< pair<string, pair< Double_t , pair<Double_t,Double_t> > > > > MSIntegral;
 
-  MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int Nbins, float Min, float Max, string XaxisLabel = string("Variable"), string YaxisLabel = string("#Events"), string AddText = string(""));
-  MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int Nbins, float* binsX, string XaxisLabel = string("Variable"), string YaxisLabel = string("#Events"), string AddText = string(""));
+  MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int Nbins, float Min, float Max, string XaxisLabel = string("Variable"), string YaxisLabel = string("Nr. of events"), string AddText = string(""));
+  MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int Nbins, float* binsX, string XaxisLabel = string("Variable"), string YaxisLabel = string("Nr. of events"), string AddText = string(""));
   MultiSamplePlot(vector<pair<TH1F*,Dataset*> > vec, string PlotName, string XaxisLabel, string YaxisLabel, string AddText);
   ~MultiSamplePlot();
   
@@ -39,7 +39,7 @@ class MultiSamplePlot{
   void Fill(float value, Dataset* data, bool scale = true, float Lumi = 1.); /**if scale==true: histo are scaled by data.NormFactor()*Lumi */
   TH1F* getTH1F(string name);
   vector<string> getTH1FNames();
-  void Draw(string label = string("CMSPlot"), unsigned int RatioType = 0, bool addRatioErrorBand = false, bool addErrorBand = false, bool ErrorBandAroundTotalInput = false, int scaleNPSignal = 1,float x1=0.45, float y1=0.63, float x2=0.97, float y2=0.94, float magnify=1.3); 
+  void Draw(string label = string("CMSPlot"), unsigned int RatioType = 0, bool addRatioErrorBand = false, bool addErrorBand = false, bool ErrorBandAroundTotalInput = false, int scaleNPSignal = 1,float x1=0.60, float y1=0.70, float x2=0.95, float y2=0.93, float magnify=1.2); 
   /**RatioType=1: ratio = data/MC, RatioType=2: ratio=(data-MC)/MC and RatioType=0: no ratio plot drawn. ErrorBandAroundTotalInput set on false means that the error band will be centered around a nominal histogram read in from an external errorband file*/
   void Write(TFile* file, string label = string(""), bool savePNG = false, string pathPNG = string(""), string ext = string("png"), string fileDir = string(""), float magnifyLog=1.3);
 
