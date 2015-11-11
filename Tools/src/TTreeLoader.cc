@@ -508,7 +508,7 @@ int TTreeLoader::iTrigger (std::string triggerName, int runID, int iFile) //iFil
     //RunInfos Debug
 //    cout << "nHLTEvents: " << runInfos->nHLTEvents() << endl;
   if (runInfos == 0) return -9999;
-    cout << "Getting HLT Path Info" << endl;
+    //cout << "Getting HLT Path Info" << endl;
 
   return runInfos->getHLTinfo(runID).hltPath(triggerName);
 }
