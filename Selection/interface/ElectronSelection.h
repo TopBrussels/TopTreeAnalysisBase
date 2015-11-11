@@ -66,13 +66,12 @@ public:
     float pfElectronIso(TRootElectron *el, bool bx25 = true) const;
 // ELECTRON GETTERS ===============================================
     std::vector<TRootElectron*> GetSelectedElectrons() const;
-	std::vector<TRootElectron*> GetSelectedElectrons(string WorkingPoint, string ProductionCampaign, bool CutsBased) const;
-	std::vector<TRootElectron*> GetSelectedElectrons(float PTthr, float EtaThr, string WorkingPoint, string ProductionCampaign, bool CutsBased) const;
-
-	std::vector<TRootElectron*> GetSelectedDisplacedElectrons (float PtThr, float EtaThr, float d0, float dz) const;
+    std::vector<TRootElectron*> GetSelectedElectrons(string WorkingPoint, string ProductionCampaign, bool CutsBased) const;
+    std::vector<TRootElectron*> GetSelectedElectrons(float PTthr, float EtaThr, string WorkingPoint, string ProductionCampaign, bool CutsBased) const;
+    
     std::vector<TRootElectron*> GetSelectedDisplacedElectrons (float PtThr, float EtaThr) const;
     std::vector<TRootElectron*> GetSelectedDisplacedElectrons () const;
-
+    
 private:
 
 	std::vector<TRootElectron*> GetSelectedTightElectronsCutsBasedPHYS14(float PtThr, float EtaThr) const;
