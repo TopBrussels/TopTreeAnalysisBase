@@ -4,12 +4,14 @@
 #include "../AnomalousCouplings/PersonalClasses/interface/MlbStudy.h"
 #include "../AnomalousCouplings/PersonalClasses/interface/TFCreation.h"
 #include "../AnomalousCouplings/PersonalClasses/interface/AnomCoupLight.h"
+#include "../AnomalousCouplings/PersonalClasses/interface/TFLight.h"
 #else
 #include "../AnomalousCouplings/PersonalClasses/interface/BTagStudy.h"
 #include "../AnomalousCouplings/PersonalClasses/interface/LHCOOutput.h"
 #include "../AnomalousCouplings/PersonalClasses/interface/MlbStudy.h"
 #include "../AnomalousCouplings/PersonalClasses/interface/TFCreation.h"
 #include "../AnomalousCouplings/PersonalClasses/interface/AnomCoupLight.h"
+#include "../AnomalousCouplings/PersonalClasses/interface/TFLight.h"
 #endif
 
 #ifdef __CINT__
@@ -22,5 +24,6 @@
 #pragma link C++ class MlbStudy;
 #pragma link C++ class TFCreation;
 #pragma link C++ class AnomCoupLight;
+#pragma link C++ class TFLight;
 
 #endif
