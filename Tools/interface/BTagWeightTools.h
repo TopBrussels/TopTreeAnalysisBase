@@ -51,15 +51,13 @@ class BTagWeightTools
 {
  public:
 
-
   // constructors, destructors
   BTagWeightTools();
-	BTagWeightTools(std::string filename,std::string defaultalgo,std::string sflightprescription); //sflightprescription default set to "EPS2013", but can be set to "MORIONDS2013"
+  BTagWeightTools(std::string filename,std::string defaultalgo,std::string sflightprescription); //sflightprescription default set to "EPS2013", but can be set to "MORIONDS2013"
   BTagWeightTools(std::string filename,std::string defaultalgo);
   BTagWeightTools(std::string filename);
-	BTagWeightTools(std::string filename,std::string algo_L,std::string algo_T,std::string sflightprescription); //only in case you use two operating points, a loose and a tight one
+  BTagWeightTools(std::string filename,std::string algo_L,std::string algo_T,std::string sflightprescription); //only in case you use two operating points, a loose and a tight one
   ~BTagWeightTools();
-  
   
   // useful setters
   void setDefaultAlgo(std::string defaultalgo){_defaultalgo=defaultalgo;}
@@ -80,15 +78,15 @@ class BTagWeightTools
 
   void InitializeMCEfficiencyHistos(int NofPtBins=15,float PtMin=30.,float PtMax=340.,int NofEtaBins=2);  //the binning is more or less arbitrary; but you should have enough statistics in each bin
   void FillMCEfficiencyHistos(vector< TRootJet* >& selectedJets);
-	void FillMCEfficiencyHistos(vector< TLorentzVector >& selectedJets, vector<int>& selectedJets_partonFlavour, vector<float>& selectedJets_bTagValues);
-	void WriteMCEfficiencyHistos(std::string outfilename);
-	void ReadMCEfficiencyHistos(std::string infilename);
-	void ReadMCEfficiencyHistos(std::string infilename_L,std::string infilename_T); //in case you use two operating points, a loose and a tight one
-	float getMCEventWeight(vector< TRootJet* >& selectedJets, int btagsyst=0, int mistagsyst=0);
+  void FillMCEfficiencyHistos(vector< TLorentzVector >& selectedJets, vector<int>& selectedJets_partonFlavour, vector<float>& selectedJets_bTagValues);
+  void WriteMCEfficiencyHistos(std::string outfilename);
+  void ReadMCEfficiencyHistos(std::string infilename);
+  void ReadMCEfficiencyHistos(std::string infilename_L,std::string infilename_T); //in case you use two operating points, a loose and a tight one
+  float getMCEventWeight(vector< TRootJet* >& selectedJets, int btagsyst=0, int mistagsyst=0);
   float getMCEventWeight(vector< TLorentzVector >& selectedJets, vector<int>& selectedJets_partonFlavour, vector<float>& selectedJets_bTagValues, int btagsyst=0, int mistagsyst=0);
-	float getMCEventWeight_LT(vector< TLorentzVector >& selectedJets, vector<int>& selectedJets_partonFlavour, vector<float>& selectedJets_bTagValues, int btagsyst=0, int mistagsyst=0); //only in case you use two operating points, a loose and a tight one
+  float getMCEventWeight_LT(vector< TLorentzVector >& selectedJets, vector<int>& selectedJets_partonFlavour, vector<float>& selectedJets_bTagValues, int btagsyst=0, int mistagsyst=0); //only in case you use two operating points, a loose and a tight one
   float getTagEff(float pt, float eta, int flavor);
-	float getTagEff_T(float pt, float eta, int flavor); //only useful in case you use two operating points, same as getTagEff but with the histograms obtained with a 'tighter' WP (e.g. inBtaggedJets_T)
+  float getTagEff_T(float pt, float eta, int flavor); //only useful in case you use two operating points, same as getTagEff but with the histograms obtained with a 'tighter' WP (e.g. inBtaggedJets_T)
 
   // other getters
   std::string getCurrentFile() {return _filename;} // returns path to currently used file
@@ -130,29 +128,29 @@ class BTagWeightTools
   TString makefakeratename(TString meanminmax, TString tagger, TString TaggerStrength, Float_t Etamin, Float_t Etamax, TString DataPeriod, TString Prescription);
   std::map<TString,TF1*> _fakeratesfunctions;
 	
-	void setalgoWPcut(std::string algo);
-	void setalgoWPcut(std::string algo_L,std::string algo_T); //in case you use two operating points, a loose and a tight one
-	map<string,TH2F*> _histo2D;
-	bool MCEfficiencyHistosInitialized;
-	float _PtMaxhistos;
-	float _algoWPcut;
-	float _algoWPcut_L;
-	float _algoWPcut_T;
-	TH2F *inBtaggedJets;
-	TH2F *inBtaggedBJets;
-	TH2F *inBtaggedCJets;
-	TH2F *inBtaggedLightJets;
-	TH2F *inTotalNofBJets;
-	TH2F *inTotalNofCJets;
-	TH2F *inTotalNofLightJets;
+  void setalgoWPcut(std::string algo);
+  void setalgoWPcut(std::string algo_L,std::string algo_T); //in case you use two operating points, a loose and a tight one
+  map<string,TH2F*> _histo2D;
+  bool MCEfficiencyHistosInitialized;
+  float _PtMaxhistos;
+  float _algoWPcut;
+  float _algoWPcut_L;
+  float _algoWPcut_T;
+  TH2F *inBtaggedJets;
+  TH2F *inBtaggedBJets;
+  TH2F *inBtaggedCJets;
+  TH2F *inBtaggedLightJets;
+  TH2F *inTotalNofBJets;
+  TH2F *inTotalNofCJets;
+  TH2F *inTotalNofLightJets;
 	
-	TH2F *inBtaggedJets_T;
-	TH2F *inBtaggedBJets_T;
-	TH2F *inBtaggedCJets_T;
-	TH2F *inBtaggedLightJets_T;
-	TH2F *inTotalNofBJets_T;
-	TH2F *inTotalNofCJets_T;
-	TH2F *inTotalNofLightJets_T;
+  TH2F *inBtaggedJets_T;
+  TH2F *inBtaggedBJets_T;
+  TH2F *inBtaggedCJets_T;
+  TH2F *inBtaggedLightJets_T;
+  TH2F *inTotalNofBJets_T;
+  TH2F *inTotalNofCJets_T;
+  TH2F *inTotalNofLightJets_T;
 	
 };
 

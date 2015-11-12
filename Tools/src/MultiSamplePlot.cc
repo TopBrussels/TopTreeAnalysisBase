@@ -188,7 +188,6 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
       }
 		
       (plots_[i].first)->SetLineColor((plots_[i].second)->Color()); //especially relevant for the overlay processes, the stacked histograms get their fill color later on. However, all seperate processes are also saved in MSPlot, so these will get the color specified in the xml too.
-      std::cout << " Setting color " << (plots_[i].second)->Color() << " for dataset " << (plots_[i].second)->Name() << std::endl;
       (plots_[i].first)->SetMarkerColor((plots_[i].second)->Color());
       (plots_[i].first)->SetLineStyle((plots_[i].second)->LineStyle());
       (plots_[i].first)->SetLineWidth((plots_[i].second)->LineWidth());
