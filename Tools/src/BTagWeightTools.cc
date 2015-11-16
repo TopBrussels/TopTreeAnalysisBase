@@ -152,9 +152,12 @@ float  BTagWeightTools::getSF(float pt, float eta,int flavor,string algo, int bt
     cout << "BTagWeightTools::getSF WARNING retrieving for eta value (" << eta << ") outside range of " << _etamax  << " which is fine but treat with caution..." << endl;
  
   if(abs(flavor)==5 ||abs(flavor)==4){
+    //std::cout << " .. so will use the _functions eval to get the SF of ";
     if(btagsyst==0){
-      if(_functions.find(algo)!=_functions.end())
+      if(_functions.find(algo)!=_functions.end()){
+        //std::cout << _functions[algo].Eval(pt);
 	return _functions[algo].Eval(pt);
+      }
     }
     else{
     // get the uncertainty:
@@ -167,6 +170,8 @@ float  BTagWeightTools::getSF(float pt, float eta,int flavor,string algo, int bt
     }
   } 
   else {
+    //std::cout << " .. so will use the getSFlight function to get the SF
+    if(getSFlight(pt,eta,algo,mistagsyst) < 0.99) std::cout << " Found a SFlight which is lower than 0.99 .... --> " << getSFlight(pt,eta,algo,mistagsyst) << std::endl;
    return getSFlight(pt,eta,algo,mistagsyst);
   }
 
@@ -1216,7 +1221,12 @@ float BTagWeightTools::getMCEventWeight(vector< TLorentzVector >& selectedJets, 
   float probData = 1.;
   float tagEff = 1.;
   float btagSF = 1.;
+
+  float bTagSF = 1.;
+  //std::cout << "\n *** Starting with new event ... *** " << std::endl;
+  if(selectedJets.size() > 4) std::cout << " Size of selectedjets larger than 4 ... --> " << selectedJets.size() << std::endl;
   for (unsigned int i=0; i < selectedJets.size(); i++){
+    //std::cout << "   - Jet " << i << " has flavour = " << selectedJets_partonFlavour[i];
     tagEff = getTagEff(selectedJets[i].Pt(), selectedJets[i].Eta(), selectedJets_partonFlavour[i]);											
     btagSF = getSF(selectedJets[i].Pt(), selectedJets[i].Eta(), selectedJets_partonFlavour[i], _defaultalgo, btagsyst, mistagsyst);
   														
@@ -1240,9 +1250,13 @@ float BTagWeightTools::getMCEventWeight(vector< TLorentzVector >& selectedJets, 
       probMC = probMC*(1.-tagEff);
       probData = probData*(1.-btagSF*tagEff);
     }
+    if(i == 0){
+      bTagSF = tagEff; //Try returning the btagSF since this can be compared with BTV results!
+    }
   }
   float Weight = probData/probMC;
   return Weight;
+  //return bTagSF;
 }
 
 float BTagWeightTools::getMCEventWeight_LT(vector< TLorentzVector >& selectedJets, vector<int>& selectedJets_partonFlavour, vector<float>& selectedJets_bTagValues, int btagsyst, int mistagsyst)

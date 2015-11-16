@@ -33,10 +33,13 @@ extern void G__set_cpp_environmentAnomCoupDict();
 #include "TMemberInspector.h"
 #include "../AnomalousCouplings/PersonalClasses/interface/AnomCoupLight.h"
 #include "../AnomalousCouplings/PersonalClasses/interface/BTagStudy.h"
+#include "../AnomalousCouplings/PersonalClasses/interface/BTagStudy_OLD.h"
+#include "../AnomalousCouplings/PersonalClasses/interface/ExtraEvtSelCuts.h"
 #include "../AnomalousCouplings/PersonalClasses/interface/KinematicFunctions.h"
 #include "../AnomalousCouplings/PersonalClasses/interface/LHCOOutput.h"
 #include "../AnomalousCouplings/PersonalClasses/interface/MlbStudy.h"
 #include "../AnomalousCouplings/PersonalClasses/interface/TFCreation.h"
+#include "../AnomalousCouplings/PersonalClasses/interface/TFLight.h"
 #include <algorithm>
 namespace std { }
 using namespace std;
@@ -85,7 +88,6 @@ extern G__linked_taginfo G__AnomCoupDictLN_reverse_iteratorlEvectorlETLorentzVec
 extern G__linked_taginfo G__AnomCoupDictLN_vectorlEintcOallocatorlEintgRsPgR;
 extern G__linked_taginfo G__AnomCoupDictLN_reverse_iteratorlEvectorlEintcOallocatorlEintgRsPgRcLcLiteratorgR;
 extern G__linked_taginfo G__AnomCoupDictLN_TF1;
-extern G__linked_taginfo G__AnomCoupDictLN_TH1D;
 extern G__linked_taginfo G__AnomCoupDictLN_TH2F;
 extern G__linked_taginfo G__AnomCoupDictLN_iteratorlEbidirectional_iterator_tagcOTObjectmUcOlongcOconstsPTObjectmUmUcOconstsPTObjectmUaNgR;
 extern G__linked_taginfo G__AnomCoupDictLN_TFile;
@@ -101,6 +103,7 @@ extern G__linked_taginfo G__AnomCoupDictLN_vectorlEstringcOallocatorlEstringgRsP
 extern G__linked_taginfo G__AnomCoupDictLN_reverse_iteratorlEvectorlEstringcOallocatorlEstringgRsPgRcLcLiteratorgR;
 extern G__linked_taginfo G__AnomCoupDictLN_vectorlEvectorlEintcOallocatorlEintgRsPgRcOallocatorlEvectorlEintcOallocatorlEintgRsPgRsPgRsPgR;
 extern G__linked_taginfo G__AnomCoupDictLN_reverse_iteratorlEvectorlEvectorlEintcOallocatorlEintgRsPgRcOallocatorlEvectorlEintcOallocatorlEintgRsPgRsPgRsPgRcLcLiteratorgR;
+extern G__linked_taginfo G__AnomCoupDictLN_TGraphErrors;
 extern G__linked_taginfo G__AnomCoupDictLN_vectorlETH1FmUcOallocatorlETH1FmUgRsPgR;
 extern G__linked_taginfo G__AnomCoupDictLN_reverse_iteratorlEvectorlETH1FmUcOallocatorlETH1FmUgRsPgRcLcLiteratorgR;
 extern G__linked_taginfo G__AnomCoupDictLN_vectorlETH1DmUcOallocatorlETH1DmUgRsPgR;
@@ -137,5 +140,6 @@ extern G__linked_taginfo G__AnomCoupDictLN_MlbStudy;
 extern G__linked_taginfo G__AnomCoupDictLN_vectorlETopTreecLcLTRootJetmUcOallocatorlETopTreecLcLTRootJetmUgRsPgR;
 extern G__linked_taginfo G__AnomCoupDictLN_reverse_iteratorlEvectorlETopTreecLcLTRootJetmUcOallocatorlETopTreecLcLTRootJetmUgRsPgRcLcLiteratorgR;
 extern G__linked_taginfo G__AnomCoupDictLN_TFCreation;
+extern G__linked_taginfo G__AnomCoupDictLN_TFLight;
 
 /* STUB derived class for protected member access */
