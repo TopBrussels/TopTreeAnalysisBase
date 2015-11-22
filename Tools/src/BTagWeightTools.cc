@@ -171,7 +171,7 @@ float  BTagWeightTools::getSF(float pt, float eta,int flavor,string algo, int bt
   } 
   else {
     //std::cout << " .. so will use the getSFlight function to get the SF
-    if(getSFlight(pt,eta,algo,mistagsyst) < 0.99) std::cout << " Found a SFlight which is lower than 0.99 .... --> " << getSFlight(pt,eta,algo,mistagsyst) << std::endl;
+    //if(getSFlight(pt,eta,algo,mistagsyst) < 0.99) std::cout << " Found a SFlight which is lower than 0.99 .... --> " << getSFlight(pt,eta,algo,mistagsyst) << std::endl;
    return getSFlight(pt,eta,algo,mistagsyst);
   }
 
@@ -1183,7 +1183,7 @@ float BTagWeightTools::getMCEventWeight(vector< TRootJet* >& selectedJets, int b
     btagSF = getSF(selectedJets[i]->Pt(), selectedJets[i]->Eta(), selectedJets[i]->partonFlavour(), _defaultalgo, btagsyst, mistagsyst);
   														
     if (tagEff == 0.){
-      cout << endl << "BTagWeightTools::getMCEventWeight WARNING: Tag efficiency is zero!" << endl;
+      cout << endl << "BTagWeightTools::getMCEventWeight WARNING: Tag efficiency is zero (with pT = " << selectedJets[i]->Pt() << ", eta = " << selectedJets[i]->Eta() << " and flavour = " << selectedJets[i]->partonFlavour() << ")!" << endl;
       continue;
     }
     if (btagSF == 0.){
@@ -1222,16 +1222,13 @@ float BTagWeightTools::getMCEventWeight(vector< TLorentzVector >& selectedJets, 
   float tagEff = 1.;
   float btagSF = 1.;
 
-  float bTagSF = 1.;
-  //std::cout << "\n *** Starting with new event ... *** " << std::endl;
-  if(selectedJets.size() > 4) std::cout << " Size of selectedjets larger than 4 ... --> " << selectedJets.size() << std::endl;
   for (unsigned int i=0; i < selectedJets.size(); i++){
-    //std::cout << "   - Jet " << i << " has flavour = " << selectedJets_partonFlavour[i];
     tagEff = getTagEff(selectedJets[i].Pt(), selectedJets[i].Eta(), selectedJets_partonFlavour[i]);											
     btagSF = getSF(selectedJets[i].Pt(), selectedJets[i].Eta(), selectedJets_partonFlavour[i], _defaultalgo, btagsyst, mistagsyst);
+    //std::cout << i << ")In BTagWeightTools: tagEff = " << tagEff << " and SF = " << btagSF ;
   														
     if (tagEff == 0.){
-      cout << endl << "BTagWeightTools::getMCEventWeight WARNING: Tag efficiency is zero!" << endl;
+      cout << "BTagWeightTools::getMCEventWeight WARNING: Tag efficiency is zero (with pT = " << selectedJets[i].Pt() << ", eta = " << selectedJets[i].Eta() << " and flavour = " << selectedJets_partonFlavour[i] << ")!!" << endl;
       continue;
     }
     if (btagSF == 0.){
@@ -1245,14 +1242,17 @@ float BTagWeightTools::getMCEventWeight(vector< TLorentzVector >& selectedJets, 
     if (selectedJets_bTagValues[i] > _algoWPcut){ //tagged
       probMC = probMC*tagEff;
       probData = probData*btagSF*tagEff;
+      //std::cout << "   ... which is b-tagged since CSV value = " << selectedJets_bTagValues[i] << std::endl;
     }
     else{	//not tagged
       probMC = probMC*(1.-tagEff);
       probData = probData*(1.-btagSF*tagEff);
+      //std::cout << "   ... which is not b-tagged since CSV value = " << selectedJets_bTagValues[i] << std::endl;
     }
-    if(i == 0){
-      bTagSF = tagEff; //Try returning the btagSF since this can be compared with BTV results!
-    }
+    //std::cout << "  ==> probMC = " << probMC << " and probData = " << probData << std::endl;
+    //if(i == 0){
+    //  bTagSF = tagEff; //Try returning the btagSF since this can be compared with BTV results!
+    //}
   }
   float Weight = probData/probMC;
   return Weight;
