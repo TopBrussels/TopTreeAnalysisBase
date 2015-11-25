@@ -56,10 +56,10 @@ class JetTools
     void correctJetJESUnc(vector<TRootJet*> inJets, TRootMET*, string direction, float nSigma = 1);
     
     // Jet correctors for JER smearing and JER systematics
-    void correctJetJER(TRootJet* inJet, TRootGenJet* inGenJet, string direction, bool oldnumbers = true);
-    void correctJetJER(vector<TRootJet*> inJets, vector<TRootGenJet*> inGenJets, string direction, bool oldnumbers = true);
+    void correctJetJER(TRootJet* inJet, TRootGenJet* inGenJet, string direction, bool oldnumbers = false);
+    void correctJetJER(vector<TRootJet*> inJets, vector<TRootGenJet*> inGenJets, string direction, bool oldnumbers = false);
     // Jet in combination with MET correctors for JER smearing and systematic
-    void correctJetJER(vector<TRootJet*> inJets, vector<TRootGenJet*> inGenJets, TRootMET* inMET, string direction, bool oldnumbers = true);
+    void correctJetJER(vector<TRootJet*> inJets, vector<TRootGenJet*> inGenJets, TRootMET* inMET, string direction, bool oldnumbers = false);
     
     // Jet scalers (with a fixed factor)
     void scaleJet(TRootJet* inJet, float scale=1);

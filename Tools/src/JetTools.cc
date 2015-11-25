@@ -58,10 +58,10 @@ JetTools::~JetTools()
 void JetTools::unCorrectJet(TRootJet* inJet, bool isData)
 {
   float corr;
-	if(!isData)
-	  corr = inJet->getJetCorrFactor("L1FastJetL2L3");
-	else
-	  corr = inJet->getJetCorrFactor("L1FastJetL2L3L23Residual");
+  if(!isData)
+    corr = inJet->getJetCorrFactor("L1FastJetL2L3");
+  else
+    corr = inJet->getJetCorrFactor("L1FastJetL2L3L23Residual");
 //  cout << "Uncorrecting!  With factor: " << corr << endl;
   inJet->SetPxPyPzE(inJet->Px()/corr, inJet->Py()/corr, inJet->Pz()/corr, inJet->E()/corr);
 }
@@ -112,20 +112,20 @@ void JetTools::correctJet(TRootJet* inJet, float rhoPU, bool isData)
   JEC_->setJetA(inJet->jetArea());
   JEC_->setRho(rhoPU);
 	
-	//set the correction factors for the type 1 MET correction
-	std::vector<float> SubCorrections = JEC_->getSubCorrections(); //0: L1FastJet, 1: L1FastJetL2, 2: L1FastJetL2L3, and if data: 3: L1FastJetL2L3L23Residual  
-	/*for(unsigned int c=0; c<SubCorrections.size(); c++)
-	  	cout<<"SubCorrections["<<c<<"] = "<<SubCorrections[c]<<endl;	
+  //set the correction factors for the type 1 MET correction
+  std::vector<float> SubCorrections = JEC_->getSubCorrections(); //0: L1FastJet, 1: L1FastJetL2, 2: L1FastJetL2L3, and if data: 3: L1FastJetL2L3L23Residual  
+  /*for(unsigned int c=0; c<SubCorrections.size(); c++)
+      cout<<"SubCorrections["<<c<<"] = "<<SubCorrections[c]<<endl;	
   */
-	inJet->setJetCorrFactor(0,"L1FastJet",SubCorrections[0]);
+  inJet->setJetCorrFactor(0,"L1FastJet",SubCorrections[0]);
   inJet->setJetCorrFactor(1,"L1FastJetL2",SubCorrections[1]);
-	inJet->setJetCorrFactor(2,"L1FastJetL2L3",SubCorrections[2]);
-	if(isData)
-	  inJet->setJetCorrFactor(3,"L1FastJetL2L3L23Residual",SubCorrections[3]);
- 
+  inJet->setJetCorrFactor(2,"L1FastJetL2L3",SubCorrections[2]);
+  if(isData)
+    inJet->setJetCorrFactor(3,"L1FastJetL2L3L23Residual",SubCorrections[3]);
+  
   //float corr = JEC_->getCorrection(); //strangely enough, this starts complaining when JEC_->getSubCorrections() is called first
-	float corr = SubCorrections[SubCorrections.size()-1]; //this is the correction UP TO the last level; so the complete correction
-//	cout << "Apply new JES correction:  " << corr << endl;
+  float corr = SubCorrections[SubCorrections.size()-1]; //this is the correction UP TO the last level; so the complete correction
+//  cout << "Apply new JES correction:  " << corr << endl;
   inJet->SetPxPyPzE(inJet->Px()*corr, inJet->Py()*corr, inJet->Pz()*corr, inJet->E()*corr);
 }
 
@@ -265,53 +265,82 @@ void JetTools::correctJetJER(TRootJet* inJet, TRootGenJet* inGenJet, string dire
   else if(direction == "plus") JER_plus = true;
   else if(direction != "nominal") cout << "Unknown JER direction: " << direction << endl;
   float fabsEta = fabs(inJet->Eta());
-	
-	if(!oldnumbers)
-	{
-	  //numbers from https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetResolution
+  
+  if(!oldnumbers)
+  {
+    /// numbers from https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetResolution -- Last updated: 24 November 2015
+    /// corrFactor = c - 1; because ptscale is defined differently (pt is used instead of pt,gen)
     if(JER_minus)
     {
-    	if(fabsEta <= 1.1) corrFactor = -0.006;
-    	else if(fabsEta <= 1.7 && fabsEta > 1.1) corrFactor = 0.129;
-			else if(fabsEta <= 2.3 && fabsEta > 1.7) corrFactor = 0.011;
-			else if(fabsEta <= 5.0 && fabsEta > 2.3) corrFactor = -0.033;
-    	else corrFactor = -0.033; //fabsEta > 5.0
-  	}
-  	else if(JER_plus)
-  	{
-    	if(fabsEta <= 1.1) corrFactor = 0.136;
-    	else if(fabsEta <= 1.7 && fabsEta > 1.1) corrFactor = 0.251;
-			else if(fabsEta <= 2.3 && fabsEta > 1.7) corrFactor = 0.176;
-			else if(fabsEta <= 5.0 && fabsEta > 2.3) corrFactor = 0.356;
-    	else corrFactor = 0.356; //fabsEta > 5.0
-  	}
-		else
-		{
-	  	if(fabsEta <= 1.1) corrFactor = 0.066;
-    	else if(fabsEta <= 1.7 && fabsEta > 1.1) corrFactor = 0.191;
-			else if(fabsEta <= 2.3 && fabsEta > 1.7) corrFactor = 0.096;
-			else if(fabsEta <= 5.0 && fabsEta > 2.3) corrFactor = 0.166;
-    	else corrFactor = 0.166; //fabsEta > 5.0
-		}
-	}
-	else
-	{
-	  if(JER_minus)
-  	{
-    	if(fabsEta <= 1.5) corrFactor = 0.0;
-    	else if(fabsEta < 2.0 && fabsEta > 1.5) corrFactor = -0.05;
-    	else corrFactor = -0.1;
-  	}
-  	else if(JER_plus)
-  	{
-    	if(fabsEta <= 1.5) corrFactor = 0.2;
-    	else if(fabsEta < 2.0 && fabsEta > 1.5) corrFactor = 0.25;
-    	else corrFactor = 0.3;
-  	}
-		else 
-			corrFactor = 0.1;	
-	}
-		
+      if(fabsEta <= 0.8) corrFactor = 0.038;
+      else if(fabsEta <= 1.3 && fabsEta > 0.8) corrFactor = 0.059;
+      else if(fabsEta <= 1.9 && fabsEta > 1.3) corrFactor = 0.076;
+      else if(fabsEta <= 2.5 && fabsEta > 1.9) corrFactor = 0.032;
+      else if(fabsEta <= 3.0 && fabsEta > 2.5) corrFactor = 0.220;
+      else if(fabsEta <= 3.2 && fabsEta > 3.0) corrFactor = 0.192;
+      else if(fabsEta <= 5.0 && fabsEta > 3.2) corrFactor = 0.034;
+      else corrFactor = 0.034; //fabsEta > 5.0
+    }
+    else if(JER_plus)
+    {
+      if(fabsEta <= 0.8) corrFactor = 0.084;
+      else if(fabsEta <= 1.3 && fabsEta > 0.8) corrFactor = 0.117;
+      else if(fabsEta <= 1.9 && fabsEta > 1.3) corrFactor = 0.136;
+      else if(fabsEta <= 2.5 && fabsEta > 1.9) corrFactor = 0.220;
+      else if(fabsEta <= 3.0 && fabsEta > 2.5) corrFactor = 0.466;
+      else if(fabsEta <= 3.2 && fabsEta > 3.0) corrFactor = 0.414;
+      else if(fabsEta <= 5.0 && fabsEta > 3.2) corrFactor = 0.606;
+      else corrFactor = 0.606; //fabsEta > 5.0
+    }
+    else
+    {
+      if(fabsEta <= 0.8) corrFactor = 0.061;
+      else if(fabsEta <= 1.3 && fabsEta > 0.8) corrFactor = 0.088;
+      else if(fabsEta <= 1.9 && fabsEta > 1.3) corrFactor = 0.106;
+      else if(fabsEta <= 2.5 && fabsEta > 1.9) corrFactor = 0.126;
+      else if(fabsEta <= 3.0 && fabsEta > 2.5) corrFactor = 0.343;
+      else if(fabsEta <= 3.2 && fabsEta > 3.0) corrFactor = 0.303;
+      else if(fabsEta <= 5.0 && fabsEta > 3.2) corrFactor = 0.320;
+      else corrFactor = 0.320; //fabsEta > 5.0
+    }
+  }
+  else  /// SFs for 13 TeV (atm 'oldnumbers' are the same as new ones, but this will change when there will be 14 TeV data)
+  {
+    if(JER_minus)
+    {
+      if(fabsEta <= 0.8) corrFactor = 0.038;
+      else if(fabsEta <= 1.3 && fabsEta > 0.8) corrFactor = 0.059;
+      else if(fabsEta <= 1.9 && fabsEta > 1.3) corrFactor = 0.076;
+      else if(fabsEta <= 2.5 && fabsEta > 1.9) corrFactor = 0.032;
+      else if(fabsEta <= 3.0 && fabsEta > 2.5) corrFactor = 0.220;
+      else if(fabsEta <= 3.2 && fabsEta > 3.0) corrFactor = 0.192;
+      else if(fabsEta <= 5.0 && fabsEta > 3.2) corrFactor = 0.034;
+      else corrFactor = 0.034; //fabsEta > 5.0
+    }
+    else if(JER_plus)
+    {
+      if(fabsEta <= 0.8) corrFactor = 0.084;
+      else if(fabsEta <= 1.3 && fabsEta > 0.8) corrFactor = 0.117;
+      else if(fabsEta <= 1.9 && fabsEta > 1.3) corrFactor = 0.136;
+      else if(fabsEta <= 2.5 && fabsEta > 1.9) corrFactor = 0.220;
+      else if(fabsEta <= 3.0 && fabsEta > 2.5) corrFactor = 0.466;
+      else if(fabsEta <= 3.2 && fabsEta > 3.0) corrFactor = 0.414;
+      else if(fabsEta <= 5.0 && fabsEta > 3.2) corrFactor = 0.606;
+      else corrFactor = 0.606; //fabsEta > 5.0
+    }
+    else
+    {
+      if(fabsEta <= 0.8) corrFactor = 0.061;
+      else if(fabsEta <= 1.3 && fabsEta > 0.8) corrFactor = 0.088;
+      else if(fabsEta <= 1.9 && fabsEta > 1.3) corrFactor = 0.106;
+      else if(fabsEta <= 2.5 && fabsEta > 1.9) corrFactor = 0.126;
+      else if(fabsEta <= 3.0 && fabsEta > 2.5) corrFactor = 0.343;
+      else if(fabsEta <= 3.2 && fabsEta > 3.0) corrFactor = 0.303;
+      else if(fabsEta <= 5.0 && fabsEta > 3.2) corrFactor = 0.320;
+      else corrFactor = 0.320; //fabsEta > 5.0
+    }
+  }
+  
   float deltapt = ( inJet->Pt() - inGenJet->Pt() ) * corrFactor;
   float ptscale = max(0.0, ( inJet->Pt() + deltapt) / inJet->Pt() );
   if(ptscale > 0.0)
