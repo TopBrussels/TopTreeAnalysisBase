@@ -191,7 +191,7 @@ public:
   float Correl_cut;
   int nPseudoSession;
 
-  ClassDef(AnalysisEnvironment,3) //was 2...
+  ClassDef(AnalysisEnvironment,3)
 };
 
 #endif

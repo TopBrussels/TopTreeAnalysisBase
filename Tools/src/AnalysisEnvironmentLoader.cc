@@ -46,8 +46,9 @@ AnalysisEnvironmentLoader::AnalysisEnvironmentLoader (AnalysisEnvironment& AnaEn
 	    {
 	      elem->QueryIntAttribute ("JetType", &AnaEnv.JetType);
 	      elem->QueryIntAttribute ("METType", &AnaEnv.METType);
-	      AnaEnv.PrimaryVertexCollection = elem->Attribute("PVCollection");
-	      AnaEnv.JetCollection = elem->Attribute("JetCollection");
+          AnaEnv.PrimaryVertexCollection = elem->Attribute("PVCollection");
+          AnaEnv.JetCollection = elem->Attribute("JetCollection");
+          AnaEnv.FatJetCollection = elem->Attribute("FatJetCollection");
 	      AnaEnv.METCollection = elem->Attribute("METCollection");
 	      AnaEnv.MuonCollection = elem->Attribute("MuonCollection");
 	      AnaEnv.ElectronCollection = elem->Attribute("ElectronCollection");
@@ -56,6 +57,9 @@ AnalysisEnvironmentLoader::AnalysisEnvironmentLoader (AnalysisEnvironment& AnaEn
 	      AnaEnv.GenEventCollection = elem->Attribute("GenEventCollection");
 	      AnaEnv.NPGenEventCollection = elem->Attribute("NPGenEventCollection");
 	      AnaEnv.MCParticlesCollection = elem->Attribute("MCParticlesCollection");
+	      int loadFatJetCollection_ = 0;
+	      elem->QueryIntAttribute ("loadFatJetCollection", &loadFatJetCollection_);
+	      (loadFatJetCollection_==0)? AnaEnv.loadFatJetCollection = false: AnaEnv.loadFatJetCollection = true; 
 	      int loadGenJetCollection_ = 0;
 	      elem->QueryIntAttribute ("loadGenJetCollection", &loadGenJetCollection_);
 	      (loadGenJetCollection_==0)? AnaEnv.loadGenJetCollection = false: AnaEnv.loadGenJetCollection = true; 
