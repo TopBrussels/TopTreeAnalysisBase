@@ -217,41 +217,43 @@ std::vector<TRootMuon*> Run2Selection::GetSelectedMuons(float PtThr, float etaTh
 }
 
 // displaced muons
-std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons(float PtThr, float EtaThr, float NormChi2, int NTrackerLayersWithMeas, int NValidMuonHits, int NValidPixelHits, int NMatchedStations, float RelIso) const
+std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons(float PtThr, float EtaThr, float NormChi2, int NTrackerLayersWithMeas, int NValidMuonHits, int NValidPixelHits, int NMatchedStations, float RelIso, bool noIso, bool noId) const
 {
-  // start from 'standard' muons with an extremely loose dz and d0 cut
-  std::vector<TRootMuon*> selectedMuons;
-  for(unsigned int i=0; i<muons.size(); i++)
+    // start from 'standard' muons with an extremely loose dz and d0 cut
+    std::vector<TRootMuon*> selectedMuons;
+    bool saveit=false;
+    for(unsigned int i=0; i<muons.size(); i++)
     {
-      //float reliso = (muons[i]->chargedHadronIso()+muons[i]->neutralHadronIso()+muons[i]->photonIso())/muons[i]->Pt();
-      // use cone 4 iso for muons:
-      float reliso = (muons[i]->chargedHadronIso(4) + max( 0.0, muons[i]->neutralHadronIso(4) + muons[i]->photonIso(4) - 0.5*muons[i]->puChargedHadronIso(4) ) ) / muons[i]->Pt(); // dBeta corrected
-      if(     muons[i]->isGlobalMuon() && muons[i]->isPFMuon()
-	      && muons[i]->Pt()>PtThr
-	      && fabs(muons[i]->Eta())<EtaThr
-	      && muons[i]->chi2() < NormChi2
-	      && muons[i]->nofTrackerLayersWithMeasurement() > NTrackerLayersWithMeas
-	      //&& muons[i]->nofValidMuHits() > NValidMuonHits
-	      && muons[i]->nofValidPixelHits() > NValidPixelHits
-	      && muons[i]->nofMatchedStations()> NMatchedStations
-	      && reliso < RelIso)
-	{
-	  selectedMuons.push_back(muons[i]);
-	}
+        saveit=false;
+        TRootMuon *muon = (TRootMuon*) muons[i]; // type conversion, not very clear why necessary... also used in electrons
+        
+        //float reliso = (muons[i]->chargedHadronIso()+muons[i]->neutralHadronIso()+muons[i]->photonIso())/muons[i]->Pt();
+        // use cone 4 iso for muons:
+       
+        if(isolationDisplacedMuon(muon,RelIso) && !noIso)
+            saveit=true;
+        if(identificationDisplacedMuon(muon, NormChi2,  NTrackerLayersWithMeas, NValidMuonHits, NValidPixelHits, NMatchedStations) && !noId)
+            saveit=true;
+        if( muons[i]->Pt()>PtThr
+           && fabs(muon->Eta())<EtaThr
+           && saveit)
+        {
+            selectedMuons.push_back(muons[i]);
+        }
     }
-
-  std::sort(selectedMuons.begin(),selectedMuons.end(),HighestPt());
-  return selectedMuons;
+    
+    std::sort(selectedMuons.begin(),selectedMuons.end(),HighestPt());
+    return selectedMuons;
 }
 
-std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons(float PtThr,float EtaThr,float MuonRelIso) const
+std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons(float PtThr,float EtaThr,float MuonRelIso, bool noIso, bool noId) const
 {
-  return GetSelectedDisplacedMuons(PtThr,EtaThr,10.,5.,0,0,1,MuonRelIso);
+  return GetSelectedDisplacedMuons(PtThr,EtaThr,10.,5.,0,0,1,MuonRelIso,noIso,noId);
 }
 
 std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons() const
 {
-	return GetSelectedDisplacedMuons(35.,2.4,0.15);
+	return GetSelectedDisplacedMuons(35.,2.4,0.15,false,false);
 }
 
 std::vector<TRootMuon*> Run2Selection::GetSelectedLooseMuonsJuly2015(float PtThr, float EtaThr,float MuonRelIso) const
@@ -435,7 +437,7 @@ bool Run2Selection::foundZCandidate(std::vector<TRootMuon*>& muons1, std::vector
 
 // ______________ELECTRONS______________________________________________//
 
-float Run2Selection::GetElectronIsoCorrType(TRootElectron *el, bool bx25) const{
+float Run2Selection::GetElectronIsoCorrType(const TRootElectron *el, bool bx25) const{
 	double EffectiveArea = 0.;
 	if(bx25)
     {
@@ -478,7 +480,7 @@ float Run2Selection::GetElectronIsoCorrType(TRootElectron *el, bool bx25) const{
 
 //This function gets the PF based Isolation for an Electron.  Since the Effective Areas for rho*effArea Isolation
 //are different for 25 and 50 ns samples, a boolean must be supplied to indicate which bx scenario.  true -> 25 ns.  false -> 50 ns
-float Run2Selection::pfElectronIso(TRootElectron *el, bool bx25) const{
+float Run2Selection::pfElectronIso(const TRootElectron *el, bool bx25) const{
 	float isoCorr = (el->neutralHadronIso(3) + el->photonIso(3) - GetElectronIsoCorrType(el, bx25));
 	float isolation = (el->chargedHadronIso(3) + (isoCorr > 0.0 ? isoCorr : 0.0))/(el->Pt());
 
@@ -538,50 +540,32 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedElectrons(float PtThr, flo
 	return ElectronCollection;
 }
 
-std::vector<TRootElectron*> Run2Selection::GetSelectedDisplacedElectrons(float PtThr, float EtaThr) const {
-
-  // use tight electron ID (cut-based) for now, but without cuts on  d0 dz . This ID can be in flux, and for now is hard-coded here:
-
-  //These quality cuts reflect the recommended Tight cut-based electron ID as provided by the EGM POG. Last updated: 23 September 2015
-  // as these are still in flux, it is probably useful to check them here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2#Spring15_selection_25ns (revision 27)
-
-  std::vector<TRootElectron*> selectedElectrons;
-  for(unsigned int i=0; i<electrons.size(); i++) {
-    TRootElectron* el = (TRootElectron*) electrons[i];
-    if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr) {
-      // For the Barrel
-      if( fabs(el->superClusterEta()) <= 1.479
-          && el->sigmaIEtaIEta() < 0.0101
-	  && fabs(el->deltaEtaIn()) < 0.00926
-          && fabs(el->deltaPhiIn()) < 0.0336
-	  && el->hadronicOverEm() < 0.0597
-          && pfElectronIso(el) < 0.0354
-          && fabs(1/el->E() - 1/el->P()) < 0.012
-          && el->missingHits() <= 2 // check wrt to expectedMissingInnerHits
-          && el->passConversion())
-        {
-          selectedElectrons.push_back(electrons[i]);
-        }
-      // For the endcap
-      else if (fabs(el->superClusterEta()) < 2.5
-	       && el->sigmaIEtaIEta() < 0.0279
-	       && fabs(el->deltaEtaIn()) < 0.00724
-	       && fabs(el->deltaPhiIn()) < 0.0918
-	       && el->hadronicOverEm() < 0.0615
-	       && pfElectronIso(el) < 0.0646
-	       && fabs(1/el->E() - 1/el->P()) < 0.00999
-	       && el->missingHits() <= 1 // check wrt to expectedMissingInnerHits
-	       && el->passConversion())
-        {
-          selectedElectrons.push_back(electrons[i]);
+std::vector<TRootElectron*> Run2Selection::GetSelectedDisplacedElectrons(float PtThr, float EtaThr,bool noIso, bool noId) const {
+    
+    // use tight electron ID (cut-based) for now, but without cuts on  d0 dz . This ID can be in flux, and for now is hard-coded here:
+    
+    //These quality cuts reflect the recommended Tight cut-based electron ID as provided by the EGM POG. Last updated: 2 december 2015
+    // as these are still in flux, it is probably useful to check them here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2#Spring15_selection_25ns (revision 27)
+    bool saveit=false;
+    std::vector<TRootElectron*> selectedElectrons;
+    for(unsigned int i=0; i<electrons.size(); i++) {
+        TRootElectron* el = (TRootElectron*) electrons[i];
+        if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr) {
+            // For the Barrel
+            saveit=false;
+            if(isolationDisplacedElectron(el) && !noIso)
+                saveit=true;
+            if(identificationDisplacedElectron(el) && !noId)
+                saveit=true;
+            if(saveit)
+                selectedElectrons.push_back(electrons[i]);
         }
     }
-  }
-  return selectedElectrons;
+    return selectedElectrons;
 }
 
 std::vector<TRootElectron*> Run2Selection::GetSelectedDisplacedElectrons() const{
-  return GetSelectedDisplacedElectrons(40.0, 2.4);
+  return GetSelectedDisplacedElectrons(40.0, 2.4,false,false);
 }
 
 std::vector<TRootElectron*> Run2Selection::GetSelectedTightElectronsCutsBasedSpring15_50ns(float PtThr, float EtaThr) const {
@@ -1152,4 +1136,73 @@ bool Run2Selection::isPVSelected(const std::vector<TRootVertex*>& vertex, int Nd
 }
 
 //______________________________________________________________________//
+
+//---- selection functions for displaced electrons and muons. factorising ID and isolation.
+bool Run2Selection::isolationDisplacedElectron(const TRootElectron* el) const{
+    if( fabs(el->superClusterEta()) <= 1.479){
+        if(pfElectronIso(el) < 0.0354)
+            return true;
+        else
+            return false;
+    }
+    // For the endcap
+    else if (fabs(el->superClusterEta()) < 2.5){
+            if(pfElectronIso(el) < 0.0646)
+                return true;
+            else
+                return false;
+    }
+    return false;
+}
+bool Run2Selection::identificationDisplacedElectron(const TRootElectron* el) const{
+    if( fabs(el->superClusterEta()) <= 1.479
+       && el->sigmaIEtaIEta() < 0.0101
+       && fabs(el->deltaEtaIn()) < 0.00926
+       && fabs(el->deltaPhiIn()) < 0.0336
+       && el->hadronicOverEm() < 0.0597
+       && fabs(1/el->E() - 1/el->P()) < 0.012
+       && el->missingHits() <= 2 // check wrt to expectedMissingInnerHits
+       && el->passConversion())
+    {
+        return true;
+    }
+    // For the endcap
+    else if (fabs(el->superClusterEta()) < 2.5
+             && el->sigmaIEtaIEta() < 0.0279
+             && fabs(el->deltaEtaIn()) < 0.00724
+             && fabs(el->deltaPhiIn()) < 0.0918
+             && el->hadronicOverEm() < 0.0615
+             && fabs(1/el->E() - 1/el->P()) < 0.00999
+             && el->missingHits() <= 1 // check wrt to expectedMissingInnerHits
+             && el->passConversion())
+    {
+        return true;
+    }
+    return false;
+}
+bool Run2Selection::identificationDisplacedMuon(const TRootMuon* muon, float NormChi2, int NTrackerLayersWithMeas, int NValidMuonHits, int NValidPixelHits, int NMatchedStations) const{
+    
+    // use cone 4 iso for muons:
+
+    if( muon->isGlobalMuon() && muon->isPFMuon()
+	      && muon->chi2() < NormChi2
+	      && muon->nofTrackerLayersWithMeasurement() > NTrackerLayersWithMeas
+	      && muon->nofValidPixelHits() > NValidPixelHits
+	      && muon->nofMatchedStations()> NMatchedStations)
+    {
+        return true;
+    }
+    return false;
+}
+bool Run2Selection::isolationDisplacedMuon(const TRootMuon* muon, float RelIso) const{
+    if( muon->Pt()<0.0001) // protecting against the strange case that the pT is zero... just to be sure
+        return false;
+    float reliso = (muon->chargedHadronIso(4) + max( 0.0, muon->neutralHadronIso(4) + muon->photonIso(4) - 0.5*muon->puChargedHadronIso(4) ) ) / muon->Pt(); // dBeta corrected
+
+    if(reliso< RelIso)
+        return true;
+    return false;
+}
+
+
 

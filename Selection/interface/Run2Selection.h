@@ -94,22 +94,22 @@ public:
 
 
     void setElectronIsoCorrType(int corrType = 1);
-    float GetElectronIsoCorrType(TRootElectron* el, bool bx25) const;
-    float pfElectronIso(TRootElectron *el, bool bx25 = true) const;
+    float GetElectronIsoCorrType(const TRootElectron* el, bool bx25) const;
+    float pfElectronIso(const TRootElectron *el, bool bx25 = true) const;
 // ELECTRON GETTERS ===============================================
     std::vector<TRootElectron*> GetSelectedElectrons() const;
 	std::vector<TRootElectron*> GetSelectedElectrons(string WorkingPoint, string ProductionCampaign, bool CutsBased) const;
 	std::vector<TRootElectron*> GetSelectedElectrons(float PTthr, float EtaThr, string WorkingPoint, string ProductionCampaign, bool CutsBased) const;
 
-    std::vector<TRootElectron*> GetSelectedDisplacedElectrons (float PtThr, float EtaThr) const;
+    std::vector<TRootElectron*> GetSelectedDisplacedElectrons (float PtThr, float EtaThr, bool noIso=false, bool noId=false) const;
     std::vector<TRootElectron*> GetSelectedDisplacedElectrons () const;
 // MUON GETTERS ==================================================
     std::vector<TRootMuon*> GetSelectedMuons() const;
     std::vector<TRootMuon*> GetSelectedMuons(float PtThr, float EtaThr, float MuonRelIso, string WorkingPoint, string ProductionCampaign) const;
 
     // displaced muons
-    std::vector<TRootMuon*> GetSelectedDisplacedMuons(float PtThr, float EtaThr, float NormChi2, int NTrackerLayersWithMeas, int NValidMuonHits, int NValidPixelHits, int NMatchedStations, float RelIso) const;
-    std::vector<TRootMuon*> GetSelectedDisplacedMuons(float PtThr, float EtaThr, float RelIs) const;
+    std::vector<TRootMuon*> GetSelectedDisplacedMuons(float PtThr, float EtaThr, float NormChi2, int NTrackerLayersWithMeas, int NValidMuonHits, int NValidPixelHits, int NMatchedStations, float RelIso, bool noIso=false, bool noId=false) const;
+    std::vector<TRootMuon*> GetSelectedDisplacedMuons(float PtThr, float EtaThr, float RelIs, bool noIso=false, bool noId=false) const;
     std::vector<TRootMuon*> GetSelectedDisplacedMuons() const;
 
 
@@ -209,7 +209,12 @@ private:
     std::map<std::string,float> cutsVBTFWP70;
     std::map<std::string,float> cutsVBTFWP80;
     std::map<std::string,float> cutsVBTFWP95;
-
+    
+    // displaced lepton functions
+    bool identificationDisplacedElectron(const TRootElectron*) const;
+    bool identificationDisplacedMuon(const TRootMuon*, float NormChi2, int NTrackerLayersWithMeas, int NValidMuonHits, int NValidPixelHits, int NMatchedStations) const;
+    bool isolationDisplacedElectron(const TRootElectron*) const;
+    bool isolationDisplacedMuon(const TRootMuon*, float RelIso) const;
     //met
     float METThreshold_;
 };
