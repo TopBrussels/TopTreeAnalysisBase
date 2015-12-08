@@ -217,38 +217,52 @@ std::vector<TRootMuon*> Run2Selection::GetSelectedMuons(float PtThr, float etaTh
 }
 
 // displaced muons
-std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons(float PtThr, float EtaThr, float NormChi2, int NTrackerLayersWithMeas, int NValidMuonHits, int NValidPixelHits, int NMatchedStations, float RelIso, bool noIso, bool noId) const
+std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons(float PtThr, float EtaThr, float NormChi2, int NTrackerLayersWithMeas, int NValidMuonHits, int NValidPixelHits, int NMatchedStations, float RelIso, bool applyIso, bool applyId) const
 {
-    // start from 'standard' muons with an extremely loose dz and d0 cut
-    std::vector<TRootMuon*> selectedMuons;
-    bool saveit=false;
-    for(unsigned int i=0; i<muons.size(); i++)
+  // start from 'standard' muons with an extremely loose dz and d0 cut
+  std::vector<TRootMuon*> selectedMuons;
+  bool saveit=false;
+  for(unsigned int i=0; i<muons.size(); i++)
     {
-        saveit=false;
-        TRootMuon *muon = (TRootMuon*) muons[i]; // type conversion, not very clear why necessary... also used in electrons
-        
-        //float reliso = (muons[i]->chargedHadronIso()+muons[i]->neutralHadronIso()+muons[i]->photonIso())/muons[i]->Pt();
-        // use cone 4 iso for muons:
-       
-        if(isolationDisplacedMuon(muon,RelIso) && !noIso)
-            saveit=true;
-        if(identificationDisplacedMuon(muon, NormChi2,  NTrackerLayersWithMeas, NValidMuonHits, NValidPixelHits, NMatchedStations) && !noId)
-            saveit=true;
-        if( muons[i]->Pt()>PtThr
-           && fabs(muon->Eta())<EtaThr
-           && saveit)
-        {
-            selectedMuons.push_back(muons[i]);
-        }
+      saveit=false;
+      TRootMuon *muon = (TRootMuon*) muons[i]; // type conversion, not very clear why necessary... also used in electrons
+      
+      if( muons[i]->Pt()>PtThr && fabs(muon->Eta())<EtaThr){
+	
+	// no id no iso
+	if (!applyIso && !applyId) {
+	  //	  cout << "no id and no iso" << endl;
+	  saveit = true;
+	}
+	// apply iso only
+        if(applyIso && isolationDisplacedMuon(muon,RelIso) && !applyId){
+	  //	  cout << "iso cut required and passed" <<endl;
+	  saveit=true;
+	}
+	// apply id only
+        if( !applyIso  && applyId  && identificationDisplacedMuon(muon, NormChi2,  NTrackerLayersWithMeas, NValidMuonHits, NValidPixelHits, NMatchedStations)){
+	  //	  cout << "id cut required and passed" <<endl;
+	  saveit=true;
+	}
+	// apply both
+        if( applyIso && isolationDisplacedMuon(muon,RelIso) && applyId  &&  identificationDisplacedMuon(muon, NormChi2,  NTrackerLayersWithMeas, NValidMuonHits, NValidPixelHits, NMatchedStations)){
+	  //	  cout << "id and iso cut required and passed" <<endl;
+	  saveit=true;
+	}
+	
+	if (saveit) selectedMuons.push_back(muons[i]);
+	
+      }
+      
     }
-    
-    std::sort(selectedMuons.begin(),selectedMuons.end(),HighestPt());
-    return selectedMuons;
+  
+  std::sort(selectedMuons.begin(),selectedMuons.end(),HighestPt());
+  return selectedMuons;
 }
 
-std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons(float PtThr,float EtaThr,float MuonRelIso, bool noIso, bool noId) const
+std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons(float PtThr,float EtaThr,float MuonRelIso, bool applyIso, bool applyId) const
 {
-  return GetSelectedDisplacedMuons(PtThr,EtaThr,10.,5.,0,0,1,MuonRelIso,noIso,noId);
+  return GetSelectedDisplacedMuons(PtThr,EtaThr,10.,5.,0,0,1,MuonRelIso,applyIso,applyId);
 }
 
 std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons() const
@@ -540,7 +554,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedElectrons(float PtThr, flo
 	return ElectronCollection;
 }
 
-std::vector<TRootElectron*> Run2Selection::GetSelectedDisplacedElectrons(float PtThr, float EtaThr,bool noIso, bool noId) const {
+std::vector<TRootElectron*> Run2Selection::GetSelectedDisplacedElectrons(float PtThr, float EtaThr,bool applyIso, bool applyId) const {
     
     // use tight electron ID (cut-based) for now, but without cuts on  d0 dz . This ID can be in flux, and for now is hard-coded here:
     
@@ -551,14 +565,28 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedDisplacedElectrons(float P
     for(unsigned int i=0; i<electrons.size(); i++) {
         TRootElectron* el = (TRootElectron*) electrons[i];
         if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr) {
-            // For the Barrel
-            saveit=false;
-            if(isolationDisplacedElectron(el) && !noIso)
-                saveit=true;
-            if(identificationDisplacedElectron(el) && !noId)
-                saveit=true;
-            if(saveit)
-                selectedElectrons.push_back(electrons[i]);
+	  saveit=false;
+	  // no id no iso
+	  if (!applyIso && !applyId) {
+	    //	    cout << "no id and no iso" << endl;
+	    saveit = true;
+	  }
+	  // apply iso only                                   
+	  if(applyIso && isolationDisplacedElectron(el) && !applyId){
+	    //	    cout << "iso cut required and passed" <<endl;
+	    saveit=true;
+	  }
+	  // apply id only
+	  if( !applyIso  && applyId  && identificationDisplacedElectron(el)){
+	    //	    cout << "id cut required and passed" <<endl;
+	    saveit=true;
+	  }
+	  // apply both
+	  if( applyIso && isolationDisplacedElectron(el) && applyId && identificationDisplacedElectron(el)){
+	    //	    cout << "id and iso cut required and passed" <<endl;
+	    saveit=true;
+	  }
+	  if(saveit) selectedElectrons.push_back(electrons[i]);
         }
     }
     return selectedElectrons;
