@@ -555,17 +555,19 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedElectrons(float PtThr, flo
 }
 
 std::vector<TRootElectron*> Run2Selection::GetSelectedDisplacedElectrons(float PtThr, float EtaThr,bool applyIso, bool applyId) const {
-    
     // use tight electron ID (cut-based) for now, but without cuts on  d0 dz . This ID can be in flux, and for now is hard-coded here:
-    
+
     //These quality cuts reflect the recommended Tight cut-based electron ID as provided by the EGM POG. Last updated: 2 december 2015
     // as these are still in flux, it is probably useful to check them here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2#Spring15_selection_25ns (revision 27)
-    bool saveit=false;
     std::vector<TRootElectron*> selectedElectrons;
+    bool saveit=false;
+
     for(unsigned int i=0; i<electrons.size(); i++) {
+      saveit=false;
         TRootElectron* el = (TRootElectron*) electrons[i];
+	
         if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr) {
-	  saveit=false;
+
 	  // no id no iso
 	  if (!applyIso && !applyId) {
 	    //	    cout << "no id and no iso" << endl;
@@ -589,11 +591,13 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedDisplacedElectrons(float P
 	  if(saveit) selectedElectrons.push_back(electrons[i]);
         }
     }
+
+    std::sort(selectedElectrons.begin(),selectedElectrons.end(),HighestPt());
     return selectedElectrons;
 }
 
 std::vector<TRootElectron*> Run2Selection::GetSelectedDisplacedElectrons() const{
-  return GetSelectedDisplacedElectrons(40.0, 2.4,false,false);
+  return GetSelectedDisplacedElectrons(42.0, 2.4,false,false);
 }
 
 std::vector<TRootElectron*> Run2Selection::GetSelectedTightElectronsCutsBasedSpring15_50ns(float PtThr, float EtaThr) const {
@@ -611,8 +615,6 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedTightElectronsCutsBasedSpr
 			   && fabs(el->deltaPhiIn()) < 0.0286
 			   && el->sigmaIEtaIEta_full5x5() < 0.0101
 			   && el->hadronicOverEm() < 0.0342
-			   && fabs(el->d0()) < 0.0103
-			   && fabs(el->dz()) < 0.170
 			   && fabs(1/el->E() - 1/el->P()) < 0.0116
 			   && pfElectronIso(el, false) <  0.0591
 			   && el->passConversion()
@@ -626,8 +628,6 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedTightElectronsCutsBasedSpr
 					 && fabs(el->deltaPhiIn()) <  0.0439
 					 && el->sigmaIEtaIEta_full5x5() <  0.0287
 					 && (el->hadronicOverEm() < 0.0544)
-					 && fabs(el->d0()) < 0.0377
-					 && fabs(el->dz()) < 0.571
 					 && fabs(1/el->E() - 1/el->P()) < 0.01
 					 && pfElectronIso(el, false) < 0.0759
 					 && el->passConversion()
@@ -1183,6 +1183,7 @@ bool Run2Selection::isolationDisplacedElectron(const TRootElectron* el) const{
     return false;
 }
 bool Run2Selection::identificationDisplacedElectron(const TRootElectron* el) const{
+  //  cout << "entering the displaced Id electron" << endl;
     if( fabs(el->superClusterEta()) <= 1.479
        && el->sigmaIEtaIEta() < 0.0101
        && fabs(el->deltaEtaIn()) < 0.00926
@@ -1191,9 +1192,10 @@ bool Run2Selection::identificationDisplacedElectron(const TRootElectron* el) con
        && fabs(1/el->E() - 1/el->P()) < 0.012
        && el->missingHits() <= 2 // check wrt to expectedMissingInnerHits
        && el->passConversion())
-    {
+      {
+	//	cout << "the displaced Id electron is true" << endl;
         return true;
-    }
+      }
     // For the endcap
     else if (fabs(el->superClusterEta()) < 2.5
              && el->sigmaIEtaIEta() < 0.0279
@@ -1204,7 +1206,8 @@ bool Run2Selection::identificationDisplacedElectron(const TRootElectron* el) con
              && el->missingHits() <= 1 // check wrt to expectedMissingInnerHits
              && el->passConversion())
     {
-        return true;
+      //      cout << "the displaced Id electron is true" << endl;
+      return true;
     }
     return false;
 }
