@@ -35,20 +35,20 @@
 using namespace std;
 
 namespace reweight {
-
-
+  
+  
   // add a class to shift the mean of a poisson-like luminosity distribution by an arbitrary amount. 
   // Only valid for small (<1.5) shifts about the 2011 lumi distribution for now, because shifts are non-linear
   // Each PoissonMeanShifter does one shift, so defining multiples can give you an arbitrary collection
-
+  
   class PoissonMeanShifter {
-
+  
   public:
-
+    
     PoissonMeanShifter() { };
-
+    
     PoissonMeanShifter( float Shift ){
-
+      
       // these are the polynomial or exponential coefficients for each bin of a 25-bin sequence that
       // convert the Distribution of the 2011 luminosity to something with a lower or higher peak luminosity.
       // The distributions aren't quite poisson because they model luminosity decreasing during a fill. This implies that
@@ -99,7 +99,7 @@ namespace reweight {
 	0.760044,
 	1.02386
       };
-
+      
       static double p1_expoM[5] = {
 	1.63363e-03,
 	6.79290e-04,
@@ -107,7 +107,6 @@ namespace reweight {
 	2.24349e-04,
 	9.87156e-06
       };
-
       static double p2_expoM[5] = {
 	2.64692,
 	3.26585,
@@ -115,8 +114,7 @@ namespace reweight {
 	4.18035,
 	5.64027
       };
-
-
+      
       static double p0_plus[20] = { 1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1. };
       static double p1_plus[20] = {
 	-0.739059,
@@ -162,7 +160,7 @@ namespace reweight {
 	3.35433,
 	5.48835
       };
-
+      
       static double p1_expoP[5] = {
 	1.42463e-01,
 	4.18966e-02,
@@ -170,7 +168,6 @@ namespace reweight {
 	1.66197e-01,
 	1.50768e-01
       };
-
       static double p2_expoP[5] = {
 	1.98758,
 	2.27217,
@@ -180,28 +177,24 @@ namespace reweight {
       };
 
       // initialize weights based on desired Shift
-
-
-
       for (int ibin=0;ibin<20;ibin++) {
 
-	if( Shift < .0) {
-	  Pweight_[ibin] = p0_minus[ibin] + p1_minus[ibin]*Shift + p2_minus[ibin]*Shift*Shift;
-	}
-	else {
-	  Pweight_[ibin] = p0_plus[ibin] + p1_plus[ibin]*Shift + p2_plus[ibin]*Shift*Shift;
-	}
+        if( Shift < .0) {
+          Pweight_[ibin] = p0_minus[ibin] + p1_minus[ibin]*Shift + p2_minus[ibin]*Shift*Shift;
+        }
+        else {
+          Pweight_[ibin] = p0_plus[ibin] + p1_plus[ibin]*Shift + p2_plus[ibin]*Shift*Shift;
+        }
       }
 
       // last few bins fit better to an exponential...
-
       for (int ibin=20;ibin<25;ibin++) {
-	if( Shift < 0.) {
-	  Pweight_[ibin] = p1_expoM[ibin-20]*exp(p2_expoM[ibin-20]*Shift);
-	}
-	else {
-	  Pweight_[ibin] = p1_expoP[ibin-20]*exp(p2_expoP[ibin-20]*Shift);
-	}
+        if( Shift < 0.) {
+          Pweight_[ibin] = p1_expoM[ibin-20]*exp(p2_expoM[ibin-20]*Shift);
+        }
+        else {
+          Pweight_[ibin] = p1_expoP[ibin-20]*exp(p2_expoP[ibin-20]*Shift);
+        }
       } 
 
     };
@@ -235,330 +228,325 @@ namespace reweight {
     LumiReWeighting ( ) { } ;
 
     LumiReWeighting( std::string generatedFile,
-		     std::string dataFile,
-		     std::string GenHistName,
-		     std::string DataHistName) :
+                     std::string dataFile,
+                     std::string GenHistName,
+                     std::string DataHistName) :
       generatedFileName_( generatedFile), 
       dataFileName_     ( dataFile ), 
       GenHistName_      ( GenHistName ), 
       DataHistName_     ( DataHistName )
-	{
-	  generatedFile_ = new TFile( generatedFileName_.c_str() ) ; //MC distribution
-	  dataFile_      = new TFile( dataFileName_.c_str() );       //Data distribution
-
-	  //Data_distr_ = new TH1(  *(static_cast<TH1*>(dataFile_->Get( DataHistName_.c_str() )->Clone() )) );
-	  //MC_distr_ = new TH1(  *(static_cast<TH1*>(generatedFile_->Get( GenHistName_.c_str() )->Clone() )) );
-		Data_distr_ = (TH1*) (dataFile_->Get( DataHistName_.c_str() )->Clone());
-	   MC_distr_ = (TH1*) (generatedFile_->Get( GenHistName_.c_str() )->Clone());
-
-	  // normalize both histograms first                                                                            
-		std::cout << "normalising data and MC to :" << Data_distr_->Integral() << " and " << MC_distr_->Integral() << std::endl;
-		Double_t integral = Data_distr_->Integral();
-		Data_distr_->Scale( 1.0/ sqrt(integral));
-		Data_distr_->Scale( 1.0/ sqrt(integral));
-		integral = MC_distr_->Integral();
-		MC_distr_->Scale( 1.0/ sqrt(integral));
-		MC_distr_->Scale( 1.0/ sqrt(integral));
-
-
-	  //weights_ = new TH1( *(Data_distr_)) ;
-           weights_ = (TH1*) Data_distr_->Clone();
-
-	  // MC * data/MC = data, so the weights are data/MC:
-
-	  weights_->SetName("lumiWeights");
-
-	  //TH1* den = new TH1(*(MC_distr_));
-	  TH1* den = (TH1*) MC_distr_->Clone();
-
-	  weights_->Divide( den );  // so now the average weight should be 1.0
-
-	  std::cout << " Lumi/Pileup Reweighting: Computed Weights per In-Time Nint " << std::endl;
-
-	  int NBins = weights_->GetNbinsX();
-
-	  for(int ibin = 1; ibin<NBins+1; ++ibin){
-	    std::cout << "   " << ibin-1 << " " << weights_->GetBinContent(ibin) << std::endl;
-	  }
-
-	  weightOOT_init();
-
-	  FirstWarning_ = true;
-
-	}
-
+    {
+      generatedFile_ = new TFile( generatedFileName_.c_str() ) ; //MC distribution
+      dataFile_      = new TFile( dataFileName_.c_str() );       //Data distribution
+      
+      //Data_distr_ = new TH1(  *(static_cast<TH1*>(dataFile_->Get( DataHistName_.c_str() )->Clone() )) );
+      //MC_distr_ = new TH1(  *(static_cast<TH1*>(generatedFile_->Get( GenHistName_.c_str() )->Clone() )) );
+      Data_distr_ = (TH1*) (dataFile_->Get( DataHistName_.c_str() )->Clone());
+      MC_distr_ = (TH1*) (generatedFile_->Get( GenHistName_.c_str() )->Clone());
+      
+      // normalize both histograms to 1 first
+      std::cout << "normalising data and MC to :" << Data_distr_->Integral() << " and " << MC_distr_->Integral() << std::endl;
+      Data_distr_->Scale( 1.0/ Data_distr_->Integral() );
+      //Data_distr_->Scale( 1.0/ sqrt(Data_distr_->Integral()) );
+      MC_distr_->Scale( 1.0/ MC_distr_->Integral() );
+      //MC_distr_->Scale( 1.0/ sqrt(MC_distr_->Integral()) );
+      
+      
+      //weights_ = new TH1( *(Data_distr_)) ;
+      weights_ = (TH1*) Data_distr_->Clone();
+      
+      // MC * data/MC = data, so the weights are data/MC on a bin by bin basis:
+      
+      weights_->SetName("lumiWeights");
+      
+      //TH1* den = new TH1(*(MC_distr_));
+      TH1* den = (TH1*) MC_distr_->Clone();
+      
+      //The Histos need to have the same bins so that they can be divided.  This function assumes that the both histos start at 0 and just need to have
+      //empty bins added to the upper range so that they have equal range
+      
+      if(den->GetNbinsX() > weights_->GetNbinsX()) weights_->SetBins(den->GetNbinsX(), 0, den->GetNbinsX()); //If more bins in MC, add bins to Data
+      else if(den->GetNbinsX() < weights_->GetNbinsX()) den->SetBins(weights_->GetNbinsX(), 0, weights_->GetNbinsX()); //Else if more bins in Data, add bins to MC
+      
+      weights_->Divide( den );  // so now the weights_*MC = Data on a bin by bin basis
+      
+      std::cout << " Lumi/Pileup Reweighting: Computed Weights per In-Time Nint " << std::endl;
+      
+      int NBins = weights_->GetNbinsX();
+      
+      for(int ibin = 1; ibin<NBins+1; ++ibin){
+        std::cout << "   " << ibin-1 << " " << weights_->GetBinContent(ibin) << std::endl;
+      }
+      
+      weightOOT_init();
+      
+      FirstWarning_ = true;
+      
+    }
     
-      LumiReWeighting( std::vector< float > MC_distr, std::vector< float > Lumi_distr){
-	// no histograms for input: use vectors
-  
-	// now, make histograms out of them:
-
-	// first, check they are the same size...
-
-	if( MC_distr.size() != Lumi_distr.size() ){   
-
-	  std::cerr <<"ERROR: LumiReWeighting: input vectors have different sizes. Quitting... \n";
-	  return;
-
-	}
-
-	Int_t NBins = MC_distr.size();
-
-	MC_distr_ = new TH1F("MC_distr","MC dist",NBins,-0.5, float(NBins)-0.5);
-	Data_distr_ = new TH1F("Data_distr","Data dist",NBins,-0.5, float(NBins)-0.5);
-
-	weights_ = new TH1F("luminumer","luminumer",NBins,-0.5, float(NBins)-0.5);
-	TH1* den = new TH1F("lumidenom","lumidenom",NBins,-0.5, float(NBins)-0.5);
-
-	for(int ibin = 1; ibin<NBins+1; ++ibin ) {
-	  weights_->SetBinContent(ibin, Lumi_distr[ibin-1]);
-	  Data_distr_->SetBinContent(ibin, Lumi_distr[ibin-1]);
-	  den->SetBinContent(ibin,MC_distr[ibin-1]);
-	  MC_distr_->SetBinContent(ibin,MC_distr[ibin-1]);
-	}
-
-	// check integrals, make sure things are normalized
-
-	float deltaH = weights_->Integral();
-	if(fabs(1.0 - deltaH) > 0.02 ) { //*OOPS*...
-	  weights_->Scale( 1.0/ deltaH );
-	  Data_distr_->Scale( 1.0/ deltaH );
-	}
-	float deltaMC = den->Integral();
-	if(fabs(1.0 - deltaMC) > 0.02 ) {
-	  den->Scale(1.0/ deltaMC );
-	  MC_distr_->Scale(1.0/ deltaMC );
-	}
-
-	weights_->Divide( den );  // so now the average weight should be 1.0    
-
-	std::cout << " Lumi/Pileup Reweighting: Computed Weights per In-Time Nint " << std::endl;
-
-	for(int ibin = 1; ibin<NBins+1; ++ibin){
-	  std::cout << "   " << ibin-1 << " " << weights_->GetBinContent(ibin) << std::endl;
-	}
-
-	weightOOT_init();
-
-	FirstWarning_ = true;
-
+    
+    LumiReWeighting( std::vector< float > MC_distr, std::vector< float > Lumi_distr){
+      // no histograms for input: use vectors
+      // now, make histograms out of them:
+      // first, check they are the same size...
+      
+      if( MC_distr.size() != Lumi_distr.size() ){   
+        std::cerr <<"ERROR: LumiReWeighting: input vectors have different sizes. Quitting... \n";
+        return;
       }
-
-      void weight3D_init( float ScaleFactor, std::string WeightOutputFile="") { 
-
-	//create histogram to write output weights, save pain of generating them again...
-
-	TH3D* WHist = new TH3D("WHist","3D weights",50,0.,50.,50,0.,50.,50,0.,50. );
-	TH3D* DHist = new TH3D("DHist","3D weights",50,0.,50.,50,0.,50.,50,0.,50. );
-	TH3D* MHist = new TH3D("MHist","3D weights",50,0.,50.,50,0.,50.,50,0.,50. );
-
-
-	using std::min;
-
-	if( MC_distr_->GetEntries() == 0 ) {
-	  std::cout << " MC and Data distributions are not initialized! You must call the LumiReWeighting constructor. " << std::endl;
-	}
-
-	// arrays for storing number of interactions
-
-	double MC_ints[50][50][50];
-	double Data_ints[50][50][50];
-
-	for (int i=0; i<50; i++) {
-	  for(int j=0; j<50; j++) {
-	    for(int k=0; k<50; k++) {
-	      MC_ints[i][j][k] = 0.;
-	      Data_ints[i][j][k] = 0.;
-	    }
-	  }
-	}
-
-	double factorial[50];
-	double PowerSer[50];
-	double base = 1.;
-
-	factorial[0] = 1.;
-	PowerSer[0]=1.;
-
-	for (int i = 1; i<50; ++i) {
-	  base = base*float(i);
-	  factorial[i] = base;
-	}
-
-
-	double x;
-	double xweight;
-	double probi, probj, probk;
-	double Expval, mean;
-	int xi;
-
-	// Get entries for Data, MC, fill arrays:                                                                                                 
-	int NMCbin = MC_distr_->GetNbinsX();
-
-	for (int jbin=1;jbin<NMCbin+1;jbin++) {
-	  x =  MC_distr_->GetBinCenter(jbin);
-	  xweight = MC_distr_->GetBinContent(jbin); //use as weight for matrix         
-
-	  //for Summer 11, we have this int feature:                      
-	  xi = int(x);
-
-	  // Generate Poisson distribution for each value of the mean     
-	  mean = double(xi);
-
-	  if(mean<0.) {
-	    std::cout << "LumiReweighting:BadInputValue" << " Your histogram generates MC luminosity values less than zero!"
-						  << " Please Check.  Terminating." << std::endl;
-	  }
-
-
-	  if(mean==0.){
-	    Expval = 1.;
-	  }
-	  else {
-	    Expval = exp(-1.*mean);
-	  }
-
-	  base = 1.;
-
-	  for (int i = 1; i<50; ++i) {
-	    base = base*mean;
-	    PowerSer[i] = base; // PowerSer is mean^i                        
-	  }
-
-	  // compute poisson probability for each Nvtx in weight matrix      
-	  for (int i=0; i<50; i++) {
-	    probi = PowerSer[i]/factorial[i]*Expval;
-	    for(int j=0; j<50; j++) {
-	      probj = PowerSer[j]/factorial[j]*Expval;
-	      for(int k=0; k<50; k++) {
-		probk = PowerSer[k]/factorial[k]*Expval;
-		// joint probability is product of event weights multiplied by weight of input distribution bin                                   
-		MC_ints[i][j][k] = MC_ints[i][j][k]+probi*probj*probk*xweight;
-	      }
-	    }
-	  }
-
-	}
-
-	int NDatabin = Data_distr_->GetNbinsX();
-
-	for (int jbin=1;jbin<NDatabin+1;jbin++) {
-	  mean =  (Data_distr_->GetBinCenter(jbin))*ScaleFactor;
-	  xweight = Data_distr_->GetBinContent(jbin);
-
-	  // Generate poisson distribution for each value of the mean
-	  if(mean<0.) {
-	    std::cout << "LumiReweighting:BadInputValue" << " Your histogram generates MC luminosity values less than zero!"
-						  << " Please Check.  Terminating." << std::endl;
-	  }
-
-	  if(mean==0.){
-	    Expval = 1.;
-	  }
-	  else {
-	    Expval = exp(-1.*mean);
-	  }
-
-	  base = 1.;
-
-	  for (int i = 1; i<50; ++i) {
-	    base = base*mean;
-	    PowerSer[i] = base;
-	  }
-
-	  // compute poisson probability for each Nvtx in weight matrix                                                                           
-
-	  for (int i=0; i<50; i++) {
-	    probi = PowerSer[i]/factorial[i]*Expval;
-	    for(int j=0; j<50; j++) {
-	      probj = PowerSer[j]/factorial[j]*Expval;
-	      for(int k=0; k<50; k++) {
-		probk = PowerSer[k]/factorial[k]*Expval;
-		// joint probability is product of event weights multiplied by weight of input distribution bin                                   
-		Data_ints[i][j][k] = Data_ints[i][j][k]+probi*probj*probk*xweight;
-	      }
-	    }
-	  }
-
-	}
-
-
-	for (int i=0; i<50; i++) {
-	  //if(i<5) std::cout << "i = " << i << std::endl;                       
-	  for(int j=0; j<50; j++) {
-	    for(int k=0; k<50; k++) {
-	      if( (MC_ints[i][j][k])>0.) {
-		Weight3D_[i][j][k]  =  Data_ints[i][j][k]/MC_ints[i][j][k];
-	      }
-	      else {
-		Weight3D_[i][j][k]  = 0.;
-	      }
-	      WHist->SetBinContent( i+1,j+1,k+1,Weight3D_[i][j][k] );
-	      DHist->SetBinContent( i+1,j+1,k+1,Data_ints[i][j][k] );
-	      MHist->SetBinContent( i+1,j+1,k+1,MC_ints[i][j][k] );
-	      //      if(i<5 && j<5 && k<5) std::cout << Weight3D_[i][j][k] << " " ;    
-	    }
-	    //      if(i<5 && j<5) std::cout << std::endl;        
-	  }
-	}
-
-	if(! WeightOutputFile.empty() ) {
-	  std::cout << " 3D Weight Matrix initialized! " << std::endl;
-	  std::cout << " Writing weights to file " << WeightOutputFile << " for re-use...  " << std::endl;
-
-
-	  TFile * outfile = new TFile(WeightOutputFile.c_str(),"RECREATE");
-	  WHist->Write();
-	  MHist->Write();
-	  DHist->Write();
-	  outfile->Write();
-	  outfile->Close();
-	  outfile->Delete();
-	}
-	
-	return;
+      
+      Int_t NBins = MC_distr.size();
+      
+      MC_distr_ = new TH1F("MC_distr","MC dist",NBins,-0.5, float(NBins)-0.5);
+      Data_distr_ = new TH1F("Data_distr","Data dist",NBins,-0.5, float(NBins)-0.5);
+      
+      weights_ = new TH1F("luminumer","luminumer",NBins,-0.5, float(NBins)-0.5);
+      TH1* den = new TH1F("lumidenom","lumidenom",NBins,-0.5, float(NBins)-0.5);
+      
+      for(int ibin = 1; ibin<NBins+1; ++ibin ) {
+        weights_->SetBinContent(ibin, Lumi_distr[ibin-1]);
+        Data_distr_->SetBinContent(ibin, Lumi_distr[ibin-1]);
+        den->SetBinContent(ibin,MC_distr[ibin-1]);
+        MC_distr_->SetBinContent(ibin,MC_distr[ibin-1]);
       }
-
-
-      void weight3D_set( std::string WeightFileName ) { 
-
-	TFile *infile = new TFile(WeightFileName.c_str());
-	TH1F *WHist = (TH1F*)infile->Get("WHist");
-
-	// Check if the histogram exists           
-	if (!WHist) {
-	  std::cout << " Could not find the histogram WHist in the file "
-						    << "in the file " << WeightFileName << "." << std::endl;
-	  return;
-	}
-
-	for (int i=0; i<50; i++) {  
-	  for(int j=0; j<50; j++) {
-	    for(int k=0; k<50; k++) {
-	      Weight3D_[i][j][k] = WHist->GetBinContent(i,j,k);
-	    }
-	  }
-	}
-
-	std::cout << " 3D Weight Matrix initialized! " << std::endl;
-
-	return;
-
-
+      
+      // check integrals, make sure things are normalized
+      
+      float deltaH = weights_->Integral();
+      if(fabs(1.0 - deltaH) > 0.02 ) { // *OOPS*...
+        weights_->Scale( 1.0/ deltaH );
+        Data_distr_->Scale( 1.0/ deltaH );
       }
+      float deltaMC = den->Integral();
+      if(fabs(1.0 - deltaMC) > 0.02 ) {
+        den->Scale(1.0/ deltaMC );
+        MC_distr_->Scale(1.0/ deltaMC );
+      }
+      
+      weights_->Divide( den );  // so now the average weight should be 1.0    
+      
+      std::cout << " Lumi/Pileup Reweighting: Computed Weights per In-Time Nint " << std::endl;
+      
+      for(int ibin = 1; ibin<NBins+1; ++ibin){
+        std::cout << "   " << ibin-1 << " " << weights_->GetBinContent(ibin) << std::endl;
+      }
+      
+      weightOOT_init();
+      
+      FirstWarning_ = true;
+      
+    }
+    
+    void weight3D_init( float ScaleFactor, std::string WeightOutputFile="") { 
+      
+      //create histogram to write output weights, save pain of generating them again...
+      TH3D* WHist = new TH3D("WHist","3D weights",50,0.,50.,50,0.,50.,50,0.,50. );
+      TH3D* DHist = new TH3D("DHist","3D weights",50,0.,50.,50,0.,50.,50,0.,50. );
+      TH3D* MHist = new TH3D("MHist","3D weights",50,0.,50.,50,0.,50.,50,0.,50. );
+      
+      using std::min;
+      
+      if( MC_distr_->GetEntries() == 0 ) {
+        std::cout << " MC and Data distributions are not initialized! You must call the LumiReWeighting constructor. " << std::endl;
+      }
+      
+      // arrays for storing number of interactions
+      double MC_ints[50][50][50];
+      double Data_ints[50][50][50];
+      
+      for (int i=0; i<50; i++) {
+        for(int j=0; j<50; j++) {
+          for(int k=0; k<50; k++) {
+            MC_ints[i][j][k] = 0.;
+            Data_ints[i][j][k] = 0.;
+          }
+        }
+      }
+      
+      double factorial[50];
+      double PowerSer[50];
+      double base = 1.;
+      
+      factorial[0] = 1.;
+      PowerSer[0]=1.;
+      
+      for (int i = 1; i<50; ++i) {
+        base = base*float(i);
+        factorial[i] = base;
+      }
+      
+      
+      double x;
+      double xweight;
+      double probi, probj, probk;
+      double Expval, mean;
+      int xi;
+      
+      // Get entries for Data, MC, fill arrays:
+      int NMCbin = MC_distr_->GetNbinsX();
+      
+      for (int jbin=1;jbin<NMCbin+1;jbin++) {
+        x =  MC_distr_->GetBinCenter(jbin);
+        xweight = MC_distr_->GetBinContent(jbin); //use as weight for matrix
+        
+        //for Summer 11, we have this int feature:                      
+        xi = int(x);
+        
+        // Generate Poisson distribution for each value of the mean     
+        mean = double(xi);
+        
+        if(mean<0.) {
+          std::cout << "LumiReweighting:BadInputValue" << " Your histogram generates MC luminosity values less than zero!"
+  					      << " Please Check.  Terminating." << std::endl;
+        }
+        
+        
+        if(mean==0.){
+          Expval = 1.;
+        }
+        else {
+          Expval = exp(-1.*mean);
+        }
+        
+        base = 1.;
+        
+        for (int i = 1; i<50; ++i) {
+          base = base*mean;
+          PowerSer[i] = base; // PowerSer is mean^i                        
+        }
+        
+        // compute poisson probability for each Nvtx in weight matrix      
+        for (int i=0; i<50; i++) {
+          probi = PowerSer[i]/factorial[i]*Expval;
+          for(int j=0; j<50; j++) {
+            probj = PowerSer[j]/factorial[j]*Expval;
+            for(int k=0; k<50; k++) {
+              probk = PowerSer[k]/factorial[k]*Expval;
+              // joint probability is product of event weights multiplied by weight of input distribution bin
+              MC_ints[i][j][k] = MC_ints[i][j][k]+probi*probj*probk*xweight;
+            }
+          }
+        }
+        
+      }
+      
+      int NDatabin = Data_distr_->GetNbinsX();
+      
+      for (int jbin=1;jbin<NDatabin+1;jbin++) {
+        mean =  (Data_distr_->GetBinCenter(jbin))*ScaleFactor;
+        xweight = Data_distr_->GetBinContent(jbin);
+        
+        // Generate poisson distribution for each value of the mean
+        if(mean<0.) {
+          std::cout << "LumiReweighting:BadInputValue" << " Your histogram generates MC luminosity values less than zero!"
+  					      << " Please Check.  Terminating." << std::endl;
+        }
+        
+        if(mean==0.){
+          Expval = 1.;
+        }
+        else {
+          Expval = exp(-1.*mean);
+        }
+        
+        base = 1.;
+        
+        for (int i = 1; i<50; ++i) {
+          base = base*mean;
+          PowerSer[i] = base;
+        }
+        
+        
+	      // compute poisson probability for each Nvtx in weight matrix
+        for (int i=0; i<50; i++) {
+          probi = PowerSer[i]/factorial[i]*Expval;
+          for(int j=0; j<50; j++) {
+            probj = PowerSer[j]/factorial[j]*Expval;
+            for(int k=0; k<50; k++) {
+              probk = PowerSer[k]/factorial[k]*Expval;
+              // joint probability is product of event weights multiplied by weight of input distribution bin
+              Data_ints[i][j][k] = Data_ints[i][j][k]+probi*probj*probk*xweight;
+            }
+          }
+        }
+        
+      }
+      
+      
+      for (int i=0; i<50; i++) {
+        //if(i<5) std::cout << "i = " << i << std::endl;                       
+        for(int j=0; j<50; j++) {
+          for(int k=0; k<50; k++) {
+            if( (MC_ints[i][j][k])>0.) {
+              Weight3D_[i][j][k]  =  Data_ints[i][j][k]/MC_ints[i][j][k];
+            }
+            else {
+              Weight3D_[i][j][k]  = 0.;
+            }
+            WHist->SetBinContent( i+1,j+1,k+1,Weight3D_[i][j][k] );
+            DHist->SetBinContent( i+1,j+1,k+1,Data_ints[i][j][k] );
+            MHist->SetBinContent( i+1,j+1,k+1,MC_ints[i][j][k] );
+            //      if(i<5 && j<5 && k<5) std::cout << Weight3D_[i][j][k] << " " ;    
+          }
+          //      if(i<5 && j<5) std::cout << std::endl;        
+        }
+      }
+      
+      if(! WeightOutputFile.empty() ) {
+        std::cout << " 3D Weight Matrix initialized! " << std::endl;
+        std::cout << " Writing weights to file " << WeightOutputFile << " for re-use...  " << std::endl;
+        
+        
+        TFile * outfile = new TFile(WeightOutputFile.c_str(),"RECREATE");
+        WHist->Write();
+        MHist->Write();
+        DHist->Write();
+        outfile->Write();
+        outfile->Close();
+        outfile->Delete();
+      }
+      
+      return;
+    }
+    
+    
+    void weight3D_set( std::string WeightFileName ) { 
+      
+      TFile *infile = new TFile(WeightFileName.c_str());
+      TH1F *WHist = (TH1F*)infile->Get("WHist");
+      
+      // Check if the histogram exists           
+      if (!WHist) {
+        std::cout << " Could not find the histogram WHist in the file "
+        << "in the file " << WeightFileName << "." << std::endl;
+        return;
+      }
+      
+      for (int i=0; i<50; i++) {  
+        for(int j=0; j<50; j++) {
+          for(int k=0; k<50; k++) {
+            Weight3D_[i][j][k] = WHist->GetBinContent(i,j,k);
+          }
+        }
+      }
+      
+      std::cout << " 3D Weight Matrix initialized! " << std::endl;
+      
+      return;
+      
+    }
+    
+    
+    void weightOOT_init() {
 
+  // The following are poisson distributions with different means, where the maximum
+  // of the function has been normalized to weight 1.0
+  // These are used to reweight the out-of-time pileup to match the in-time distribution.
+  // The total event weight is the product of the in-time weight, the out-of-time weight,
+  // and a residual correction to fix the distortions caused by the fact that the out-of-time
+  // distribution is not flat.
 
-
-      void weightOOT_init() {
-
-	// The following are poisson distributions with different means, where the maximum
-	// of the function has been normalized to weight 1.0
-	// These are used to reweight the out-of-time pileup to match the in-time distribution.
-	// The total event weight is the product of the in-time weight, the out-of-time weight,
-	// and a residual correction to fix the distortions caused by the fact that the out-of-time
-	// distribution is not flat.
-
-	static double weight_24[25] = {
+  static double weight_24[25] = {
 	  0,
 	  0,
 	  0,
@@ -584,9 +572,9 @@ namespace reweight {
 	  0.958624,
 	  0.99939,
 	  1
-	};
+  };
 
-	static double weight_23[25] = {
+  static double weight_23[25] = {
 	  0,
 	  1.20628e-06,
 	  1.20628e-06,
@@ -612,9 +600,9 @@ namespace reweight {
 	  0.999381,
 	  1,
 	  0.957738
-	};
+  };
 
-	static double weight_22[25] = {
+  static double weight_22[25] = {
 	  0,
 	  0,
 	  0,
@@ -640,9 +628,9 @@ namespace reweight {
 	  1,
 	  0.954245,
 	  0.873688
-	};
+  };
 
-	static double weight_21[25] = {
+  static double weight_21[25] = {
 	  0,
 	  0,
 	  1.15381e-06,
@@ -668,10 +656,9 @@ namespace reweight {
 	  0.956683,
 	  0.872272,
 	  0.76399
-	};
+  };
  
- 
-	static double weight_20[25] = {
+  static double weight_20[25] = {
 	  0,
 	  0,
 	  1.12532e-06,
@@ -697,8 +684,8 @@ namespace reweight {
 	  0.865689,
 	  0.753288,
 	  0.62765
-	}; 
-	static double weight_19[25] = {
+  }; 
+  static double weight_19[25] = {
 	  0,
 	  0,
 	  1.20714e-05,
@@ -724,9 +711,9 @@ namespace reweight {
 	  0.742319,
 	  0.613601,
 	  0.48552
-	};
+  };
 
-	static double weight_18[25] = {
+  static double weight_18[25] = {
 	  0,
 	  3.20101e-06,
 	  2.88091e-05,
@@ -752,10 +739,9 @@ namespace reweight {
 	  0.596332,
 	  0.467818,
 	  0.350434
-	};
+  };
 
- 
-	static double weight_17[25] = {
+  static double weight_17[25] = {
 	  1.03634e-06,
 	  7.25437e-06,
 	  4.97443e-05,
@@ -781,10 +767,9 @@ namespace reweight {
 	  0.449595,
 	  0.331336,
 	  0.234332
-	};
-
+  };
  
-	static double weight_16[25] = {
+  static double weight_16[25] = {
 	  4.03159e-06,
 	  2.41895e-05,
 	  0.000141106,
@@ -810,10 +795,9 @@ namespace reweight {
 	  0.312515,
 	  0.216251,
 	  0.14561
-	};
+  };
  
- 
-	static double weight_15[25] = {
+  static double weight_15[25] = {
 	  9.76084e-07,
 	  5.07564e-05,
 	  0.000303562,
@@ -839,10 +823,9 @@ namespace reweight {
 	  0.198861,
 	  0.12951,
 	  0.0808051
-	};
+  };
  
- 
-	static double weight_14[25] = {
+  static double weight_14[25] = {
 	  1.13288e-05,
 	  0.000124617,
 	  0.000753365,
@@ -868,10 +851,9 @@ namespace reweight {
 	  0.114669,
 	  0.0698288,
 	  0.0406496
-	};
-
+  };
  
-	static double weight_13[25] = {
+  static double weight_13[25] = {
 	  2.54296e-05,
 	  0.000261561,
 	  0.00167018,
@@ -897,9 +879,9 @@ namespace reweight {
 	  0.0585434,
 	  0.0332437,
 	  0.0180159
-	};
+  };
 
-	static double weight_12[25] = {
+  static double weight_12[25] = {
 	  5.85742e-05,
 	  0.000627706,
 	  0.00386677,
@@ -925,10 +907,9 @@ namespace reweight {
 	  0.0263287,
 	  0.0133969,
 	  0.00696683
-	};
-
+  };
  
-	static double weight_11[25] = {
+  static double weight_11[25] = {
 	  0.00015238,
 	  0.00156064,
 	  0.00846044,
@@ -954,9 +935,9 @@ namespace reweight {
 	  0.0100922,
 	  0.00484937,
 	  0.00222458
-	};
+  };
 
-	static double weight_10[25] = {
+  static double weight_10[25] = {
 	  0.000393044,
 	  0.00367001,
 	  0.0179474,
@@ -982,10 +963,9 @@ namespace reweight {
 	  0.00319628,
 	  0.00140601,
 	  0.000568796
-	};
-
+  };
  
-	static double weight_9[25] = {
+  static double weight_9[25] = {
 	  0.00093396,
 	  0.00854448,
 	  0.0380306,
@@ -1011,10 +991,9 @@ namespace reweight {
 	  0.000771598,
 	  0.000295893,
 	  0.000111529
-	};
-
+  };
  
-	static double weight_8[25] = {
+  static double weight_8[25] = {
 	  0.00240233,
 	  0.0192688,
 	  0.0768653,
@@ -1040,9 +1019,9 @@ namespace reweight {
 	  0.000168471,
 	  5.80689e-05,
 	  1.93563e-05
-	};
+  };
 
-	static double weight_7[25] = {
+  static double weight_7[25] = {
 	  0.00617233,
 	  0.0428714,
 	  0.150018,
@@ -1068,9 +1047,9 @@ namespace reweight {
 	  1.67818e-05,
 	  7.38398e-06,
 	  6.71271e-07
-	};
- 
-	static double weight_6[25] = {
+  };
+
+  static double weight_6[25] = {
 	  0.0154465,
 	  0.0923472,
 	  0.277322,
@@ -1096,10 +1075,9 @@ namespace reweight {
 	  3.73163e-06,
 	  6.21938e-07,
 	  0
-	};
+  };
  
- 
-	static double weight_5[25] = {
+  static double weight_5[25] = {
 	  0.0382845,
 	  0.191122,
 	  0.478782,
@@ -1125,10 +1103,9 @@ namespace reweight {
 	  0,
 	  0,
 	  0
-	};
+  };
  
- 
-	static double weight_4[25] = {
+  static double weight_4[25] = {
 	  0.0941305,
 	  0.373824,
 	  0.750094,
@@ -1154,10 +1131,9 @@ namespace reweight {
 	  0,
 	  0,
 	  0
-	};
+  };
  
- 
-	static double weight_3[25] = {
+  static double weight_3[25] = {
 	  0.222714,
 	  0.667015,
 	  1,
@@ -1183,9 +1159,9 @@ namespace reweight {
 	  0,
 	  0,
 	  0
-	};
+  };
  
-	static double weight_2[25] = {
+  static double weight_2[25] = {
 	  0.499541,
 	  0.999607,
 	  1,
@@ -1211,9 +1187,9 @@ namespace reweight {
 	  0,
 	  0,
 	  0
-	};
+  };
  
-	static double weight_1[25] = {
+  static double weight_1[25] = {
 	  0.999165,
 	  1,
 	  0.499996,
@@ -1239,9 +1215,9 @@ namespace reweight {
 	  0,
 	  0,
 	  0
-	};
+  };
  
-	static double weight_0[25] = {
+  static double weight_0[25] = {
 	  1,
 	  0,
 	  0,
@@ -1267,7 +1243,7 @@ namespace reweight {
 	  0,
 	  0,
 	  0
-	};
+  };
 
 	//WeightOOTPU_ = {0};
 
