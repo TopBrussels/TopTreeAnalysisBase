@@ -251,25 +251,31 @@ namespace reweight {
 		Data_distr_ = (TH1*) (dataFile_->Get( DataHistName_.c_str() )->Clone());
 	   MC_distr_ = (TH1*) (generatedFile_->Get( GenHistName_.c_str() )->Clone());
 
-	  // normalize both histograms first                                                                            
+	  // normalize both histograms to 1 first                                                                            
 		std::cout << "normalising data and MC to :" << Data_distr_->Integral() << " and " << MC_distr_->Integral() << std::endl;
-		Data_distr_->Scale( 1.0/ sqrt(Data_distr_->Integral()) );
-		Data_distr_->Scale( 1.0/ sqrt(Data_distr_->Integral()) );
-		MC_distr_->Scale( 1.0/ sqrt(MC_distr_->Integral()) );
-		MC_distr_->Scale( 1.0/ sqrt(MC_distr_->Integral()) );
+		Data_distr_->Scale( 1.0/ Data_distr_->Integral() );
+		//Data_distr_->Scale( 1.0/ sqrt(Data_distr_->Integral()) );
+		MC_distr_->Scale( 1.0/ MC_distr_->Integral() );
+		//MC_distr_->Scale( 1.0/ sqrt(MC_distr_->Integral()) );
 
 
 	  //weights_ = new TH1( *(Data_distr_)) ;
            weights_ = (TH1*) Data_distr_->Clone();
 
-	  // MC * data/MC = data, so the weights are data/MC:
+	  // MC * data/MC = data, so the weights are data/MC on a bin by bin basis:
 
 	  weights_->SetName("lumiWeights");
 
 	  //TH1* den = new TH1(*(MC_distr_));
 	  TH1* den = (TH1*) MC_distr_->Clone();
 
-	  weights_->Divide( den );  // so now the average weight should be 1.0
+          //The Histos need to have the same bins so that they can be divided.  This function assumes that the both histos start at 0 and just need to have
+          //empty bins added to the upper range so that they have equal range
+
+          if(den->GetNbinsX() > weights_->GetNbinsX()) weights_->SetBins(den->GetNbinsX(), 0, den->GetNbinsX()); //If more bins in MC, add bins to Data
+          else if(den->GetNbinsX() < weights_->GetNbinsX()) den->SetBins(weights_->GetNbinsX(), 0, weights_->GetNbinsX()); //Else if more bins in Data, add bins to MC
+
+	  weights_->Divide( den );  // so now the weights_*MC = Data on a bin by bin basis
 
 	  std::cout << " Lumi/Pileup Reweighting: Computed Weights per In-Time Nint " << std::endl;
 
