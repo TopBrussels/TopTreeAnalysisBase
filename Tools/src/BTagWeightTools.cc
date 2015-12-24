@@ -66,7 +66,7 @@ _histogramsFilled(false)
   _ptmin = minpt;
   _etamax = maxeta;
   _reader = reader;
-  InitializeMCEfficiencyHistos(10,_ptmin,_ptmax,2);
+  InitializeMCEfficiencyHistos(20,_ptmin,_ptmax,4);
   _f = TFile::Open(histoFileName.c_str(),"READ");
   if (!_f){_f = TFile::Open(histoFileName.c_str(),"RECREATE");}
   else if (!(_f->GetListOfKeys()->FindObject("BtaggedJets"))){_f->ReOpen("UPDATE");}
