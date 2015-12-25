@@ -460,10 +460,10 @@ double BTagCalibrationReader::eval(BTagEntry::JetFlavor jf,
   }
   float new_pt = pt;
   float new_eta = eta;
-  if (eta < smallest_eta){new_eta = smallest_eta + 0.01;}
-  if (eta > largest_eta){new_eta = largest_eta - 0.01;}
-  if (pt < smallest_pt){new_pt = smallest_pt + 1.;}
-  if (pt > largest_pt){new_pt = largest_pt - 1.;}
+  if (eta <= smallest_eta){new_eta = smallest_eta + 0.01;}
+  if (eta >= largest_eta){new_eta = largest_eta - 0.01;}
+  if (pt <= smallest_pt){new_pt = smallest_pt + 1.;}
+  if (pt >= largest_pt){new_pt = largest_pt - 1.;}
   
   
    std::cerr << "Warning in BTagCalibrationReader: "
