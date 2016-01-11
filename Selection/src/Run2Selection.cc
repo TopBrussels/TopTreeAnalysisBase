@@ -1184,32 +1184,36 @@ bool Run2Selection::isolationDisplacedElectron(const TRootElectron* el) const{
 }
 bool Run2Selection::identificationDisplacedElectron(const TRootElectron* el) const{
   //  cout << "entering the displaced Id electron" << endl;
-    if( fabs(el->superClusterEta()) <= 1.479
-       && el->sigmaIEtaIEta() < 0.0101
-       && fabs(el->deltaEtaIn()) < 0.00926
-       && fabs(el->deltaPhiIn()) < 0.0336
-       && el->hadronicOverEm() < 0.0597
-       && fabs(1/el->E() - 1/el->P()) < 0.012
-       && el->missingHits() <= 2 // check wrt to expectedMissingInnerHits
-       && el->passConversion())
+  if( fabs(el->superClusterEta()) <= 1.479){
+    if ( el->sigmaIEtaIEta() < 0.0101
+	 && fabs(el->deltaEtaIn()) < 0.00926
+	 && fabs(el->deltaPhiIn()) < 0.0336
+	 && el->hadronicOverEm() < 0.0597
+	 && fabs(1/el->E() - 1/el->P()) < 0.012
+	 && el->missingHits() <= 2 // check wrt to expectedMissingInnerHits
+	 && el->passConversion())
       {
 	//	cout << "the displaced Id electron is true" << endl;
         return true;
       }
-    // For the endcap
-    else if (fabs(el->superClusterEta()) < 2.5
-             && el->sigmaIEtaIEta() < 0.0279
-             && fabs(el->deltaEtaIn()) < 0.00724
-             && fabs(el->deltaPhiIn()) < 0.0918
-             && el->hadronicOverEm() < 0.0615
-             && fabs(1/el->E() - 1/el->P()) < 0.00999
-             && el->missingHits() <= 1 // check wrt to expectedMissingInnerHits
-             && el->passConversion())
+  }
+  // For the endcap
+  else if (fabs(el->superClusterEta()) < 2.5)
     {
-      //      cout << "the displaced Id electron is true" << endl;
-      return true;
+      if ( el->sigmaIEtaIEta() < 0.0279
+	   && fabs(el->deltaEtaIn()) < 0.00724
+	   && fabs(el->deltaPhiIn()) < 0.0918
+	   && el->hadronicOverEm() < 0.0615
+	   && fabs(1/el->E() - 1/el->P()) < 0.00999
+	   && el->missingHits() <= 1 // check wrt to expectedMissingInnerHits
+	   && el->passConversion())
+	{
+	  //      cout << "the displaced Id electron is true" << endl;
+	  return true;
+	}
     }
-    return false;
+  return false;
+
 }
 bool Run2Selection::identificationDisplacedMuon(const TRootMuon* muon, float NormChi2, int NTrackerLayersWithMeas, int NValidMuonHits, int NValidPixelHits, int NMatchedStations) const{
     
