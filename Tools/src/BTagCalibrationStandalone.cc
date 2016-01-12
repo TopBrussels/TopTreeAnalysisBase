@@ -466,9 +466,9 @@ double BTagCalibrationReader::eval(BTagEntry::JetFlavor jf,
   if (pt >= largest_pt){new_pt = largest_pt - 1.;}
   
   
-   std::cerr << "Warning in BTagCalibrationReader: "
-          << "The given jet Pt (" << pt << " GeV) and jet Eta (" << eta << ") are not covered by the given .csv file" << std::endl
-	  << "The SF will be evaluated with Pt = " << new_pt << " GeV and Eta = " << new_eta << " to match the closest bin." << std::endl;
+//   std::cerr << "Warning in BTagCalibrationReader: "
+//          << "The given jet Pt (" << pt << " GeV) and jet Eta (" << eta << ") are not covered by the given .csv file" << std::endl
+//	  << "The SF will be evaluated with Pt = " << new_pt << " GeV and Eta = " << new_eta << " to match the closest bin." << std::endl;
 	  
 	  
   // recursively call the eval function with these new pt and eta values
