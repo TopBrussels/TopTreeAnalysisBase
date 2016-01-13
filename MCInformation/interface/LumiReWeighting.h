@@ -253,10 +253,12 @@ namespace reweight {
 
 	  // normalize both histograms first                                                                            
 		std::cout << "normalising data and MC to :" << Data_distr_->Integral() << " and " << MC_distr_->Integral() << std::endl;
-		Data_distr_->Scale( 1.0/ sqrt(Data_distr_->Integral()) );
-		Data_distr_->Scale( 1.0/ sqrt(Data_distr_->Integral()) );
-		MC_distr_->Scale( 1.0/ sqrt(MC_distr_->Integral()) );
-		MC_distr_->Scale( 1.0/ sqrt(MC_distr_->Integral()) );
+		Double_t integral = Data_distr_->Integral();
+		Data_distr_->Scale( 1.0/ sqrt(integral));
+		Data_distr_->Scale( 1.0/ sqrt(integral));
+		integral = MC_distr_->Integral();
+		MC_distr_->Scale( 1.0/ sqrt(integral));
+		MC_distr_->Scale( 1.0/ sqrt(integral));
 
 
 	  //weights_ = new TH1( *(Data_distr_)) ;
