@@ -616,7 +616,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedTightElectronsCutsBasedSpr
                    && fabs(el->deltaPhiIn()) < 0.0286
                    && el->sigmaIEtaIEta_full5x5() < 0.0101
                    && el->hadronicOverEm() < 0.0342
-                   && fabs(1/el->E() - 1/el->P()) < 0.0116
+                   && el->ioEmIoP() < 0.0116
                    && pfElectronIso(el, false) <  0.0591
                    && el->passConversion()
                    && el->missingHits() <= 2)
@@ -630,7 +630,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedTightElectronsCutsBasedSpr
                    && fabs(el->deltaPhiIn()) <  0.0439
                    && el->sigmaIEtaIEta_full5x5() <  0.0287
                    && (el->hadronicOverEm() < 0.0544)
-                   && fabs(1/el->E() - 1/el->P()) < 0.01
+                   && el->ioEmIoP() < 0.01
                    && pfElectronIso(el, false) < 0.0759
                    && el->passConversion()
                    && el->missingHits() <= 1)
@@ -662,7 +662,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedMediumElectronsCutsBasedSp
                    && el->hadronicOverEm() < 0.0372
                    && fabs(el->d0()) < 0.0151
                    && fabs(el->dz()) < 0.238
-                   && fabs(1/el->E() - 1/el->P()) < 0.118
+                   && el->ioEmIoP() < 0.118
                    && pfElectronIso(el, false) < 0.0987
                    && el->passConversion()
                    && el->missingHits() <= 2)
@@ -677,7 +677,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedMediumElectronsCutsBasedSp
                    && (el->hadronicOverEm() < 0.0546)
                    && fabs(el->d0()) < 0.0535
                    && fabs(el->dz()) < 0.572
-                   && fabs(1/el->E() - 1/el->P()) < 0.104
+                   && el->ioEmIoP() < 0.104
                    && pfElectronIso(el, false) < 0.0902
                    && el->passConversion()
                    && el->missingHits() <= 1)
@@ -709,7 +709,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedLooseElectronsCutsBasedSpr
                    && el->hadronicOverEm() < 0.0765
                    && fabs(el->d0()) <  0.0227
                    && fabs(el->dz()) <  0.379
-                   && fabs(1/el->E() - 1/el->P()) <  0.184
+                   && el->ioEmIoP() <  0.184
                    && pfElectronIso(el, false) <  0.118
                    && el->passConversion()
                    && el->missingHits() <= 2)
@@ -724,7 +724,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedLooseElectronsCutsBasedSpr
                    && (el->hadronicOverEm() < 0.0824)
                    && fabs(el->d0()) <  0.242
                    && fabs(el->dz()) <  0.921
-                   && fabs(1/el->E() - 1/el->P()) <  0.125
+                   && el->ioEmIoP() <  0.125
                    && pfElectronIso(el, false) <  0.118
                    && el->passConversion()
                    && el->missingHits() <= 1)
@@ -755,7 +755,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedTightElectronsCutsBasedSpr
                    && el->hadronicOverEm() < 0.0597
                    && fabs(el->d0()) < 0.0111
                    && fabs(el->dz()) < 0.0466
-                   && fabs(1/el->E() - 1/el->P()) < 0.012
+                   && el->ioEmIoP() < 0.012
                    && pfElectronIso(el, true) <  0.0354
                    && el->passConversion()
                    && el->missingHits() <= 2)
@@ -771,7 +771,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedTightElectronsCutsBasedSpr
                    && (el->hadronicOverEm() < 0.0615)
                    && fabs(el->d0()) < 0.0351
                    && fabs(el->dz()) < 0.417
-                   && fabs(1/el->E() - 1/el->P()) < 0.00999
+                   && el->ioEmIoP() < 0.00999
                    && pfElectronIso(el, true) < 0.0646
                    && el->passConversion()
                    && el->missingHits() <= 1)
@@ -803,7 +803,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedMediumElectronsCutsBasedSp
                    && el->hadronicOverEm() < 0.0876
                    && fabs(el->d0()) < 0.0118
                    && fabs(el->dz()) < 0.373
-                   && fabs(1/el->E() - 1/el->P()) < 0.0174
+                   && el->ioEmIoP() < 0.0174
                    && pfElectronIso(el, true) < 0.0766
                    && el->passConversion()
                    && el->missingHits() <= 2)
@@ -818,7 +818,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedMediumElectronsCutsBasedSp
                    && (el->hadronicOverEm() < 0.0678)
                    && fabs(el->d0()) < 0.0739
                    && fabs(el->dz()) < 0.602
-                   && fabs(1/el->E() - 1/el->P()) < 0.0898
+                   && el->ioEmIoP() < 0.0898
                    && pfElectronIso(el, true) < 0.0678
                    && el->passConversion()
                    && el->missingHits() <= 1)
@@ -850,7 +850,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedLooseElectronsCutsBasedSpr
                    && el->hadronicOverEm() < 0.104
                    && fabs(el->d0()) <  0.0261
                    && fabs(el->dz()) <  0.41
-                   && fabs(1/el->E() - 1/el->P()) <  0.102
+                   && el->ioEmIoP() <  0.102
                    && pfElectronIso(el, true) <  0.0893
                    && el->passConversion()
                    && el->missingHits() <= 2)
@@ -865,7 +865,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedLooseElectronsCutsBasedSpr
                    && (el->hadronicOverEm() < 0.0897)
                    && fabs(el->d0()) <  0.118
                    && fabs(el->dz()) <  0.822
-                   && fabs(1/el->E() - 1/el->P()) <  0.126
+                   && el->ioEmIoP() <  0.126
                    && pfElectronIso(el, true) <  0.121
                    && el->passConversion()
                    && el->missingHits() <= 1)
@@ -897,7 +897,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedVetoElectronsCutsBasedSpri
                    && el->hadronicOverEm() < 0.181
                    && fabs(el->d0()) <  0.0564
                    && fabs(el->dz()) <  0.472
-                   && fabs(1/el->E() - 1/el->P()) <  0.207
+                   && el->ioEmIoP() <  0.207
                    && pfElectronIso(el, true) <  0.126
                    && el->passConversion()
                    && el->missingHits() <= 2)
@@ -912,7 +912,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedVetoElectronsCutsBasedSpri
                    && (el->hadronicOverEm() < 0.116)
                    && fabs(el->d0()) <  0.222
                    && fabs(el->dz()) <  0.921
-                   && fabs(1/el->E() - 1/el->P()) <  0.174
+                   && el->ioEmIoP() <  0.174
                    && pfElectronIso(el, true) <  0.144
                    && el->passConversion()
                    && el->missingHits() <= 3)
@@ -945,7 +945,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedTightElectronsCutsBasedPHY
                    && el->hadronicOverEm() < 0.045772
                    && fabs(el->d0()) < 0.008790
                    && fabs(el->dz()) < 0.021226
-                   && fabs(1/el->E() - 1/el->P()) < 0.020118
+                   && el->ioEmIoP() < 0.020118
                    && pfElectronIso(el, true) < 0.069537
                    && el->passConversion()
                    && el->missingHits() <= 1)
@@ -960,7 +960,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedTightElectronsCutsBasedPHY
                    && (el->hadronicOverEm() < 0.067778)
                    && fabs(el->d0()) < 0.027984
                    && fabs(el->dz()) < 0.133431
-                   && fabs(1/el->E() - 1/el->P()) < 0.098919
+                   && el->ioEmIoP() < 0.098919
                    && pfElectronIso(el, true) < 0.078265
                    && el->passConversion()
                    && el->missingHits() <= 1)
@@ -991,7 +991,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedMediumElectronsCutsBasedPH
                    && el->hadronicOverEm() < 0.050537
                    && fabs(el->d0()) < 0.012235
                    && fabs(el->dz()) < 0.042020
-                   && fabs(1/el->E() - 1/el->P()) < 0.091942
+                   && el->ioEmIoP() < 0.091942
                    && pfElectronIso(el, true) < 0.107587
                    && el->passConversion()
                    && el->missingHits() <= 1)
@@ -1006,7 +1006,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedMediumElectronsCutsBasedPH
                    && el->hadronicOverEm() < 0.086782
                    && fabs(el->d0()) < 0.036719
                    && fabs(el->dz()) < 0.138142
-                   && fabs(1/el->E() - 1/el->P()) < 0.100683
+                   && el->ioEmIoP() < 0.100683
                    && pfElectronIso(el, true) < 0.113254
                    && el->passConversion()
                    && el->missingHits() <= 1)
@@ -1036,7 +1036,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedLooseElectronsCutsBasedPHY
                    && el->hadronicOverEm() < 0.093068
                    && fabs(el->d0()) < 0.035904
                    && fabs(el->dz()) < 0.075496
-                   && fabs(1/el->E() - 1/el->P()) < 0.189968
+                   && el->ioEmIoP() < 0.189968
                    && pfElectronIso(el, true) < 0.130136
                    && el->passConversion()
                    && el->missingHits() <= 1)
@@ -1051,7 +1051,7 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedLooseElectronsCutsBasedPHY
                    && (el->hadronicOverEm() < 0.115754)
                    && fabs(el->d0()) < 0.099266
                    && fabs(el->dz()) < 0.197897
-                   && fabs(1/el->E() - 1/el->P()) < 0.140662
+                   && el->ioEmIoP() < 0.140662
                    && pfElectronIso(el, true) < 0.163368
                    && el->passConversion()
                    && el->missingHits() <= 1)
@@ -1202,7 +1202,7 @@ bool Run2Selection::identificationDisplacedElectron(const TRootElectron* el) con
 	 && fabs(el->deltaEtaIn()) < 0.00926
 	 && fabs(el->deltaPhiIn()) < 0.0336
 	 && el->hadronicOverEm() < 0.0597
-	 && fabs(1/el->E() - 1/el->P()) < 0.012
+	 && el->ioEmIoP() < 0.012
 	 && el->missingHits() <= 2 // check wrt to expectedMissingInnerHits
 	 && el->passConversion())
       {
@@ -1217,7 +1217,7 @@ bool Run2Selection::identificationDisplacedElectron(const TRootElectron* el) con
 	   && fabs(el->deltaEtaIn()) < 0.00724
 	   && fabs(el->deltaPhiIn()) < 0.0918
 	   && el->hadronicOverEm() < 0.0615
-	   && fabs(1/el->E() - 1/el->P()) < 0.00999
+	   && el->ioEmIoP() < 0.00999
 	   && el->missingHits() <= 1 // check wrt to expectedMissingInnerHits
 	   && el->passConversion())
 	{
