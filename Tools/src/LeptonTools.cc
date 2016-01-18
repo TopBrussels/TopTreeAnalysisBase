@@ -2,11 +2,16 @@
 
 
 // muonSFweight constructor
-MuonSFWeight::MuonSFWeight (const string &sfFile, const string &dataOverMC, const bool &debug, const bool &printWarning)
+MuonSFWeight::MuonSFWeight (const string &sfFile, const string &dataOverMC, const bool &extendRange, const bool &debug, const bool &printWarning)
 {
   printWarning_ = printWarning;
   debug_ = debug;
-  if (debug_)std::cout << "MuonSFWeight constuctor being called!!" << std::endl << endl;
+  extendRange_ = extendRange;
+  if (debug_) {
+    cout << endl;
+    cout << "--------------------------------------" << endl;
+    cout << "MuonSFWeight constuctor being called!!" << endl << endl;
+  }
   TFile *fin = TFile::Open (sfFile.c_str ());
   if (debug_) cout << "file is " << sfFile.c_str () << endl;
   TH2F* SF_Combined_TOT = (TH2F *) fin->Get(dataOverMC.c_str ());
@@ -20,8 +25,18 @@ MuonSFWeight::MuonSFWeight (const string &sfFile, const string &dataOverMC, cons
     cout << "name of cloned histo is " << SF_Combined_TOT->GetName() << endl;
     cout << "Mean of histo is " << muonSFWeight_->GetMean() << endl;
   }
+  if (debug_){
+    cout << "printing the bin content of the loaded histogram!!" << endl;
+    for (int bin=1; bin <= muonSFWeight_->GetNbinsX(); bin ++) {
+      for (int jbin=1; jbin <= muonSFWeight_->GetNbinsY(); jbin++){
+	cout << "x bin is " << bin << ", y bin is " << jbin <<  " and bin content is " << muonSFWeight_->GetBinContent(bin,jbin) << endl ;
+      }
+    }
+    cout << endl << "End of MuonSFWeight constuctor" << endl ;
+    cout << "------------------------------" << endl << endl;
+  }
   fin->Close ();
-  if (debug_) cout << "file closed" << endl;
+  //  if (extendRange_) cout << "extendRange_ is true" << endl;
 }
 
 
@@ -29,50 +44,65 @@ MuonSFWeight::MuonSFWeight (const string &sfFile, const string &dataOverMC, cons
 double
 MuonSFWeight::at(const double &eta, const double &pt, const int &shiftUpDown)
 {
-  double pt_hist= pt;
-  double eta_hist= eta;
+  // insert few useful variables:
+  double Xmin = muonSFWeight_->GetXaxis()->GetBinLowEdge(1) ;
+  double Xmax = muonSFWeight_->GetXaxis()->GetBinUpEdge(muonSFWeight_->GetNbinsX());
+  double Ymin = muonSFWeight_->GetYaxis()->GetBinLowEdge(1);
+  double Ymax = muonSFWeight_->GetYaxis()->GetBinUpEdge(muonSFWeight_->GetNbinsY()) ;
+
 
   // some cout to help debug
   if (debug_){
     cout << "in 'at' method " << endl;
-    cout << "pt hist is " << pt << endl;
-    cout << "eta hist is " << eta << endl;
-    for (int bin=0; bin <= muonSFWeight_->GetNbinsX(); bin ++) {
-      for (int jbin=0; jbin <= muonSFWeight_->GetNbinsY(); jbin++){
-	cout << "x bin is " << bin << ", y bin is " << jbin <<  " and bin content is " << muonSFWeight_->GetBinContent(bin,jbin) << endl;
-      }
-    }
+    cout << "pt is " << pt << endl;
+    cout << "eta is " << eta << endl;
   }
 
-
+  double pt_hist= pt;
+  double eta_hist= eta;
+  bool isOutOfRange = false;
+  double uncertaintyMultiplier = 1;
   // to give a non null SF for muons being out of eta and/or pt range of the input histo
-  /*
-  if (pt > 300 && abs(eta) < muonSFWeight_->GetXaxis()->GetBinUpEdge(muonSFWeight_->GetXaxis()->GetLast()) )
-    {
-      pt_hist =( muonSFWeight_->GetYaxis()->GetBinUpEdge(muonSFWeight_->GetYaxis()->GetNbins() - 1) + muonSFWeight_->GetYaxis()->GetBinUpEdge(muonSFWeight_->GetYaxis()->GetNbins() - 2))/2;
-      if (pt > 300 && abs(eta) < 0.9)
-        {
-          pt_hist =( muonSFWeight_->GetYaxis()->GetBinUpEdge(muonSFWeight_->GetYaxis()->GetNbins()) + muonSFWeight_->GetYaxis()->GetBinUpEdge(muonSFWeight_->GetYaxis()->GetNbins() - 1))/2;
-        }
+  if (extendRange_){
+    if ( pt < Ymin ){
+      pt_hist = muonSFWeight_->GetYaxis()->GetBinCenter(1);
+      uncertaintyMultiplier *= 2;
+      isOutOfRange = true;
     }
-  else if (pt < 300 && abs(eta) > muonSFWeight_->GetXaxis()->GetBinUpEdge(muonSFWeight_->GetXaxis()->GetLast()))
-    {
-      eta_hist =(muonSFWeight_->GetXaxis()->GetBinUpEdge(muonSFWeight_->GetXaxis()->GetLast()) + muonSFWeight_->GetXaxis()->GetBinUpEdge(muonSFWeight_->GetXaxis()->GetNbins() - 1))/2;
+    if ( Ymax < pt){
+      pt_hist = muonSFWeight_->GetYaxis()->GetBinCenter(muonSFWeight_->GetNbinsY());
+      cout << "pt_hist is " << pt_hist << endl;
+      uncertaintyMultiplier *= 2;
+      isOutOfRange = true;
     }
-  else if (pt > 300 && abs(eta) > muonSFWeight_->GetXaxis()->GetBinUpEdge(muonSFWeight_->GetXaxis()->GetLast()))
-    {
-      pt_hist =( muonSFWeight_->GetYaxis()->GetBinUpEdge(muonSFWeight_->GetYaxis()->GetNbins() - 1) + muonSFWeight_->GetYaxis()->GetBinUpEdge(muonSFWeight_->GetYaxis()->GetNbins() - 2))/2;
-      eta_hist =(muonSFWeight_->GetXaxis()->GetBinUpEdge(muonSFWeight_->GetXaxis()->GetLast()) + muonSFWeight_->GetXaxis()->GetBinUpEdge(muonSFWeight_->GetXaxis()->GetNbins() - 1))/2;
+    if (abs(eta) < Xmin){
+      eta_hist = muonSFWeight_->GetXaxis()->GetBinCenter(1);
+      uncertaintyMultiplier *= 2;
+      isOutOfRange = true;
     }
-  */
+    if (Xmax < abs(eta)){
+      eta_hist=muonSFWeight_->GetXaxis()->GetBinCenter(muonSFWeight_->GetNbinsX());
+      uncertaintyMultiplier *= 2;
+      isOutOfRange = true;
+    }
+  }
   
   Int_t foundBin = muonSFWeight_->FindBin(abs(eta_hist),pt_hist);
-  double SF = muonSFWeight_->GetBinContent(foundBin) + shiftUpDown * muonSFWeight_->GetBinError(foundBin);
+  double SF = muonSFWeight_->GetBinContent(foundBin) + shiftUpDown * uncertaintyMultiplier * muonSFWeight_->GetBinError(foundBin);
 
-  if (SF == 0. && printWarning_) {
-    cout << "WARNING. The value of the SF for the muon is equal to 0. This probably means that your are outside the range of the histogram " << endl;
-    cout << "range in eta is " << muonSFWeight_->GetXaxis()->GetBinLowEdge(1) << " ---> " << muonSFWeight_->GetXaxis()->GetBinUpEdge(muonSFWeight_->GetNbinsX()) << endl;
-    cout << "range in pt is " << muonSFWeight_->GetYaxis()->GetBinLowEdge(1) << " ---> " << muonSFWeight_->GetYaxis()->GetBinUpEdge(muonSFWeight_->GetNbinsY()) << endl;
+  if (isOutOfRange && printWarning_) {
+    cout << "The value of pt/and or eta for which you want a SF is outside the range of the histogram you have laoded. The SF of the closest bin will be used and the uncertainty is doubled!" << endl;
+    cout << "The pt is " << pt << " and the eta is " << eta << endl;
+    cout << "range in eta is " << Xmin << " ---> " << Xmax << endl;
+    cout << "range in pt is " << Ymin << " ---> " << Ymax << endl;
+    //    cout << "uncertaintyMultiplier is " << uncertaintyMultiplier << endl;
+  }
+
+  if (SF==0. && printWarning_) {
+    cout << "The SF is equal to 0 because the value of pt/and or eta for which you want a SF is outside the range of the histogram you have laoded. You might want to set 'extendRange_' to true if you want to get the value of the closest bin." << endl;
+    cout << "The pt is " << pt << " and the eta is " << eta << endl;
+    cout << "range in eta is " << Xmin << " ---> " << Xmax << endl;
+    cout << "range in pt is " << Ymin << " ---> " << Ymax << endl;
   }
   return SF;
 
@@ -85,14 +115,20 @@ MuonSFWeight::~MuonSFWeight ()
 }
 
 
+#include "../interface/LeptonTools.h"
 
 
 // electronSFweight constructor
-ElectronSFWeight::ElectronSFWeight (const string &sfFile, const string &dataOverMC, const bool &debug, const bool &printWarning)
+ElectronSFWeight::ElectronSFWeight (const string &sfFile, const string &dataOverMC, const bool &extendRange, const bool &debug, const bool &printWarning)
 {
   printWarning_ = printWarning;
   debug_ = debug;
-  if (debug_)std::cout << "ElectronSFWeight constuctor being called!!" << std::endl << endl;
+  extendRange_ = extendRange;
+  if (debug_) {
+    cout << endl;
+    cout << "--------------------------------------" << endl;
+    cout << "ElectronSFWeight constuctor being called!!" << endl << endl;
+  }
   TFile *fin = TFile::Open (sfFile.c_str ());
   if (debug_) cout << "file is " << sfFile.c_str () << endl;
   TH2F* SF_Combined_TOT = (TH2F *) fin->Get(dataOverMC.c_str ());
@@ -106,67 +142,92 @@ ElectronSFWeight::ElectronSFWeight (const string &sfFile, const string &dataOver
     cout << "name of cloned histo is " << SF_Combined_TOT->GetName() << endl;
     cout << "Mean of histo is " << electronSFWeight_->GetMean() << endl;
   }
+  if (debug_){
+    cout << "printing the bin content of the loaded histogram!!" << endl;
+    for (int bin=1; bin <= electronSFWeight_->GetNbinsX(); bin ++) {
+      for (int jbin=1; jbin <= electronSFWeight_->GetNbinsY(); jbin++){
+	cout << "x bin is " << bin << ", y bin is " << jbin <<  " and bin content is " << electronSFWeight_->GetBinContent(bin,jbin) << endl ;
+      }
+    }
+    cout << endl << "End of ElectronSFWeight constuctor" << endl ;
+    cout << "------------------------------" << endl << endl;
+  }
   fin->Close ();
-  if (debug_) cout << "file closed" << endl;
+  //  if (extendRange_) cout << "extendRange_ is true" << endl;
 }
+
 
 // electronSFweight at method (get SF for the given eta and pt)
 double
 ElectronSFWeight::at(const double &eta, const double &pt, const int &shiftUpDown)
 {
-  double pt_hist= pt;
-  double eta_hist= eta;
+  // insert few useful variables:
+  double Xmin = electronSFWeight_->GetXaxis()->GetBinLowEdge(1) ;
+  double Xmax = electronSFWeight_->GetXaxis()->GetBinUpEdge(electronSFWeight_->GetNbinsX());
+  double Ymin = electronSFWeight_->GetYaxis()->GetBinLowEdge(1);
+  double Ymax = electronSFWeight_->GetYaxis()->GetBinUpEdge(electronSFWeight_->GetNbinsY()) ;
+
 
   // some cout to help debug
   if (debug_){
     cout << "in 'at' method " << endl;
-    cout << "pt hist is " << pt << endl;
-    cout << "eta hist is " << eta << endl;
-    for (int bin=1; bin <= electronSFWeight_->GetNbinsX(); bin ++) {
-      for (int jbin=1; jbin <= electronSFWeight_->GetNbinsY(); jbin++){
-	cout << "x bin is " << bin << ", y bin is " << jbin <<  " and bin content is " << electronSFWeight_->GetBinContent(bin,jbin) << endl;
-      }
-    }
+    cout << "pt is " << pt << endl;
+    cout << "eta is " << eta << endl;
   }
 
-
+  double pt_hist= pt;
+  double eta_hist= eta;
+  bool isOutOfRange = false;
+  double uncertaintyMultiplier = 1;
   // to give a non null SF for electrons being out of eta and/or pt range of the input histo
-  /*
-  if (pt > 300 && abs(eta) < electronSFWeight_->GetXaxis()->GetBinUpEdge(electronSFWeight_->GetXaxis()->GetLast()) )
-    {
-      pt_hist =( electronSFWeight_->GetYaxis()->GetBinUpEdge(electronSFWeight_->GetYaxis()->GetNbins() - 1) + electronSFWeight_->GetYaxis()->GetBinUpEdge(electronSFWeight_->GetYaxis()->GetNbins() - 2))/2;
-      if (pt > 300 && abs(eta) < 0.9)
-        {
-          pt_hist =( electronSFWeight_->GetYaxis()->GetBinUpEdge(electronSFWeight_->GetYaxis()->GetNbins()) + electronSFWeight_->GetYaxis()->GetBinUpEdge(electronSFWeight_->GetYaxis()->GetNbins() - 1))/2;
-        }
+  if (extendRange_){
+    if ( pt < Ymin ){
+      pt_hist = electronSFWeight_->GetYaxis()->GetBinCenter(1);
+      uncertaintyMultiplier *= 2;
+      isOutOfRange = true;
     }
-  else if (pt < 300 && abs(eta) > electronSFWeight_->GetXaxis()->GetBinUpEdge(electronSFWeight_->GetXaxis()->GetLast()))
-    {
-      eta_hist =(electronSFWeight_->GetXaxis()->GetBinUpEdge(electronSFWeight_->GetXaxis()->GetLast()) + electronSFWeight_->GetXaxis()->GetBinUpEdge(electronSFWeight_->GetXaxis()->GetNbins() - 1))/2;
+    if ( Ymax < pt){
+      pt_hist = electronSFWeight_->GetYaxis()->GetBinCenter(electronSFWeight_->GetNbinsY());
+      cout << "pt_hist is " << pt_hist << endl;
+      uncertaintyMultiplier *= 2;
+      isOutOfRange = true;
     }
-  else if (pt > 300 && abs(eta) > electronSFWeight_->GetXaxis()->GetBinUpEdge(electronSFWeight_->GetXaxis()->GetLast()))
-    {
-      pt_hist =( electronSFWeight_->GetYaxis()->GetBinUpEdge(electronSFWeight_->GetYaxis()->GetNbins() - 1) + electronSFWeight_->GetYaxis()->GetBinUpEdge(electronSFWeight_->GetYaxis()->GetNbins() - 2))/2;
-      eta_hist =(electronSFWeight_->GetXaxis()->GetBinUpEdge(electronSFWeight_->GetXaxis()->GetLast()) + electronSFWeight_->GetXaxis()->GetBinUpEdge(electronSFWeight_->GetXaxis()->GetNbins() - 1))/2;
+    if (abs(eta) < Xmin){
+      eta_hist = electronSFWeight_->GetXaxis()->GetBinCenter(1);
+      uncertaintyMultiplier *= 2;
+      isOutOfRange = true;
     }
-  */
+    if (Xmax < abs(eta)){
+      eta_hist=electronSFWeight_->GetXaxis()->GetBinCenter(electronSFWeight_->GetNbinsX());
+      uncertaintyMultiplier *= 2;
+      isOutOfRange = true;
+    }
+  }
   
   Int_t foundBin = electronSFWeight_->FindBin(abs(eta_hist),pt_hist);
-  double SF = electronSFWeight_->GetBinContent(foundBin) + shiftUpDown * electronSFWeight_->GetBinError(foundBin);
-  
-  if (SF == 0. && printWarning_) {
-    cout << "WARNING. The value of the SF for the electron is equal to 0. This probably means that your are outside the range of the histogram " << endl;
-    cout << "range in eta is " << electronSFWeight_->GetXaxis()->GetBinLowEdge(1) << " ---> " << electronSFWeight_->GetXaxis()->GetBinUpEdge(electronSFWeight_->GetNbinsX()) << endl;
-    cout << "range in pt is " << electronSFWeight_->GetYaxis()->GetBinLowEdge(1) << " ---> " << electronSFWeight_->GetYaxis()->GetBinUpEdge(electronSFWeight_->GetNbinsY()) << endl;
+  double SF = electronSFWeight_->GetBinContent(foundBin) + shiftUpDown * uncertaintyMultiplier * electronSFWeight_->GetBinError(foundBin);
+
+  if (isOutOfRange && printWarning_) {
+    cout << "The value of pt/and or eta for which you want a SF is outside the range of the histogram you have laoded. The SF of the closest bin will be used and the uncertainty is doubled!" << endl;
+    cout << "The pt is " << pt << " and the eta is " << eta << endl;
+    cout << "range in eta is " << Xmin << " ---> " << Xmax << endl;
+    cout << "range in pt is " << Ymin << " ---> " << Ymax << endl;
+    //    cout << "uncertaintyMultiplier is " << uncertaintyMultiplier << endl;
+  }
+
+  if (SF==0. && printWarning_) {
+    cout << "The SF is equal to 0 because the value of pt/and or eta for which you want a SF is outside the range of the histogram you have laoded. You might want to set 'extendRange_' to true if you want to get the value of the closest bin." << endl;
+    cout << "The pt is " << pt << " and the eta is " << eta << endl;
+    cout << "range in eta is " << Xmin << " ---> " << Xmax << endl;
+    cout << "range in pt is " << Ymin << " ---> " << Ymax << endl;
   }
   return SF;
+
 }
 
-
-// electronSFweight destructor
+//electronSFweight destructor
 ElectronSFWeight::~ElectronSFWeight ()
 {
   delete electronSFWeight_; // close file
 }
-
 
