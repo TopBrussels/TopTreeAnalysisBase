@@ -20,12 +20,13 @@ class MuonSFWeight
 {
  public:
   MuonSFWeight () {};
-  MuonSFWeight (const string &, const string &, const bool &debug = false, const bool &printWarning = true);
+  MuonSFWeight (const string &, const string &, const bool &extendRange = false, const bool &debug = false, const bool &printWarning = true);
   ~MuonSFWeight ();
   double at (const double &eta, const double &pt, const int &shiftUpDown = 0);
 
  private:
   TH2 *muonSFWeight_;
+  bool extendRange_;
   bool debug_;
   bool printWarning_;
 };
@@ -35,12 +36,13 @@ class ElectronSFWeight
 {
  public:
   ElectronSFWeight () {};
-  ElectronSFWeight (const string &, const string &, const bool &debug = false, const bool &printWarning = true);
+  ElectronSFWeight (const string &, const string &, const bool &extendRange = false, const bool &debug = false, const bool &printWarning = true);
   ~ElectronSFWeight ();
   double at (const double &eta, const double &pt, const int &shiftUpDown = 0);
 
  private:
   TH2 *electronSFWeight_;
+  bool extendRange_;
   bool debug_;
   bool printWarning_;
 };
