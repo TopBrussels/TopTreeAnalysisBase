@@ -71,7 +71,6 @@ MuonSFWeight::at(const double &eta, const double &pt, const int &shiftUpDown)
     }
     if ( Ymax < pt){
       pt_hist = muonSFWeight_->GetYaxis()->GetBinCenter(muonSFWeight_->GetNbinsY());
-      cout << "pt_hist is " << pt_hist << endl;
       uncertaintyMultiplier *= 2;
       isOutOfRange = true;
     }
