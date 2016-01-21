@@ -105,10 +105,9 @@ bool JetSelection::passLoosePFJetID13TeV(const TRootPFJet* PFJet) const
 						{
 							if (fabs(PFJet->Eta()) >= 2.4 || PFJet->chargedMultiplicity() > 0)
 							{
-								if(PFJet->muonEnergyFraction() <= 0.8)
-								{
+								
 									return true;
-								}
+								
 							}
 						}
 					}
@@ -141,10 +140,9 @@ bool JetSelection::passTightPFJetID13TeV(const TRootPFJet* PFJet) const
 						{
 							if (fabs(PFJet->Eta()) >= 2.4 || PFJet->chargedMultiplicity() > 0)
 							{
-								if(PFJet->muonEnergyFraction() <= 0.8)
-								{
+								
 									return true;
-								}
+								
 							}
 						}
 					}
