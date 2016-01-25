@@ -4,7 +4,6 @@
 
 #include "../../../TopTreeProducer/interface/TRootJet.h"
 #include "../../../TopTreeProducer/interface/TRootMuon.h"
-#include "../../../TopTreeProducer/interface/TRootGenEvent.h"
 #include "../../../TopTreeProducer/interface/TRootNPGenEvent.h"
 #include "../../Reconstruction/interface/MEzCalculator.h"
 
