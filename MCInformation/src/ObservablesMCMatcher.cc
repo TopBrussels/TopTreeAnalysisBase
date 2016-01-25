@@ -97,35 +97,6 @@ Observables& ObservablesMCMatcher::getMatchedObservables(TRootNPGenEvent& npgene
   return *obs;
 };
 
-Observables& ObservablesMCMatcher::getMatchedObservables(TRootGenEvent& genevt, const TRootMuon& lepton, const TRootJet& qFromW1, const TRootJet& qFromW2, const TRootJet& bFromHadTop, const TRootJet& bFromLepTop, const TRootMET& MET, const vector<TRootJet>& jets)
-{
-  TRootMCParticle leptonMC(genevt.lepton());
-  TRootMCParticle qFromW1MC(genevt.hadronicDecayQuark());
-  TRootMCParticle qFromW2MC(genevt.hadronicDecayQuarkBar());
-  TRootMCParticle bFromHadTopMC(genevt.hadronicDecayB());
-  TRootMCParticle bFromLepTopMC(genevt.leptonicDecayB());
-  TRootMCParticle METMC(genevt.neutrino());
-  vector<TRootMCParticle> quarks;
-  vector<TLorentzVector> lep = genevt.leptonicDecayTopRadiation();
-  for (vector<TLorentzVector>::const_iterator iter = lep.begin(); iter != lep.end(); iter++)
-    quarks.push_back(TRootMCParticle(*iter));
-  vector<TLorentzVector> had = genevt.hadronicDecayTopRadiation();
-  for (vector<TLorentzVector>::const_iterator iter = had.begin(); iter != had.end(); iter++)
-    quarks.push_back(TRootMCParticle(*iter));
-  vector<TLorentzVector> isr = genevt.ISR();
-  for (vector<TLorentzVector>::const_iterator iter = isr.begin(); iter != isr.end(); iter++)
-    quarks.push_back(TRootMCParticle(*iter));
-  quarks.push_back(qFromW1MC);
-  quarks.push_back(qFromW2MC);
-  quarks.push_back(bFromHadTopMC);
-  quarks.push_back(bFromLepTopMC);
-  
-    //  Observables *obs = new Observables(lepton, jets[], jets[], jets[], jets[], MET, jets);
-    Observables *obs = new Observables(lepton, qFromW1, qFromW2, bFromHadTop, bFromLepTop, MET, jets);
-  obs->SetMCInfo(leptonMC, qFromW1MC, qFromW2MC, bFromHadTopMC, bFromLepTopMC, METMC, quarks);
-  return *obs;
-};
-
 Observables& ObservablesMCMatcher::getMatchedObservables(vector<TRootMCParticle>& mcParticles, const TRootMuon& lepton, const TRootJet& qFromW1, const TRootJet& qFromW2, const TRootJet& bFromHadTop, const TRootJet& bFromLepTop, const TRootMET& MET, const vector<TRootJet>& jets)
 {
   vector<TRootMCParticle> quarks_unordered;
