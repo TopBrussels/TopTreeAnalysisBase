@@ -16,15 +16,12 @@
 #include "TopTreeProducer/interface/TRootVertex.h"
 #include "TopTreeProducer/interface/TRootMuon.h"
 #include "TopTreeProducer/interface/TRootJet.h"
-#include "TopTreeProducer/interface/TRootCaloJet.h"
 #include "TopTreeProducer/interface/TRootGenJet.h"
 #include "TopTreeProducer/interface/TRootPFJet.h"
 #include "TopTreeProducer/interface/TRootElectron.h"
 #include "TopTreeProducer/interface/TRootMET.h"
-#include "TopTreeProducer/interface/TRootTrackMET.h"
 #include "TopTreeProducer/interface/TRootRun.h"
 #include "TopTreeProducer/interface/TRootEvent.h"
-#include "TopTreeProducer/interface/TRootGenEvent.h"
 #include "TopTreeProducer/interface/TRootNPGenEvent.h"
 #include "TopTreeProducer/interface/TRootMCParticle.h"
 
@@ -45,13 +42,11 @@ TRootEvent* LoadEvent(int ievent,vector<TRootVertex*>&vertex,vector<TRootMuon*>&
 TRootEvent* LoadEvent(int ievent,vector<TRootVertex*>&vertex,vector<TRootMuon*>&vmuons,vector<TRootElectron*>&velectrons,vector<TRootJet*>& vjets,vector<TRootJet*>& vfatjets, vector<TRootMET*>&vmet,bool verbose=false);
 
 
-TRootGenEvent*          LoadGenEvent (int ievt, bool reloadEvent = true);
 vector<TRootGenJet*>     LoadGenJet   (int ievt, bool reloadEvent = true);
 vector<TRootMCParticle*> LoadMCPart   (int ievt, bool reloadEvent = true);
-vector<TRootTrackMET*> LoadTrackMET   (int ievt);
 
-void LoadMCEvent(int ievent, TRootGenEvent *genEvt, TRootNPGenEvent* npgenEvent, bool reloadEvent = true);
-void LoadMCEvent(int ievent, TRootGenEvent *genEvt, TRootNPGenEvent* npgenEvent, vector<TRootMCParticle*>& vmcparticles, bool reloadEvent = true);
+void LoadMCEvent(int ievent, TRootNPGenEvent* npgenEvent, bool reloadEvent = true);
+void LoadMCEvent(int ievent, TRootNPGenEvent* npgenEvent, vector<TRootMCParticle*>& vmcparticles, bool reloadEvent = true);
 
 bool EventTrigged(int itrigger); /** return true if event is trigged. This method can only be applied if LoadEvent was called first*/
 bool EventPassedJSON(int runID, int lumiBlockID);
