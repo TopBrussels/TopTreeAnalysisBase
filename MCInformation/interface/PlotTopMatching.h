@@ -23,9 +23,7 @@ class PlotTopMatching {
   ~PlotTopMatching();
  
   void Compute();
-  void Fill(TopMatching* topmatch, vector<TRootJet>& jets, TRootGenEvent& genEvt, int& iter, bool& selected);
   void Fill(TopMatching* topmatch, vector<TRootJet>& jets, TRootNPGenEvent& genEvt, int& iter, bool& selected);
-  void FillObs(int nobs, TopMatching* topmatch, vector<TRootJet>& jets, TRootGenEvent& genEvt, int& iter, float& variable);
   void FillObs(int nobs, TopMatching* topmatch, vector<TRootJet>& jets, TRootNPGenEvent& genEvt, int& iter, float& variable);
   void AddObsParam(vector<string> jetCollection, string obsName, string obsLabel, int Nbins, float* bins);
   void Write(TFile* fout);

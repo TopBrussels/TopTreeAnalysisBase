@@ -39,7 +39,7 @@ public:
   bool loadNPGenEventCollection;
   bool loadMCParticles;
   bool loadTrackMETCollection;
-  int JetType; //0: TRootJet - 1: CaloJet - 2: PFJet - 3: JPTJet
+  int JetType; //0: TRootJet - 0: PFJet - 1
   int METType; //0: TRootMET - 1: CaloMET - 2: PFMET - 3: TCMET
   string PrimaryVertexCollection;
   string JetCollection;

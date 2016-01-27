@@ -10,7 +10,6 @@
 #include "TopTreeProducer/interface/TRootJet.h"
 #include "TopTreeProducer/interface/TRootElectron.h"
 #include "TopTreeProducer/interface/TRootMET.h"
-#include "TopTreeProducer/interface/TRootGenEvent.h"
 #include "TopTreeProducer/interface/TRootNPGenEvent.h"
 
 
@@ -32,10 +31,7 @@ class TopMatching{
       TopMatching(const TopMatching &);
       ~TopMatching();
       
-      //Matched means 3 jets matched with HadTop + 1 jet matched with LepB
-      bool isMCMatched(const std::vector<TRootJet>, const TRootGenEvent&, float& , float& );
       //Matched means 3 jets matched with HadTop
-      bool isMCMatchedHadTop(const std::vector<TRootJet>, const TRootGenEvent&, float& , float& );
       bool isMCMatchedHadTop(const std::vector<TRootJet>, const TRootNPGenEvent&, float& , float& );
       bool is3jetsSelected(const std::vector<TRootJet> jets);
       bool is4jetsSelected(const std::vector<TRootJet> jets);

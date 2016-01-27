@@ -100,30 +100,6 @@ PlotTopMatching::PlotTopMatching(const PlotTopMatching& psel){
 
 PlotTopMatching::~PlotTopMatching(){;}
 
-void PlotTopMatching::Fill(TopMatching* topmatch, vector<TRootJet>& jets, TRootGenEvent& genEvt, int& iter, bool& selected){
-	NofEvts_[iter]++;
-	if(selected) NofEvtsSel_[iter]++;
-	float wmass = -888.;
-	float topmass = -888.;
-	if(topmatch->isMCMatched(jets,genEvt,wmass,topmass)){
-		h_Matching->Fill(iter);	
-		if(selected) h_Matching->Fill(iter);	
-		//for(unsigned int i=0;i<h_WMass.size();i++){
-			h_WMass[iter]->Fill(wmass);
-			h_TopMass[iter]->Fill(topmass);
-		//}
-	}
-	if(topmatch->isMCMatchedHadTop(jets,genEvt,wmass,topmass)){
-		h_MatchingHadTop->Fill(iter);	
-		if(selected) h_MatchingHadTop_Sel->Fill(iter);	
-		//for(unsigned int i=0;i<h_WMass.size();i++){
-			h_WMass[iter]->Fill(wmass);
-			h_TopMass[iter]->Fill(topmass);
-		//}
-	}
-	if(jets.size()>0 && jets[0].Pt()>500) h_MassLeadingJet[iter]->Fill(jets[0].M());
-}
-
 void PlotTopMatching::Fill(TopMatching* topmatch, vector<TRootJet>& jets, TRootNPGenEvent& genEvt, int& iter, bool& selected){
 	NofEvts_[iter]++;
 	if(selected) NofEvtsSel_[iter]++;
@@ -138,16 +114,6 @@ void PlotTopMatching::Fill(TopMatching* topmatch, vector<TRootJet>& jets, TRootN
 		//}
 	}
 	if(jets.size()>0 && jets[0].Pt()>500) h_MassLeadingJet[iter]->Fill(jets[0].M());
-}
-
-void PlotTopMatching::FillObs(int nobs, TopMatching* topmatch, vector<TRootJet>& jets, TRootGenEvent& genEvt, int& iter, float& obs){
-	if(nobs>=(int)h_MatchingHadTop_vs_Var.size()) cerr<<"Number of variable incorrect .. too high"<<endl;
-	float wmass = -888.;
-	float topmass = -888.;
-	if(topmatch->isMCMatchedHadTop(jets,genEvt,wmass,topmass)){
-		h_MatchingHadTop_vs_Var[nobs][iter]->Fill(obs);	
-	}
-	h_MatchingHadTop_vs_Var_Ref[nobs][iter]->Fill(obs);	
 }
 
 void PlotTopMatching::FillObs(int nobs, TopMatching* topmatch, vector<TRootJet>& jets, TRootNPGenEvent& genEvt, int& iter, float& obs){

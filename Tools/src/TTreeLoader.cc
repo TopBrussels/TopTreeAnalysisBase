@@ -206,9 +206,7 @@ TTreeLoader::LoadDataset (Dataset* d, AnalysisEnvironment anaEnv)
   d_->eventTree()->SetBranchStatus(branchStatus,1);
   d_->eventTree()->SetBranchAddress(anaEnv.ElectronCollection.c_str(),&tcelectrons);
 
-  if(anaEnv.JetType == 1) tcjets = new TClonesArray ("TopTree::TRootCaloJet", 0);
-  else if(anaEnv.JetType == 2) tcjets = new TClonesArray ("TopTree::TRootPFJet", 0);
-  else if(anaEnv.JetType == 3) tcjets = new TClonesArray ("TopTree::TRootJPTJet", 0);
+  if(anaEnv.JetType == 1) tcjets = new TClonesArray ("TopTree::TRootPFJet", 0);
   else                         tcjets = new TClonesArray ("TopTree::TRootJet", 0);
   sprintf(branchStatus,"%s*",anaEnv.JetCollection.c_str());
 
@@ -260,13 +258,6 @@ TTreeLoader::LoadDataset (Dataset* d, AnalysisEnvironment anaEnv)
       d_->eventTree()->SetBranchStatus(branchStatus,1);
       d_->eventTree()->SetBranchAddress(anaEnv.GenJetCollection.c_str(),&tcgenjets);
     }
-  if (anaEnv.loadGenEventCollection)
-    {
-      tcgenEvt = new TClonesArray ("TopTree::TRootGenEvent", 0);
-      sprintf(branchStatus,"%s*",anaEnv.GenEventCollection.c_str());
-      d_->eventTree()->SetBranchStatus(branchStatus,1);
-      d_->eventTree()->SetBranchAddress(anaEnv.GenEventCollection.c_str(),&tcgenEvt);
-    }
   if (anaEnv.loadNPGenEventCollection)
     {
       tcnpgenEvt = new TClonesArray ("TopTree::TRootNPGenEvent", 0);
@@ -284,31 +275,6 @@ TTreeLoader::LoadDataset (Dataset* d, AnalysisEnvironment anaEnv)
     }
 
 
-/*
-  if (anaEnv.loadGenJetCollection)
-    {
-      genjets_br = (TBranch *) d.eventTree ()->GetBranch (anaEnv.GenJetCollection.c_str());
-      tcgenjets  = new TClonesArray ("TopTree::TRootGenJet", 0);
-      genjets_br->SetAddress (&tcgenjets);
-    }
-  if (anaEnv.loadGenEventCollection)
-    {
-      genEvt_br = (TBranch *) d.eventTree ()->GetBranch (anaEnv.GenEventCollection.c_str());
-      tcgenEvt = new TClonesArray ("TopTree::TRootGenEvent", 0);
-      genEvt_br->SetAddress (&tcgenEvt);
-    }
-  if (anaEnv.loadNPGenEventCollection)
-    {
-      npgenEvt_br = (TBranch *) d.eventTree ()->GetBranch (anaEnv.NPGenEventCollection.c_str());
-      tcnpgenEvt = new TClonesArray ("TopTree::TRootNPGenEvent", 0);
-      npgenEvt_br->SetAddress (&tcnpgenEvt);
-    }
-
-  run_br = (TBranch *) d.runTree ()->GetBranch ("runInfos");
-  run_br->SetAddress (&runInfos);
-  event_br = (TBranch *) d.eventTree ()->GetBranch ("Event");
-  event_br->SetAddress (&event);
-*/
 }
 
 void
@@ -366,17 +332,8 @@ TTreeLoader::LoadEvent (int ievt, vector<TRootVertex*>& vertex, vector < TRootMu
   	init_jets.clear ();
 
   	for (int i = 0; i < tcjets->GetEntriesFast (); i++) {
-	  //const TRootCaloJet* CaloJet = static_cast<const TRootCaloJet*>((TRootJet*)(tcjets->At(0)));
-
-	  //if (i==0)
-	  //  cout << "EMF " << CaloJet->ecalEnergyFraction() << " fHPD" << CaloJet->fHPD() << " n90Hits " << CaloJet->n90Hits() <<endl;
 
 	  init_jets.push_back( (TRootJet *) tcjets->At (i));
-
-	  //const TRootCaloJet* CaloJet2 = static_cast<const TRootCaloJet*>((TRootJet*) init_jets[0]);
-
-	  //if (i==0)
-	  //  cout << "NOPOINTER EMF " << CaloJet2->ecalEnergyFraction() << " fHPD" << CaloJet2->fHPD() << " n90Hits " << CaloJet2->n90Hits() <<endl;
 	}
 
 
@@ -400,29 +357,6 @@ TTreeLoader::LoadEvent (int ievt, vector<TRootVertex*>& vertex, vector < TRootMu
 	return event;
 }
 
-
-
-
-TRootGenEvent*
-TTreeLoader::LoadGenEvent (int ievt, bool reloadEvent)
-{
-  if (reloadEvent)
-    d_->eventTree ()->GetEntry (ievt);
-  if (tcgenEvt && tcgenEvt->GetEntriesFast () == 1)
-    return (TRootGenEvent *) tcgenEvt->At (0);
-  return 0;
-}
-
-vector<TRootTrackMET*>
-TTreeLoader::LoadTrackMET(int ievt)
-{
-  vector<TRootTrackMET*> vtrackmets;
-  if (tctrackmets) {
-    for(int i = 0; i < tctrackmets->GetEntriesFast (); i++)
-      vtrackmets.push_back( (TRootTrackMET *) tctrackmets->At (i));
-  }
-  return vtrackmets;
-}
 
 
 
@@ -453,24 +387,20 @@ TTreeLoader::LoadMCPart(int ievt, bool reloadEvent)
 }
 
 void
-TTreeLoader::LoadMCEvent (int ievt, TRootGenEvent * genEvt, TRootNPGenEvent * npgenEvt, bool reloadEvent)
+TTreeLoader::LoadMCEvent (int ievt, TRootNPGenEvent * npgenEvt, bool reloadEvent)
 {
   if (reloadEvent)
     d_->eventTree ()->GetEntry (ievt);
-  if (tcgenEvt && tcgenEvt->GetEntriesFast () == 1)
-    genEvt = (TRootGenEvent *) tcgenEvt->At (0);
   if (tcnpgenEvt && tcnpgenEvt->GetEntriesFast () == 1)
     npgenEvt = (TRootNPGenEvent *) tcnpgenEvt->At (0);
 }
 
 void
-TTreeLoader::LoadMCEvent (int ievt, TRootGenEvent * genEvt, TRootNPGenEvent * npgenEvt, vector < TRootMCParticle* >& vmcparticles, bool reloadEvent)
+TTreeLoader::LoadMCEvent (int ievt, TRootNPGenEvent * npgenEvt, vector < TRootMCParticle* >& vmcparticles, bool reloadEvent)
 {
   if (reloadEvent)
     d_->eventTree ()->GetEntry (ievt);
   vmcparticles.clear ();
-  if (tcgenEvt && tcgenEvt->GetEntriesFast () == 1)
-    genEvt = (TRootGenEvent *) tcgenEvt->At (0);
   if (tcnpgenEvt && tcnpgenEvt->GetEntriesFast () == 1)
     npgenEvt = (TRootNPGenEvent *) tcnpgenEvt->At (0);
   if (tcmcparticles) {
