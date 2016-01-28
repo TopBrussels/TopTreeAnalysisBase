@@ -7,10 +7,8 @@ AnalysisEnvironment::AnalysisEnvironment ()
 {
   loadFatJetCollection = true;
   loadGenJetCollection = false;
-  loadGenEventCollection = false;
   loadNPGenEventCollection = false;
   loadMCParticles = false;
-  loadTrackMETCollection = false;
   JetType = 0;
   METType = 0;
   isMC = true;
@@ -129,10 +127,8 @@ AnalysisEnvironment::AnalysisEnvironment (const AnalysisEnvironment & a)
 //branch name 
   loadFatJetCollection = a.loadFatJetCollection;
   loadGenJetCollection = a.loadGenJetCollection;
-  loadGenEventCollection = a.loadGenEventCollection;
   loadNPGenEventCollection = a.loadNPGenEventCollection;
   loadMCParticles = a.loadMCParticles;
-  loadTrackMETCollection = a.loadTrackMETCollection;
   JetType = a.JetType;
   METType = a.METType;
   PrimaryVertexCollection = a.PrimaryVertexCollection;
@@ -142,8 +138,6 @@ AnalysisEnvironment::AnalysisEnvironment (const AnalysisEnvironment & a)
   MuonCollection = a.MuonCollection;
   ElectronCollection = a.ElectronCollection;
   GenJetCollection = a.GenJetCollection;
-  TrackMETCollection = a.TrackMETCollection;
-  GenEventCollection = a.GenEventCollection;
   NPGenEventCollection = a.NPGenEventCollection;
   MCParticlesCollection = a.MCParticlesCollection;
 //Conditions

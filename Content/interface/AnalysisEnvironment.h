@@ -35,21 +35,17 @@ public:
 //Branch name
   bool loadGenJetCollection;
   bool loadFatJetCollection;
-  bool loadGenEventCollection;
   bool loadNPGenEventCollection;
   bool loadMCParticles;
-  bool loadTrackMETCollection;
   int JetType; //0: TRootJet - 0: PFJet - 1
   int METType; //0: TRootMET - 1: CaloMET - 2: PFMET - 3: TCMET
   string PrimaryVertexCollection;
   string JetCollection;
   string FatJetCollection;
   string METCollection;
-  string TrackMETCollection;
   string MuonCollection;
   string ElectronCollection;
   string GenJetCollection;
-  string GenEventCollection;
   string NPGenEventCollection;
   string MCParticlesCollection;
 

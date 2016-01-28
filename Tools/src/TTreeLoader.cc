@@ -9,9 +9,7 @@ TTreeLoader::TTreeLoader ()
   tcmuons = 0;
   tcelectrons = 0;
   tcmets = 0;
-  tctrackmets = 0;
   tcgenjets = 0;
-  tcgenEvt = 0;
   tcnpgenEvt = 0;
   tcmcparticles = 0;
   runInfos = 0;
@@ -31,12 +29,8 @@ TTreeLoader::~TTreeLoader ()
     tcelectrons->Delete();
   if (tcmets)
     tcmets->Delete();
-  if (tctrackmets)
-    tctrackmets->Delete();
   if (tcgenjets)
     tcgenjets->Delete();
-  if (tcgenEvt)
-    tcgenEvt->Delete();
   if (tcnpgenEvt)
      tcnpgenEvt->Delete();
   if (tcmcparticles)
@@ -177,39 +171,39 @@ TTreeLoader::LoadDataset (Dataset* d, AnalysisEnvironment anaEnv)
 {
   d_ = new Dataset(*d);
   char branchStatus[100];
-
+  
   //d_->runTree()  ->SetBranchStatus ("*",0);
   //d_->eventTree()->SetBranchStatus ("*",0);
-
+  
   runInfos = new TRootRun();
   d_->runTree()->SetBranchStatus("runInfos*",1);
   d_->runTree()->SetBranchAddress("runInfos",&runInfos);
-  cout<<"SetBranchAddress(runInfos,&runInfos) : "<<d_->runTree()->SetBranchAddress("runInfos",&runInfos)<<endl;
-
+  //cout<<"SetBranchAddress(runInfos,&runInfos) : "<<d_->runTree()->SetBranchAddress("runInfos",&runInfos)<<endl;
+  
   event = new TRootEvent();
   d_->eventTree()->SetBranchStatus("Event*",1);
   d_->eventTree()->SetBranchAddress("Event",&event);
   //cout<<"SetBranchAddress(Event,&event) : "<<d_->eventTree()->SetBranchAddress("Event",&event)<<endl;
-
+  
   tcpvertex = new TClonesArray ("TopTree::TRootVertex", 0);
   sprintf(branchStatus,"%s*",anaEnv.PrimaryVertexCollection.c_str());
   d_->eventTree()->SetBranchStatus(branchStatus,1);
   d_->eventTree()->SetBranchAddress(anaEnv.PrimaryVertexCollection.c_str(),&tcpvertex);
-
+  
   tcmuons = new TClonesArray("TopTree::TRootMuon", 0);
   sprintf(branchStatus,"%s*",anaEnv.MuonCollection.c_str());
   d_->eventTree()->SetBranchStatus(branchStatus,1);
   d_->eventTree()->SetBranchAddress(anaEnv.MuonCollection.c_str(),&tcmuons);
-
+  
   tcelectrons = new TClonesArray ("TopTree::TRootElectron", 0);
   sprintf(branchStatus,"%s*",anaEnv.ElectronCollection.c_str());
   d_->eventTree()->SetBranchStatus(branchStatus,1);
   d_->eventTree()->SetBranchAddress(anaEnv.ElectronCollection.c_str(),&tcelectrons);
-
-  if(anaEnv.JetType == 1) tcjets = new TClonesArray ("TopTree::TRootPFJet", 0);
+  
+  if(anaEnv.JetType == 2) tcjets = new TClonesArray ("TopTree::TRootPFJet", 0);
   else                         tcjets = new TClonesArray ("TopTree::TRootJet", 0);
   sprintf(branchStatus,"%s*",anaEnv.JetCollection.c_str());
-
+  
   cout <<"***************************************************"<<endl;
   cout <<"***************************************************"<<endl;
   cout <<"***************************************************"<<endl;
@@ -217,64 +211,53 @@ TTreeLoader::LoadDataset (Dataset* d, AnalysisEnvironment anaEnv)
   cout <<"***************************************************"<<endl;
   cout <<"***************************************************"<<endl;
   cout <<"***************************************************"<<endl;
-
+  
   d_->eventTree()->SetBranchStatus(branchStatus,1);
   d_->eventTree()->SetBranchAddress(anaEnv.JetCollection.c_str(),&tcjets);
-
-  if(anaEnv.METType == 1)      tcmets = new TClonesArray ("TopTree::TRootCaloMET", 0);
-  else if(anaEnv.METType == 2) tcmets = new TClonesArray ("TopTree::TRootPFMET", 0);
+  
+  if(anaEnv.METType == 2) tcmets = new TClonesArray ("TopTree::TRootPFMET", 0);
   else if(anaEnv.METType == 3) tcmets = new TClonesArray ("TopTree::TRootMET", 0); // JPT is just TRootMET
   else                         tcmets = new TClonesArray ("TopTree::TRootMET", 0);
   sprintf(branchStatus,"%s*",anaEnv.METCollection.c_str());
   d_->eventTree()->SetBranchStatus(branchStatus,1);
   d_->eventTree()->SetBranchAddress(anaEnv.METCollection.c_str(),&tcmets);
-
+  
   if (d_->Name().find("Data") < d_->Name().size() || d_->Name().find("data") < d_->Name().size() || d_->Name().find("DATA") < d_->Name().size()) {
-    anaEnv.loadGenEventCollection=false;
     anaEnv.loadNPGenEventCollection=false;
     anaEnv.loadMCParticles=false;
   }
-
+  
   if (anaEnv.loadMCParticles)
   {
-      tcmcparticles = new TClonesArray ("TopTree::TRootMCParticle", 0);
-      sprintf(branchStatus,"%s*",anaEnv.MCParticlesCollection.c_str());
-      d_->eventTree()->SetBranchStatus(branchStatus,1);
-      d_->eventTree()->SetBranchAddress(anaEnv.MCParticlesCollection.c_str(),&tcmcparticles);
+    tcmcparticles = new TClonesArray ("TopTree::TRootMCParticle", 0);
+    sprintf(branchStatus,"%s*",anaEnv.MCParticlesCollection.c_str());
+    d_->eventTree()->SetBranchStatus(branchStatus,1);
+    d_->eventTree()->SetBranchAddress(anaEnv.MCParticlesCollection.c_str(),&tcmcparticles);
   }
-
- if (anaEnv.loadFatJetCollection)
+  
+  if (anaEnv.loadFatJetCollection)
   {
-      tcfatjets = new TClonesArray ("TopTree::TRootSubstructureJet", 0);
-      sprintf(branchStatus,"%s*",anaEnv.FatJetCollection.c_str());
-      d_->eventTree()->SetBranchStatus(branchStatus,1);
-      d_->eventTree()->SetBranchAddress(anaEnv.FatJetCollection.c_str(),&tcfatjets);
+    tcfatjets = new TClonesArray ("TopTree::TRootSubstructureJet", 0);
+    sprintf(branchStatus,"%s*",anaEnv.FatJetCollection.c_str());
+    d_->eventTree()->SetBranchStatus(branchStatus,1);
+    d_->eventTree()->SetBranchAddress(anaEnv.FatJetCollection.c_str(),&tcfatjets);
   }
-
+  
   if (anaEnv.loadGenJetCollection)
-    {
-      tcgenjets  = new TClonesArray ("TopTree::TRootGenJet", 0);
-      sprintf(branchStatus,"%s*",anaEnv.GenJetCollection.c_str());
-      d_->eventTree()->SetBranchStatus(branchStatus,1);
-      d_->eventTree()->SetBranchAddress(anaEnv.GenJetCollection.c_str(),&tcgenjets);
-    }
+  {
+    tcgenjets  = new TClonesArray ("TopTree::TRootGenJet", 0);
+    sprintf(branchStatus,"%s*",anaEnv.GenJetCollection.c_str());
+    d_->eventTree()->SetBranchStatus(branchStatus,1);
+    d_->eventTree()->SetBranchAddress(anaEnv.GenJetCollection.c_str(),&tcgenjets);
+  }
   if (anaEnv.loadNPGenEventCollection)
-    {
-      tcnpgenEvt = new TClonesArray ("TopTree::TRootNPGenEvent", 0);
-      sprintf(branchStatus,"%s*",anaEnv.NPGenEventCollection.c_str());
-      d_->eventTree()->SetBranchStatus(branchStatus,1);
-      d_->eventTree()->SetBranchAddress(anaEnv.NPGenEventCollection.c_str(),&tcnpgenEvt);
-    }
-
-  if (anaEnv.loadTrackMETCollection)
-   {
-      tctrackmets = new TClonesArray ("TopTree::TRootMET", 0);
-      sprintf(branchStatus,"%s*",anaEnv.TrackMETCollection.c_str());
-      d_->eventTree()->SetBranchStatus(branchStatus,1);
-      d_->eventTree()->SetBranchAddress(anaEnv.TrackMETCollection.c_str(),&tctrackmets);
-    }
-
-
+  {
+    tcnpgenEvt = new TClonesArray ("TopTree::TRootNPGenEvent", 0);
+    sprintf(branchStatus,"%s*",anaEnv.NPGenEventCollection.c_str());
+    d_->eventTree()->SetBranchStatus(branchStatus,1);
+    d_->eventTree()->SetBranchAddress(anaEnv.NPGenEventCollection.c_str(),&tcnpgenEvt);
+  }
+  
 }
 
 void
@@ -285,9 +268,7 @@ TTreeLoader::UnLoadDataset (){
   if(tcjets)        tcjets       ->Delete();
   if(tcfatjets)     tcfatjets    ->Delete();
   if(tcmets)        tcmets       ->Delete();
-  if(tctrackmets)   tctrackmets  ->Delete();
   if(tcmcparticles) tcmcparticles->Delete();
-  if(tcgenEvt)      tcgenEvt     ->Delete();
   if(tcgenjets)     tcgenjets    ->Delete();
   if(tcnpgenEvt)    tcnpgenEvt   ->Delete();
   if(d_)            d_           ->Delete();
@@ -364,7 +345,9 @@ vector<TRootGenJet*>
 TTreeLoader::LoadGenJet(int ievt, bool reloadEvent)
 {
   if (reloadEvent)
+  {
     d_->eventTree ()->GetEntry (ievt);
+  }
   vector<TRootGenJet*> vgenjets;
   if (tcgenjets) {
     for(int i = 0; i < tcgenjets->GetEntriesFast (); i++)

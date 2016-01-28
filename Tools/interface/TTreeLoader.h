@@ -62,9 +62,7 @@ private:
   TClonesArray *tcmuons;
   TClonesArray *tcelectrons;
   TClonesArray *tcmets;
-  TClonesArray *tctrackmets;
   TClonesArray *tcgenjets;
-  TClonesArray *tcgenEvt;
   TClonesArray *tcnpgenEvt;
   TClonesArray *tcmcparticles;
   TRootRun     *runInfos;
