@@ -60,42 +60,57 @@ std::vector<TRootMuon*> MuonSelection::GetSelectedMuons(float PtThr, float etaTh
 }
 
 // displaced muons
-std::vector<TRootMuon*> MuonSelection::GetSelectedDisplacedMuons(float PtThr, float EtaThr, float NormChi2, int NTrackerLayersWithMeas, int NValidMuonHits, int NValidPixelHits, int NMatchedStations, float RelIso) const
+std::vector<TRootMuon*> MuonSelection::GetSelectedDisplacedMuons (float PtThr, float EtaThr, float NormChi2, int NTrackerLayersWithMeas, int NValidMuonHits, int NValidPixelHits, int NMatchedStations, float RelIso, bool applyIso, bool applyId) const
 {
-  // start from 'standard' muons with an extremely loose dz and d0 cut
+  // start from 'standard' muons with an extremely loose dz and d0 cut                                                                                                                                                                                                         
   std::vector<TRootMuon*> selectedMuons;
+  bool saveit=false;
   for(unsigned int i=0; i<muons.size(); i++)
     {
-      //float reliso = (muons[i]->chargedHadronIso()+muons[i]->neutralHadronIso()+muons[i]->photonIso())/muons[i]->Pt()
-      // use cone 4 iso for muons:
-      float reliso = (muons[i]->chargedHadronIso(4) + max( 0.0, muons[i]->neutralHadronIso(4) + muons[i]->photonIso(4) - 0.5*muons[i]->puChargedHadronIso(4) ) ) / muons[i]->Pt();
-      // dBeta corrected
-      if(     muons[i]->isGlobalMuon() && muons[i]->isPFMuon()
-              && muons[i]->Pt()>PtThr
-              && fabs(muons[i]->Eta())<EtaThr
-              && muons[i]->chi2() < NormChi2
-              && muons[i]->nofTrackerLayersWithMeasurement() > NTrackerLayersWithMeas
-              //&& muons[i]->nofValidMuHits() > NValidMuonHits
-              && muons[i]->nofValidPixelHits() > NValidPixelHits
-              && muons[i]->nofMatchedStations()> NMatchedStations
-              && reliso < RelIso)
-        {
-          selectedMuons.push_back(muons[i]);
+      saveit=false;
+      TRootMuon *muon = (TRootMuon*) muons[i]; // type conversion, not very clear why necessary... also used in electrons                                                                                                            
+      if( muons[i]->Pt()>PtThr && fabs(muon->Eta())<EtaThr){
+        // no id no iso                                                                                                                                                                                                                                                        
+        if (!applyIso && !applyId) {
+          //      cout << "no id and no iso" << endl;                                                                                                                                                                                                                          
+          saveit = true;
         }
+        // apply iso only                                                                                                                                                                                                                                                      
+        if(applyIso && isolationDisplacedMuon(muon,RelIso) && !applyId){
+          //      cout << "iso cut required and passed" <<endl;                                                                                                                                                                                                                
+          saveit=true;
+        }
+        // apply id only                                                                                                                                                                                                                                                       
+        if( !applyIso  && applyId  && identificationDisplacedMuon(muon, NormChi2,  NTrackerLayersWithMeas, NValidMuonHits, NValidPixelHits, NMatchedStations)){
+          //      cout << "id cut required and passed" <<endl;                                                                                                                                                                                                                 
+          saveit=true;
+        }
+        // apply both                                                                                                                                                                                                                                                          
+        if( applyIso && isolationDisplacedMuon(muon,RelIso) && applyId  &&  identificationDisplacedMuon(muon, NormChi2,  NTrackerLayersWithMeas, NValidMuonHits, NValidPixelHits, NMatchedStations)){
+          //      cout << "id and iso cut required and passed" <<endl;                                                                                                                                                                                                         
+          saveit=true;
+        }
+
+        if (saveit) selectedMuons.push_back(muons[i]);
+      }
+
     }
-  
+
+  //  std::sort(selectedMuons.begin(),selectedMuons.end(),HighestPt());
   return selectedMuons;
 }
 
-std::vector<TRootMuon*> MuonSelection::GetSelectedDisplacedMuons(float PtThr,float EtaThr,float MuonRelIso) const
+std::vector<TRootMuon*> MuonSelection::GetSelectedDisplacedMuons(float PtThr,float EtaThr,float MuonRelIso, bool applyIso, bool applyId) const
 {
-  return GetSelectedDisplacedMuons(PtThr,EtaThr,10.,5.,0,0,1,MuonRelIso);
+  return GetSelectedDisplacedMuons(PtThr,EtaThr,10.,5.,0,0,1,MuonRelIso,applyIso,applyId);
 }
 
 std::vector<TRootMuon*> MuonSelection::GetSelectedDisplacedMuons() const
 {
-  return GetSelectedDisplacedMuons(35.,2.4,0.12);
+  return GetSelectedDisplacedMuons(35.,2.4,0.15,false,false);
 }
+
+
 
 std::vector<TRootMuon*> MuonSelection::GetSelectedLooseMuonsJuly2015(float PtThr, float EtaThr,float MuonRelIso) const
 {
@@ -222,3 +237,26 @@ bool MuonSelection::foundZCandidate(std::vector<TRootMuon*>& muons1, std::vector
 }
 
 
+bool MuonSelection::identificationDisplacedMuon(const TRootMuon* muon, float NormChi2, int NTrackerLayersWithMeas, int NValidMuonHits, int NValidPixelHits, int NMatchedStations) const{
+
+  // use cone 4 iso for muons:                                                                                                                                                                                                               
+
+  if( muon->isGlobalMuon() && muon->isPFMuon()
+      && muon->chi2() < NormChi2
+      && muon->nofTrackerLayersWithMeasurement() > NTrackerLayersWithMeas
+      && muon->nofValidPixelHits() > NValidPixelHits
+      && muon->nofMatchedStations()> NMatchedStations)
+    {
+      return true;
+    }
+  return false;
+}
+bool MuonSelection::isolationDisplacedMuon(const TRootMuon* muon, float RelIso) const{
+  if( muon->Pt()<0.0001) // protecting against the strange case that the pT is zero... just to be sure                                                                                                                                       
+    return false;
+  float reliso = (muon->chargedHadronIso(4) + max( 0.0, muon->neutralHadronIso(4) + muon->photonIso(4) - 0.5*muon->puChargedHadronIso(4) ) ) / muon->Pt(); // dBeta corrected                                                                
+
+  if(reliso< RelIso)
+    return true;
+  return false;
+}
