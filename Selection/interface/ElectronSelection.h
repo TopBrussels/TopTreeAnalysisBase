@@ -67,7 +67,8 @@ public:
     std::vector<TRootElectron*> GetSelectedElectrons(string WorkingPoint, string ProductionCampaign, bool CutsBased) const;
     std::vector<TRootElectron*> GetSelectedElectrons(float PTthr, float EtaThr, string WorkingPoint, string ProductionCampaign, bool CutsBased) const;
     
-    std::vector<TRootElectron*> GetSelectedDisplacedElectrons (float PtThr, float EtaThr) const;
+    //displaced electrons
+    std::vector<TRootElectron*> GetSelectedDisplacedElectrons (float PtThr, float EtaThr, bool applyIso=true, bool applyId=true) const;
     std::vector<TRootElectron*> GetSelectedDisplacedElectrons () const;
     
 private:
@@ -101,6 +102,11 @@ private:
     float ElectronMVAId_;
     float ElectronLooseMVAId_;
     int   ElectronMaxMissingHitsCut_;
+
+    // displaced electron functions                                  
+    bool identificationDisplacedElectron(const TRootElectron*) const;
+    //    bool isolationDisplacedElectron(const TRootElectron*) const;
+    bool isolationDisplacedElectron(TRootElectron*) const;
 
     std::map<std::string,float> cutsVBTFWP70;
     std::map<std::string,float> cutsVBTFWP80;
