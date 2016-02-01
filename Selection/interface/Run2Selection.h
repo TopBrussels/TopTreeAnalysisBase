@@ -12,10 +12,8 @@
 #include "TopTreeProducer/interface/TRootVertex.h"
 #include "TopTreeProducer/interface/TRootMuon.h"
 #include "TopTreeProducer/interface/TRootJet.h"
-#include "TopTreeProducer/interface/TRootCaloJet.h"
 #include "TopTreeProducer/interface/TRootPFJet.h"
 #include "TopTreeProducer/interface/TRootSubstructureJet.h"
-#include "TopTreeProducer/interface/TRootJPTJet.h"
 #include "TopTreeProducer/interface/TRootElectron.h"
 #include "TopTreeProducer/interface/TRootMET.h"
 #include "TopTreeProducer/interface/TRootMCParticle.h"
@@ -90,8 +88,10 @@ public:
     std::vector<TRootElectron*> GetSelectedElectrons(float PTthr, float EtaThr, string WorkingPoint, string ProductionCampaign, bool CutsBased) const;
 
 
-    std::vector<TRootElectron*> GetSelectedDisplacedElectrons (float PtThr, float EtaThr) const;
+    // displaced electrons
+    std::vector<TRootElectron*> GetSelectedDisplacedElectrons (float PtThr, float EtaThr, bool applyIso=true, bool applyId=true) const;
     std::vector<TRootElectron*> GetSelectedDisplacedElectrons () const;
+
 
 
 // MUON GETTERS ==================================================
@@ -100,8 +100,8 @@ public:
 
 
     // displaced muons
-    std::vector<TRootMuon*> GetSelectedDisplacedMuons(float PtThr, float EtaThr, float NormChi2, int NTrackerLayersWithMeas, int NValidMuonHits, int NValidPixelHits, int NMatchedStations, float RelIso) const;
-    std::vector<TRootMuon*> GetSelectedDisplacedMuons(float PtThr, float EtaThr, float RelIs) const;
+    std::vector<TRootMuon*> GetSelectedDisplacedMuons(float PtThr, float EtaThr, float NormChi2, int NTrackerLayersWithMeas, int NValidMuonHits, int NValidPixelHits, int NMatchedStations, float RelIso, bool applyIso=true, bool applyId=true) const;
+    std::vector<TRootMuon*> GetSelectedDisplacedMuons(float PtThr, float EtaThr, float RelIs, bool applyIso=true, bool applyId=true) const;
     std::vector<TRootMuon*> GetSelectedDisplacedMuons() const;
 
 

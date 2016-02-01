@@ -3,7 +3,6 @@
 
 #include<vector>
 #include "TopTreeAnalysisBase/Reconstruction/interface/Observables.h"
-#include "TopTreeProducer/interface/TRootGenEvent.h"
 #include "TopTreeProducer/interface/TRootNPGenEvent.h"
 #include "TopTreeProducer/interface/TRootMCParticle.h"
 #include "TopTreeProducer/interface/TRootJet.h"
@@ -40,13 +39,6 @@ public:
    */
   Observables& getMatchedObservables(TRootNPGenEvent& npgenevt, const TRootMuon& lepton, const TRootJet& qFromW1, const TRootJet& qFromW2, const TRootJet& bFromHadTop, const TRootJet& bFromLepTop, const TRootMET& MET, const vector<TRootJet>& jets);
 
-  /**
-   Load MC info from GenEvent.
-   Be aware that TRootGenEvent only provides TLorentzVector.
-   TRootMCParticles then only contains the momentum TLorentzVector.
-   Moreover, take only into account semi-leptonic events !!!!
-   */
-  Observables& getMatchedObservables(TRootGenEvent& genevt, const TRootMuon& lepton, const TRootJet& qFromW1, const TRootJet& qFromW2, const TRootJet& bFromHadTop, const TRootJet& bFromLepTop, const TRootMET& MET, const vector<TRootJet>& jets);
 
   /** Generic analysis */
   Observables& getMatchedObservables(TRootNPGenEvent& npgenevt, const TRootMuon & lept, const vector < TRootJet > &jets_, const TRootMET & MET_, string & dsname);

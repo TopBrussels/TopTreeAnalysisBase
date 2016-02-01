@@ -12,10 +12,8 @@
 #include "TopTreeProducer/interface/TRootVertex.h"
 #include "TopTreeProducer/interface/TRootMuon.h"
 #include "TopTreeProducer/interface/TRootJet.h"
-#include "TopTreeProducer/interface/TRootCaloJet.h"
 #include "TopTreeProducer/interface/TRootPFJet.h"
 #include "TopTreeProducer/interface/TRootSubstructureJet.h"
-#include "TopTreeProducer/interface/TRootJPTJet.h"
 #include "TopTreeProducer/interface/TRootElectron.h"
 #include "TopTreeProducer/interface/TRootMET.h"
 #include "TopTreeProducer/interface/TRootMCParticle.h"
@@ -59,9 +57,9 @@ public:
     std::vector<TRootMuon*> GetSelectedMuons() const;
     std::vector<TRootMuon*> GetSelectedMuons(float PtThr, float EtaThr, float MuonRelIso, string WorkingPoint, string ProductionCampaign) const;
 
-    // displaced muons
-    std::vector<TRootMuon*> GetSelectedDisplacedMuons(float PtThr, float EtaThr, float NormChi2, int NTrackerLayersWithMeas, int NValidMuonHits, int NValidPixelHits, int NMatchedStations, float RelIso) const;
-    std::vector<TRootMuon*> GetSelectedDisplacedMuons(float PtThr, float EtaThr, float RelIs) const;
+    // displaced muons                                                                                                                 
+    std::vector<TRootMuon*> GetSelectedDisplacedMuons(float PtThr, float EtaThr, float NormChi2, int NTrackerLayersWithMeas, int NValidMuonHits, int NValidPixelHits, int NMatchedStations, float RelIso, bool applyIso=true, bool applyId=true) const;
+    std::vector<TRootMuon*> GetSelectedDisplacedMuons(float PtThr, float EtaThr, float RelIs, bool applyIso=true, bool applyId=true) const;
     std::vector<TRootMuon*> GetSelectedDisplacedMuons() const;
 
 
@@ -100,6 +98,10 @@ private:
     int   MuonNTrackerLayersWithMeasurementCut_;
     int   MuonNValidPixelHitsCut_;
     int   MuonNValidMuonHitsCut_;
+
+    // displaced lepton functions
+    bool identificationDisplacedMuon(const TRootMuon*, float NormChi2, int NTrackerLayersWithMeas, int NValidMuonHits, int NValidPixelHits, int NMatchedStations) const;
+    bool isolationDisplacedMuon(const TRootMuon*, float RelIso) const;
 
     float DRJetMuon_; // for pflow mu-jet cleaning
 };

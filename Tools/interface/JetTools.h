@@ -11,9 +11,7 @@
 #include "TopTreeProducer/interface/TRootElectron.h"
 #include "TopTreeProducer/interface/TRootJet.h"
 #include "TopTreeProducer/interface/TRootGenJet.h"
-#include "TopTreeProducer/interface/TRootCaloJet.h"
 #include "TopTreeProducer/interface/TRootPFJet.h"
-#include "TopTreeProducer/interface/TRootJPTJet.h"
 #include "TopTreeProducer/interface/TRootMET.h"
 #include "TopTreeProducer/interface/TRootVertex.h"
 
@@ -77,12 +75,8 @@ class JetTools
     void correctMETUnclusteredEnergy(TRootMET* inMET, vector<TRootJet*> inJets, vector<TRootMuon*> inMuons, vector<TRootElectron*> inElectrons, string direction);
 
     // Jet convertors
-    vector<TRootCaloJet*> convertToCaloJets(vector<TRootJet*> init_jets);
     vector<TRootPFJet*> convertToPFJets(vector<TRootJet*> init_jets);
-    vector<TRootJPTJet*> convertToJPTJets(vector<TRootJet*> init_jets);
-    TRootCaloJet* convertToCaloJets(TRootJet* init_jet);
     TRootPFJet* convertToPFJets(TRootJet* init_jet);
-    TRootJPTJet* convertToJPTJets(TRootJet* init_jets);
     
   private:
     FactorizedJetCorrector *JEC_;

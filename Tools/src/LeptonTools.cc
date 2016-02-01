@@ -187,7 +187,6 @@ ElectronSFWeight::at(const double &eta, const double &pt, const int &shiftUpDown
     }
     if ( Ymax < pt){
       pt_hist = electronSFWeight_->GetYaxis()->GetBinCenter(electronSFWeight_->GetNbinsY());
-      cout << "pt_hist is " << pt_hist << endl;
       uncertaintyMultiplier *= 2;
       isOutOfRange = true;
     }

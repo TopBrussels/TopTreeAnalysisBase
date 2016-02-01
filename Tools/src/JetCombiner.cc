@@ -89,10 +89,8 @@ JetCombiner::JetCombiner(bool trainMVA, float Luminosity, const vector<Dataset*>
         MSPlot_["maxMVA_btag"] = new MultiSamplePlot(datasets, "MVA_btag", 10, -0.0001, 1, "btag");
         MSPlot_["maxMVA_ThPtOverSumPt"] = new MultiSamplePlot(datasets, "MVA_ThPtOverSumPt", 10, -0.0001, 1, "ThPtOverSumPt");
         MSPlot_["maxMVA_AngleThWh"] = new MultiSamplePlot(datasets, "MVA_AngleThWh", 8, -0.0001, 3.2, "AngleThWh");
-        MSPlot_["maxMVA_AngleBlMu"] = new MultiSamplePlot(datasets, "MVA_AngleBlMu", 8, -0.0001, 3.2, "AngleBlMu");
         MSPlot_["maxMVA_AngleThBl"] = new MultiSamplePlot(datasets, "MVA_AngleThBl", 8, -0.0001, 3.2, "AngleThBl");
         MSPlot_["maxMVA_AngleThBh"] = new MultiSamplePlot(datasets, "MVA_AngleThBh", 8, -0.0001, 3.2, "AngleThBh");
-        MSPlot_["maxMVA_AngleThMu"] = new MultiSamplePlot(datasets, "MVA_AngleThMu", 8, -0.0001, 3.2, "AngleThMu");
         MSPlot_["maxMVA_HadrWmass"] = new MultiSamplePlot(datasets, "MVA_HadrWmass", 50, -0.0001, 200, "HadrWmass");
         MSPlot_["maxMVA_HadrWMassCalc"] = new MultiSamplePlot(datasets, "maxMVA_HadrWMassCalc", 20, -0.0001, 600, "Hadronic W Mass");
         MSPlot_["maxMVA_HadrTopMass"] = new MultiSamplePlot(datasets, "maxMVA_HadrTopMass", 20, -0.0001, 1000, "Hadronic Top Mass");
@@ -186,7 +184,6 @@ JetCombiner::~JetCombiner() {
 
 void JetCombiner::ProcessEvent_SingleHadTop(Dataset* dataSet, const vector<TRootMCParticle*> mcParticles, const vector<TRootPFJet*> selectedJets, const TLorentzVector* selectedLepton, float scaleFactor) {
     //initialize stuff for each event
-    bool all4PartonsMatched = false; // True if the 4 ttbar semi-lep partons are matched to 4 jets (not necessarily the 4 highest pt jets)
     all4JetsMatched_MCdef_ = false; // True if the 4 highest pt jets are matched to the 4 ttbar semi-lep partons
     hadronictopJetsMatched_MCdef_ = false;
 
@@ -209,10 +206,8 @@ void JetCombiner::ProcessEvent_SingleHadTop(Dataset* dataSet, const vector<TRoot
     relDiffEJetParton_l2_ = -9999;
 
     string dataSetName = dataSet->Name();
-    int pdgID_top = 6; //top quark
 
     if(debug)   cout <<"jetcombiner: in jet combiner"<< endl;
-
     if(debug)   cout <<"jetcombiner: got gen event"<< endl;
     vector<TLorentzVector> mcParticlesTLV, selectedJetsTLV;
     TLorentzVector topQuark, antiTopQuark;
@@ -406,6 +401,7 @@ void JetCombiner::ProcessEvent_SingleHadTop(Dataset* dataSet, const vector<TRoot
         }
     } //if Semi mu or semi el ttbar
 
+
     ///////////////////////
     // Train/Compute MVA //
     ///////////////////////
@@ -416,10 +412,8 @@ void JetCombiner::ProcessEvent_SingleHadTop(Dataset* dataSet, const vector<TRoot
 
     float maxMVA_btag = -9999;
     float maxMVA_AngleThWh = -9999;
-    float maxMVA_AngleBlMu = -9999;
     float maxMVA_AngleThBl = -9999;
     float maxMVA_AngleThBh = -9999;
-    float maxMVA_AngleThMu = -9999;
     float maxMVA_ThPtOverSumPt = -9999;
     float maxMVA_HadrWmass = -9999;
 
@@ -505,7 +499,6 @@ void JetCombiner::ProcessEvent_SingleHadTop(Dataset* dataSet, const vector<TRoot
                     // DeltaR
                     float AngleThBh = fabs(Th.DeltaPhi(Bh));
 
-                    float AngleThLep = Th.DeltaPhi(*selectedLepton);
 
 
                     //trying the summed energy of the jets...
@@ -604,6 +597,7 @@ void JetCombiner::ProcessEvent_SingleHadTop(Dataset* dataSet, const vector<TRoot
                         } //end trainMVA_ && all4JetsMatched_MCdef_
                     } //end (muMinusFromTop || muPlusFromTop || elMinusFromTop || elPlusFromTop)
 
+
                     if( !trainMVA_ ) {
                         // compute MVA stuff
                         MSPlot_["MVA_input_btag"]->Fill(btag, dataSet, true, Luminosity_*scaleFactor);
@@ -661,10 +655,8 @@ void JetCombiner::ProcessEvent_SingleHadTop(Dataset* dataSet, const vector<TRoot
 
                                 maxMVA_btag = btag;
                                 maxMVA_AngleThWh = AngleThWh;
-                                // maxMVA_AngleBlMu = AngleBlMu;
                                 //   maxMVA_AngleThBl = AngleThBl;
                                 maxMVA_AngleThBh = AngleThBh;
-                                // maxMVA_AngleThMu = AngleThMu;
                                 maxMVA_ThPtOverSumPt = ThPtOverSumPt;
                                 maxMVA_HadrWmass = Wh.M();
                             }
@@ -705,10 +697,8 @@ void JetCombiner::ProcessEvent_SingleHadTop(Dataset* dataSet, const vector<TRoot
             MSPlot_["maxMVA_btag"]->Fill(maxMVA_btag, dataSet, true, Luminosity_*scaleFactor);
             MSPlot_["maxMVA_ThPtOverSumPt"]->Fill(maxMVA_ThPtOverSumPt, dataSet, true, Luminosity_*scaleFactor);
             MSPlot_["maxMVA_AngleThWh"]->Fill(maxMVA_AngleThWh, dataSet, true, Luminosity_*scaleFactor);
-            //    MSPlot_["maxMVA_AngleBlMu"]->Fill(maxMVA_AngleBlMu, dataSet, true, Luminosity_*scaleFactor);
             MSPlot_["maxMVA_AngleThBl"]->Fill(maxMVA_AngleThBl, dataSet, true, Luminosity_*scaleFactor);
             MSPlot_["maxMVA_AngleThBh"]->Fill(maxMVA_AngleThBh, dataSet, true, Luminosity_*scaleFactor);
-            //  MSPlot_["maxMVA_AngleThMu"]->Fill(maxMVA_AngleThMu, dataSet, true, Luminosity_*scaleFactor);
             MSPlot_["maxMVA_HadrWmass"]->Fill(maxMVA_HadrWmass, dataSet, true, Luminosity_*scaleFactor);
             MSPlot_["maxMVA_HadrWMassCalc"]->Fill(mW_maxMVA, dataSet, true, Luminosity_*scaleFactor);
             MSPlot_["maxMVA_HadrTopMass"]->Fill(mTop_maxMVA, dataSet, true, Luminosity_*scaleFactor);
@@ -766,6 +756,7 @@ void JetCombiner::ProcessEvent_SingleHadTop(Dataset* dataSet, const vector<TRoot
                                                histo2D_[titleBadmWVSmtop]->Fill(mW_maxMVA,mTop_maxMVA);
                                            }
                 */
+
             }
         }
     }
@@ -776,7 +767,6 @@ void JetCombiner::ProcessEvent_SingleHadTop(Dataset* dataSet, const vector<TRoot
 
 void JetCombiner::ProcessEvent(Dataset* dataSet, const vector<TRootMCParticle*> mcParticles, const vector<TRootPFJet*> selectedJets, const TLorentzVector* selectedLepton, vector<TRootElectron*> vectEl, vector<TRootMuon*> vectMu, float scaleFactor, bool TprimeEvaluation) {
     //initialize stuff for each event
-    bool all4PartonsMatched = false; // True if the 4 ttbar semi-lep partons are matched to 4 jets (not necessarily the 4 highest pt jets)
     all4JetsMatched_MCdef_ = false; // True if the 4 highest pt jets are matched to the 4 ttbar semi-lep partons
     hadronictopJetsMatched_MCdef_ = false;
 
@@ -969,6 +959,7 @@ void JetCombiner::ProcessEvent(Dataset* dataSet, const vector<TRootMCParticle*> 
             }
         }
     } //if Semi mu or semi el ttbar
+    // string dataSetName = dataSet->Name();
 
     ///////////////////////
     // Train/Compute MVA //
@@ -978,10 +969,8 @@ void JetCombiner::ProcessEvent(Dataset* dataSet, const vector<TRootMCParticle*> 
 
     float maxMVA_btag = -9999;
     float maxMVA_AngleThWh = -9999;
-    float maxMVA_AngleBlMu = -9999;
     float maxMVA_AngleThBl = -9999;
     float maxMVA_AngleThBh = -9999;
-    float maxMVA_AngleThMu = -9999;
     float maxMVA_ThPtOverSumPt = -9999;
     float maxMVA_HadrWmass = -9999;
 
@@ -1132,10 +1121,8 @@ void JetCombiner::ProcessEvent(Dataset* dataSet, const vector<TRootMCParticle*> 
 
                                     maxMVA_btag = btag;
                                     maxMVA_AngleThWh = AngleThWh;
-                                    maxMVA_AngleBlMu = AngleBlMu;
                                     maxMVA_AngleThBl = AngleThBl;
                                     maxMVA_AngleThBh = AngleThBh;
-                                    maxMVA_AngleThMu = AngleThMu;
                                     maxMVA_ThPtOverSumPt = ThPtOverSumPt;
                                     maxMVA_HadrWmass = Wh.M();
                                 }
@@ -1168,10 +1155,8 @@ void JetCombiner::ProcessEvent(Dataset* dataSet, const vector<TRootMCParticle*> 
             MSPlot_["maxMVA_btag"]->Fill(maxMVA_btag, dataSet, true, Luminosity_*scaleFactor);
             MSPlot_["maxMVA_ThPtOverSumPt"]->Fill(maxMVA_ThPtOverSumPt, dataSet, true, Luminosity_*scaleFactor);
             MSPlot_["maxMVA_AngleThWh"]->Fill(maxMVA_AngleThWh, dataSet, true, Luminosity_*scaleFactor);
-            MSPlot_["maxMVA_AngleBlMu"]->Fill(maxMVA_AngleBlMu, dataSet, true, Luminosity_*scaleFactor);
             MSPlot_["maxMVA_AngleThBl"]->Fill(maxMVA_AngleThBl, dataSet, true, Luminosity_*scaleFactor);
             MSPlot_["maxMVA_AngleThBh"]->Fill(maxMVA_AngleThBh, dataSet, true, Luminosity_*scaleFactor);
-            MSPlot_["maxMVA_AngleThMu"]->Fill(maxMVA_AngleThMu, dataSet, true, Luminosity_*scaleFactor);
             MSPlot_["maxMVA_HadrWmass"]->Fill(maxMVA_HadrWmass, dataSet, true, Luminosity_*scaleFactor);
             MSPlot_["maxMVA_HadrWMassCalc"]->Fill(mW_maxMVA, dataSet, true, Luminosity_*scaleFactor);
             MSPlot_["maxMVA_HadrTopMass"]->Fill(mTop_maxMVA, dataSet, true, Luminosity_*scaleFactor);
@@ -1221,8 +1206,6 @@ void JetCombiner::ProcessEvent(Dataset* dataSet, const vector<TRootMCParticle*> 
 
 void JetCombiner::ProcessEvent(Dataset* dataSet, const vector<TLorentzVector> mcParticlesForMatching, const vector<TLorentzVector> selectedJets, const vector<float> bTagValues, const TLorentzVector selectedLepton, bool isSemiLep, float scaleFactor, bool TprimeEvaluation) {
     //initialize stuff for each event
-    bool all4PartonsMatched = false; // True if the 4 ttbar semi-lep partons are matched to 4 jets (not necessarily the 4 highest pt jets)
-    all4PartonsMatched=false;
     all4JetsMatched_MCdef_ = false; // True if the 4 highest pt jets are matched to the 4 ttbar semi-lep partons
     hadronictopJetsMatched_MCdef_ = false;
 
@@ -1272,7 +1255,6 @@ void JetCombiner::ProcessEvent(Dataset* dataSet, const vector<TLorentzVector> mc
             cout<<"Problem!! JetPartonPair.size() != 4"<<endl;
 
         if(hadronicWJet1_.first != 9999 && hadronicWJet2_.first != 9999 && hadronicBJet_.first != 9999 && leptonicBJet_.first != 9999) {
-            all4PartonsMatched = true;
             if(hadronicWJet1_.first < 4 && hadronicWJet2_.first < 4 && hadronicBJet_.first < 4 && leptonicBJet_.first < 4)
                 all4JetsMatched_MCdef_ = true;
             }
@@ -1290,10 +1272,8 @@ void JetCombiner::ProcessEvent(Dataset* dataSet, const vector<TLorentzVector> mc
 
     float maxMVA_btag = -9999;
     float maxMVA_AngleThWh = -9999;
-    float maxMVA_AngleBlMu = -9999;
     float maxMVA_AngleThBl = -9999;
     float maxMVA_AngleThBh = -9999;
-    float maxMVA_AngleThMu = -9999;
     float maxMVA_ThPtOverSumPt = -9999;
     float maxMVA_HadrWmass = -9999;
 
@@ -1410,10 +1390,8 @@ void JetCombiner::ProcessEvent(Dataset* dataSet, const vector<TLorentzVector> mc
 
                                     maxMVA_btag = btag;
                                     maxMVA_AngleThWh = AngleThWh;
-                                    maxMVA_AngleBlMu = AngleBlMu;
                                     maxMVA_AngleThBl = AngleThBl;
                                     maxMVA_AngleThBh = AngleThBh;
-                                    maxMVA_AngleThMu = AngleThMu;
                                     maxMVA_ThPtOverSumPt = ThPtOverSumPt;
                                     maxMVA_HadrWmass = Wh.M();
                                     }
@@ -1445,10 +1423,8 @@ void JetCombiner::ProcessEvent(Dataset* dataSet, const vector<TLorentzVector> mc
             MSPlot_["maxMVA_btag"]->Fill(maxMVA_btag, dataSet, true, Luminosity_*scaleFactor);
             MSPlot_["maxMVA_ThPtOverSumPt"]->Fill(maxMVA_ThPtOverSumPt, dataSet, true, Luminosity_*scaleFactor);
             MSPlot_["maxMVA_AngleThWh"]->Fill(maxMVA_AngleThWh, dataSet, true, Luminosity_*scaleFactor);
-            MSPlot_["maxMVA_AngleBlMu"]->Fill(maxMVA_AngleBlMu, dataSet, true, Luminosity_*scaleFactor);
             MSPlot_["maxMVA_AngleThBl"]->Fill(maxMVA_AngleThBl, dataSet, true, Luminosity_*scaleFactor);
             MSPlot_["maxMVA_AngleThBh"]->Fill(maxMVA_AngleThBh, dataSet, true, Luminosity_*scaleFactor);
-            MSPlot_["maxMVA_AngleThMu"]->Fill(maxMVA_AngleThMu, dataSet, true, Luminosity_*scaleFactor);
             MSPlot_["maxMVA_HadrWmass"]->Fill(maxMVA_HadrWmass, dataSet, true, Luminosity_*scaleFactor);
             MSPlot_["maxMVA_HadrWMassCalc"]->Fill(mW_maxMVA, dataSet, true, Luminosity_*scaleFactor);
             MSPlot_["maxMVA_HadrTopMass"]->Fill(mTop_maxMVA, dataSet, true, Luminosity_*scaleFactor);
@@ -1684,11 +1660,6 @@ void JetCombiner::Write(TFile* fout, bool savePNG, string pathPNG, bool plotMVAs
                 ///////////////////////////////////
                 // make efficiency vs purity plot
                 ///////////////////////////////////
-                double x[100000], yBadComb[100000], yAllSemiMuBGComb[100000];
-                // set first array value to 0 to avoid warnings
-                x[0]=yBadComb[0]=yAllSemiMuBGComb[0]=0;
-
-
                 int nVals = 0;
 
                 cerr << " post canvas write 2"   << endl;
@@ -1705,8 +1676,6 @@ void JetCombiner::Write(TFile* fout, bool savePNG, string pathPNG, bool plotMVAs
 
                     Double_t nSignalAbove = histo1D_[titleGood]->Integral(cutBin,histo1D_[titleGood]->GetNbinsX());
                     Double_t nSignalBelow = histo1D_[titleGood]->Integral(0,cutBin);
-                    Double_t nBadCombAbove = histo1D_[titleBad]->Integral(cutBin,histo1D_[titleBad]->GetNbinsX());
-                    Double_t nAllSemiMuBGCombAbove = histo1D_[titleSemiMuBG]->Integral(cutBin,histo1D_[titleSemiMuBG]->GetNbinsX());
 
                     //   Double_t nSignalAbove = 1.;
                     //   Double_t nSignalBelow = 1.;
@@ -1715,14 +1684,11 @@ void JetCombiner::Write(TFile* fout, bool savePNG, string pathPNG, bool plotMVAs
 
                     //cout <<"Cut " << cut << " -> " <<  cutBin << " " << nSignalBelow << " " << nSignalAbove << " " << nBadCombAbove <<" "<< nAllSemiMuBGCombAbove<<endl;
 
-                    if ((nSignalAbove + nSignalBelow)>0) x[nVals] = (Double_t) nSignalAbove / (Double_t) (nSignalAbove + nSignalBelow); //efficiency
-                    if ((nSignalAbove + nBadCombAbove)>0) yBadComb[nVals] = (Double_t) nSignalAbove / (Double_t) (nSignalAbove + nBadCombAbove); //purity
-                    if ((nSignalAbove + nAllSemiMuBGCombAbove)>0) yAllSemiMuBGComb[nVals] = (Double_t) nSignalAbove / (Double_t) (nSignalAbove + nAllSemiMuBGCombAbove); //purity
 
 
 
                     nVals++;
-                    //cout <<"Cut " << cut << " -> " <<  cutBin << " " << nSignalBelow << " " << nSignalAbove << " " << efficiency << " " << purity << endl;
+                    cout <<"Cut " << cut << " -> " <<  cutBin << " " << nSignalBelow << " " << nSignalAbove << " " << endl;
                     }
 
                 //removing refs to problematic arrays...

@@ -10,7 +10,6 @@
 #include "TopTreeProducer/interface/TRootJet.h"
 #include "TopTreeProducer/interface/TRootElectron.h"
 #include "TopTreeProducer/interface/TRootMET.h"
-#include "TopTreeProducer/interface/TRootGenEvent.h"
 #include "TopTreeProducer/interface/TRootNPGenEvent.h"
 
 #include "TopTreeProducer/interface/TRootGenTop.h"
@@ -52,11 +51,7 @@ class TtSemiMuJetCombination{
       //std::vector<std::vector<TRootJet> > ComputeCombinations(int method = 0, std::vector<float>& ChiSquareVector );//modify the vector of ChiSquare
       //->both vector ordered by increasing ChiSquare
       //not yet implemented
-      std::vector<TRootJet> MCMatchedCombination(const TRootGenEvent&, double& ChiSquare);
       std::vector<TRootJet> MCMatchedCombination(const TRootNPGenEvent&, double& ChiSquare);
-      //Matched means 3 jets matched with HadTop + 1 jet matched with LepB
-      bool isMCMatched(const TRootGenEvent& genEvt);
-      bool isMCMatched(const std::vector<TRootJet>, const TRootGenEvent&);
       //Matched means 3 jets matched with HadTop
       bool isMCMatchedHadTop(const std::vector<TRootJet>, const TRootNPGenEvent&);
 

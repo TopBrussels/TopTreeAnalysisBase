@@ -531,16 +531,6 @@ void JetTools::correctMETUnclusteredEnergy(TRootMET* inMET, vector<TRootJet*> in
 }
     
 //_____Jet convertors________________________________________
-vector<TRootCaloJet*> JetTools::convertToCaloJets(vector<TRootJet*> init_jets) {
-  vector<TRootCaloJet*> jets;
-  for (unsigned i=0; i<init_jets.size(); i++)
-    if (init_jets[i]->jetType() == 1)
-      jets.push_back(static_cast<TRootCaloJet*>(init_jets[i]));
-    else
-      cout << "ERROR - JetTools: Attempting to convert a TRootJet to TRootCaloJet that was not created from a CaloJet!";
-  return jets;
-}
-
 vector<TRootPFJet*> JetTools::convertToPFJets(vector<TRootJet*> init_jets) {
   vector<TRootPFJet*> jets;
   for (unsigned i=0; i<init_jets.size(); i++)
@@ -551,23 +541,6 @@ vector<TRootPFJet*> JetTools::convertToPFJets(vector<TRootJet*> init_jets) {
   return jets;
 }
 
-vector<TRootJPTJet*> JetTools::convertToJPTJets(vector<TRootJet*> init_jets) {
-  vector<TRootJPTJet*> jets;
-  for (unsigned i=0; i<init_jets.size(); i++)
-    if (init_jets[i]->jetType() == 3)
-      jets.push_back(static_cast<TRootJPTJet*>(init_jets[i]));
-    else
-      cout << "ERROR - JetTools: Attempting to convert a TRootJet to TRootJPTJet that was not created from a JPTJet!";
-  return jets;
-}
-
-TRootCaloJet* JetTools::convertToCaloJets(TRootJet* init_jet) {
-  std::vector<TRootJet*> init_jets; init_jets.push_back(init_jet);
-  std::vector<TRootCaloJet*> jets = convertToCaloJets(init_jets);
-  if (jets.size() > 0) return jets[0];
-  return NULL;
-}
-
 TRootPFJet* JetTools::convertToPFJets(TRootJet* init_jet) {
   std::vector<TRootJet*> init_jets; init_jets.push_back(init_jet);
   std::vector<TRootPFJet*> jets = convertToPFJets(init_jets);
@@ -575,10 +548,4 @@ TRootPFJet* JetTools::convertToPFJets(TRootJet* init_jet) {
   return NULL;
 }
 
-TRootJPTJet* JetTools::convertToJPTJets(TRootJet* init_jet) {
-  std::vector<TRootJet*> init_jets; init_jets.push_back(init_jet);
-  std::vector<TRootJPTJet*> jets = convertToJPTJets(init_jets);
-  if (jets.size() > 0) return jets[0];
-  return NULL;
-}
 //___________________________________________________________

@@ -216,56 +216,51 @@ std::vector<TRootElectron*> ElectronSelection::GetSelectedElectrons(float PtThr,
 }
 
 // displaced electrons
-std::vector<TRootElectron*> ElectronSelection::GetSelectedDisplacedElectrons(float PtThr, float EtaThr) const
+std::vector<TRootElectron*> ElectronSelection::GetSelectedDisplacedElectrons(float PtThr, float EtaThr,bool applyIso, bool applyId) const
 {
+  // use tight electron ID (cut-based) for now, but without cuts on  d0 dz . This ID can be in flux, and for now is hard-coded here:
+  //These quality cuts reflect the recommended Tight cut-based electron ID as provided by the EGM POG. Last updated: 2 december 2015
+  // as these are still in flux, it is probably useful to check them here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2#Spring15_selection_25ns (revision 27)
+  std::vector<TRootElectron*> selectedElectrons;
+  bool saveit=false;
 
-    // use tight electron ID (cut-based) for now, but without cuts on  d0 dz . This ID can be in flux, and for now is hard-coded here
-    //These quality cuts reflect the recommended Tight cut-based electron ID as provided by the EGM POG. Last updated: 23 September 2015
-    // as these are still in flux, it is probably useful to check them here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2#Spring15_selection_25n (revision 27)
+  for(unsigned int i=0; i<electrons.size(); i++) {
+    saveit=false;
+    TRootElectron* el = (TRootElectron*) electrons[i];
 
-    std::vector<TRootElectron*> selectedElectrons;
-    for(unsigned int i=0; i<electrons.size(); i++)
-    {
-        TRootElectron* el = (TRootElectron*) electrons[i];
-        if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr)
-        {
-            // For the Barrel
-
-            if( fabs(el->superClusterEta()) <= 1.479
-                    && el->sigmaIEtaIEta() < 0.0101
-                    && fabs(el->deltaEtaIn()) < 0.00926
-                    && fabs(el->deltaPhiIn()) < 0.0336
-                    && el->hadronicOverEm() < 0.0597
-                    && pfElectronIso(el) < 0.0354
-                    && el->ioEmIoP() < 0.012
-                    && el->missingHits() <= 2 // check wrt to expectedMissingInnerHits
-                    && el->passConversion())
-            {
-                selectedElectrons.push_back(electrons[i]);
-            }
-            // For the endcap
-
-            else if (fabs(el->superClusterEta()) < 2.5
-                     && el->sigmaIEtaIEta() < 0.0279
-                     && fabs(el->deltaEtaIn()) < 0.00724
-                     && fabs(el->deltaPhiIn()) < 0.0918
-                     && el->hadronicOverEm() < 0.0615
-                     && pfElectronIso(el) < 0.0646
-                     && el->ioEmIoP() < 0.00999
-                     && el->missingHits() <= 1 // check wrt to expectedMissingInnerHits
-                     && el->passConversion())
-            {
-                selectedElectrons.push_back(electrons[i]);
-            }
-        }
+    if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr) {
+      // no id no iso
+      if (!applyIso && !applyId) {
+	//      cout << "no id and no iso" << endl;
+	saveit = true;
+      }
+      // apply iso only
+      if(applyIso && isolationDisplacedElectron(el) && !applyId){
+	//      cout << "iso cut required and passed" <<endl;
+	saveit=true;
+      }
+      // apply id only                                                                                                                                                                                                                                                   
+      if( !applyIso  && applyId  && identificationDisplacedElectron(el)){
+	//      cout << "id cut required and passed" <<endl
+	saveit=true;
+      }
+      // apply both                                                                                                                                                                                                                                                      
+      if( applyIso && isolationDisplacedElectron(el) && applyId && identificationDisplacedElectron(el)){
+	//      cout << "id and iso cut required and passed" <<endl
+	saveit=true;
+      }
+      if(saveit) selectedElectrons.push_back(electrons[i]);
     }
-    return selectedElectrons;
+  }
+
+  //  std::sort(selectedElectrons.begin(),selectedElectrons.end(),HighestPt());
+  return selectedElectrons;
 }
 
-std::vector<TRootElectron*> ElectronSelection::GetSelectedDisplacedElectrons() const
-{
-    return GetSelectedDisplacedElectrons(40.0, 2.4);
+std::vector<TRootElectron*> ElectronSelection::GetSelectedDisplacedElectrons() const{
+  return GetSelectedDisplacedElectrons(42.0, 2.4,false,false);
 }
+
 
 std::vector<TRootElectron*> ElectronSelection::GetSelectedTightElectronsCutsBasedSpring15_50ns(float PtThr, float EtaThr) const
 {
@@ -804,3 +799,52 @@ bool ElectronSelection::isPVSelected(const std::vector<TRootVertex*>& vertex, in
 
 //______________________________________________________________________//
 
+//---- selection functions for displaced electrons and muons. factorising ID and isolation.
+bool ElectronSelection::isolationDisplacedElectron(TRootElectron* el) const{
+  if( fabs(el->superClusterEta()) <= 1.479){
+    if(pfElectronIso(el) < 0.0354)
+      return true;
+    else
+      return false;
+  }
+  // For the endcap                                                                                                                                                                                                                                                        
+  else if (fabs(el->superClusterEta()) < 2.5){
+    if(pfElectronIso(el) < 0.0646)
+      return true;
+    else
+      return false;
+  }
+  return false;
+}
+bool ElectronSelection::identificationDisplacedElectron(const TRootElectron* el) const{
+  //  cout << "entering the displaced Id electron" << endl;
+  if( fabs(el->superClusterEta()) <= 1.479){
+    if ( el->sigmaIEtaIEta() < 0.0101
+         && fabs(el->deltaEtaIn()) < 0.00926
+         && fabs(el->deltaPhiIn()) < 0.0336
+         && el->hadronicOverEm() < 0.0597
+         && el->ioEmIoP() < 0.012
+         && el->missingHits() <= 2 // check wrt to expectedMissingInnerHits 
+         && el->passConversion())
+      {
+        //      cout << "the displaced Id electron is true" << endl;
+        return true;
+      }
+  }
+  // For the endcap
+  else if (fabs(el->superClusterEta()) < 2.5)
+    {
+      if ( el->sigmaIEtaIEta() < 0.0279
+           && fabs(el->deltaEtaIn()) < 0.00724
+           && fabs(el->deltaPhiIn()) < 0.0918
+           && el->hadronicOverEm() < 0.0615
+           && el->ioEmIoP() < 0.00999
+           && el->missingHits() <= 1 // check wrt to expectedMissingInnerHits
+           && el->passConversion())
+        {
+          //      cout << "the displaced Id electron is true" << endl;
+          return true;
+        }
+    }
+  return false;
+}

@@ -6,22 +6,16 @@
 #include "TopTreeProducer/interface/TRootParticle.h"
 #include "TopTreeProducer/interface/TRootMCParticle.h"
 #include "TopTreeProducer/interface/TRootJet.h"
-#include "TopTreeProducer/interface/TRootCaloJet.h"
 #include "TopTreeProducer/interface/TRootPFJet.h"
-#include "TopTreeProducer/interface/TRootJPTJet.h"
 #include "TopTreeProducer/interface/TRootGenJet.h"
 #include "TopTreeProducer/interface/TRootLepton.h"
 #include "TopTreeProducer/interface/TRootMuon.h"
 #include "TopTreeProducer/interface/TRootElectron.h"
 #include "TopTreeProducer/interface/TRootMET.h"
 #include "TopTreeProducer/interface/TRootPhoton.h"
-#include "TopTreeProducer/interface/TRootCaloMET.h"
 #include "TopTreeProducer/interface/TRootPFMET.h"
-#include "TopTreeProducer/interface/TRootTrackMET.h"
-#include "TopTreeProducer/interface/TRootGenEvent.h"
 #include "TopTreeProducer/interface/TRootNPGenEvent.h"
 #include "TopTreeProducer/interface/TRootGenTop.h"
-#include "TopTreeProducer/interface/TRootSpinCorrGen.h"
 #include "TopTreeProducer/interface/TRootVertex.h"
 #include "TopTreeProducer/interface/TRootSubstructureJet.h"
 #include "Content/interface/MCExpectation.h"
@@ -38,19 +32,14 @@
 #include "TopTreeProducer/interface/TRootParticle.h"
 #include "TopTreeProducer/interface/TRootMCParticle.h"
 #include "TopTreeProducer/interface/TRootJet.h"
-#include "TopTreeProducer/interface/TRootCaloJet.h"
 #include "TopTreeProducer/interface/TRootPFJet.h"
 #include "TopTreeProducer/interface/TRootLepton.h"
 #include "TopTreeProducer/interface/TRootMuon.h"
 #include "TopTreeProducer/interface/TRootElectron.h"
 #include "TopTreeProducer/interface/TRootMET.h"
-#include "TopTreeProducer/interface/TRootCaloMET.h"
 #include "TopTreeProducer/interface/TRootPFMET.h"
-#include "TopTreeProducer/interface/TRootTrackMET.h"
-#include "TopTreeProducer/interface/TRootGenEvent.h"
 #include "TopTreeProducer/interface/TRootNPGenEvent.h"
 #include "TopTreeProducer/interface/TRootGenTop.h"
-#include "TopTreeProducer/interface/TRootSpinCorrGen.h"
 #include "TopTreeProducer/interface/TRootVertex.h"
 #include "TopTreeProducer/interface/TRootPhoton.h"
 #include "TopTreeProducer/interface/TRootSubstructureJet.h"
@@ -74,9 +63,7 @@
 #pragma link C++ class TRootParticle+;
 #pragma link C++ class TRootMCParticle+;
 #pragma link C++ class TRootJet+;
-#pragma link C++ class TRootCaloJet+;
 #pragma link C++ class TRootPFJet+;
-#pragma link C++ class TRootJPTJet+;
 #pragma link C++ class TRootGenJet+;
 #pragma link C++ class TRootLepton+;
 #pragma link C++ class TRootPhoton+;
@@ -84,13 +71,9 @@
 #pragma link C++ class TRootElectron+;
 #pragma link C++ class TRootMET+;
 #pragma link C++ class TRootSubstructureJet+;
-#pragma link C++ class TRootCaloMET+;
 #pragma link C++ class TRootPFMET+;
-#pragma link C++ class TRootTrackMET+;
-#pragma link C++ class TRootGenEvent+;
 #pragma link C++ class TRootNPGenEvent+;
 #pragma link C++ class TRootGenTop+;
-#pragma link C++ class TRootSpinCorrGen+;
 #pragma link C++ class TRootVertex+;
 #pragma link C++ class MCExpectation+;
 #pragma link C++ class MCObsExpectation+;

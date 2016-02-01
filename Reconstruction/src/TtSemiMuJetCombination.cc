@@ -106,39 +106,6 @@ TtSemiMuJetCombination::TtSemiMuJetCombination(const std::vector<TRootJet>& init
 }
 
 
-std::vector<TRootJet> TtSemiMuJetCombination::MCMatchedCombination(const TRootGenEvent& genEvt, double& ChiSquare){
-   std::vector<TRootJet> genselectedjets;
-   std::vector<TLorentzVector> tljets;
-   for(unsigned int i=0;i<jets.size();i++){
-   	tljets.push_back((TLorentzVector)jets[i]);
-   }
-
-   if(jets.size()<4){
-      cout<<"Number of jets in MCMatchedCombination <4"<<endl;
-      return genselectedjets;
-   }
-
-   if(genEvt.isSemiLeptonic(TRootGenEvent::kMuon))
-   {
-   	// Matching index : Hadronic Q  = 0, Hadronic Q' = 1, Hadronic b  = 2, Leptonic b  = 3;
-   	std::vector<TLorentzVector> quarks;
-	quarks.push_back(genEvt.hadronicDecayQuark());
-	quarks.push_back(genEvt.hadronicDecayQuarkBar());
-	quarks.push_back(genEvt.hadronicDecayB());
-	quarks.push_back(genEvt.leptonicDecayB());
-
-	JetPartonMatching GenMatch(quarks, tljets, matchingAlgo_, useMaxDist_, useDeltaR_, maxDist_);
-	TRootJet myjet;
-	for(unsigned int i=0;i<quarks.size();i++)
-	{
-		((GenMatch.getMatchForParton(i,0) < 0) ? genselectedjets.push_back(myjet) : genselectedjets.push_back(jets[GenMatch.getMatchForParton(i,0)]) );
-	}
-   }
-   unsigned int *Permutation = new unsigned int[4];
-   for(unsigned int i=0;i<4;i++) Permutation[i]=i;
-   ChiSquare = ChiSquareMatching( genselectedjets, muon , Permutation);
-   return(genselectedjets);
-}
 
 std::vector<TRootJet> TtSemiMuJetCombination::MCMatchedCombination(const TRootNPGenEvent& genEvt, double& ChiSquare){
    std::vector<TRootJet> genselectedjets;
@@ -195,53 +162,6 @@ std::vector<TRootJet> TtSemiMuJetCombination::MCMatchedCombination(const TRootNP
    return(genselectedjets);
 }
 
-bool TtSemiMuJetCombination::isMCMatched(const std::vector<TRootJet> jets,const TRootGenEvent& genEvt){
-   std::vector<TLorentzVector> tljets;
-   for(unsigned int i=0;i<jets.size();i++){
-   	tljets.push_back((TLorentzVector)jets[i]);
-   }
-		 
-   if(genEvt.isSemiLeptonic(TRootGenEvent::kMuon) && jets.size()==4)
-   {
-   	// Matching index : Hadronic Q  = 0, Hadronic Q' = 1, Hadronic b  = 2, Leptonic b  = 3;
-   	std::vector<TLorentzVector> quarks;
-   	std::vector<TLorentzVector> lepB;
-	quarks.push_back(genEvt.hadronicDecayQuark());
-	quarks.push_back(genEvt.hadronicDecayQuarkBar());
-	quarks.push_back(genEvt.hadronicDecayB());
-	quarks.push_back(genEvt.leptonicDecayB());
-	JetPartonMatching GenMatchHadTop(quarks, tljets, matchingAlgo_, useMaxDist_, useDeltaR_, maxDist_);
-	JetPartonMatching GenMatchLepB(lepB, tljets, matchingAlgo_, useMaxDist_, useDeltaR_, maxDist_);
-	bool return_ = false;
-        (GenMatchHadTop.getNumberOfUnmatchedPartons()==0 && GenMatchLepB.getNumberOfUnmatchedPartons()==0) ? return_ = true : return_ = false;
-	return return_;
-   }
-   return false;
-}
-
-bool TtSemiMuJetCombination::isMCMatched(const TRootGenEvent& genEvt){
-   std::vector<TLorentzVector> tljets;
-   for(unsigned int i=0;i<jets.size();i++){
-   	tljets.push_back((TLorentzVector)jets[i]);
-   }
-		 
-   if(genEvt.isSemiLeptonic(TRootGenEvent::kMuon) && jets.size()==4)
-   {
-   	// Matching index : Hadronic Q  = 0, Hadronic Q' = 1, Hadronic b  = 2, Leptonic b  = 3;
-   	std::vector<TLorentzVector> quarks;
-   	std::vector<TLorentzVector> lepB;
-	quarks.push_back(genEvt.hadronicDecayQuark());
-	quarks.push_back(genEvt.hadronicDecayQuarkBar());
-	quarks.push_back(genEvt.hadronicDecayB());
-	quarks.push_back(genEvt.leptonicDecayB());
-	JetPartonMatching GenMatchHadTop(quarks, tljets, matchingAlgo_, useMaxDist_, useDeltaR_, maxDist_);
-	JetPartonMatching GenMatchLepB(lepB, tljets, matchingAlgo_, useMaxDist_, useDeltaR_, maxDist_);
-	bool return_ = false;
-        (GenMatchHadTop.getNumberOfUnmatchedPartons()==0 && GenMatchLepB.getNumberOfUnmatchedPartons()==0) ? return_ = true : return_ = false;
-	return return_;
-   }
-   return false;
-}
 
 bool TtSemiMuJetCombination::isMCMatchedHadTop(const std::vector<TRootJet> jets, const TRootNPGenEvent& genEvt){
    if(jets.size()!=3){

@@ -56,7 +56,6 @@ class PlotTopology {
      void InitStruct(histo &h, string name);
      void InitStruct(histomultibody &h, string name);
      void Fill(TRootNPGenEvent& NPgenEvt);
-     void Fill(TRootGenEvent& genEvt);	/*called when looping over TRootGenEvents in stead of TRootNPGenEvents*/
      void Write(TFile* fout);
 
  private:
