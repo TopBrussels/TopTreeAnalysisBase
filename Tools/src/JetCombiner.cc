@@ -184,6 +184,7 @@ JetCombiner::~JetCombiner() {
 
 void JetCombiner::ProcessEvent_SingleHadTop(Dataset* dataSet, const vector<TRootMCParticle*> mcParticles, const vector<TRootPFJet*> selectedJets, const TLorentzVector* selectedLepton, float scaleFactor) {
     //initialize stuff for each event
+    bool all4PartonsMatched = false; // True if the 4 ttbar semi-lep partons are matched to 4 jets (not necessarily the 4 highest pt jets)
     all4JetsMatched_MCdef_ = false; // True if the 4 highest pt jets are matched to the 4 ttbar semi-lep partons
     hadronictopJetsMatched_MCdef_ = false;
 
@@ -214,6 +215,7 @@ void JetCombiner::ProcessEvent_SingleHadTop(Dataset* dataSet, const vector<TRoot
 
     bool muPlusFromTop = false, muMinusFromTop = false, elPlusFromTop = false, elMinusFromTop = false;
     int nTTbarQuarks = 0;
+    int pdgID_top = 6; //top quark
 
     for(unsigned int i=0; i<mcParticles.size(); i++) {
         if(debug)     cout <<"jetcombiner: looping mc parts"<< endl;
@@ -567,7 +569,7 @@ void JetCombiner::ProcessEvent_SingleHadTop(Dataset* dataSet, const vector<TRoot
                                 //     trainer_->Fill("S","AngleThMu",AngleThMu);
                                 trainer_->Fill("S","HadrWmass",Wh.M());
                                 trainer_->Fill("S","TopMass",Th.M());
-                                trainer_->Fill("S","AngleThLep",AngleThLep);
+                                // trainer_->Fill("S","AngleThLep",AngleThLep);
 
 
                                 //  trainer_->Fill("S","sumE",sumE);
@@ -589,7 +591,7 @@ void JetCombiner::ProcessEvent_SingleHadTop(Dataset* dataSet, const vector<TRoot
                                 //trainer_->Fill("B","AngleThMu",AngleThMu);
                                 trainer_->Fill("B","HadrWmass",Wh.M());
                                 trainer_->Fill("B","TopMass",Th.M());
-                                trainer_->Fill("B","AngleThLep",AngleThLep);
+                                // trainer_->Fill("B","AngleThLep",AngleThLep);
 
                                 //trainer_->Fill("B","sumE",sumE);
 
@@ -767,6 +769,7 @@ void JetCombiner::ProcessEvent_SingleHadTop(Dataset* dataSet, const vector<TRoot
 
 void JetCombiner::ProcessEvent(Dataset* dataSet, const vector<TRootMCParticle*> mcParticles, const vector<TRootPFJet*> selectedJets, const TLorentzVector* selectedLepton, vector<TRootElectron*> vectEl, vector<TRootMuon*> vectMu, float scaleFactor, bool TprimeEvaluation) {
     //initialize stuff for each event
+    bool all4PartonsMatched = false; // True if the 4 ttbar semi-lep partons are matched to 4 jets (not necessarily the 4 highest pt jets)    
     all4JetsMatched_MCdef_ = false; // True if the 4 highest pt jets are matched to the 4 ttbar semi-lep partons
     hadronictopJetsMatched_MCdef_ = false;
 
