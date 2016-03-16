@@ -63,6 +63,9 @@ class MultiSamplePlot{
 		TGraphAsymmErrors *  RatioErrorGraph_; /**for error band on Data/MC ratio plot*/		
 		float maxY_;
 		float minLogY_;
+		float logYMultiplicator_;
+		float maxLogY_;
+		float maxLogYAreaNorm_;
 		TString text_;
 		bool showNumberEntries_;
 		string errorbandfile_;
