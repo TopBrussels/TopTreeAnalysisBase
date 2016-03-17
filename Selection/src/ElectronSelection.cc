@@ -239,12 +239,12 @@ std::vector<TRootElectron*> ElectronSelection::GetSelectedDisplacedElectrons(flo
 	//      cout << "iso cut required and passed" <<endl;
 	saveit=true;
       }
-      // apply id only                                                                                                                                                                                                                                                   
+      // apply id only 
       if( !applyIso  && applyId  && identificationDisplacedElectron(el)){
 	//      cout << "id cut required and passed" <<endl
 	saveit=true;
       }
-      // apply both                                                                                                                                                                                                                                                      
+      // apply both 
       if( applyIso && isolationDisplacedElectron(el, relIsoB, relIsoEC) && applyId && identificationDisplacedElectron(el)){
 	//      cout << "id and iso cut required and passed" <<endl
 	saveit=true;
@@ -802,16 +802,16 @@ bool ElectronSelection::isPVSelected(const std::vector<TRootVertex*>& vertex, in
 //---- selection functions for displaced electrons and muons. factorising ID and isolation.
 bool ElectronSelection::isolationDisplacedElectron(TRootElectron* el, float relIsoB, float relIsoEC) const{
   if( fabs(el->superClusterEta()) <= 1.479){
-    //    if(pfElectronIso(el) < 0.0354)
-    if(pfElectronIso(el) < relIsoB)
+    //    if(pfElectronIso(el, true) < 0.0354)
+    if(pfElectronIso(el, true) < relIsoB) // using the 25ns Effective Area 
       return true;
     else
       return false;
   }
-  // For the endcap                                                                                                                                                                                                                                                        
+  // For the endcap 
   else if (fabs(el->superClusterEta()) < 2.5){
-    //    if(pfElectronIso(el) < 0.0646)
-    if(pfElectronIso(el) < relIsoEC)
+    //    if(pfElectronIso(el, true) < 0.0646)
+    if(pfElectronIso(el, true) < relIsoEC) // using the 25ns Effective Area
       return true;
     else
       return false;
