@@ -147,7 +147,7 @@ std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons(float PtThr,flo
 
 std::vector<TRootMuon*> Run2Selection::GetSelectedDisplacedMuons() const
 {
-  return muonSelector->GetSelectedDisplacedMuons(35.,2.4,0.12,false,false);
+  return muonSelector->GetSelectedDisplacedMuons(35.,2.4,0.12, true, true);
 }
 
 
@@ -315,13 +315,13 @@ std::vector<TRootElectron*> Run2Selection::GetSelectedElectrons(float PtThr, flo
     return electronSelector->GetSelectedElectrons(PtThr, etaThr, WorkingPoint, ProductionCampaign, CutsBased);
 }
 
-std::vector<TRootElectron*> Run2Selection::GetSelectedDisplacedElectrons(float PtThr, float EtaThr,bool applyIso, bool applyId) const {
+std::vector<TRootElectron*> Run2Selection::GetSelectedDisplacedElectrons(float PtThr, float EtaThr, float relIsoB, float relIsoEC, bool applyIso, bool applyId) const {
 
-  return electronSelector->GetSelectedDisplacedElectrons(PtThr, EtaThr,applyIso , applyId);
+  return electronSelector->GetSelectedDisplacedElectrons(PtThr, EtaThr, relIsoB, relIsoEC, applyIso , applyId);
 }
 
 std::vector<TRootElectron*> Run2Selection::GetSelectedDisplacedElectrons() const{
-  return GetSelectedDisplacedElectrons(40.0, 2.4, false, false);
+  return GetSelectedDisplacedElectrons(40.0, 2.4, 0.0354, 0.0646, true, true);
 }
 
 //____________IS SELECTED_______________________________________________//
