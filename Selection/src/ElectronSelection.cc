@@ -216,7 +216,7 @@ std::vector<TRootElectron*> ElectronSelection::GetSelectedElectrons(float PtThr,
 }
 
 // displaced electrons
-std::vector<TRootElectron*> ElectronSelection::GetSelectedDisplacedElectrons(float PtThr, float EtaThr,bool applyIso, bool applyId) const
+std::vector<TRootElectron*> ElectronSelection::GetSelectedDisplacedElectrons(float PtThr, float EtaThr, float relIsoB, float relIsoEC, bool applyIso, bool applyId) const
 {
   // use tight electron ID (cut-based) for now, but without cuts on  d0 dz . This ID can be in flux, and for now is hard-coded here:
   //These quality cuts reflect the recommended Tight cut-based electron ID as provided by the EGM POG. Last updated: 2 december 2015
@@ -235,17 +235,17 @@ std::vector<TRootElectron*> ElectronSelection::GetSelectedDisplacedElectrons(flo
 	saveit = true;
       }
       // apply iso only
-      if(applyIso && isolationDisplacedElectron(el) && !applyId){
+      if(applyIso && isolationDisplacedElectron(el, relIsoB, relIsoEC) && !applyId){
 	//      cout << "iso cut required and passed" <<endl;
 	saveit=true;
       }
-      // apply id only                                                                                                                                                                                                                                                   
+      // apply id only 
       if( !applyIso  && applyId  && identificationDisplacedElectron(el)){
 	//      cout << "id cut required and passed" <<endl
 	saveit=true;
       }
-      // apply both                                                                                                                                                                                                                                                      
-      if( applyIso && isolationDisplacedElectron(el) && applyId && identificationDisplacedElectron(el)){
+      // apply both 
+      if( applyIso && isolationDisplacedElectron(el, relIsoB, relIsoEC) && applyId && identificationDisplacedElectron(el)){
 	//      cout << "id and iso cut required and passed" <<endl
 	saveit=true;
       }
@@ -258,7 +258,7 @@ std::vector<TRootElectron*> ElectronSelection::GetSelectedDisplacedElectrons(flo
 }
 
 std::vector<TRootElectron*> ElectronSelection::GetSelectedDisplacedElectrons() const{
-  return GetSelectedDisplacedElectrons(42.0, 2.4,false,false);
+  return GetSelectedDisplacedElectrons(42.0, 2.4, 0.0354, 0.0646, true, true);
 }
 
 
@@ -800,16 +800,18 @@ bool ElectronSelection::isPVSelected(const std::vector<TRootVertex*>& vertex, in
 //______________________________________________________________________//
 
 //---- selection functions for displaced electrons and muons. factorising ID and isolation.
-bool ElectronSelection::isolationDisplacedElectron(TRootElectron* el) const{
+bool ElectronSelection::isolationDisplacedElectron(TRootElectron* el, float relIsoB, float relIsoEC) const{
   if( fabs(el->superClusterEta()) <= 1.479){
-    if(pfElectronIso(el) < 0.0354)
+    //    if(pfElectronIso(el, true) < 0.0354)
+    if(pfElectronIso(el, true) < relIsoB) // using the 25ns Effective Area 
       return true;
     else
       return false;
   }
-  // For the endcap                                                                                                                                                                                                                                                        
+  // For the endcap 
   else if (fabs(el->superClusterEta()) < 2.5){
-    if(pfElectronIso(el) < 0.0646)
+    //    if(pfElectronIso(el, true) < 0.0646)
+    if(pfElectronIso(el, true) < relIsoEC) // using the 25ns Effective Area
       return true;
     else
       return false;

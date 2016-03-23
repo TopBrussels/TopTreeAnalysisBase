@@ -77,6 +77,9 @@ void MultiSamplePlot::Initialize()
   RatioErrorGraph_ = 0;
   maxY_ = -1;
   minLogY_ = 1.;
+  logYMultiplicator_ = 1000;
+  maxLogY_ = 1.;
+  maxLogYAreaNorm_ = 1.;
   showNumberEntries_ = true;
   //errorbandfile_ = "systematics.root";
   errorbandfile_ = "errorbands.root";
@@ -317,7 +320,7 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
     }
 
 
-  leg_ = new TLegend(0.65,0.73,0.97,0.94);
+  leg_ = new TLegend(0.60,0.70,0.97,0.94);
   leg_->SetFillColor(0);
   leg_->SetTextFont(42);
   leg_->SetLineColor(1);
@@ -327,7 +330,7 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
   if( ! showNumberEntries_ ) leg_->SetX1(0.76);
 
   //a second legend is needed because otherwise it will add the datasets two times to the same legend...
-  legAreaNorm_ = new TLegend(0.45,0.63,0.97,0.94);
+  legAreaNorm_ = new TLegend(0.60,0.70,0.97,0.94);
   legAreaNorm_->SetFillColor(0);
   legAreaNorm_->SetTextFont(42);
   legAreaNorm_->SetLineColor(1);
@@ -409,6 +412,7 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
       DrawStackedPlot(hCanvasStack_,hCanvasStackLogY_,hStack_,histosForOverlay,scaleNPSignal,histosForHStack[0]->GetXaxis()->GetTitle(),histosForHStack[0]->GetYaxis()->GetTitle(),RatioType);
       ymax = 1.3*hStack_->GetMaximum();
       if(ymaxoverlay > ymax) ymax = ymaxoverlay;
+      maxLogY_ = logYMultiplicator_ * ymax;
     }
 
   //'area normalized'
@@ -429,8 +433,9 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
 	}
 
       DrawStackedPlot(hCanvasStackAreaNorm_,hCanvasStackAreaNormLogY_,hStackAreaNorm_,histosForOverlayAreaNorm,scaleNPSignal,histosForHStackAreaNorm[0]->GetXaxis()->GetTitle(),histosForHStackAreaNorm[0]->GetYaxis()->GetTitle(),RatioType);
-      ymaxAreaNorm = 1.3*hStackAreaNorm_->GetMaximum();
+      ymaxAreaNorm = 1.3*hStackAreaNorm_->GetMaximum(); 
       if(ymaxoverlayAreaNorm > ymaxAreaNorm) ymaxAreaNorm = ymaxoverlayAreaNorm;
+      maxLogYAreaNorm_ = logYMultiplicator_ * ymaxAreaNorm;
     }
 
 
@@ -745,7 +750,9 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
   if(maxY_ > 0)
     {
       ymax = maxY_;
+      maxLogY_ = logYMultiplicator_ * ymax;
       ymaxAreaNorm = maxY_;
+      maxLogYAreaNorm_ = logYMultiplicator_ * ymaxAreaNorm;
     }
   if(hStack_)	hStack_->SetMaximum(ymax);
   if(hStackAreaNorm_) hStackAreaNorm_->SetMaximum(ymaxAreaNorm);
@@ -958,6 +965,7 @@ void MultiSamplePlot::Write(TFile* fout, string label, bool savePNG, string path
   if(hCanvasStackLogY_)
     {
       if(hStack_) hStack_->SetMinimum(minLogY_);
+      if(hStack_) hStack_->SetMaximum(maxLogY_);
       hCanvasStackLogY_->Write();
       if(savePNG)
 	hCanvasStackLogY_->SaveAs( (pathPNG+"/"+label+"_StackLogY."+ext).c_str() );
@@ -974,6 +982,7 @@ void MultiSamplePlot::Write(TFile* fout, string label, bool savePNG, string path
   if(hCanvasStackAreaNormLogY_ && hData_)
     {
       if(hStackAreaNorm_) hStackAreaNorm_->SetMinimum(minLogY_);
+      if(hStackAreaNorm_) hStackAreaNorm_->SetMaximum(maxLogYAreaNorm_);
       hCanvasStackAreaNormLogY_->Write();
       if(savePNG)
 	hCanvasStackAreaNormLogY_->SaveAs( (pathPNG+"/"+label+"_StackAreaNormLogY."+ext).c_str() );

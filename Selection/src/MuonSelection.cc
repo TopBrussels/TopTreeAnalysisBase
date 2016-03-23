@@ -70,27 +70,26 @@ std::vector<TRootMuon*> MuonSelection::GetSelectedDisplacedMuons (float PtThr, f
       saveit=false;
       TRootMuon *muon = (TRootMuon*) muons[i]; // type conversion, not very clear why necessary... also used in electrons                                                                                                            
       if( muons[i]->Pt()>PtThr && fabs(muon->Eta())<EtaThr){
-        // no id no iso                                                                                                                                                                                                                                                        
+        // no id no iso 
         if (!applyIso && !applyId) {
-          //      cout << "no id and no iso" << endl;                                                                                                                                                                                                                          
+          //      cout << "no id and no iso" << endl;
           saveit = true;
         }
-        // apply iso only                                                                                                                                                                                                                                                      
+        // apply iso only 
         if(applyIso && isolationDisplacedMuon(muon,RelIso) && !applyId){
-          //      cout << "iso cut required and passed" <<endl;                                                                                                                                                                                                                
+          //      cout << "iso cut required and passed" <<endl; 
           saveit=true;
         }
-        // apply id only                                                                                                                                                                                                                                                       
+        // apply id only 
         if( !applyIso  && applyId  && identificationDisplacedMuon(muon, NormChi2,  NTrackerLayersWithMeas, NValidMuonHits, NValidPixelHits, NMatchedStations)){
-          //      cout << "id cut required and passed" <<endl;                                                                                                                                                                                                                 
+          //      cout << "id cut required and passed" <<endl; 
           saveit=true;
         }
-        // apply both                                                                                                                                                                                                                                                          
+        // apply both 
         if( applyIso && isolationDisplacedMuon(muon,RelIso) && applyId  &&  identificationDisplacedMuon(muon, NormChi2,  NTrackerLayersWithMeas, NValidMuonHits, NValidPixelHits, NMatchedStations)){
-          //      cout << "id and iso cut required and passed" <<endl;                                                                                                                                                                                                         
+          //      cout << "id and iso cut required and passed" <<endl; 
           saveit=true;
         }
-
         if (saveit) selectedMuons.push_back(muons[i]);
       }
 
@@ -107,7 +106,7 @@ std::vector<TRootMuon*> MuonSelection::GetSelectedDisplacedMuons(float PtThr,flo
 
 std::vector<TRootMuon*> MuonSelection::GetSelectedDisplacedMuons() const
 {
-  return GetSelectedDisplacedMuons(35.,2.4,0.15,false,false);
+  return GetSelectedDisplacedMuons(35.,2.4,0.15, true, true);
 }
 
 

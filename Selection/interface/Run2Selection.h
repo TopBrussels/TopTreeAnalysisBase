@@ -89,7 +89,7 @@ public:
 
 
     // displaced electrons
-    std::vector<TRootElectron*> GetSelectedDisplacedElectrons (float PtThr, float EtaThr, bool applyIso=true, bool applyId=true) const;
+    std::vector<TRootElectron*> GetSelectedDisplacedElectrons (float PtThr, float EtaThr, float relIsoB, float relIsoEC, bool applyIso=true, bool applyId=true) const;
     std::vector<TRootElectron*> GetSelectedDisplacedElectrons () const;
 
 
