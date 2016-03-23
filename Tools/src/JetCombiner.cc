@@ -6,7 +6,7 @@ bool sortMVAValues (MVAValues f1, MVAValues f2) {
 
 struct HighestCVSBtag {
     bool operator()( TRootPFJet* j1, TRootPFJet* j2 ) const {
-        return j1->btag_combinedSecondaryVertexBJetTags() > j2->btag_combinedSecondaryVertexBJetTags();
+        return j1->btag_combinedInclusiveSecondaryVertexV2BJetTags() > j2->btag_combinedInclusiveSecondaryVertexV2BJetTags();
     }
 };
 
@@ -431,11 +431,11 @@ void JetCombiner::ProcessEvent_SingleHadTop(Dataset* dataSet, const vector<TRoot
 
                     //calculate the vars
                     // btag
-                    float btag_i = selectedJets_[i]->btag_combinedSecondaryVertexBJetTags();
+                    float btag_i = selectedJets_[i]->btag_combinedInclusiveSecondaryVertexV2BJetTags();
                     if(btag_i < -90) btag_i = 0;
-                    float btag_j = selectedJets_[j]->btag_combinedSecondaryVertexBJetTags();
+                    float btag_j = selectedJets_[j]->btag_combinedInclusiveSecondaryVertexV2BJetTags();
                     if(btag_j < -90) btag_j = 0;
-                    float btag_k = selectedJets_[k]->btag_combinedSecondaryVertexBJetTags();
+                    float btag_k = selectedJets_[k]->btag_combinedInclusiveSecondaryVertexV2BJetTags();
                     if(btag_k < -90) btag_k = 0;
 
                     tempselectedJets.clear();
@@ -469,7 +469,7 @@ void JetCombiner::ProcessEvent_SingleHadTop(Dataset* dataSet, const vector<TRoot
                     }
                     float btag = -9999;
                     if(tempselectedJets.size()>0)
-                        btag = tempselectedJets[bj1]->btag_combinedSecondaryVertexBJetTags();
+                        btag = tempselectedJets[bj1]->btag_combinedInclusiveSecondaryVertexV2BJetTags();
 
                     // float  delR =  sqrt(   pow(tempselectedJets[wj1]->Eta() - tempselectedJets[wj2]->Eta(),2) + pow(tempselectedJets[wj1]->Phi() - tempselectedJets[wj2]->Phi(),2 )   ) ;
                     // float  delR =  sqrt(   pow(selectedJets[0]->Eta() - selectedJets[1]->Eta(),2) + pow(selectedJets[0]->Phi() - selectedJets[1]->Phi(),2 )   )  +  sqrt(   pow(selectedJets[1]->Eta() - selectedJets[2]->Eta(),2) + pow(selectedJets[1]->Phi() - selectedJets[2]->Phi(),2 )   )  + sqrt(   pow(selectedJets[2]->Eta() - selectedJets[0]->Eta(),2) + pow(selectedJets[2]->Phi() - selectedJets[0]->Phi(),2 )) ;
