@@ -228,7 +228,7 @@ std::vector<TRootElectron*> ElectronSelection::GetSelectedDisplacedElectrons(flo
     saveit=false;
     TRootElectron* el = (TRootElectron*) electrons[i];
 
-    if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr) {
+    if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr && !el->isEBEEGap()) {
       // no id no iso
       if (!applyIso && !applyId) {
 	//      cout << "no id and no iso" << endl;
