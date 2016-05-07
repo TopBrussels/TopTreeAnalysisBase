@@ -1,6 +1,6 @@
 #include "../interface/MultiSamplePlot.h"
 
-MultiSamplePlot::MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int Nbins, float Min, float Max, string XaxisLabel, string YaxisLabel, string Text)
+/*MultiSamplePlot::MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int Nbins, float Min, float Max, string XaxisLabel, string YaxisLabel, string Text)
 {
   Nbins_ = Nbins;
   string histoName = "";
@@ -16,6 +16,39 @@ MultiSamplePlot::MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int
     h->Sumw2();
     h->GetXaxis()->SetTitle(XaxisLabel.c_str());
     h->GetYaxis()->SetTitle(YaxisLabel.c_str());
+    plots_.push_back(pair<TH1F*,Dataset*>(h,datasets[i]));
+    if(datasets[i]->Name().find("data") == 0 || datasets[i]->Name().find("Data") == 0 || datasets[i]->Name().find("DATA") == 0 )
+      lumi_ = datasets[i]->EquivalentLumi();
+  }
+  Initialize();
+}*/
+
+MultiSamplePlot::MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int Nbins, float Min, float Max, string XaxisLabel, string YaxisLabel, string Text, string Units)
+{
+  std::stringstream stream;
+  string XaxisLabel_, YaxisLabel_;
+  Nbins_ = Nbins;
+  string histoName = "";
+  string histoTitle = "";
+  float binWidth = (Max - Min)/Nbins;
+  stream << std::fixed << std::setprecision(2) << binWidth;
+  string sbinWidth = stream.str();
+
+  if(!Units.empty()) XaxisLabel_ = XaxisLabel + " (" + Units + ")";
+  else XaxisLabel_ = XaxisLabel;
+  if(!Units.empty()) YaxisLabel_ = YaxisLabel + " #backslash " + sbinWidth + " " + Units;
+  else YaxisLabel_ = YaxisLabel + " #backslash " + sbinWidth + " units";
+  plotName_ = PlotName;
+  text_ = TString(Text);
+  lumi_ = 1.;
+  for(unsigned int i=0;i<datasets.size();i++){
+    histoName  = PlotName+"_"+datasets[i]->Name();
+    histoTitle = datasets[i]->Title();
+    TH1F* h = new TH1F(histoName.c_str(),histoTitle.c_str(),Nbins,Min,Max);
+    h->SetStats(false);
+    h->Sumw2();
+    h->GetXaxis()->SetTitle(XaxisLabel_.c_str());
+    h->GetYaxis()->SetTitle(YaxisLabel_.c_str());
     plots_.push_back(pair<TH1F*,Dataset*>(h,datasets[i]));
     if(datasets[i]->Name().find("data") == 0 || datasets[i]->Name().find("Data") == 0 || datasets[i]->Name().find("DATA") == 0 )
       lumi_ = datasets[i]->EquivalentLumi();
@@ -130,6 +163,8 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
 {
   vector<TH1F*> normalizedhistos;
   vector<Dataset*> mergeddatasets;
+
+  this->setTDRStyle();
 
   if(RatioType==0 && addRatioErrorBand)
     {
@@ -320,18 +355,18 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
     }
 
 
-  leg_ = new TLegend(0.60,0.70,0.97,0.94);
-  leg_->SetFillColor(0);
+  leg_ = new TLegend(0.60,0.66,0.95,0.90);
+  leg_->SetFillColorAlpha(0,0.0);
   leg_->SetTextFont(42);
   leg_->SetLineColor(1);
   leg_->SetLineWidth(1);
   leg_->SetLineStyle(0);
-  leg_->SetBorderSize(1);
+  leg_->SetBorderSize(0);
   if( ! showNumberEntries_ ) leg_->SetX1(0.76);
 
   //a second legend is needed because otherwise it will add the datasets two times to the same legend...
-  legAreaNorm_ = new TLegend(0.60,0.70,0.97,0.94);
-  legAreaNorm_->SetFillColor(0);
+  legAreaNorm_ = new TLegend(0.60,0.66,0.95,0.90);
+  legAreaNorm_->SetFillColorAlpha(0,0.0);
   legAreaNorm_->SetTextFont(42);
   legAreaNorm_->SetLineColor(1);
   legAreaNorm_->SetLineWidth(1);
@@ -395,9 +430,9 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
   //regular 'luminosity normalized'
   name = "CanvasStack_"+label;
   hCanvasStack_ = new TCanvas(name.c_str(), name.c_str(), 1000, 700);
-  hCanvasStack_->SetRightMargin(0.035);
+  hCanvasStack_->SetRightMargin(0.04);
   hCanvasStackLogY_ = new TCanvas((name+"_LogY").c_str(), (name+"_LogY").c_str(), 1000, 700);
-  hCanvasStackLogY_->SetRightMargin(0.035);
+  hCanvasStackLogY_->SetRightMargin(0.04);
   float ymax = 0;
   if(hStack_)
     {
@@ -418,9 +453,9 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
   //'area normalized'
   name = "CanvasStackAreaNorm_"+label;
   hCanvasStackAreaNorm_ = new TCanvas(name.c_str(), name.c_str(), 1000, 700);
-  hCanvasStackAreaNorm_->SetRightMargin(0.035);
+  hCanvasStackAreaNorm_->SetRightMargin(0.04);
   hCanvasStackAreaNormLogY_ = new TCanvas((name+"_LogY").c_str(), (name+"_LogY").c_str(), 1000, 700);
-  hCanvasStackAreaNormLogY_->SetRightMargin(0.035);
+  hCanvasStackAreaNormLogY_->SetRightMargin(0.04);
   float ymaxAreaNorm = 0;
   if(hStackAreaNorm_)
     {
@@ -481,7 +516,8 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
       pad->SetFillColor(0); // was 1 but could have been related to the problem of black canvases
       pad->SetFillStyle(0); // was 1 but could have been related to the problem of black canvases
       pad->SetGridy(1);
-      pad->SetRightMargin(0.035);
+      pad->SetRightMargin(0.04);
+      pad->SetLeftMargin(0.12);
       padLogY = (TPad*) pad->Clone();
     }
 
@@ -626,7 +662,8 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
       padAreaNorm->SetFillColor(0);
       padAreaNorm->SetFillStyle(0);
       padAreaNorm->SetGridy(1);
-      padAreaNorm->SetRightMargin(0.035);
+      pad->SetRightMargin(0.04);
+      pad->SetLeftMargin(0.12);
       padAreaNormLogY = (TPad*) padAreaNorm->Clone();
     }
 
@@ -784,13 +821,81 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
 
 void MultiSamplePlot::DrawStackedPlot(TCanvas* canvas, TCanvas* canvasLogY, THStack* hstack, vector<TH1F*> histosForOverlay, int scaleNPSignal, const char* xaxistitle, const char* yaxistitle, unsigned int RatioType)
 {
+  float H = canvas->GetWh();
+  float W = canvas->GetWw();
+  // references for T, B, L, R
+  float T = 0.08*H;
+  float B = 0.12*H; 
+  float L = 0.12*W;
+  float R = 0.04*W;
+  canvas->SetFillColor(0);
+  canvas->SetBorderMode(0);
+  canvas->SetFrameFillStyle(0);
+  canvas->SetFrameBorderMode(0);
+  canvas->SetLeftMargin( L/W );
+  canvas->SetRightMargin( R/W );
+  canvas->SetTopMargin( T/H );
+//  canvas->SetBottomMargin( B/H );
+  canvas->SetTickx(0);
+  canvas->SetTicky(0);
+
+  canvasLogY->SetFillColor(0);
+  canvasLogY->SetBorderMode(0);
+  canvasLogY->SetFrameFillStyle(0);
+  canvasLogY->SetFrameBorderMode(0);
+  canvasLogY->SetLeftMargin( L/W );
+  canvasLogY->SetRightMargin( R/W );
+  canvasLogY->SetTopMargin( T/H );
+//  canvas->SetBottomMargin( B/H );
+  canvasLogY->SetTickx(0);
+  canvasLogY->SetTicky(0);
+
+  float l = canvas->GetLeftMargin();
+  float t = canvas->GetTopMargin();
+  float r = canvas->GetRightMargin();
+  float b = canvas->GetBottomMargin();
+  int iPosX = 11;
+  bool outOfFrame    = false;
+
+  int alignY_=3;
+  int alignX_=2;
+  if( iPosX/10==0 ) alignX_=1;
+  if( iPosX==0    ) alignX_=1;
+  if( iPosX==0    ) alignY_=1;
+  if( iPosX/10==1 ) alignX_=1;
+  if( iPosX/10==2 ) alignX_=2;
+  if( iPosX/10==3 ) alignX_=3;
+  //if( iPosX == 0  ) relPosX = 0.12;
+  int align_ = 10*alignX_ + alignY_;
+
   stringstream slumi; slumi.precision(3); slumi << lumi_/1000; //luminosity given in picobarns, but will be displayed in femtobarns, because this in not 2010 anymore.
   stringstream ssqrts; ssqrts << sqrts_; //sqrt(s) given in TeV
   TLatex cmstext;
+
+  TString lumiText = "2.6 fb^{-1} (13 TeV)";
+  float extraTextSize = extraOverCmsTextSize*cmsTextSize;
+
   cmstext.SetNDC(true);
-  cmstext.SetTextAlign(12);
   cmstext.SetTextFont(42);
-  cmstext.SetTextSize(0.05);
+  cmstext.SetTextAlign(31); 
+  cmstext.SetTextSize(lumiTextSize*t); 
+  cmstext.SetTextColor(kBlack);
+  cmstext.SetTextAngle(0);
+
+  float posX_=0;
+  if( iPosX%10<=1 )
+    {
+      posX_ =   l + relPosX*(1-l-r);
+    }
+  else if( iPosX%10==2 )
+    {
+      posX_ =  l + 0.5*(1-l-r);
+    }
+  else if( iPosX%10==3 )
+    {
+      posX_ =  1-r - relPosX*(1-l-r);
+    }
+  float posY_ = 1-t - relPosY*(1-t-b);
 
   TLatex text;
   text.SetNDC(true);
@@ -803,20 +908,35 @@ void MultiSamplePlot::DrawStackedPlot(TCanvas* canvas, TCanvas* canvasLogY, THSt
   hstack->Draw("HIST");
   hstack->GetXaxis()->SetTitle(xaxistitle);
   hstack->GetYaxis()->SetTitle(yaxistitle);
-  hstack->GetYaxis()->SetTitleOffset(1.1);  //or 1.4
+  hstack->GetYaxis()->SetTitleOffset(1.0);  //or 1.4
+
+  cmstext.DrawLatex(1-r,1-t+lumiTextOffset*t,"2.6 fb^{-1} (13 TeV)");
+
+  cmstext.SetTextAlign(align_);
+  cmstext.SetTextFont(cmsTextFont);
+  cmstext.SetTextSize(cmsTextSize*t);
 
   if(RatioType>0)
     {
       hstack->GetXaxis()->SetLabelSize(0);
       hstack->GetXaxis()->SetTitleSize(0);
     }
-
+  cmstext.DrawLatex(posX_,posY_,"CMS");
   if(hData_)
     {
-      if(prelim_) cmstext.DrawLatex(0.16,0.975,("CMS Preliminary, "+slumi.str()+" fb^{-1} at #sqrt{s} = "+ssqrts.str()+" TeV").c_str());
-      else cmstext.DrawLatex(0.16,0.975,("CMS, "+slumi.str()+" fb^{-1} at #sqrt{s} = "+ssqrts.str()+" TeV").c_str());
+      if(prelim_) {
+	  cmstext.SetTextFont(extraTextFont);
+	  cmstext.SetTextAlign(align_);
+	  cmstext.SetTextSize(extraTextSize*t);
+	  cmstext.DrawLatex(posX_, posY_- relExtraDY*cmsTextSize*t, extraText);
+      }
     }
-  else cmstext.DrawLatex(0.16,0.975,("CMS simulation, "+slumi.str()+" fb^{-1} at #sqrt{s} = "+ssqrts.str()+" TeV").c_str());
+  else {
+	  cmstext.SetTextFont(extraTextFont);
+	  cmstext.SetTextAlign(align_);
+	  cmstext.SetTextSize(extraTextSize*t);
+	  cmstext.DrawLatex(posX_, posY_- relExtraDY*cmsTextSize*t, "Simulation");
+  }
 
   if(!text_.IsNull()) text.DrawLatex(0.2,0.9,text_);
 
@@ -830,12 +950,31 @@ void MultiSamplePlot::DrawStackedPlot(TCanvas* canvas, TCanvas* canvasLogY, THSt
   canvasLogY->cd();
   canvasLogY->SetLogy();
   hstack->Draw("HIST");
+  cmstext.SetTextFont(42);
+  cmstext.SetTextAlign(31); 
+  cmstext.SetTextSize(lumiTextSize*t); 
+  cmstext.DrawLatex(1-r,1-t+lumiTextOffset*t,"2.6 fb^{-1} (13 TeV)");
+
+  cmstext.SetTextAlign(align_);
+  cmstext.SetTextFont(cmsTextFont);
+  cmstext.SetTextSize(cmsTextSize*t);
+  cmstext.DrawLatex(posX_,posY_,"CMS");
+
   if(hData_)
     {
-      if(prelim_) cmstext.DrawLatex(0.16,0.975,("CMS Preliminary, "+slumi.str()+" fb^{-1} at #sqrt{s} = "+ssqrts.str()+" TeV").c_str());
-      else cmstext.DrawLatex(0.16,0.975,("CMS, "+slumi.str()+" fb^{-1} at #sqrt{s} = "+ssqrts.str()+" TeV").c_str());
+      if(prelim_) {
+	  cmstext.SetTextFont(extraTextFont);
+	  cmstext.SetTextAlign(align_);
+	  cmstext.SetTextSize(extraTextSize*t);
+	  cmstext.DrawLatex(posX_, posY_- relExtraDY*cmsTextSize*t, extraText);
+      }
     }
-  else cmstext.DrawLatex(0.16,0.975,("CMS simulation, "+slumi.str()+" fb^{-1} at #sqrt{s} = "+ssqrts.str()+" TeV").c_str());
+  else {
+	  cmstext.SetTextFont(extraTextFont);
+	  cmstext.SetTextAlign(align_);
+	  cmstext.SetTextSize(extraTextSize*t);
+	  cmstext.DrawLatex(posX_, posY_- relExtraDY*cmsTextSize*t, "Simulation");
+  }
 
   if(!text_.IsNull()) text.DrawLatex(0.5,0.86,text_);
 
@@ -995,3 +1134,150 @@ void MultiSamplePlot::Write(TFile* fout, string label, bool savePNG, string path
 	plots_[i].first->Write();
       }
 }
+
+void MultiSamplePlot::setTDRStyle() {
+  TStyle *tdrStyle = new TStyle("tdrStyle","Style for P-TDR");
+
+// For the canvas:
+  tdrStyle->SetCanvasBorderMode(0);
+  tdrStyle->SetCanvasColor(kWhite);
+  tdrStyle->SetCanvasDefH(600); //Height of canvas
+  tdrStyle->SetCanvasDefW(600); //Width of canvas
+  tdrStyle->SetCanvasDefX(0);   //POsition on screen
+  tdrStyle->SetCanvasDefY(0);
+
+// For the Pad:
+  tdrStyle->SetPadBorderMode(0);
+  // tdrStyle->SetPadBorderSize(Width_t size = 1);
+  tdrStyle->SetPadColor(kWhite);
+  tdrStyle->SetPadGridX(false);
+  tdrStyle->SetPadGridY(false);
+  tdrStyle->SetGridColor(0);
+  tdrStyle->SetGridStyle(3);
+  tdrStyle->SetGridWidth(1);
+
+// For the frame:
+  tdrStyle->SetFrameBorderMode(0);
+  tdrStyle->SetFrameBorderSize(1);
+  tdrStyle->SetFrameFillColor(0);
+  tdrStyle->SetFrameFillStyle(0);
+  tdrStyle->SetFrameLineColor(1);
+  tdrStyle->SetFrameLineStyle(1);
+  tdrStyle->SetFrameLineWidth(1);
+  
+// For the histo:
+  // tdrStyle->SetHistFillColor(1);
+  // tdrStyle->SetHistFillStyle(0);
+  tdrStyle->SetHistLineColor(1);
+  tdrStyle->SetHistLineStyle(0);
+  tdrStyle->SetHistLineWidth(1);
+  // tdrStyle->SetLegoInnerR(Float_t rad = 0.5);
+  // tdrStyle->SetNumberContours(Int_t number = 20);
+
+  tdrStyle->SetEndErrorSize(2);
+  // tdrStyle->SetErrorMarker(20);
+  //tdrStyle->SetErrorX(0.);
+  
+  tdrStyle->SetMarkerStyle(20);
+  
+//For the fit/function:
+  tdrStyle->SetOptFit(1);
+  tdrStyle->SetFitFormat("5.4g");
+  tdrStyle->SetFuncColor(2);
+  tdrStyle->SetFuncStyle(1);
+  tdrStyle->SetFuncWidth(1);
+
+//For the date:
+  tdrStyle->SetOptDate(0);
+  // tdrStyle->SetDateX(Float_t x = 0.01);
+  // tdrStyle->SetDateY(Float_t y = 0.01);
+
+// For the statistics box:
+  tdrStyle->SetOptFile(0);
+  tdrStyle->SetOptStat(0); // To display the mean and RMS:   SetOptStat("mr");
+  tdrStyle->SetStatColor(kWhite);
+  tdrStyle->SetStatFont(42);
+  tdrStyle->SetStatFontSize(0.025);
+  tdrStyle->SetStatTextColor(1);
+  tdrStyle->SetStatFormat("6.4g");
+  tdrStyle->SetStatBorderSize(1);
+  tdrStyle->SetStatH(0.1);
+  tdrStyle->SetStatW(0.15);
+  // tdrStyle->SetStatStyle(Style_t style = 1001);
+  // tdrStyle->SetStatX(Float_t x = 0);
+  // tdrStyle->SetStatY(Float_t y = 0);
+
+// Margins:
+  tdrStyle->SetPadTopMargin(0.05);
+  tdrStyle->SetPadBottomMargin(0.13);
+  tdrStyle->SetPadLeftMargin(0.16);
+  tdrStyle->SetPadRightMargin(0.02);
+
+// For the Global title:
+
+  tdrStyle->SetOptTitle(0);
+  tdrStyle->SetTitleFont(42);
+  tdrStyle->SetTitleColor(1);
+  tdrStyle->SetTitleTextColor(1);
+  tdrStyle->SetTitleFillColor(10);
+  tdrStyle->SetTitleFontSize(0.05);
+  // tdrStyle->SetTitleH(0); // Set the height of the title box
+  // tdrStyle->SetTitleW(0); // Set the width of the title box
+  // tdrStyle->SetTitleX(0); // Set the position of the title box
+  // tdrStyle->SetTitleY(0.985); // Set the position of the title box
+  // tdrStyle->SetTitleStyle(Style_t style = 1001);
+  // tdrStyle->SetTitleBorderSize(2);
+
+// For the axis titles:
+
+  tdrStyle->SetTitleColor(1, "XYZ");
+  tdrStyle->SetTitleFont(42, "XYZ");
+  tdrStyle->SetTitleSize(0.06, "XYZ");
+  // tdrStyle->SetTitleXSize(Float_t size = 0.02); // Another way to set the size?
+  // tdrStyle->SetTitleYSize(Float_t size = 0.02);
+  tdrStyle->SetTitleXOffset(0.9);
+  tdrStyle->SetTitleYOffset(1.25);
+  // tdrStyle->SetTitleOffset(1.1, "Y"); // Another way to set the Offset
+
+// For the axis labels:
+
+  tdrStyle->SetLabelColor(1, "XYZ");
+  tdrStyle->SetLabelFont(42, "XYZ");
+  tdrStyle->SetLabelOffset(0.005, "XYZ");
+  tdrStyle->SetLabelSize(0.05, "XYZ");
+
+// For the axis:
+
+  tdrStyle->SetAxisColor(1, "XYZ");
+  tdrStyle->SetStripDecimals(kTRUE);
+  tdrStyle->SetTickLength(0.03, "XYZ");
+  tdrStyle->SetNdivisions(510, "XYZ");
+  tdrStyle->SetPadTickX(1);  // To get tick marks on the opposite side of the frame
+  tdrStyle->SetPadTickY(1);
+
+// Change for log plots:
+  tdrStyle->SetOptLogx(0);
+  tdrStyle->SetOptLogy(0);
+  tdrStyle->SetOptLogz(0);
+
+// Postscript options:
+  tdrStyle->SetPaperSize(20.,20.);
+  // tdrStyle->SetLineScalePS(Float_t scale = 3);
+  // tdrStyle->SetLineStyleString(Int_t i, const char* text);
+  // tdrStyle->SetHeaderPS(const char* header);
+  // tdrStyle->SetTitlePS(const char* pstitle);
+
+  // tdrStyle->SetBarOffset(Float_t baroff = 0.5);
+  // tdrStyle->SetBarWidth(Float_t barwidth = 0.5);
+  // tdrStyle->SetPaintTextFormat(const char* format = "g");
+  // tdrStyle->SetPalette(Int_t ncolors = 0, Int_t* colors = 0);
+  // tdrStyle->SetTimeOffset(Double_t toffset);
+  // tdrStyle->SetHistMinimumZero(kTRUE);
+
+  tdrStyle->SetHatchesLineWidth(5);
+  tdrStyle->SetHatchesSpacing(0.05);
+
+  tdrStyle->cd();
+
+}
+

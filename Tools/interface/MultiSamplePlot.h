@@ -10,6 +10,11 @@
 #include "TString.h"
 #include "TGraph.h"
 #include "TGraphAsymmErrors.h"
+#include "TPad.h"
+#include "TLine.h"
+#include "TBox.h"
+#include "TASImage.h"
+#include "TStyle.h"
 
 #include "TopTreeAnalysisBase/Content/interface/Dataset.h"
 #include "TopTreeAnalysisBase/Tools/interface/PlottingTools.h"
@@ -26,7 +31,8 @@ The dataset containing data should be called "data" or "Data" or "DATA".\\
 class MultiSamplePlot{
 
 	public:
-		MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int Nbins, float Min, float Max, string XaxisLabel = string("Variable"), string YaxisLabel = string("Events"), string AddText = string(""));
+//		MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int Nbins, float Min, float Max, string XaxisLabel = string("Variable"), string YaxisLabel = string("Events"), string AddText = string(""));
+		MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int Nbins, float Min, float Max, string XaxisLabel = string("Variable"), string YaxisLabel = string("Events"), string AddText = string(""), string Units = string(""));
 		MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int Nbins, float* binsX, string XaxisLabel = string("Variable"), string YaxisLabel = string("Events"), string AddText = string(""));
 		MultiSamplePlot(vector<pair<TH1F*,Dataset*> > vec, string PlotName, string XaxisLabel, string YaxisLabel, string AddText);
 		~MultiSamplePlot();
@@ -45,11 +51,14 @@ class MultiSamplePlot{
 		void addText(string text) { text_ = text; } /**add some text on the plot (as alternative to specifying it in the constructor)*/
 		string getplotName() {return plotName_; }
 		void setErrorBandFile(string errorbandfile, bool dosystfile = false) { errorbandfile_ = errorbandfile; dosystfile_ = dosystfile;} /**set the file where to look for the errorbands. If systfile is set to true, this file actually only contains systematic shifted histograms, not yet the actual error 'band'*/
-	
+		
+
 	private:
-	  void Initialize(); /**initialize some private members common for all MultiSamplePlot constructors*/
+
+	  	void Initialize(); /**initialize some private members common for all MultiSamplePlot constructors*/
 		void DrawStackedPlot(TCanvas* canvas, TCanvas* canvasLogY, THStack* hstack, vector<TH1F*> histosForOverlay, int scaleNPSignal = 1, const char* xaxistitle = "", const char* yaxistitle = "", unsigned int RatioType = 0);
 		void DrawErrorBand(TH1F* totalSM, TH1F* hErrorPlus, TH1F* hErrorMinus, TH1F* hNominal, TGraphAsymmErrors*  ErrorGraph, bool ErrorBandAroundTotalInput);
+		void setTDRStyle();
 		vector<pair<TH1F*,Dataset*> > plots_;
 		TH1F*    hData_;
 		TCanvas* hCanvas_;
@@ -77,6 +86,34 @@ class MultiSamplePlot{
 		float sqrts_;  /**in TeV, for cms title of plot */
 		bool prelim_;  /**to display "Preliminary" in cms title of plot*/
 		string plotName_;
+		//Variables from May 2016 version of CMS Plotting style
+                TString cmsText     = "CMS";
+		float cmsTextFont   = 61;  // default is helvetic-bold
+
+		bool writeExtraText = false;
+		TString extraText   = "Preliminary";
+		float extraTextFont = 52;  // default is helvetica-italics
+
+		// text sizes and text offsets with respect to the top frame
+		// in unit of the top margin size
+		float lumiTextSize     = 0.6;
+		float lumiTextOffset   = 0.2;
+		float cmsTextSize      = 0.75;
+		float cmsTextOffset    = 0.1;  // only used in outOfFrame version
+
+		float relPosX    = 0.045;
+		float relPosY    = 0.035;
+		float relExtraDY = 1.2;
+
+		// ratio of "CMS" and extra text size
+		float extraOverCmsTextSize  = 0.76;
+
+		TString lumi_13TeV = "20.1 fb^{-1}";
+		TString lumi_8TeV  = "19.7 fb^{-1}";
+		TString lumi_7TeV  = "5.1 fb^{-1}";
+		TString lumi_sqrtS = "";
+
+		bool drawLogo      = false;
 };
 
 #endif
