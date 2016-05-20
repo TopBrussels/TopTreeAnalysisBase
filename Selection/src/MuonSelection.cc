@@ -36,7 +36,7 @@ MuonSelection::~MuonSelection()
 std::vector<TRootMuon*> MuonSelection::GetSelectedMuons() const
 {
         //Default Muon selection method.  This method should be updated to the most recent set of recommended cuts regularly.  Currently it points to the MUON POG Medium working point with Pt, Eta, and dBeta RelIso thresholds set as in the TOP PAG selection TWiki for single lepton event ID.
-	return GetSelectedMuons(26,2.1,0.12, "Tight", "Spring15");
+	return GetSelectedMuons(26,2.1,0.15, "Tight", "Spring15");
 }
 
 std::vector<TRootMuon*> MuonSelection::GetSelectedMuons(float PtThr, float etaThr, float relIso, string WorkingPoint, string ProductionCampaign) const
