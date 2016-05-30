@@ -985,13 +985,13 @@ void JetCombiner::ProcessEvent(Dataset* dataSet, const vector<TRootMCParticle*> 
                     if (i < j && i != j && i != k && i != l && j != k && j != l && k != l) {
                         //calculate the vars
                         // btag
-                        float btag_i = selectedJets_[i]->btag_trackCountingHighEffBJetTags();
+                        float btag_i = 0;//selectedJets_[i]->btag_trackCountingHighEffBJetTags();
                         if(btag_i < -90) btag_i = 0;
-                        float btag_j = selectedJets_[j]->btag_trackCountingHighEffBJetTags();
+                        float btag_j = 0;//selectedJets_[j]->btag_trackCountingHighEffBJetTags();
                         if(btag_j < -90) btag_j = 0;
-                        float btag_k = selectedJets_[k]->btag_trackCountingHighEffBJetTags();
+                        float btag_k = 0;//selectedJets_[k]->btag_trackCountingHighEffBJetTags();
                         if(btag_k < -90) btag_k = 0;
-                        float btag_l = selectedJets_[l]->btag_trackCountingHighEffBJetTags();
+                        float btag_l = 0;//selectedJets_[l]->btag_trackCountingHighEffBJetTags();
                         if(btag_l < -90) btag_l = 0;
 
                         float btag = pow(btag_k,2) + pow(btag_l,2);

@@ -150,7 +150,6 @@ void BTagWeightTools::FillMCEfficiencyHistos(vector< TopTree::TRootPFJet* > allS
 		float btagValue = -100.;
 		std::string tagger_name = (_reader->calib)->tagger();
 		if (tagger_name.find("CSVv2") != std::string::npos || tagger_name.find("csvv2") != std::string::npos){btagValue = allSelectedJets[i]->btag_combinedInclusiveSecondaryVertexV2BJetTags();}
-		else if (tagger_name.find("JP") != std::string::npos || tagger_name.find("jp") != std::string::npos){btagValue = allSelectedJets[i]->btag_jetProbabilityBJetTags();}
 		else if (tagger_name.find("SC") != std::string::npos || tagger_name.find("sc") != std::string::npos){
 				if (_verbose){
 					std::cerr << "Warning in BTagWeightTools: SC discriminator values not yet been included!!!" << std::endl
@@ -238,7 +237,6 @@ float BTagWeightTools::getMCEventWeight(vector< TopTree::TRootPFJet* > jetsPerEv
 						float btagValue = -100.;
 						std::string tagger_name = (_reader->calib)->tagger();
 						if (tagger_name.find("CSVv2") != std::string::npos || tagger_name.find("csvv2") != std::string::npos){btagValue = jetsPerEvent[i]->btag_combinedInclusiveSecondaryVertexV2BJetTags();}
-  						else if (tagger_name.find("JP") != std::string::npos || tagger_name.find("jp") != std::string::npos){btagValue = jetsPerEvent[i]->btag_jetProbabilityBJetTags();}
   						else if (tagger_name.find("SC") != std::string::npos || tagger_name.find("sc") != std::string::npos){
     							if (_verbose){std::cerr << "Warning in BTagWeightTools: SC discriminator values not yet been included!!!" << std::endl
 	      						  	  		<< "Uses CSVv2 instead, please choose another tagger (or update the script)." << std::endl;

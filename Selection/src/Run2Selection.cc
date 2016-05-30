@@ -111,9 +111,6 @@ std::vector<TRootPFJet*> Run2Selection::GetSelectedBJets(const std::vector<TRoot
 	for(unsigned int i = 0; i<seljets.size(); i++)
 	{
 		if(btagAlgo == 1) btagDisc = seljets[i]->btag_combinedInclusiveSecondaryVertexV2BJetTags();
-		else if(btagAlgo == 2) btagDisc = seljets[i]->btag_simpleSecondaryVertexHighEffBJetTags();
-		else if(btagAlgo == 3) btagDisc = seljets[i]->btag_simpleSecondaryVertexHighPurBJetTags();
-		else if(btagAlgo == 4) btagDisc = seljets[i]->btag_combinedSecondaryVertexMVABJetTags();
 		else                   btagDisc = -999999;
 		if(btagDisc>btagCut) bjets.push_back(seljets[i]);
 	}
