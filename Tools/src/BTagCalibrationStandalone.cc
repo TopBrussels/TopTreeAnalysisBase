@@ -282,7 +282,7 @@ BTagCalibration::BTagCalibration(const std::string &taggr,
   tagger_(taggr)
 {
   std::ifstream ifs(filename.c_str());
-  std::cout << ifs << std::endl;
+  std::cout << !ifs.fail() << std::endl;
   readCSV(ifs);
   ifs.close();
 }
