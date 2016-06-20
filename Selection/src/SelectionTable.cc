@@ -15,43 +15,43 @@ SelectionTable::SelectionTable(vector<string> listOfCuts, vector<Dataset*> listO
 	merge_ = false;
 	listOfCuts_ = listOfCuts;
 	listOfDatasets_ = listOfDatasets;
-	nofEventsRaw_                = new float*[listOfCuts.size()];
-	nofEventsRawError_           = new float*[listOfCuts.size()];
-	nofEventsRawErrorHigh_       = new float*[listOfCuts.size()];
-	nofEventsRawErrorLow_        = new float*[listOfCuts.size()];
-	nofEvents_                   = new float*[listOfCuts.size()];
-	nofEventsError_              = new float*[listOfCuts.size()];
-	nofEventsExpErrorHigh_       = new float*[listOfCuts.size()];
-	nofEventsExpErrorLow_        = new float*[listOfCuts.size()];
-	nofEventsMcErrorHigh_        = new float*[listOfCuts.size()];
-	nofEventsMcErrorLow_         = new float*[listOfCuts.size()];
-	cutEfficiency_               = new float*[listOfCuts.size()];
-	cutEfficiencyErrorHigh_      = new float*[listOfCuts.size()];
-	cutEfficiencyErrorLow_       = new float*[listOfCuts.size()];
-	cutEfficiencyError_          = new float*[listOfCuts.size()];
-	totalCutEfficiency_          = new float*[listOfCuts.size()];
-	totalCutEfficiencyErrorHigh_ = new float*[listOfCuts.size()];
-	totalCutEfficiencyErrorLow_  = new float*[listOfCuts.size()];
-	totalCutEfficiencyError_     = new float*[listOfCuts.size()];
+	nofEventsRaw_                = new double*[listOfCuts.size()];
+	nofEventsRawError_           = new double*[listOfCuts.size()];
+	nofEventsRawErrorHigh_       = new double*[listOfCuts.size()];
+	nofEventsRawErrorLow_        = new double*[listOfCuts.size()];
+	nofEvents_                   = new double*[listOfCuts.size()];
+	nofEventsError_              = new double*[listOfCuts.size()];
+	nofEventsExpErrorHigh_       = new double*[listOfCuts.size()];
+	nofEventsExpErrorLow_        = new double*[listOfCuts.size()];
+	nofEventsMcErrorHigh_        = new double*[listOfCuts.size()];
+	nofEventsMcErrorLow_         = new double*[listOfCuts.size()];
+	cutEfficiency_               = new double*[listOfCuts.size()];
+	cutEfficiencyErrorHigh_      = new double*[listOfCuts.size()];
+	cutEfficiencyErrorLow_       = new double*[listOfCuts.size()];
+	cutEfficiencyError_          = new double*[listOfCuts.size()];
+	totalCutEfficiency_          = new double*[listOfCuts.size()];
+	totalCutEfficiencyErrorHigh_ = new double*[listOfCuts.size()];
+	totalCutEfficiencyErrorLow_  = new double*[listOfCuts.size()];
+	totalCutEfficiencyError_     = new double*[listOfCuts.size()];
   for(unsigned int i=0;i<listOfCuts.size();i++){
-		nofEventsRaw_[i]                = new float[listOfDatasets.size()];
-		nofEventsRawError_[i]           = new float[listOfDatasets.size()];
-		nofEventsRawErrorHigh_[i]       = new float[listOfDatasets.size()];
-		nofEventsRawErrorLow_[i]        = new float[listOfDatasets.size()];
-		nofEvents_[i]                   = new float[listOfDatasets.size()];
-		nofEventsError_[i]              = new float[listOfDatasets.size()];
-		nofEventsExpErrorHigh_[i]       = new float[listOfDatasets.size()];
-		nofEventsExpErrorLow_[i]        = new float[listOfDatasets.size()];
-		nofEventsMcErrorHigh_[i]        = new float[listOfDatasets.size()];
-		nofEventsMcErrorLow_[i]         = new float[listOfDatasets.size()];
-		cutEfficiency_[i]               = new float[listOfDatasets.size()];
-		cutEfficiencyError_[i]          = new float[listOfDatasets.size()];
-		cutEfficiencyErrorHigh_[i]      = new float[listOfDatasets.size()];
-		cutEfficiencyErrorLow_[i]       = new float[listOfDatasets.size()];
-		totalCutEfficiency_[i]          = new float[listOfDatasets.size()];
-		totalCutEfficiencyErrorHigh_[i] = new float[listOfDatasets.size()];
-		totalCutEfficiencyErrorLow_[i]  = new float[listOfDatasets.size()];
-		totalCutEfficiencyError_[i]     = new float[listOfDatasets.size()];
+		nofEventsRaw_[i]                = new double[listOfDatasets.size()];
+		nofEventsRawError_[i]           = new double[listOfDatasets.size()];
+		nofEventsRawErrorHigh_[i]       = new double[listOfDatasets.size()];
+		nofEventsRawErrorLow_[i]        = new double[listOfDatasets.size()];
+		nofEvents_[i]                   = new double[listOfDatasets.size()];
+		nofEventsError_[i]              = new double[listOfDatasets.size()];
+		nofEventsExpErrorHigh_[i]       = new double[listOfDatasets.size()];
+		nofEventsExpErrorLow_[i]        = new double[listOfDatasets.size()];
+		nofEventsMcErrorHigh_[i]        = new double[listOfDatasets.size()];
+		nofEventsMcErrorLow_[i]         = new double[listOfDatasets.size()];
+		cutEfficiency_[i]               = new double[listOfDatasets.size()];
+		cutEfficiencyError_[i]          = new double[listOfDatasets.size()];
+		cutEfficiencyErrorHigh_[i]      = new double[listOfDatasets.size()];
+		cutEfficiencyErrorLow_[i]       = new double[listOfDatasets.size()];
+		totalCutEfficiency_[i]          = new double[listOfDatasets.size()];
+		totalCutEfficiencyErrorHigh_[i] = new double[listOfDatasets.size()];
+		totalCutEfficiencyErrorLow_[i]  = new double[listOfDatasets.size()];
+		totalCutEfficiencyError_[i]     = new double[listOfDatasets.size()];
 		for(unsigned int j=0;j<listOfDatasets.size();j++){
 			nofEventsRaw_[i][j]                = 0;
 			nofEventsRawErrorHigh_[i][j]       = 0;
@@ -103,8 +103,8 @@ SelectionTable::~SelectionTable(){
 
 	    
 
-void SelectionTable::Scale(float Lumi){
-  float factor = 1;
+void SelectionTable::Scale(double Lumi){
+  double factor = 1;
   for(unsigned int i=0;i<listOfCuts_.size();i++){
 		for(unsigned int j=0;j<listOfDatasets_.size();j++){
 			factor = listOfDatasets_[j]->NormFactor();
@@ -137,7 +137,7 @@ void SelectionTable::TableCalculator(bool mergeTT, bool mergeQCD, bool mergeW, b
 
 			if(NP_mass && datasetName.find("NP_") == 0 && datasetName.find("NP_overlay_") != 0) continue; // write only the NP_overlay new physics sample if NP_mass is true
 		
-		float factor = listOfDatasets_[j]->NormFactor();
+		double factor = listOfDatasets_[j]->NormFactor();
 		//Errors on the raw numbers of events (Wald formula)
 		nofEventsRawError_[i][j]     = ErrorCalculator(nofEventsRaw_[i][j],nofEventsRaw_[i][j]/nofEventsRaw_[0][j],1);
 		// Asymmetric errors on the raw numbers of events (Wilson Score formula).
@@ -154,10 +154,10 @@ void SelectionTable::TableCalculator(bool mergeTT, bool mergeQCD, bool mergeW, b
   		nofEventsMcErrorLow_[i][j]   = nofEventsRawErrorLow_[i][j]*factor*lumi_;
    		//push_back
   		if(i>0){
-  			cutEfficiency_[i][j] =  (float)(nofEventsRaw_[i][j]/nofEventsRaw_[i-1][j]);
+  			cutEfficiency_[i][j] =  (double)(nofEventsRaw_[i][j]/nofEventsRaw_[i-1][j]);
   			cutEfficiencyErrorHigh_[i][j] =  WilsonScoreIntervalHigh(nofEventsRaw_[i][j],nofEventsRaw_[i-1][j])-(nofEventsRaw_[i][j]/nofEventsRaw_[i-1][j]);
   			cutEfficiencyErrorLow_[i][j]  =  (nofEventsRaw_[i][j]/nofEventsRaw_[i-1][j])-WilsonScoreIntervalLow(nofEventsRaw_[i][j],nofEventsRaw_[i-1][j]);
-  			cutEfficiencyError_[i][j] =  BinomialeError((float)(nofEventsRaw_[i][j]/nofEventsRaw_[i-1][j]),nofEventsRaw_[i-1][j]);
+  			cutEfficiencyError_[i][j] =  BinomialeError((double)(nofEventsRaw_[i][j]/nofEventsRaw_[i-1][j]),nofEventsRaw_[i-1][j]);
   		}
   		else {
   			cutEfficiency_[i][j] = 1.;
@@ -208,58 +208,58 @@ void SelectionTable::TableCalculator(bool mergeTT, bool mergeQCD, bool mergeW, b
   			}
 			else listOfDatasetsMerged_.push_back(listOfDatasets_[j]);
   		}
-  		totalCutEfficiency_[i][j] = (float)(nofEventsRaw_[i][j]/nofEventsRaw_[0][j]);
-  		totalCutEfficiencyError_[i][j] =  BinomialeError((float)(nofEventsRaw_[i][j]/nofEventsRaw_[0][j]),nofEventsRaw_[0][j]);
+  		totalCutEfficiency_[i][j] = (double)(nofEventsRaw_[i][j]/nofEventsRaw_[0][j]);
+  		totalCutEfficiencyError_[i][j] =  BinomialeError((double)(nofEventsRaw_[i][j]/nofEventsRaw_[0][j]),nofEventsRaw_[0][j]);
   		totalCutEfficiencyErrorHigh_[i][j] =  WilsonScoreIntervalHigh(nofEventsRaw_[i][j],nofEventsRaw_[0][j])-(nofEventsRaw_[i][j]/nofEventsRaw_[0][j]);
   		totalCutEfficiencyErrorLow_[i][j]  =  (nofEventsRaw_[i][j]/nofEventsRaw_[0][j])-WilsonScoreIntervalLow(nofEventsRaw_[i][j],nofEventsRaw_[0][j]);
 	}
 	if(merge_)
 	{
   	  // initialize everything with zero's and then fill it!
-  	  nofEventsRawMerged_          = new float*[listOfCuts_.size()];
-  	  nofEventsRawErrorMerged_     = new float*[listOfCuts_.size()];
-  	  nofEventsRawErrorHighMerged_ = new float*[listOfCuts_.size()];
-  	  nofEventsRawErrorLowMerged_  = new float*[listOfCuts_.size()];
+  	  nofEventsRawMerged_          = new double*[listOfCuts_.size()];
+  	  nofEventsRawErrorMerged_     = new double*[listOfCuts_.size()];
+  	  nofEventsRawErrorHighMerged_ = new double*[listOfCuts_.size()];
+  	  nofEventsRawErrorLowMerged_  = new double*[listOfCuts_.size()];
 
-  	  nofEventsMerged_             = new float*[listOfCuts_.size()];
-  	  nofEventsErrorMerged_        = new float*[listOfCuts_.size()];
-  	  nofEventsExpErrorHighMerged_ = new float*[listOfCuts_.size()];
-  	  nofEventsExpErrorLowMerged_  = new float*[listOfCuts_.size()];
-  	  nofEventsMcErrorHighMerged_  = new float*[listOfCuts_.size()];
-  	  nofEventsMcErrorLowMerged_   = new float*[listOfCuts_.size()];
+  	  nofEventsMerged_             = new double*[listOfCuts_.size()];
+  	  nofEventsErrorMerged_        = new double*[listOfCuts_.size()];
+  	  nofEventsExpErrorHighMerged_ = new double*[listOfCuts_.size()];
+  	  nofEventsExpErrorLowMerged_  = new double*[listOfCuts_.size()];
+  	  nofEventsMcErrorHighMerged_  = new double*[listOfCuts_.size()];
+  	  nofEventsMcErrorLowMerged_   = new double*[listOfCuts_.size()];
 
-  	  cutEfficiencyMerged_          = new float*[listOfCuts_.size()];
-  	  cutEfficiencyErrorMerged_     = new float*[listOfCuts_.size()];
-  	  cutEfficiencyErrorHighMerged_ = new float*[listOfCuts_.size()];
-  	  cutEfficiencyErrorLowMerged_  = new float*[listOfCuts_.size()];
+  	  cutEfficiencyMerged_          = new double*[listOfCuts_.size()];
+  	  cutEfficiencyErrorMerged_     = new double*[listOfCuts_.size()];
+  	  cutEfficiencyErrorHighMerged_ = new double*[listOfCuts_.size()];
+  	  cutEfficiencyErrorLowMerged_  = new double*[listOfCuts_.size()];
 
-  	  totalCutEfficiencyMerged_          = new float*[listOfCuts_.size()];
-  	  totalCutEfficiencyErrorMerged_     = new float*[listOfCuts_.size()];
-  	  totalCutEfficiencyErrorHighMerged_ = new float*[listOfCuts_.size()];
-  	  totalCutEfficiencyErrorLowMerged_  = new float*[listOfCuts_.size()];
+  	  totalCutEfficiencyMerged_          = new double*[listOfCuts_.size()];
+  	  totalCutEfficiencyErrorMerged_     = new double*[listOfCuts_.size()];
+  	  totalCutEfficiencyErrorHighMerged_ = new double*[listOfCuts_.size()];
+  	  totalCutEfficiencyErrorLowMerged_  = new double*[listOfCuts_.size()];
 
   	  for(unsigned int i=0;i<listOfCuts_.size();i++){
-  	  	nofEventsRawMerged_[i]          = new float[listOfDatasetsMerged_.size()];
-  	  	nofEventsRawErrorMerged_[i]     = new float[listOfDatasetsMerged_.size()];
-  	  	nofEventsRawErrorHighMerged_[i] = new float[listOfDatasetsMerged_.size()];
-  	  	nofEventsRawErrorLowMerged_[i]  = new float[listOfDatasetsMerged_.size()];
+  	  	nofEventsRawMerged_[i]          = new double[listOfDatasetsMerged_.size()];
+  	  	nofEventsRawErrorMerged_[i]     = new double[listOfDatasetsMerged_.size()];
+  	  	nofEventsRawErrorHighMerged_[i] = new double[listOfDatasetsMerged_.size()];
+  	  	nofEventsRawErrorLowMerged_[i]  = new double[listOfDatasetsMerged_.size()];
 
-  	  	nofEventsMerged_[i]             = new float[listOfDatasetsMerged_.size()];
-  	  	nofEventsErrorMerged_[i]        = new float[listOfDatasetsMerged_.size()];
-  	  	nofEventsExpErrorHighMerged_[i] = new float[listOfDatasetsMerged_.size()];
-  	  	nofEventsExpErrorLowMerged_[i]  = new float[listOfDatasetsMerged_.size()];
-  	  	nofEventsMcErrorHighMerged_[i]  = new float[listOfDatasetsMerged_.size()];
-  	  	nofEventsMcErrorLowMerged_[i]   = new float[listOfDatasetsMerged_.size()];
+  	  	nofEventsMerged_[i]             = new double[listOfDatasetsMerged_.size()];
+  	  	nofEventsErrorMerged_[i]        = new double[listOfDatasetsMerged_.size()];
+  	  	nofEventsExpErrorHighMerged_[i] = new double[listOfDatasetsMerged_.size()];
+  	  	nofEventsExpErrorLowMerged_[i]  = new double[listOfDatasetsMerged_.size()];
+  	  	nofEventsMcErrorHighMerged_[i]  = new double[listOfDatasetsMerged_.size()];
+  	  	nofEventsMcErrorLowMerged_[i]   = new double[listOfDatasetsMerged_.size()];
 
-  	  	cutEfficiencyMerged_[i]          = new float[listOfDatasetsMerged_.size()];
-  	  	cutEfficiencyErrorMerged_[i]     = new float[listOfDatasetsMerged_.size()];
-  	  	cutEfficiencyErrorHighMerged_[i] = new float[listOfDatasetsMerged_.size()];
-  	  	cutEfficiencyErrorLowMerged_[i]  = new float[listOfDatasetsMerged_.size()];
+  	  	cutEfficiencyMerged_[i]          = new double[listOfDatasetsMerged_.size()];
+  	  	cutEfficiencyErrorMerged_[i]     = new double[listOfDatasetsMerged_.size()];
+  	  	cutEfficiencyErrorHighMerged_[i] = new double[listOfDatasetsMerged_.size()];
+  	  	cutEfficiencyErrorLowMerged_[i]  = new double[listOfDatasetsMerged_.size()];
 
-  	  	totalCutEfficiencyMerged_[i]          = new float[listOfDatasetsMerged_.size()];
-  	  	totalCutEfficiencyErrorMerged_[i]     = new float[listOfDatasetsMerged_.size()];
-  	  	totalCutEfficiencyErrorHighMerged_[i] = new float[listOfDatasetsMerged_.size()];
-  	  	totalCutEfficiencyErrorLowMerged_[i]  = new float[listOfDatasetsMerged_.size()];
+  	  	totalCutEfficiencyMerged_[i]          = new double[listOfDatasetsMerged_.size()];
+  	  	totalCutEfficiencyErrorMerged_[i]     = new double[listOfDatasetsMerged_.size()];
+  	  	totalCutEfficiencyErrorHighMerged_[i] = new double[listOfDatasetsMerged_.size()];
+  	  	totalCutEfficiencyErrorLowMerged_[i]  = new double[listOfDatasetsMerged_.size()];
 
   	  	for(unsigned int j=0;j<listOfDatasetsMerged_.size();j++){
   	  		nofEventsRawMerged_[i][j]          = 0;
@@ -307,13 +307,13 @@ void SelectionTable::TableCalculator(bool mergeTT, bool mergeQCD, bool mergeW, b
   			        		cutEfficiencyErrorMerged_[i][j] = 0.;
       		    			}
       		    			else {
-      		      				cutEfficiencyMerged_[i][j]      =  (float)(nofEventsMerged_[i][j]/nofEventsMerged_[i-1][j]);
-  			        		cutEfficiencyErrorMerged_[i][j] =  BinomialeError((float)(nofEventsMerged_[i][j]/nofEventsMerged_[i-1][j]),nofEventsMerged_[i-1][j]);
+      		      				cutEfficiencyMerged_[i][j]      =  (double)(nofEventsMerged_[i][j]/nofEventsMerged_[i-1][j]);
+  			        		cutEfficiencyErrorMerged_[i][j] =  BinomialeError((double)(nofEventsMerged_[i][j]/nofEventsMerged_[i-1][j]),nofEventsMerged_[i-1][j]);
   						cutEfficiencyErrorHighMerged_[i][j] =  WilsonScoreIntervalHigh(nofEventsMerged_[i][j],nofEventsMerged_[i-1][j])-(nofEventsMerged_[i][j]/nofEventsMerged_[i-1][j]);
   						cutEfficiencyErrorLowMerged_[i][j]  =  (nofEventsMerged_[i][j]/nofEventsMerged_[i-1][j])-WilsonScoreIntervalLow(nofEventsMerged_[i][j],nofEventsMerged_[i-1][j]);
       		    			}
-      		    			totalCutEfficiencyMerged_[i][j] = (float)(nofEventsMerged_[i][j]/nofEventsMerged_[0][j]);
-          				totalCutEfficiencyErrorMerged_[i][j] =  BinomialeError((float)(nofEventsMerged_[i][j]/nofEventsMerged_[0][j]),nofEventsRawMerged_[0][j]);
+      		    			totalCutEfficiencyMerged_[i][j] = (double)(nofEventsMerged_[i][j]/nofEventsMerged_[0][j]);
+          				totalCutEfficiencyErrorMerged_[i][j] =  BinomialeError((double)(nofEventsMerged_[i][j]/nofEventsMerged_[0][j]),nofEventsRawMerged_[0][j]);
   					totalCutEfficiencyErrorHigh_[i][j] =  WilsonScoreIntervalHigh(nofEventsMerged_[i][j],nofEventsMerged_[0][j])-(nofEventsMerged_[i][j]/nofEventsMerged_[0][j]);
   					totalCutEfficiencyErrorLow_[i][j]  =  (nofEventsMerged_[i][j]/nofEventsMerged_[0][j])-WilsonScoreIntervalLow(nofEventsMerged_[i][j],nofEventsMerged_[0][j]);      		  		
 						}
@@ -337,20 +337,20 @@ void SelectionTable::TableCalculator(bool mergeTT, bool mergeQCD, bool mergeW, b
 }
 
 
-void SelectionTable::Fill(unsigned int DatasetNumber, unsigned int CutNumber, float value){
+void SelectionTable::Fill(unsigned int DatasetNumber, unsigned int CutNumber, double value){
 	if(DatasetNumber>=listOfDatasets_.size()) cerr<<"DataNumber argument wrong !"<<endl;
 	if(CutNumber>=listOfCuts_.size()) cerr<<"CutNumber argument wrong !"<<endl;
 	nofEventsRaw_[CutNumber][DatasetNumber]+= value;
 }
 
-void SelectionTable::Fill( unsigned int DatasetNumber, vector<float> PassTheCuts){
+void SelectionTable::Fill( unsigned int DatasetNumber, vector<double> PassTheCuts){
 	if(DatasetNumber>=listOfDatasets_.size()) cerr<<"DataNumber argument wrong !"<<endl;
 	if(PassTheCuts.size()>listOfCuts_.size()) cerr<<"CutNumber argument wrong !"<<endl;
 	for(unsigned int i=0;i<PassTheCuts.size();i++) nofEventsRaw_[i][DatasetNumber]+= PassTheCuts[i];
 }
 
 
-void SelectionTable::WriteTable(ofstream& fout, float** listTable_, bool writeMerged, bool useBookTabs, bool writeLandscape){
+void SelectionTable::WriteTable(ofstream& fout, double** listTable_, bool writeMerged, bool useBookTabs, bool writeLandscape){
 
 	unsigned int nDatasets = ( writeMerged ? listOfDatasetsMerged_.size() : listOfDatasets_.size() );
 
@@ -388,7 +388,7 @@ void SelectionTable::WriteTable(ofstream& fout, float** listTable_, bool writeMe
 	if(writeLandscape)fout<<"\\end{landscape}"<<endl;
 }
 
-void SelectionTable::WriteTable(ofstream& fout, float** listTable_,float** listTableError_, bool writeMerged, bool useBookTabs, bool writeLandscape){
+void SelectionTable::WriteTable(ofstream& fout, double** listTable_,double** listTableError_, bool writeMerged, bool useBookTabs, bool writeLandscape){
 	unsigned int nDatasets = ( writeMerged ? listOfDatasetsMerged_.size() : listOfDatasets_.size() );
 
 	if(precision_ >= 0) fout << fixed << setprecision(precision_);
@@ -426,7 +426,7 @@ void SelectionTable::WriteTable(ofstream& fout, float** listTable_,float** listT
 	if(writeLandscape)fout<<"\\end{landscape}"<<endl;
 }
 
-void SelectionTable::WriteTable(ofstream& fout, float** listTable_,float** listTableErrorHigh_ ,float** listTableErrorLow_, bool writeMerged, bool useBookTabs, bool writeLandscape){
+void SelectionTable::WriteTable(ofstream& fout, double** listTable_,double** listTableErrorHigh_ ,double** listTableErrorLow_, bool writeMerged, bool useBookTabs, bool writeLandscape){
 	unsigned int nDatasets = ( writeMerged ? listOfDatasetsMerged_.size() : listOfDatasets_.size() );
 
 	if(precision_ >= 0) fout << fixed << setprecision(precision_);
@@ -557,19 +557,19 @@ void SelectionTable::Write(ofstream& fout, bool withError, bool writeMerged, boo
 	fout<<"\\end{document}"<<endl;
 }
 
-float SelectionTable::WilsonScoreIntervalHigh(float Non, float Ntot)
+double SelectionTable::WilsonScoreIntervalHigh(double Non, double Ntot)
 {
-	float T = (Ntot>0 ? 1/Ntot : 0);
-	float p_hat = (Ntot>0 && Non>=0 && Ntot>=Non ? Non/Ntot : 0);
-	float Int_High = ((p_hat+(T/2))/(1+T))+(sqrt(p_hat*(1-p_hat)*T+pow(T/2,2))/(1+T));
+	double T = (Ntot>0 ? 1/Ntot : 0);
+	double p_hat = (Ntot>0 && Non>=0 && Ntot>=Non ? Non/Ntot : 0);
+	double Int_High = ((p_hat+(T/2))/(1+T))+(sqrt(p_hat*(1-p_hat)*T+pow(T/2,2))/(1+T));
 	return Int_High;
 }
 
-float SelectionTable::WilsonScoreIntervalLow(float Non, float Ntot)
+double SelectionTable::WilsonScoreIntervalLow(double Non, double Ntot)
 {
-	float T = (Ntot>0 ? 1/Ntot : 0);
-	float p_hat = (Ntot>0 && Non>=0 && Ntot>=Non ? Non/Ntot : 0);
-	float Int_Low = ((p_hat+(T/2))/(1+T))-(sqrt(p_hat*(1-p_hat)*T+pow(T/2,2))/(1+T));
+	double T = (Ntot>0 ? 1/Ntot : 0);
+	double p_hat = (Ntot>0 && Non>=0 && Ntot>=Non ? Non/Ntot : 0);
+	double Int_Low = ((p_hat+(T/2))/(1+T))-(sqrt(p_hat*(1-p_hat)*T+pow(T/2,2))/(1+T));
 	return Int_Low;
 }
 
