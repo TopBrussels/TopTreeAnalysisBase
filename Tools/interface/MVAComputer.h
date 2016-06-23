@@ -16,13 +16,8 @@
 #include "TStopwatch.h"
 #include "TH1F.h"
 
-//#include "TopTreeAnalysisBase/TMVA/src/Reader.h"
-//#include "TopTreeAnalysisBase/TMVA/src/Tools.h"
-
-
-//Changing to these include paths for compatibility with ROOT v5.34
-#include "TopTreeAnalysisBase/TMVA/inc/TMVA/Reader.h"
-#include "TopTreeAnalysisBase/TMVA/inc/TMVA/Tools.h"
+#include "TMVA/Reader.h"
+#include "TMVA/Tools.h"
 
 
 using namespace std;

@@ -18,9 +18,9 @@
 
 
 //Changing to these include paths for compatibility with ROOT v5.34
-#include "TopTreeAnalysisBase/TMVA/inc/TMVA/Factory.h"
-#include "TopTreeAnalysisBase/TMVA/inc/TMVA/Tools.h"
-#include "TopTreeAnalysisBase/TMVA/inc/TMVA/Config.h"
+#include "TMVA/Factory.h"
+#include "TMVA/Tools.h"
+#include "TMVA/Config.h"
 
 
 class MVATrainer {
