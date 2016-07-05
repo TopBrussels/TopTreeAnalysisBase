@@ -109,11 +109,11 @@ void MultiSamplePlot::Initialize()
   StackErrorGraph_ = 0;
   RatioErrorGraph_ = 0;
   maxY_ = -1;
-  minLogY_ = 1.;
+  minLogY_ = 0.1;
   logYMultiplicator_ = 1000;
   maxLogY_ = 1.;
   maxLogYAreaNorm_ = 1.;
-  showNumberEntries_ = true;
+  showNumberEntries_ = false;
   //errorbandfile_ = "systematics.root";
   errorbandfile_ = "errorbands.root";
   dosystfile_ = false;
@@ -355,14 +355,15 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
     }
 
 
-  leg_ = new TLegend(0.60,0.66,0.95,0.90);
+  leg_ = new TLegend(0.60,0.60,0.95,0.90);
   leg_->SetFillColorAlpha(0,0.0);
   leg_->SetTextFont(42);
   leg_->SetLineColor(1);
   leg_->SetLineWidth(1);
   leg_->SetLineStyle(0);
   leg_->SetBorderSize(0);
-  if( ! showNumberEntries_ ) leg_->SetX1(0.76);
+  leg_->SetHeader(text_);
+  //if( ! showNumberEntries_ ) leg_->SetX1(0.76);
 
   //a second legend is needed because otherwise it will add the datasets two times to the same legend...
   legAreaNorm_ = new TLegend(0.60,0.66,0.95,0.90);
@@ -529,7 +530,8 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
 
       if(hData_)
 	{
-	  hData_->Draw("same E");
+	  hData_->SetBinErrorOption(TH1::kPoisson);
+	  hData_->Draw("same E0");
 
 	  if(RatioType>0)
 	    {
@@ -567,7 +569,10 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
     }
   else
     {
-      if(hData_) hData_->Draw("E");
+      if(hData_) {
+	hData_->SetBinErrorOption(TH1::kPoisson);
+	  hData_->Draw("same E0");
+      }
     }
 
 
@@ -581,7 +586,8 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
 
       if(hData_)
 	{
-	  hData_->Draw("same E");
+	  hData_->SetBinErrorOption(TH1::kPoisson);
+	  hData_->Draw("same E0");
 
 	  if(RatioType>0)
 	    {
@@ -619,7 +625,10 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
     }
   else
     {
-      if(hData_) hData_->Draw("E");
+      if(hData_) {
+	hData_->SetBinErrorOption(TH1::kPoisson);
+	  hData_->Draw("same E0");
+      }
     }
 
   //Now area-normalized plots...
@@ -675,7 +684,8 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
 
       if(hData_)
 	{
-	  hData_->Draw("same E");
+	  hData_->SetBinErrorOption(TH1::kPoisson);
+	  hData_->Draw("same E0");
 
 	  if(RatioType>0)
 	    {
@@ -713,7 +723,10 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
     }
   else
     {
-      if(hData_) hData_->Draw("E");
+      if(hData_) {
+	hData_->SetBinErrorOption(TH1::kPoisson);
+	  hData_->Draw("same E0");
+      }
     }
 
   //Now area-normalized log-scale plots...
@@ -726,7 +739,8 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
 
       if(hData_)
 	{
-	  hData_->Draw("same E");
+	  hData_->SetBinErrorOption(TH1::kPoisson);
+	  hData_->Draw("same E0");
 
 	  if(RatioType)
 	    {
@@ -764,7 +778,10 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
     }
   else
     {
-      if(hData_) hData_->Draw("E");
+      if(hData_) {
+	hData_->SetBinErrorOption(TH1::kPoisson);
+	  hData_->Draw("same E0");
+      }
     }
 
   if(addErrorBand)
@@ -938,12 +955,13 @@ void MultiSamplePlot::DrawStackedPlot(TCanvas* canvas, TCanvas* canvasLogY, THSt
 	  cmstext.DrawLatex(posX_, posY_- relExtraDY*cmsTextSize*t, "Simulation");
   }
 
-  if(!text_.IsNull()) text.DrawLatex(0.2,0.9,text_);
+  //if(!text_.IsNull()) text.DrawLatex(0.2,0.9,text_);
 
   for(unsigned int i=0;i<histosForOverlay.size();i++)
     {
       histosForOverlay[i]->Scale(scaleNPSignal);
       histosForOverlay[i]->SetFillColor(0);
+      histosForOverlay[i]->SetLineWidth(4);
       histosForOverlay[i]->Draw("HIST SAME");
     }
 
@@ -976,7 +994,7 @@ void MultiSamplePlot::DrawStackedPlot(TCanvas* canvas, TCanvas* canvasLogY, THSt
 	  cmstext.DrawLatex(posX_, posY_- relExtraDY*cmsTextSize*t, "Simulation");
   }
 
-  if(!text_.IsNull()) text.DrawLatex(0.5,0.86,text_);
+  //if(!text_.IsNull()) text.DrawLatex(0.5,0.86,text_);
 
   for(unsigned int i=0;i<histosForOverlay.size();i++)
     {

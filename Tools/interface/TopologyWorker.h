@@ -68,7 +68,13 @@ public:
   double get_ht3() {return m_ht3;}
   double get_et0() {return m_et0;}
   double get_sqrts() {return m_sqrts;}
-  double get_njetW() {return m_njetsweighed;}
+  double get_njetW() {return m_njetsweighed;} 
+  double get_njetW105() {return m_njetsweighed105;}
+  double get_njetW115() {return m_njetsweighed115;}
+  double get_njetW135() {return m_njetsweighed135;}
+  double get_njetW145() {return m_njetsweighed145;}
+  double get_njetW160() {return m_njetsweighed160;}
+
   double get_et56() {return m_et56;}
   double get_centrality() { return m_centrality;}
   
@@ -141,6 +147,12 @@ private:
   double m_et0;
   double m_sqrts;
   double m_njetsweighed;
+  double m_njetsweighed105;
+  double m_njetsweighed115;
+  double m_njetsweighed135;
+  double m_njetsweighed145;
+  double m_njetsweighed160;
+
   double m_et56;
   double m_centrality;
   
@@ -149,6 +161,11 @@ private:
   static int m_maxpart;
   
   void CalcWmul();
+  void CalcWmul105();
+  void CalcWmul115();
+  void CalcWmul135();
+  void CalcWmul145();
+  void CalcWmul160();
   void CalcSqrts();
   void CalcHTstuff();
   double CalcPt(int i) { return sqrt(pow(m_mom(i,1),2)+pow(m_mom(i,2),2));}

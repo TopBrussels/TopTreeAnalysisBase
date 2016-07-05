@@ -79,8 +79,8 @@ SOURCESTOPFCNCDIC	= $(wildcard ../TopTreeAnalysis/TopFCNC/src/TopFCNC_Evt.cc Con
 HEADERSTOPFCNCDIC	= $(wildcard ../TopTreeAnalysis/TopFCNC/interface/TopFCNC_Evt.h Content/interface/Dataset.h ../TopTreeProducer/interface/TRoot*.h)
 OBJECTSTOPFCNCDIC	= $(SOURCESTOPFCNCDIC:.$(SrcSuf)=.$(ObjSuf))
 
-all:  libTopTreeAna76.$(DllSuf) libTopTreeAnaContent76.$(DllSuf)
-	cp libTopTreeAna76.$(DllSuf) ~/lib/ ; cp libTopTreeAnaContent76.$(DllSuf) ~/lib/ ; cp Dict_rdict.pcm ~/lib/
+all:  libTopTreeAna76V3.$(DllSuf) libTopTreeAnaContent76V3.$(DllSuf)
+	cp libTopTreeAna76V3.$(DllSuf) ~/lib/ ; cp libTopTreeAnaContent76V3.$(DllSuf) ~/lib/ ; cp Dict_rdict.pcm ~/lib/
 
 btag: libBtagAnalysis76.$(DllSuf)
 	cp libBtagAnalysis76.$(DllSuf) ~/lib/
@@ -103,12 +103,12 @@ Dict.$(SrcSuf): $(HEADERSDIC) ./LinkDef.h
 	@echo "Generating dictionary Dict..."
 	@rootcint -f Dict.$(SrcSuf) -c $(DEFINES) $(HEADERSDIC) ./LinkDef.h
 
-libTopTreeAna76.$(DllSuf): $(OBJECTS) libTopTreeAnaContent76.$(DllSuf)
-	@echo "Building libTopTreeAna76..."
-	$(LD) $(LIBS) -lTopTreeAnaContent76 $(SOFLAGS) $(LDFLAGS) $+ -o $@
+libTopTreeAna76V3.$(DllSuf): $(OBJECTS) libTopTreeAnaContent76V3.$(DllSuf)
+	@echo "Building libTopTreeAna76V3..."
+	$(LD) $(LIBS) -lTopTreeAnaContent76V3 $(SOFLAGS) $(LDFLAGS) $+ -o $@
 
-libTopTreeAnaContent76.$(DllSuf): $(OBJECTSDIC)  Dict.o  
-	@echo "Building libTopTreeAnaContent76..."
+libTopTreeAnaContent76V3.$(DllSuf): $(OBJECTSDIC)  Dict.o  
+	@echo "Building libTopTreeAnaContent76V3..."
 	$(LD) $(LIBS) $(SOFLAGS) $(LDFLAGS) $+ -o $@
 
 # specific stuff for btag eff analysis ONLY
@@ -143,8 +143,8 @@ libTopFcncAnalysis76.$(DllSuf): $(OBJECTSTOPFCNC) TopFcncDict.o
 
 ADDLIBS_MACROS = -lMLP -lTreePlayer -lXMLIO
 
-macros/%.exe: macros/%.cc $(HEADERS) libTopTreeAna76.$(DllSuf) libTopTreeAnaContent76.$(DllSuf)
-	$(LD) -lTopTreeAna76 -lTopTreeAnaContent76 $(LIBS) $(ADDLIBS_MACROS) -I`root-config --incdir` $< $(LDFLAGS) -o $@
+macros/%.exe: macros/%.cc $(HEADERS) libTopTreeAna76V3.$(DllSuf) libTopTreeAnaContent76V3.$(DllSuf)
+	$(LD) -lTopTreeAna76V3 -lTopTreeAnaContent76V3 $(LIBS) $(ADDLIBS_MACROS) -I`root-config --incdir` $< $(LDFLAGS) -o $@
 
 SOURCES_MACROS = $(wildcard macros/*.cc)
 

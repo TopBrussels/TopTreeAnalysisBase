@@ -28,36 +28,36 @@ class SelectionTable {
   	SelectionTable(const SelectionTable& psel); /** Copy constructor */
   	~SelectionTable(); /** Default destructor */
 
-	void SetLuminosity(float Lumi) {lumi_ = Lumi;};
+	void SetLuminosity(double Lumi) {lumi_ = Lumi;};
 	void SetPrecision(int Precision) {precision_ = Precision;} /** To specify exactly how many digits to display after the decimal point */
 
 	// Accessors
-	float Luminosity() const {return lumi_;};
+	double Luminosity() const {return lumi_;};
 	int Precision() const {return precision_;}
 	vector<string> ListOfCuts() const {return listOfCuts_;};
 	vector<Dataset*> ListOfDatasets() const {return listOfDatasets_;};
 
 	// Statistical errors
-	float BinomialeError(float p, float n) const {return (sqrt((p*(1-p)/n)*p));}; /** Calculate the binomial error on the efficiency p */
-	float ErrorCalculator( float number, float p, float factor) const { return (sqrt(number*(1-p))*factor); }; /** Calculate the error on the number of selected events, rescaled by factor*/
-	float WilsonScoreIntervalLow(float Non, float Ntot); /** Calculate the low limit of the W-S interval*/
-	float WilsonScoreIntervalHigh(float Non, float Ntot);/** Calculate the high limit of the W-S interval*/
-	float FactorCalculator(float nofevents, float xsection) const { return(lumi_*xsection/nofevents);}; /** Calculate the ratio of the expected number of events to the actual number of events */
+	double BinomialeError(double p, double n) const {return (sqrt((p*(1-p)/n)*p));}; /** Calculate the binomial error on the efficiency p */
+	double ErrorCalculator( double number, double p, double factor) const { return (sqrt(number*(1-p))*factor); }; /** Calculate the error on the number of selected events, rescaled by factor*/
+	double WilsonScoreIntervalLow(double Non, double Ntot); /** Calculate the low limit of the W-S interval*/
+	double WilsonScoreIntervalHigh(double Non, double Ntot);/** Calculate the high limit of the W-S interval*/
+	double FactorCalculator(double nofevents, double xsection) const { return(lumi_*xsection/nofevents);}; /** Calculate the ratio of the expected number of events to the actual number of events */
 
 
   void Clear(){;}; /** Clear the tables */
-  void Fill(unsigned int DatasetNumber, vector<float> PassTheCuts); /** Method to fill the tables */
-  void Fill(unsigned int DatasetNumber, unsigned int CutNumber, float value); /** Method to fill the tables */
+  void Fill(unsigned int DatasetNumber, vector<double> PassTheCuts); /** Method to fill the tables */
+  void Fill(unsigned int DatasetNumber, unsigned int CutNumber, double value); /** Method to fill the tables */
   void TableCalculator(bool mergeTT = false, bool mergeQCD = false, bool mergeW = false, bool mergeZ = false, bool mergeST = false, bool mergeVV = false, bool mergeTTV = false, bool NP_mass = false); /** Calculate the different selection efficiencies and rescaled number of events */
-  void Scale(float Lumi);
-  void WriteTable(ofstream& fout, float** listTable_, bool writeMerged = true, bool useBookTabs = false, bool writeLandscape = false);
+  void Scale(double Lumi);
+  void WriteTable(ofstream& fout, double** listTable_, bool writeMerged = true, bool useBookTabs = false, bool writeLandscape = false);
   /**
 	Method to display latex-formatted tables
 	Options :
 	* writeMerged ; if true, display individual contributions for split samples (ex ; st+jets s-ch, t-ch, tW-ch, ...). Set to true by default.
 	* useBookTabs ; if true, use command from the latex package booktabs for table lines. Set to false by default.
   */
-  void WriteTable(ofstream& fout, float** listTable_, float** listTableError_, bool writeMerged = true, bool useBookTabs = false, bool writeLandscape = false);
+  void WriteTable(ofstream& fout, double** listTable_, double** listTableError_, bool writeMerged = true, bool useBookTabs = false, bool writeLandscape = false);
   /**
 	Method to display latex-formatted tables into an external file. Display both numbers and their associated errors (binomial approx.)
 	Options :
@@ -65,7 +65,7 @@ class SelectionTable {
 	* useBookTabs ; use command from the latex package booktabs for table lines. Set to false by default.
 	* writeLandscape ; display tables in landscape mode. Set to false by default.
   */
-  void WriteTable(ofstream& fout, float** listTable_, float** listTableErrorHigh_, float** listTableErrorLow_, bool writeMerged = true, bool useBookTabs = false, bool writeLandscape = false);
+  void WriteTable(ofstream& fout, double** listTable_, double** listTableErrorHigh_, double** listTableErrorLow_, bool writeMerged = true, bool useBookTabs = false, bool writeLandscape = false);
   /**
 	Method to display latex-formatted tables into an external file. Display both numbers and their associated errors (correct error calculation)
 	Options :
@@ -85,51 +85,51 @@ class SelectionTable {
 
  private:
 
-  float lumi_; // in 1/pb
+  double lumi_; // in 1/pb
   int   precision_; // nb of digits to display after the decimal point
   vector<string>   listOfCuts_;
   vector<Dataset*> listOfDatasets_;
   //first dimension: cuts
   //second dimension: datasets
-  float**  nofEventsRaw_;	//from Fill method
-  float**  nofEventsRawError_;
-  float**  nofEventsRawErrorHigh_;
-  float**  nofEventsRawErrorLow_;
-  float**  nofEvents_;	        //rescaled
-  float**  nofEventsError_;
-  float**  nofEventsExpErrorHigh_;
-  float**  nofEventsExpErrorLow_;
-  float**  nofEventsMcErrorHigh_;
-  float**  nofEventsMcErrorLow_;
-  float**  cutEfficiency_;
-  float**  cutEfficiencyErrorHigh_;
-  float**  cutEfficiencyErrorLow_;
-  float**  cutEfficiencyError_;
-  float**  totalCutEfficiency_;
-  float**  totalCutEfficiencyErrorHigh_;
-  float**  totalCutEfficiencyErrorLow_;
-  float**  totalCutEfficiencyError_;
+  double**  nofEventsRaw_;	//from Fill method
+  double**  nofEventsRawError_;
+  double**  nofEventsRawErrorHigh_;
+  double**  nofEventsRawErrorLow_;
+  double**  nofEvents_;	        //rescaled
+  double**  nofEventsError_;
+  double**  nofEventsExpErrorHigh_;
+  double**  nofEventsExpErrorLow_;
+  double**  nofEventsMcErrorHigh_;
+  double**  nofEventsMcErrorLow_;
+  double**  cutEfficiency_;
+  double**  cutEfficiencyErrorHigh_;
+  double**  cutEfficiencyErrorLow_;
+  double**  cutEfficiencyError_;
+  double**  totalCutEfficiency_;
+  double**  totalCutEfficiencyErrorHigh_;
+  double**  totalCutEfficiencyErrorLow_;
+  double**  totalCutEfficiencyError_;
 
   //Merged stuff
   vector<Dataset*> listOfDatasetsMerged_;
-  float**  nofEventsRawMerged_;
-  float**  nofEventsRawErrorMerged_;
-  float**  nofEventsRawErrorHighMerged_;
-  float**  nofEventsRawErrorLowMerged_;
-  float**  nofEventsMerged_;
-  float**  nofEventsErrorMerged_;
-  float**  nofEventsExpErrorHighMerged_;
-  float**  nofEventsExpErrorLowMerged_;
-  float**  nofEventsMcErrorHighMerged_;
-  float**  nofEventsMcErrorLowMerged_;
-  float**  cutEfficiencyMerged_;
-  float**  cutEfficiencyErrorMerged_;
-  float**  cutEfficiencyErrorHighMerged_;
-  float**  cutEfficiencyErrorLowMerged_;
-  float**  totalCutEfficiencyMerged_;
-  float**  totalCutEfficiencyErrorMerged_;
-  float**  totalCutEfficiencyErrorHighMerged_;
-  float**  totalCutEfficiencyErrorLowMerged_;
+  double**  nofEventsRawMerged_;
+  double**  nofEventsRawErrorMerged_;
+  double**  nofEventsRawErrorHighMerged_;
+  double**  nofEventsRawErrorLowMerged_;
+  double**  nofEventsMerged_;
+  double**  nofEventsErrorMerged_;
+  double**  nofEventsExpErrorHighMerged_;
+  double**  nofEventsExpErrorLowMerged_;
+  double**  nofEventsMcErrorHighMerged_;
+  double**  nofEventsMcErrorLowMerged_;
+  double**  cutEfficiencyMerged_;
+  double**  cutEfficiencyErrorMerged_;
+  double**  cutEfficiencyErrorHighMerged_;
+  double**  cutEfficiencyErrorLowMerged_;
+  double**  totalCutEfficiencyMerged_;
+  double**  totalCutEfficiencyErrorMerged_;
+  double**  totalCutEfficiencyErrorHighMerged_;
+  double**  totalCutEfficiencyErrorLowMerged_;
 
   bool merge_;
 };
