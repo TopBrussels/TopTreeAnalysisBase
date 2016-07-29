@@ -372,17 +372,11 @@ BTagCalibrationReader::BTagCalibrationReader(const BTagCalibration* c,
   setupTmpData(c);
   op_cutvalue_ = -999;
   std::string tagger_name = c->tagger();
-  // OPs updated according to https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation76X (Seth, 03-02-2016)
+  // OPs updated according to https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80X (Seth, 29-07-2016)
   if (tagger_name.find("CSVv2") != std::string::npos || tagger_name.find("csvv2") != std::string::npos){
     if (params.operatingPoint == BTagEntry::OP_LOOSE){op_cutvalue_ = 0.460;}
     else if (params.operatingPoint == BTagEntry::OP_MEDIUM){op_cutvalue_ = 0.800;}
     else if (params.operatingPoint == BTagEntry::OP_TIGHT){op_cutvalue_ = 0.935;}
-    else if (params.operatingPoint == BTagEntry::OP_RESHAPING){op_cutvalue_ = -999;} //default value, of no importance
-  }
-  else if (tagger_name.find("JP") != std::string::npos || tagger_name.find("jp") != std::string::npos){
-    if (params.operatingPoint == BTagEntry::OP_LOOSE){op_cutvalue_ = 0.245;}
-    else if (params.operatingPoint == BTagEntry::OP_MEDIUM){op_cutvalue_ = 0.515;}
-    else if (params.operatingPoint == BTagEntry::OP_TIGHT){op_cutvalue_ = 0.760;}
     else if (params.operatingPoint == BTagEntry::OP_RESHAPING){op_cutvalue_ = -999;} //default value, of no importance
   }
   else if (tagger_name.find("cMVAv2") != std::string::npos || tagger_name.find("cmvav2") != std::string::npos || tagger_name.find("CMVAv2") != std::string::npos){
@@ -392,7 +386,7 @@ BTagCalibrationReader::BTagCalibrationReader(const BTagCalibration* c,
     else if (params.operatingPoint == BTagEntry::OP_RESHAPING){op_cutvalue_ = -999;} //default value, of no importance
   }
   else{
-  	std::cerr << "Warning in BTagCalibration: Tagger " << tagger_name << " is not CSVv2, JP, or cMVAv2." << std::endl
+  	std::cerr << "Warning in BTagCalibration: Tagger " << tagger_name << " is not CSVv2 or cMVAv2." << std::endl
 	<< "Please define your BTagCalibration object with one of these tagger names." << std::endl
 	<< "The working point cut value of CSVv2 is used instead" << std::endl;
 	

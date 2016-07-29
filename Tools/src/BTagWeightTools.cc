@@ -150,15 +150,11 @@ void BTagWeightTools::FillMCEfficiencyHistos(vector< TopTree::TRootPFJet* > allS
 		float btagValue = -100.;
 		std::string tagger_name = (_reader->calib)->tagger();
 		if (tagger_name.find("CSVv2") != std::string::npos || tagger_name.find("csvv2") != std::string::npos){btagValue = allSelectedJets[i]->btag_combinedInclusiveSecondaryVertexV2BJetTags();}
-		else if (tagger_name.find("SC") != std::string::npos || tagger_name.find("sc") != std::string::npos){
-				if (_verbose){
-					std::cerr << "Warning in BTagWeightTools: SC discriminator values not yet been included!!!" << std::endl
-						  << "Uses CSVv2 instead, please choose another tagger (or update the script)." << std::endl;
-				}
-				btagValue = allSelectedJets[i]->btag_combinedInclusiveSecondaryVertexV2BJetTags();
+		else if (tagger_name.find("cMVAv2") != std::string::npos || tagger_name.find("cmvav2") != std::string::npos || tagger_name.find("CMVAv2") != std::string::npos){				
+				btagValue = allSelectedJets[i]->btag_PFCombinedMVAV2BJetTags();
 		}
 		else{
-			if (_verbose){std::cerr << "Warning in BTagCalibration: Tagger " << tagger_name << " is not CSVv2, JP, or SC." << std::endl
+			if (_verbose){std::cerr << "Warning in BTagCalibration: Tagger " << tagger_name << " is not CSVv2 or cMVAv2." << std::endl
 						<< "Please define your BTagCalibration object with one of these tagger names." << std::endl
 						<< "CSVv2 discriminator is used instead!!!" << std::endl;
 			}
@@ -237,14 +233,11 @@ float BTagWeightTools::getMCEventWeight(vector< TopTree::TRootPFJet* > jetsPerEv
 						float btagValue = -100.;
 						std::string tagger_name = (_reader->calib)->tagger();
 						if (tagger_name.find("CSVv2") != std::string::npos || tagger_name.find("csvv2") != std::string::npos){btagValue = jetsPerEvent[i]->btag_combinedInclusiveSecondaryVertexV2BJetTags();}
-  						else if (tagger_name.find("SC") != std::string::npos || tagger_name.find("sc") != std::string::npos){
-    							if (_verbose){std::cerr << "Warning in BTagWeightTools: SC discriminator values not yet been included!!!" << std::endl
-	      						  	  		<< "Uses CSVv2 instead, please choose another tagger (or update the script)." << std::endl;
-							}
-    							btagValue = jetsPerEvent[i]->btag_combinedInclusiveSecondaryVertexV2BJetTags();
-  						}
+  						else if (tagger_name.find("cMVAv2") != std::string::npos || tagger_name.find("cmvav2") != std::string::npos || tagger_name.find("CMVAv2") != std::string::npos){				
+							btagValue = jetsPerEvent[i]->btag_PFCombinedMVAV2BJetTags();
+						}
   						else{
-  							if (_verbose){std::cerr << "Warning in BTagCalibration: Tagger " << tagger_name << " is not CSVv2, JP, or SC." << std::endl
+  							if (_verbose){std::cerr << "Warning in BTagCalibration: Tagger " << tagger_name << " is not CSVv2 or cMVAv2." << std::endl
 										<< "Please define your BTagCalibration object with one of these tagger names." << std::endl
 										<< "CSVv2 discriminator is used instead!!!" << std::endl;
 							}
