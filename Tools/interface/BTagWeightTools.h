@@ -53,8 +53,8 @@ class BTagWeightTools
 
 
   // constructors, destructors
-  BTagWeightTools(string histoFileName="HistosPtEta.root", bool verbose = true);
-  BTagWeightTools(const BTagCalibrationReader *reader, string histoFileName="HistosPtEta.root", bool verbose = true, float minpt = 30, float maxpt = 999, float maxeta = 2.4);
+  BTagWeightTools(TFile* FileHandle, bool verbose = true);
+  BTagWeightTools(const BTagCalibrationReader *reader, TFile* FileHandle, float minpt = 30, float maxpt = 999, float maxeta = 2.4, bool verbose = true);
   ~BTagWeightTools();
   
   void InitializeMCEfficiencyHistos(int NofPtBins=15,float PtMin=30.,float PtMax=999.,int NofEtaBins=2);  //the binning is more or less arbitrary; but you should have enough statistics in each bin

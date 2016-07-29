@@ -36,7 +36,7 @@ using namespace TopTree;
 
 
 // constructor
-BTagWeightTools::BTagWeightTools(string histoFileName, bool verbose):
+BTagWeightTools::BTagWeightTools(TFile* FileHandle, bool verbose):
 _ptmin(9999),
 _ptmax(-999),
 _etamax(2.4),
@@ -47,13 +47,10 @@ _histogramsFilled(false)
 
 {
   InitializeMCEfficiencyHistos();
-  _f = TFile::Open(histoFileName.c_str(),"READ");
-  if (!_f){_f = TFile::Open(histoFileName.c_str(),"RECREATE");}
-  else if (!(_f->GetListOfKeys()->FindObject("BtaggedJets"))){_f->ReOpen("UPDATE");}
-  
+  _f = FileHandle;
 }
 
-BTagWeightTools::BTagWeightTools(const BTagCalibrationReader *reader, string histoFileName, bool verbose, float minpt, float maxpt, float maxeta):
+BTagWeightTools::BTagWeightTools(const BTagCalibrationReader *reader, TFile* FileHandle, float minpt, float maxpt, float maxeta, bool verbose):
 _ptmin(9999),
 _ptmax(-999),
 _etamax(2.4),
@@ -67,9 +64,7 @@ _histogramsFilled(false)
   _etamax = maxeta;
   _reader = reader;
   InitializeMCEfficiencyHistos(20,_ptmin,_ptmax,4);
-  _f = TFile::Open(histoFileName.c_str(),"READ");
-  if (!_f){_f = TFile::Open(histoFileName.c_str(),"RECREATE");}
-  else if (!(_f->GetListOfKeys()->FindObject("BtaggedJets"))){_f->ReOpen("UPDATE");}
+  _f = FileHandle;
   
 }
 
@@ -82,7 +77,7 @@ BTagWeightTools::~BTagWeightTools(){
   TString opt = _f->GetOption();
   if (opt == "READ"){
   	_f->ReOpen("UPDATE");
-	if (_verbose){cout << "BTagWeightTools::Destructor WARNING: Histograms are being added to already existing file (NOT A NEW FILE)" << endl;}
+	if (_verbose){cout << "BTagWeightTools::Destructor WARNING: File was opened as READ, changing this to UPDATE in order to write out the Histograms!!!)" << endl;}
   }
   _histo2D["BtaggedJets"]->Write();
   _histo2D["BtaggedBJets"]->Write();
@@ -94,8 +89,8 @@ BTagWeightTools::~BTagWeightTools(){
   }
   
 
-  _f->Close();
-  delete _f;
+  //_f->Close();
+  //delete _f;
   //_histo2D.clear();
   //_allSelectedJets.clear();
   
