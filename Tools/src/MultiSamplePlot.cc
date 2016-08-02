@@ -31,13 +31,14 @@ MultiSamplePlot::MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int
   string histoName = "";
   string histoTitle = "";
   float binWidth = (Max - Min)/Nbins;
-  stream << std::fixed << std::setprecision(2) << binWidth;
+  if(fmod(binWidth, 1) == 0.0) stream << std::fixed << std::setprecision(0) << binWidth;
+  else stream << std::fixed << std::setprecision(2) << binWidth;
   string sbinWidth = stream.str();
 
   if(!Units.empty()) XaxisLabel_ = XaxisLabel + " (" + Units + ")";
   else XaxisLabel_ = XaxisLabel;
-  if(!Units.empty()) YaxisLabel_ = YaxisLabel + " #backslash " + sbinWidth + " " + Units;
-  else YaxisLabel_ = YaxisLabel + " #backslash " + sbinWidth + " units";
+  if(!Units.empty()) YaxisLabel_ = YaxisLabel + " #/ " + sbinWidth + " " + Units;
+  else YaxisLabel_ = YaxisLabel + " #/ " + sbinWidth;
   plotName_ = PlotName;
   text_ = TString(Text);
   lumi_ = 1.;
@@ -46,7 +47,7 @@ MultiSamplePlot::MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int
     histoTitle = datasets[i]->Title();
     TH1F* h = new TH1F(histoName.c_str(),histoTitle.c_str(),Nbins,Min,Max);
     h->SetStats(false);
-    h->Sumw2();
+    h->Sumw2(kFALSE);
     h->GetXaxis()->SetTitle(XaxisLabel_.c_str());
     h->GetYaxis()->SetTitle(YaxisLabel_.c_str());
     plots_.push_back(pair<TH1F*,Dataset*>(h,datasets[i]));
@@ -69,7 +70,7 @@ MultiSamplePlot::MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int
     histoTitle = datasets[i]->Title();
     TH1F* h = new TH1F(histoName.c_str(),histoTitle.c_str(),Nbins,binsX);
     h->SetStats(false);
-    h->Sumw2();
+    h->Sumw2(kFALSE);
     h->GetXaxis()->SetTitle(XaxisLabel.c_str());
     h->GetYaxis()->SetTitle(YaxisLabel.c_str());
     plots_.push_back(pair<TH1F*,Dataset*>(h,datasets[i]));
@@ -531,7 +532,7 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
       if(hData_)
 	{
 	  hData_->SetBinErrorOption(TH1::kPoisson);
-	  hData_->Draw("same E0");
+	  hData_->Draw("same E");
 
 	  if(RatioType>0)
 	    {
@@ -571,7 +572,7 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
     {
       if(hData_) {
 	hData_->SetBinErrorOption(TH1::kPoisson);
-	  hData_->Draw("same E0");
+	  hData_->Draw("same E");
       }
     }
 
@@ -587,7 +588,7 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
       if(hData_)
 	{
 	  hData_->SetBinErrorOption(TH1::kPoisson);
-	  hData_->Draw("same E0");
+	  hData_->Draw("same E");
 
 	  if(RatioType>0)
 	    {
@@ -627,7 +628,7 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
     {
       if(hData_) {
 	hData_->SetBinErrorOption(TH1::kPoisson);
-	  hData_->Draw("same E0");
+	  hData_->Draw("same E");
       }
     }
 
@@ -685,7 +686,7 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
       if(hData_)
 	{
 	  hData_->SetBinErrorOption(TH1::kPoisson);
-	  hData_->Draw("same E0");
+	  hData_->Draw("same E");
 
 	  if(RatioType>0)
 	    {
@@ -725,7 +726,7 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
     {
       if(hData_) {
 	hData_->SetBinErrorOption(TH1::kPoisson);
-	  hData_->Draw("same E0");
+	  hData_->Draw("same E");
       }
     }
 
@@ -740,7 +741,7 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
       if(hData_)
 	{
 	  hData_->SetBinErrorOption(TH1::kPoisson);
-	  hData_->Draw("same E0");
+	  hData_->Draw("same E");
 
 	  if(RatioType)
 	    {
@@ -780,7 +781,7 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
     {
       if(hData_) {
 	hData_->SetBinErrorOption(TH1::kPoisson);
-	  hData_->Draw("same E0");
+	  hData_->Draw("same E");
       }
     }
 
@@ -792,7 +793,7 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
       ErrorGraph->SetFillColor(kBlack);
       ErrorGraph->SetLineColor(kBlack);
       ErrorGraph->SetLineWidth(1);
-      leg_->AddEntry(ErrorGraph,"Systematic Uncertainty","F");
+      leg_->AddEntry(ErrorGraph,"ME Scale Uncertainty","F");
     }
 
   if(hData_)
