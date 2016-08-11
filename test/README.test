@@ -1,0 +1,25 @@
+Running tests requires GoogleTest (https://github.com/google/googletest) and
+CMSSW software
+0.  Set CMSSW in release area
+    $> cmsenv
+1. Install googletest library to TopBrussels root folder
+    $> cd ${TOPBRUSSELS_ROOT}
+    $> wget https://github.com/google/googletest/archive/release-1.7.0.zip
+    $> unzip  wget https://github.com/google/googletest/archive/release-1.7.0.zip
+    $> cd googletest-release-1.7.0
+    $> mkdir build; cd build
+    $> cmake ..
+    $> make
+    $> cd ..
+    $> mkdir lib
+    $> cp build/lib*.a lib
+
+2. Build tests
+    $> cd ${TOPTREEANALYSISBASE_ROOT}
+    $> mkdir build; cd build
+    $> cmake .. -DCMAKE_BUILD_TYPE=Release -DTOPBRUSSELS_INCLUDE_DIRS=${TOPBRUSSELS_ROOT} \
+        -DGTEST_ROOT=${TOPBRUSSELS_ROOT}/googletest-release-1.7.0 \
+        -DROOT_DIR=$ROOTSYS/cmake
+3. Test
+    $> ctest
+
