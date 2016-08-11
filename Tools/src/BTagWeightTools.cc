@@ -211,6 +211,13 @@ float BTagWeightTools::getMCEventWeight(vector< TopTree::TRootPFJet* > jetsPerEv
 						else{
 							tagEff = getTagEff(jetsPerEvent[i]->Pt(), jetsPerEvent[i]->Eta(), jetsPerEvent[i]->hadronFlavour());											
 							btagSF = _reader->eval(jetsPerEvent[i]);
+                                                        if (_verbose){
+                                                            cout << endl << "BTagWeightTools::getMCEventWeight DEBUG:\n" 
+                                                                 << "pt: " << jetsPerEvent[i]->Pt() << "\n" 
+                                                                 << "eta: " << jetsPerEvent[i]->Eta() << "\n" 
+                                                                 << "flav: " << jetsPerEvent[i]->hadronFlavour() << "\n"
+                                                                 << "tagEff: " << tagEff << "\n";
+                                                        }
 						}
 													
 						if (tagEff == 0.)
