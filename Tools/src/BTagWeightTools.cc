@@ -46,7 +46,6 @@ _verbose(verbose),
 _histogramsFilled(false)
 
 {
-  InitializeMCEfficiencyHistos();
   _f = FileHandle;
 }
 
@@ -63,7 +62,6 @@ _histogramsFilled(false)
   _ptmin = minpt;
   _etamax = maxeta;
   _reader = reader;
-  InitializeMCEfficiencyHistos(20,_ptmin,_ptmax,4);
   _f = FileHandle;
   
 }
@@ -118,7 +116,7 @@ void BTagWeightTools::FillMCEfficiencyHistos(vector< TopTree::TRootPFJet* > allS
 		throw std::exception();
 	  }
 	  
-	  
+	  InitializeMCEfficiencyHistos(20,_ptmin,_ptmax,4);
 	  
 	  for (unsigned int i=0; i < allSelectedJets.size(); i++)
 	  {
