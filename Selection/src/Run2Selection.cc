@@ -300,7 +300,7 @@ float Run2Selection::pfElectronIso(TRootElectron *el, bool bx25) const{
 }
 
 std::vector<TRootElectron*> Run2Selection::GetSelectedElectrons() const {
-	return GetSelectedElectrons(30,2.5,"Tight","Spring15_25ns",true);
+	return GetSelectedElectrons(30,2.5,"Tight","Spring16_80X",true);
 }
 
 std::vector<TRootElectron*> Run2Selection::GetSelectedElectrons(string WorkingPoint, string ProductionCampaign, bool CutsBased) const {
