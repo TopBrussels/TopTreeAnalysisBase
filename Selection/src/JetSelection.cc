@@ -88,70 +88,49 @@ std::vector<TRootPFJet*> JetSelection::GetSelectedBJets(const std::vector<TRootP
 
 bool JetSelection::passLoosePFJetID13TeV(const TRootPFJet* PFJet) const
 {
-  if (fabs(PFJet->Eta()) <= 3.0)
-    {
-      if (PFJet->nConstituents() > 1 )
-	{
-	  if (PFJet->neutralHadronEnergyFraction() < 0.99)
-	    {
-	      if (PFJet->neutralEmEnergyFraction() < 0.99 )
-		{
-		  if (fabs(PFJet->Eta()) > 2.4 || PFJet->chargedEmEnergyFraction() < 0.99 )
-		    {
-		      if (fabs(PFJet->Eta()) > 2.4 || PFJet->chargedHadronEnergyFraction() > 0)
-			{
-			  if (fabs(PFJet->Eta()) > 2.4 || PFJet->chargedMultiplicity() > 0)
-			    {
-			      return true;
-			    }
-			}
-		    }
-		}
-	    }
-	}
-    }
-  else if (PFJet->neutralEmEnergyFraction() < 0.9 )
-    {
-      if(PFJet->neutralMultiplicity() > 10)
-	{
-	  return true;
-	}
-    }
+
+  if(fabs(fabs(PFJet->Eta()) <= 2.4)
+  {
+      if(PFJet->chargedHadronEnergyFraction() > 0 && PFJet->chargedEmEnergyFraction() < 0.99 && PFJet->chargedMultiplicity() > 0)
+      {
+          if(PFJet->neutralHadronEnergyFraction() < 0.99 && PFJet->neutralEmEnergyFraction() < 0.99 && PFJet->nConstituents() > 1) return true;
+      }
+  }
+  else if(fabs(PFJet->Eta()) > 2.4 && fabs(PFJet->Eta()) <= 2.7)
+  {
+      if(PFJet->neutralHadronEnergyFraction() < 0.99 && PFJet->neutralEmEnergyFraction() < 0.99 && PFJet->nConstituents() > 1) return true;
+  }
+  else if(fabs(PFJet->Eta()) > 2.7 && fabs(PFJet->Eta()) <= 3.0)
+  {
+      if(PFJet->neutralEmEnergyFraction() < 0.90 && PFJet->neutralMultiplicity() > 2) return true;
+  }
+  else
+  {
+      if(PFJet->neutralEmEnergyFraction() < 0.90 && PFJet->neutralMultiplicity() > 10) return true;
+  }
   return false;
 }
 bool JetSelection::passTightPFJetID13TeV(const TRootPFJet* PFJet) const
 {
-  if(fabs(PFJet->Eta()) <= 3.0)
-    {
-      if (PFJet->nConstituents() > 1 )
-	{
-	  if (PFJet->neutralHadronEnergyFraction() < 0.9)
-	    {
-	      if (PFJet->neutralEmEnergyFraction() < 0.9 )
-		{
-		  if (fabs(PFJet->Eta()) > 2.4 || PFJet->chargedEmEnergyFraction() < 0.99 )
-		    {
-		      if (fabs(PFJet->Eta()) > 2.4 || PFJet->chargedHadronEnergyFraction() > 0)
-			{
-			  if (fabs(PFJet->Eta()) > 2.4 || PFJet->chargedMultiplicity() > 0)
-			    {
-			      return true;
-			    }
-			}
-		    }
-		}
-	    }
-	}
-    }
-  else if (PFJet->neutralEmEnergyFraction() < 0.9 )
-    {
-      if(PFJet->neutralMultiplicity() > 10)
-	{
-	  return true;
-	}
-    }
-
-
+  if(fabs(fabs(PFJet->Eta()) <= 2.4)
+  {
+      if(PFJet->chargedHadronEnergyFraction() > 0 && PFJet->chargedEmEnergyFraction() < 0.99 && PFJet->chargedMultiplicity() > 0)
+      {
+          if(PFJet->neutralHadronEnergyFraction() < 0.90 && PFJet->neutralEmEnergyFraction() < 0.90  && PFJet->nConstituents() > 1) return true;
+      }
+  }
+  else if(fabs(PFJet->Eta()) > 2.4 && fabs(PFJet->Eta()) <= 2.7)
+  {
+      if(PFJet->neutralHadronEnergyFraction() < 0.90 && PFJet->neutralEmEnergyFraction() < 0.90 && PFJet->nConstituents() > 1) return true;
+  }
+  else if(fabs(PFJet->Eta()) > 2.7 && fabs(PFJet->Eta()) <= 3.0)
+  {
+      if(PFJet->neutralEmEnergyFraction() < 0.90 && PFJet->neutralMultiplicity() > 2) return true;
+  }
+  else
+  {
+      if(PFJet->neutralEmEnergyFraction() < 0.90 && PFJet->neutralMultiplicity() > 10) return true;
+  }
   return false;
 }
 
