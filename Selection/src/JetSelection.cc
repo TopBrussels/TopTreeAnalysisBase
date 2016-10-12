@@ -89,7 +89,7 @@ std::vector<TRootPFJet*> JetSelection::GetSelectedBJets(const std::vector<TRootP
 bool JetSelection::passLoosePFJetID13TeV(const TRootPFJet* PFJet) const
 {
 
-  if(fabs(fabs(PFJet->Eta()) <= 2.4)
+  if(fabs(fabs(PFJet->Eta()) <= 2.4))
   {
       if(PFJet->chargedHadronEnergyFraction() > 0 && PFJet->chargedEmEnergyFraction() < 0.99 && PFJet->chargedMultiplicity() > 0)
       {
@@ -112,7 +112,7 @@ bool JetSelection::passLoosePFJetID13TeV(const TRootPFJet* PFJet) const
 }
 bool JetSelection::passTightPFJetID13TeV(const TRootPFJet* PFJet) const
 {
-  if(fabs(fabs(PFJet->Eta()) <= 2.4)
+  if(fabs(fabs(PFJet->Eta()) <= 2.4))
   {
       if(PFJet->chargedHadronEnergyFraction() > 0 && PFJet->chargedEmEnergyFraction() < 0.99 && PFJet->chargedMultiplicity() > 0)
       {
