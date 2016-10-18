@@ -31,7 +31,8 @@ MultiSamplePlot::MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int
   string histoName = "";
   string histoTitle = "";
   float binWidth = (Max - Min)/Nbins;
-  stream << std::fixed << std::setprecision(2) << binWidth;
+  if(!Units.empty()) stream << std::fixed << std::setprecision(2) << binWidth;
+  else stream << std::fixed << std::setprecision(0) << binWidth;
   string sbinWidth = stream.str();
 
   if(!Units.empty()) XaxisLabel_ = XaxisLabel + " (" + Units + ")";
@@ -872,7 +873,7 @@ void MultiSamplePlot::DrawStackedPlot(TCanvas* canvas, TCanvas* canvasLogY, THSt
   stringstream ssqrts; ssqrts << sqrts_; //sqrt(s) given in TeV
   TLatex cmstext;
 
-  TString lumiText = "2.6 fb^{-1} (13 TeV)";
+  TString lumiText = (slumi.str()+" fb^{-1} ("+ssqrts.str()+" TeV)").c_str();
   float extraTextSize = extraOverCmsTextSize*cmsTextSize;
 
   cmstext.SetNDC(true);
@@ -910,7 +911,7 @@ void MultiSamplePlot::DrawStackedPlot(TCanvas* canvas, TCanvas* canvasLogY, THSt
   hstack->GetYaxis()->SetTitle(yaxistitle);
   hstack->GetYaxis()->SetTitleOffset(1.0);  //or 1.4
 
-  cmstext.DrawLatex(1-r,1-t+lumiTextOffset*t,"2.6 fb^{-1} (13 TeV)");
+  cmstext.DrawLatex(1-r,1-t+lumiTextOffset*t,lumiText);
 
   cmstext.SetTextAlign(align_);
   cmstext.SetTextFont(cmsTextFont);
@@ -953,7 +954,7 @@ void MultiSamplePlot::DrawStackedPlot(TCanvas* canvas, TCanvas* canvasLogY, THSt
   cmstext.SetTextFont(42);
   cmstext.SetTextAlign(31); 
   cmstext.SetTextSize(lumiTextSize*t); 
-  cmstext.DrawLatex(1-r,1-t+lumiTextOffset*t,"2.6 fb^{-1} (13 TeV)");
+  cmstext.DrawLatex(1-r,1-t+lumiTextOffset*t,lumiText);
 
   cmstext.SetTextAlign(align_);
   cmstext.SetTextFont(cmsTextFont);
