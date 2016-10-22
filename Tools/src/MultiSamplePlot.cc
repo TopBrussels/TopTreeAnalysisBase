@@ -32,13 +32,13 @@ MultiSamplePlot::MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int
   string histoTitle = "";
   float binWidth = (Max - Min)/Nbins;
   if(!Units.empty()) stream << std::fixed << std::setprecision(2) << binWidth;
-  else stream << std::fixed << std::setprecision(0) << binWidth;
+  else stream << std::fixed << std::setprecision(2) << binWidth;
   string sbinWidth = stream.str();
 
   if(!Units.empty()) XaxisLabel_ = XaxisLabel + " (" + Units + ")";
   else XaxisLabel_ = XaxisLabel;
   if(!Units.empty()) YaxisLabel_ = YaxisLabel + " #backslash " + sbinWidth + " " + Units;
-  else YaxisLabel_ = YaxisLabel + " #backslash " + sbinWidth + " units";
+  else YaxisLabel_ = YaxisLabel + " #backslash " + sbinWidth + Units;
   plotName_ = PlotName;
   text_ = TString(Text);
   lumi_ = 1.;
@@ -663,8 +663,8 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
       padAreaNorm->SetFillColor(0);
       padAreaNorm->SetFillStyle(0);
       padAreaNorm->SetGridy(1);
-      pad->SetRightMargin(0.04);
-      pad->SetLeftMargin(0.12);
+      padAreaNorm->SetRightMargin(0.04);
+      padAreaNorm->SetLeftMargin(0.12);
       padAreaNormLogY = (TPad*) padAreaNorm->Clone();
     }
 
