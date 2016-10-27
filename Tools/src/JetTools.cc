@@ -259,6 +259,7 @@ void JetTools::correctJetJESUnc(vector<TRootJet*> inJets, TRootMET* inMET, strin
 
 void JetTools::correctJetJER(TRootJet* inJet, TRootGenJet* inGenJet, string direction, bool oldnumbers)
 {
+  /// For AK4PF jets!!!
   float corrFactor;
   bool JER_minus = false, JER_plus = false; // only one of them true! never both of them!
   if(direction == "minus") JER_minus = true;
@@ -266,96 +267,114 @@ void JetTools::correctJetJER(TRootJet* inJet, TRootGenJet* inGenJet, string dire
   else if(direction != "nominal") cout << "Unknown JER direction: " << direction << endl;
   float fabsEta = fabs(inJet->Eta());
   
-  if(!oldnumbers) /// SFs for CMSSW_7_6_X (13 TeV)
+  if(!oldnumbers) /// SFs for CMSSW_8_0_X (13 TeV)
   {
-    /// numbers from https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetResolution -- Last updated: 30 March 2016
+    /// numbers from https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetResolution -- Last updated: 27 October 2016
     /// corrFactor = c - 1; because ptscale is defined differently (pt is used instead of pt,gen)
     if(JER_minus)
     {
-      if(fabsEta <= 0.5) corrFactor = 0.077;
-      else if(fabsEta <= 0.8 && fabsEta > 0.5) corrFactor = 0.092;
-      else if(fabsEta <= 1.1 && fabsEta > 0.8) corrFactor = 0.080;
-      else if(fabsEta <= 1.3 && fabsEta > 1.1) corrFactor = 0.070;
-      else if(fabsEta <= 1.7 && fabsEta > 1.3) corrFactor = 0.104;
-      else if(fabsEta <= 1.9 && fabsEta > 1.7) corrFactor = 0.067;
-      else if(fabsEta <= 2.1 && fabsEta > 1.9) corrFactor = 0.118;
-      else if(fabsEta <= 2.3 && fabsEta > 2.1) corrFactor = 0.112;
-      else if(fabsEta <= 2.5 && fabsEta > 2.3) corrFactor = 0.101;
-      else if(fabsEta <= 2.8 && fabsEta > 2.5) corrFactor = 0.150;
-      else if(fabsEta <= 3.0 && fabsEta > 2.8) corrFactor = 0.243;
-      else if(fabsEta <= 3.2 && fabsEta > 3.0) corrFactor = 0.351;
-      else if(fabsEta <= 5.0 && fabsEta > 3.2) corrFactor = 0.166;
-      else corrFactor = 0.166; //fabsEta > 5.0
+      if(fabsEta <= 0.5) corrFactor = 0.096;
+      else if(fabsEta <= 0.8 && fabsEta > 0.5) corrFactor = 0.119;
+      else if(fabsEta <= 1.1 && fabsEta > 0.8) corrFactor = 0.122;
+      else if(fabsEta <= 1.3 && fabsEta > 1.1) corrFactor = -0.037;
+      else if(fabsEta <= 1.7 && fabsEta > 1.3) corrFactor = 0.085;
+      else if(fabsEta <= 1.9 && fabsEta > 1.7) corrFactor = -0.021;
+      else if(fabsEta <= 2.1 && fabsEta > 1.9) corrFactor = 0.081;
+      else if(fabsEta <= 2.3 && fabsEta > 2.1) corrFactor = 0.001;
+      else if(fabsEta <= 2.5 && fabsEta > 2.3) corrFactor = 0.048;
+      else if(fabsEta <= 2.8 && fabsEta > 2.5) corrFactor = 0.134;
+      else if(fabsEta <= 3.0 && fabsEta > 2.8) corrFactor = 0.420;
+      else if(fabsEta <= 3.2 && fabsEta > 3.0) corrFactor = -0.068;
+      else if(fabsEta <= 5.0 && fabsEta > 3.2) corrFactor = 0.081;
+      else corrFactor = 0.081; //fabsEta > 5.0
     }
     else if(JER_plus)
     {
-      if(fabsEta <= 0.5) corrFactor = 0.113;
-      else if(fabsEta <= 0.8 && fabsEta > 0.5) corrFactor = 0.148;
-      else if(fabsEta <= 1.1 && fabsEta > 0.8) corrFactor = 0.114;
-      else if(fabsEta <= 1.3 && fabsEta > 1.1) corrFactor = 0.136;
-      else if(fabsEta <= 1.7 && fabsEta > 1.3) corrFactor = 0.132;
-      else if(fabsEta <= 1.9 && fabsEta > 1.7) corrFactor = 0.133;
-      else if(fabsEta <= 2.1 && fabsEta > 1.9) corrFactor = 0.206;
-      else if(fabsEta <= 2.3 && fabsEta > 2.1) corrFactor = 0.208;
-      else if(fabsEta <= 2.5 && fabsEta > 2.3) corrFactor = 0.221;
-      else if(fabsEta <= 2.8 && fabsEta > 2.5) corrFactor = 0.268;
-      else if(fabsEta <= 3.0 && fabsEta > 2.8) corrFactor = 0.885;
-      else if(fabsEta <= 3.2 && fabsEta > 3.0) corrFactor = 0.417;
-      else if(fabsEta <= 5.0 && fabsEta > 3.2) corrFactor = 0.266;
-      else corrFactor = 0.266; //fabsEta > 5.0
+      if(fabsEta <= 0.5) corrFactor = 0.148;
+      else if(fabsEta <= 0.8 && fabsEta > 0.5) corrFactor = 0.215;
+      else if(fabsEta <= 1.1 && fabsEta > 0.8) corrFactor = 0.214;
+      else if(fabsEta <= 1.3 && fabsEta > 1.1) corrFactor = 0.095;
+      else if(fabsEta <= 1.7 && fabsEta > 1.3) corrFactor = 0.145;
+      else if(fabsEta <= 1.9 && fabsEta > 1.7) corrFactor = 0.103;
+      else if(fabsEta <= 2.1 && fabsEta > 1.9) corrFactor = 0.253;
+      else if(fabsEta <= 2.3 && fabsEta > 2.1) corrFactor = 0.187;
+      else if(fabsEta <= 2.5 && fabsEta > 2.3) corrFactor = 0.288;
+      else if(fabsEta <= 2.8 && fabsEta > 2.5) corrFactor = 0.398;
+      else if(fabsEta <= 3.0 && fabsEta > 2.8) corrFactor = 0.770;
+      else if(fabsEta <= 3.2 && fabsEta > 3.0) corrFactor = 0.064;
+      else if(fabsEta <= 5.0 && fabsEta > 3.2) corrFactor = 0.371;
+      else corrFactor = 0.371; //fabsEta > 5.0
     }
     else
     {
-      if(fabsEta <= 0.5) corrFactor = 0.095;
-      else if(fabsEta <= 0.8 && fabsEta > 0.5) corrFactor = 0.120;
-      else if(fabsEta <= 1.1 && fabsEta > 0.8) corrFactor = 0.097;
-      else if(fabsEta <= 1.3 && fabsEta > 1.1) corrFactor = 0.103;
-      else if(fabsEta <= 1.7 && fabsEta > 1.3) corrFactor = 0.118;
-      else if(fabsEta <= 1.9 && fabsEta > 1.7) corrFactor = 0.100;
-      else if(fabsEta <= 2.1 && fabsEta > 1.9) corrFactor = 0.162;
-      else if(fabsEta <= 2.3 && fabsEta > 2.1) corrFactor = 0.160;
-      else if(fabsEta <= 2.5 && fabsEta > 2.3) corrFactor = 0.161;
-      else if(fabsEta <= 2.8 && fabsEta > 2.5) corrFactor = 0.209;
-      else if(fabsEta <= 3.0 && fabsEta > 2.8) corrFactor = 0.564;
-      else if(fabsEta <= 3.2 && fabsEta > 3.0) corrFactor = 0.384;
-      else if(fabsEta <= 5.0 && fabsEta > 3.2) corrFactor = 0.216;
-      else corrFactor = 0.216; //fabsEta > 5.0
+      if(fabsEta <= 0.5) corrFactor = 0.122;
+      else if(fabsEta <= 0.8 && fabsEta > 0.5) corrFactor = 0.167;
+      else if(fabsEta <= 1.1 && fabsEta > 0.8) corrFactor = 0.168;
+      else if(fabsEta <= 1.3 && fabsEta > 1.1) corrFactor = 0.029;
+      else if(fabsEta <= 1.7 && fabsEta > 1.3) corrFactor = 0.115;
+      else if(fabsEta <= 1.9 && fabsEta > 1.7) corrFactor = 0.041;
+      else if(fabsEta <= 2.1 && fabsEta > 1.9) corrFactor = 0.167;
+      else if(fabsEta <= 2.3 && fabsEta > 2.1) corrFactor = 0.094;
+      else if(fabsEta <= 2.5 && fabsEta > 2.3) corrFactor = 0.168;
+      else if(fabsEta <= 2.8 && fabsEta > 2.5) corrFactor = 0.266;
+      else if(fabsEta <= 3.0 && fabsEta > 2.8) corrFactor = 0.595;
+      else if(fabsEta <= 3.2 && fabsEta > 3.0) corrFactor = -0.002;
+      else if(fabsEta <= 5.0 && fabsEta > 3.2) corrFactor = 0.226;
+      else corrFactor = 0.226; //fabsEta > 5.0
     }
   }
-  else  /// SFs for CMSSW_7_4_X (13 TeV)
+  else  /// SFs for CMSSW_8_0_X, ICHEP dataset (at the moment same as above)
   {
     if(JER_minus)
     {
-      if(fabsEta <= 0.8) corrFactor = 0.038;
-      else if(fabsEta <= 1.3 && fabsEta > 0.8) corrFactor = 0.059;
-      else if(fabsEta <= 1.9 && fabsEta > 1.3) corrFactor = 0.076;
-      else if(fabsEta <= 2.5 && fabsEta > 1.9) corrFactor = 0.032;
-      else if(fabsEta <= 3.0 && fabsEta > 2.5) corrFactor = 0.220;
-      else if(fabsEta <= 3.2 && fabsEta > 3.0) corrFactor = 0.192;
-      else if(fabsEta <= 5.0 && fabsEta > 3.2) corrFactor = 0.034;
-      else corrFactor = 0.034; //fabsEta > 5.0
+      if(fabsEta <= 0.5) corrFactor = 0.096;
+      else if(fabsEta <= 0.8 && fabsEta > 0.5) corrFactor = 0.119;
+      else if(fabsEta <= 1.1 && fabsEta > 0.8) corrFactor = 0.122;
+      else if(fabsEta <= 1.3 && fabsEta > 1.1) corrFactor = -0.037;
+      else if(fabsEta <= 1.7 && fabsEta > 1.3) corrFactor = 0.085;
+      else if(fabsEta <= 1.9 && fabsEta > 1.7) corrFactor = -0.021;
+      else if(fabsEta <= 2.1 && fabsEta > 1.9) corrFactor = 0.081;
+      else if(fabsEta <= 2.3 && fabsEta > 2.1) corrFactor = 0.001;
+      else if(fabsEta <= 2.5 && fabsEta > 2.3) corrFactor = 0.048;
+      else if(fabsEta <= 2.8 && fabsEta > 2.5) corrFactor = 0.134;
+      else if(fabsEta <= 3.0 && fabsEta > 2.8) corrFactor = 0.420;
+      else if(fabsEta <= 3.2 && fabsEta > 3.0) corrFactor = -0.068;
+      else if(fabsEta <= 5.0 && fabsEta > 3.2) corrFactor = 0.081;
+      else corrFactor = 0.081; //fabsEta > 5.0
     }
     else if(JER_plus)
     {
-      if(fabsEta <= 0.8) corrFactor = 0.084;
-      else if(fabsEta <= 1.3 && fabsEta > 0.8) corrFactor = 0.117;
-      else if(fabsEta <= 1.9 && fabsEta > 1.3) corrFactor = 0.136;
-      else if(fabsEta <= 2.5 && fabsEta > 1.9) corrFactor = 0.220;
-      else if(fabsEta <= 3.0 && fabsEta > 2.5) corrFactor = 0.466;
-      else if(fabsEta <= 3.2 && fabsEta > 3.0) corrFactor = 0.414;
-      else if(fabsEta <= 5.0 && fabsEta > 3.2) corrFactor = 0.606;
-      else corrFactor = 0.606; //fabsEta > 5.0
+      if(fabsEta <= 0.5) corrFactor = 0.148;
+      else if(fabsEta <= 0.8 && fabsEta > 0.5) corrFactor = 0.215;
+      else if(fabsEta <= 1.1 && fabsEta > 0.8) corrFactor = 0.214;
+      else if(fabsEta <= 1.3 && fabsEta > 1.1) corrFactor = 0.095;
+      else if(fabsEta <= 1.7 && fabsEta > 1.3) corrFactor = 0.145;
+      else if(fabsEta <= 1.9 && fabsEta > 1.7) corrFactor = 0.103;
+      else if(fabsEta <= 2.1 && fabsEta > 1.9) corrFactor = 0.253;
+      else if(fabsEta <= 2.3 && fabsEta > 2.1) corrFactor = 0.187;
+      else if(fabsEta <= 2.5 && fabsEta > 2.3) corrFactor = 0.288;
+      else if(fabsEta <= 2.8 && fabsEta > 2.5) corrFactor = 0.398;
+      else if(fabsEta <= 3.0 && fabsEta > 2.8) corrFactor = 0.770;
+      else if(fabsEta <= 3.2 && fabsEta > 3.0) corrFactor = 0.064;
+      else if(fabsEta <= 5.0 && fabsEta > 3.2) corrFactor = 0.371;
+      else corrFactor = 0.371; //fabsEta > 5.0
     }
     else
     {
-      if(fabsEta <= 0.8) corrFactor = 0.061;
-      else if(fabsEta <= 1.3 && fabsEta > 0.8) corrFactor = 0.088;
-      else if(fabsEta <= 1.9 && fabsEta > 1.3) corrFactor = 0.106;
-      else if(fabsEta <= 2.5 && fabsEta > 1.9) corrFactor = 0.126;
-      else if(fabsEta <= 3.0 && fabsEta > 2.5) corrFactor = 0.343;
-      else if(fabsEta <= 3.2 && fabsEta > 3.0) corrFactor = 0.303;
-      else if(fabsEta <= 5.0 && fabsEta > 3.2) corrFactor = 0.320;
-      else corrFactor = 0.320; //fabsEta > 5.0
+      if(fabsEta <= 0.5) corrFactor = 0.122;
+      else if(fabsEta <= 0.8 && fabsEta > 0.5) corrFactor = 0.167;
+      else if(fabsEta <= 1.1 && fabsEta > 0.8) corrFactor = 0.168;
+      else if(fabsEta <= 1.3 && fabsEta > 1.1) corrFactor = 0.029;
+      else if(fabsEta <= 1.7 && fabsEta > 1.3) corrFactor = 0.115;
+      else if(fabsEta <= 1.9 && fabsEta > 1.7) corrFactor = 0.041;
+      else if(fabsEta <= 2.1 && fabsEta > 1.9) corrFactor = 0.167;
+      else if(fabsEta <= 2.3 && fabsEta > 2.1) corrFactor = 0.094;
+      else if(fabsEta <= 2.5 && fabsEta > 2.3) corrFactor = 0.168;
+      else if(fabsEta <= 2.8 && fabsEta > 2.5) corrFactor = 0.266;
+      else if(fabsEta <= 3.0 && fabsEta > 2.8) corrFactor = 0.595;
+      else if(fabsEta <= 3.2 && fabsEta > 3.0) corrFactor = -0.002;
+      else if(fabsEta <= 5.0 && fabsEta > 3.2) corrFactor = 0.226;
+      else corrFactor = 0.226; //fabsEta > 5.0
     }
   }
   
