@@ -826,7 +826,7 @@ void MultiSamplePlot::DrawStackedPlot(TCanvas* canvas, TCanvas* canvasLogY, THSt
   float W = canvas->GetWw();
   // references for T, B, L, R
   float T = 0.08*H;
-  float B = 0.12*H; 
+  //float B = 0.12*H; 
   float L = 0.12*W;
   float R = 0.04*W;
   canvas->SetFillColor(0);
@@ -856,7 +856,7 @@ void MultiSamplePlot::DrawStackedPlot(TCanvas* canvas, TCanvas* canvasLogY, THSt
   float r = canvas->GetRightMargin();
   float b = canvas->GetBottomMargin();
   int iPosX = 11;
-  bool outOfFrame    = false;
+  //bool outOfFrame    = false;
 
   int alignY_=3;
   int alignX_=2;
