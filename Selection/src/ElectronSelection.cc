@@ -108,8 +108,8 @@ float ElectronSelection::GetElectronIsoCorrType(TRootElectron *el) const
         if (fabs(el->superClusterEta()) >= 2.0   && fabs(el->superClusterEta()) < 2.2   ) EffectiveArea = 0.1230;
         if (fabs(el->superClusterEta()) >= 2.2   && fabs(el->superClusterEta()) < 2.3   ) EffectiveArea = 0.1635;
         if (fabs(el->superClusterEta()) >= 2.3   && fabs(el->superClusterEta()) < 2.4   ) EffectiveArea = 0.1937;
-        if (fabs(el->superClusterEta()) >= 2.4   && fabs(el->superClusterEta()) < 2.5   ) EffectiveArea = 0.2393;
-        if (fabs(el->superClusterEta()) >= 2.5) EffectiveArea = -9999;
+        if (fabs(el->superClusterEta()) >= 2.4   && fabs(el->superClusterEta()) < 5.   ) EffectiveArea = 0.2393;
+        if (fabs(el->superClusterEta()) >= 5.) EffectiveArea = -9999;
 
     double isocorr = 0;
     if(elecIsoCorrType_ == 1) // rho correction (default corr)
