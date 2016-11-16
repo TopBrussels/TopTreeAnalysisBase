@@ -248,54 +248,14 @@ bool Run2Selection::foundZCandidate(std::vector<TRootMuon*>& muons1, std::vector
 
 // ______________ELECTRONS______________________________________________//
 
-float Run2Selection::GetElectronIsoCorrType(TRootElectron *el, bool bx25) const{
-	double EffectiveArea = 0.;
-	if(bx25)
-    {
-        // Updated to Spring 2015 EA from https://github.com/cms-sw/cmssw/blob/CMSSW_7_4_14/RecoEgamma/ElectronIdentification/data/Spring15/effAreaElectrons_cone03_pfNeuHadronsAndPhotons_25ns.txt#L8
-        if (fabs(el->superClusterEta()) >= 0.0   && fabs(el->superClusterEta()) < 1.0   ) EffectiveArea = 0.1752;
-        if (fabs(el->superClusterEta()) >= 1.0   && fabs(el->superClusterEta()) < 1.479 ) EffectiveArea = 0.1862;
-        if (fabs(el->superClusterEta()) >= 1.479 && fabs(el->superClusterEta()) < 2.0   ) EffectiveArea = 0.1411;
-        if (fabs(el->superClusterEta()) >= 2.0   && fabs(el->superClusterEta()) < 2.2   ) EffectiveArea = 0.1534;
-        if (fabs(el->superClusterEta()) >= 2.2   && fabs(el->superClusterEta()) < 2.3   ) EffectiveArea = 0.1903;
-        if (fabs(el->superClusterEta()) >= 2.3   && fabs(el->superClusterEta()) < 2.4   ) EffectiveArea = 0.2243;
-        if (fabs(el->superClusterEta()) >= 2.4   && fabs(el->superClusterEta()) < 5.0   ) EffectiveArea = 0.2687;
-    }
-    else
-    {
-        // Updated to Spring 2015 EA from https://github.com/cms-sw/cmssw/blob/CMSSW_7_4_14/RecoEgamma/ElectronIdentification/data/Spring15/effAreaElectrons_cone03_pfNeuHadronsAndPhotons_50ns.txt
-        if (fabs(el->superClusterEta()) >= 0.0   && fabs(el->superClusterEta()) < 0.8   ) EffectiveArea = 0.0973;
-        if (fabs(el->superClusterEta()) >= 0.8   && fabs(el->superClusterEta()) < 1.3   ) EffectiveArea = 0.0954;
-        if (fabs(el->superClusterEta()) >= 1.3   && fabs(el->superClusterEta()) < 2.0   ) EffectiveArea = 0.0632;
-        if (fabs(el->superClusterEta()) >= 2.0   && fabs(el->superClusterEta()) < 2.2   ) EffectiveArea = 0.0727;
-        if (fabs(el->superClusterEta()) >= 2.2   && fabs(el->superClusterEta()) < 5.0   ) EffectiveArea = 0.1337;
-    }
-
-	if (fabs(el->superClusterEta()) >= 2.5) EffectiveArea = -9999;
-
-	double isocorr = 0;
-	if(elecIsoCorrType_ == 1) // rho correction (default corr)
-		isocorr = rho_*EffectiveArea;
-	else if(elecIsoCorrType_ == 2) // dB correction
-		isocorr = 0.5*el->puChargedHadronIso(3);
-	else if (elecIsoCorrType_ == 0) // no correction
-		isocorr = 0.;
-	else {
-		cerr << "Please, specify the correction type to be applied for the calculation of the electron relative isolation" << endl;
-		cerr << " - Use setElectronIsoCorrType(int) method: " << endl;
-		cerr << " -- 0: no correction, 1: rho correction (default), 2: dB correction" << endl;
-		exit(1);
-	}
-	return isocorr;
+float Run2Selection::GetElectronIsoCorrType(TRootElectron *el) const{
+	return electronSelector->GetElectronIsoCorrType(el);
 }
 
 //This function gets the PF based Isolation for an Electron.  Since the Effective Areas for rho*effArea Isolation
 //are different for 25 and 50 ns samples, a boolean must be supplied to indicate which bx scenario.  true -> 25 ns.  false -> 50 ns
-float Run2Selection::pfElectronIso(TRootElectron *el, bool bx25) const{
-	float isoCorr = (el->neutralHadronIso(3) + el->photonIso(3) - GetElectronIsoCorrType(el, bx25));
-	float isolation = (el->chargedHadronIso(3) + (isoCorr > 0.0 ? isoCorr : 0.0))/(el->Pt());
-
-	return isolation;
+float Run2Selection::pfElectronIso(TRootElectron *el) const{
+	return electronSelector->pfElectronIso(el);
 
 }
 
