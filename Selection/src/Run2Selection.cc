@@ -259,17 +259,24 @@ float Run2Selection::pfElectronIso(TRootElectron *el) const{
 
 }
 
-std::vector<TRootElectron*> Run2Selection::GetSelectedElectrons() const {
-	return GetSelectedElectrons(30,2.5,"Tight","Spring16_80X",true);
+std::vector<TRootElectron*> Run2Selection::GetSelectedElectrons() const
+{
+    return GetSelectedElectrons(30,2.5,"Tight","Spring16_80X",true,true);
 }
 
-std::vector<TRootElectron*> Run2Selection::GetSelectedElectrons(string WorkingPoint, string ProductionCampaign, bool CutsBased) const {
-	return GetSelectedElectrons(30,2.5,WorkingPoint,ProductionCampaign,CutsBased);
+std::vector<TRootElectron*> Run2Selection::GetSelectedElectrons(string WorkingPoint, string ProductionCampaign, bool CutsBased) const
+{
+    return GetSelectedElectrons(30,2.5,WorkingPoint,ProductionCampaign,CutsBased,true);
 }
 
-std::vector<TRootElectron*> Run2Selection::GetSelectedElectrons(float PtThr, float etaThr, string WorkingPoint, string ProductionCampaign, bool CutsBased) const {
+std::vector<TRootElectron*> Run2Selection::GetSelectedElectrons(float PtThr, float etaThr, string WorkingPoint) const
+{
+    return GetSelectedElectrons(PtThr,etaThr,WorkingPoint,"Spring16_80X",true,true);
+}
 
-    return electronSelector->GetSelectedElectrons(PtThr, etaThr, WorkingPoint, ProductionCampaign, CutsBased);
+std::vector<TRootElectron*> Run2Selection::GetSelectedElectrons(float PtThr, float etaThr, string WorkingPoint, string ProductionCampaign, bool CutsBased, bool applyVID) const
+{
+    return electronSelector->GetSelectedElectrons(PtThr, etaThr, WorkingPoint, ProductionCampaign, CutsBased, applyVID);
 }
 
 std::vector<TRootElectron*> Run2Selection::GetSelectedDisplacedElectrons(float PtThr, float EtaThr, float relIsoB, float relIsoEC, bool applyIso, bool applyId) const {

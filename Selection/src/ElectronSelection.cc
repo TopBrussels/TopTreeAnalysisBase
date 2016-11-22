@@ -139,46 +139,222 @@ float ElectronSelection::pfElectronIso(TRootElectron *el) const
 
 std::vector<TRootElectron*> ElectronSelection::GetSelectedElectrons() const
 {
-    return GetSelectedElectrons(30,2.5,"Tight","Spring16_80X",true);
+    return GetSelectedElectrons(30,2.5,"Tight","Spring16_80X",true,true);
 }
 
 std::vector<TRootElectron*> ElectronSelection::GetSelectedElectrons(string WorkingPoint, string ProductionCampaign, bool CutsBased) const
 {
-    return GetSelectedElectrons(30,2.5,WorkingPoint,ProductionCampaign,CutsBased);
+    return GetSelectedElectrons(30,2.5,WorkingPoint,ProductionCampaign,CutsBased,true);
 }
 
-std::vector<TRootElectron*> ElectronSelection::GetSelectedElectrons(float PtThr, float etaThr, string WorkingPoint, string ProductionCampaign, bool CutsBased) const
+std::vector<TRootElectron*> ElectronSelection::GetSelectedElectrons(float PtThr, float etaThr, string WorkingPoint) const
+{
+    return GetSelectedElectrons(PtThr,etaThr,WorkingPoint,"Spring16_80X",true,true);
+}
+
+std::vector<TRootElectron*> ElectronSelection::GetSelectedElectrons(float PtThr, float etaThr, string WorkingPoint, string ProductionCampaign, bool CutsBased, bool applyVID) const
 {
     std::vector<TRootElectron* > ElectronCollection;
-    if (CutsBased == true)
+    if (CutsBased == true && applyVID ==  false)
     {
-        if (ProductionCampaign == "Spring16_80X" && WorkingPoint == "Tight")
-        {
-            ElectronCollection = GetSelectedTightElectronsCutsBasedSpring16_80X(PtThr, etaThr);
-        }
-        else if (ProductionCampaign == "Spring16_80X" && WorkingPoint == "Medium")
-        {
-            ElectronCollection = GetSelectedMediumElectronsCutsBasedSpring16_80X(PtThr, etaThr);
-        }
-        else if (ProductionCampaign == "Spring16_80X" && WorkingPoint == "Loose")
-        {
-            ElectronCollection = GetSelectedLooseElectronsCutsBasedSpring16_80X(PtThr, etaThr);
-        }
-        else if (ProductionCampaign == "Spring16_80X" && WorkingPoint == "Veto")
-        {
-            ElectronCollection = GetSelectedVetoElectronsCutsBasedSpring16_80X(PtThr, etaThr);
-        }
-        else
-        {
-            string printboolval="Cutbased=true";
-            if(!CutsBased)
-                printboolval="Cutbased=false";
+            if (ProductionCampaign == "Spring16_80X" && WorkingPoint == "Tight")
+            {
+                ElectronCollection = GetSelectedTightElectronsCutsBasedSpring16_80X(PtThr, etaThr);
+            }
+            else if (ProductionCampaign == "Spring16_80X" && WorkingPoint == "Medium")
+            {
+                ElectronCollection = GetSelectedMediumElectronsCutsBasedSpring16_80X(PtThr, etaThr);
+            }
+            else if (ProductionCampaign == "Spring16_80X" && WorkingPoint == "Loose")
+            {
+                ElectronCollection = GetSelectedLooseElectronsCutsBasedSpring16_80X(PtThr, etaThr);
+            }
+            else if (ProductionCampaign == "Spring16_80X" && WorkingPoint == "Veto")
+            {
+                ElectronCollection = GetSelectedVetoElectronsCutsBasedSpring16_80X(PtThr, etaThr);
+            }
+            else
+            {
+                string printboolval="Cutbased=true, applyVID=false";
 
-            throw std::invalid_argument( "received incorrect args to GetSelectedElectrons, requested: "+WorkingPoint+", "+ProductionCampaign+" "+printboolval);
-        }
+                throw std::invalid_argument( "received incorrect args to GetSelectedElectrons, requested: "+WorkingPoint+", "+ProductionCampaign+" "+printboolval);
+            }
+    }
+    else if (CutsBased == true && applyVID ==  true)
+    {
+            if (ProductionCampaign == "Spring16_80X" && WorkingPoint == "Heep")
+            {
+                ElectronCollection = GetSelectedHeepElectronsCutsBasedSpring16_80X_VID(PtThr, etaThr);
+            }
+            if (ProductionCampaign == "Spring16_80X" && WorkingPoint == "Tight")
+            {
+                ElectronCollection = GetSelectedTightElectronsCutsBasedSpring16_80X_VID(PtThr, etaThr);
+            }
+            else if (ProductionCampaign == "Spring16_80X" && WorkingPoint == "Medium")
+            {
+                ElectronCollection = GetSelectedMediumElectronsCutsBasedSpring16_80X_VID(PtThr, etaThr);
+            }
+            else if (ProductionCampaign == "Spring16_80X" && WorkingPoint == "Loose")
+            {
+                ElectronCollection = GetSelectedLooseElectronsCutsBasedSpring16_80X_VID(PtThr, etaThr);
+            }
+            else if (ProductionCampaign == "Spring16_80X" && WorkingPoint == "Veto")
+            {
+                ElectronCollection = GetSelectedVetoElectronsCutsBasedSpring16_80X_VID(PtThr, etaThr);
+            }
+            else
+            {
+                string printboolval="Cutbased=true, applyVID=true";
+
+                throw std::invalid_argument( "received incorrect args to GetSelectedElectrons, requested: "+WorkingPoint+", "+ProductionCampaign+" "+printboolval);
+            }
+    }
+    else if (CutsBased == false && applyVID ==  true)
+    {
+            if (ProductionCampaign == "Spring16_80X" && WorkingPoint == "Tight")
+            {
+                ElectronCollection = GetSelectedTightElectronsMVABasedSpring16_80X_VID(PtThr, etaThr);
+            }
+            else if (ProductionCampaign == "Spring16_80X" && WorkingPoint == "Medium")
+            {
+                ElectronCollection = GetSelectedMediumElectronsMVABasedSpring16_80X_VID(PtThr, etaThr);
+            }
+            else if (ProductionCampaign == "Spring16_80X" && WorkingPoint == "Loose")
+            {
+                ElectronCollection = GetSelectedLooseElectronsMVABasedSpring16_80X_VID(PtThr, etaThr);
+            }
+            else
+            {
+                string printboolval="Cutbased=false, applyVID=true";
+
+                throw std::invalid_argument( "received incorrect args to GetSelectedElectrons, requested: "+WorkingPoint+", "+ProductionCampaign+" "+printboolval);
+            }
+    }
+    else
+    {
+                string printboolval="Cutbased=false, applyVID=false";
+
+                throw std::invalid_argument( "received incorrect args to GetSelectedElectrons, requested: "+WorkingPoint+", "+ProductionCampaign+" "+printboolval);
     }
     return ElectronCollection;
 }
+
+//VID electrons
+std::vector<TRootElectron*> ElectronSelection::GetSelectedHeepElectronsCutsBasedSpring16_80X_VID(float PtThr, float EtaThr) const
+{
+  std::vector<TRootElectron*> selectedElectrons;
+
+  for(unsigned int i=0; i<electrons.size(); i++)
+  {
+      TRootElectron* el = (TRootElectron*) electrons[i];
+      
+      if(el->isCB_HeepID() && el->Pt() > PtThr && fabs(el->Eta()) < EtaThr) selectedElectrons.push_back(electrons[i]);
+  }
+  
+  return selectedElectrons;
+}
+
+std::vector<TRootElectron*> ElectronSelection::GetSelectedTightElectronsCutsBasedSpring16_80X_VID(float PtThr, float EtaThr) const
+{
+  std::vector<TRootElectron*> selectedElectrons;
+
+  for(unsigned int i=0; i<electrons.size(); i++)
+  {
+      TRootElectron* el = (TRootElectron*) electrons[i];
+      
+      if(el->isCB_TightID() && el->Pt() > PtThr && fabs(el->Eta()) < EtaThr) selectedElectrons.push_back(electrons[i]);
+  }
+  
+  return selectedElectrons;
+}
+std::vector<TRootElectron*> ElectronSelection::GetSelectedMediumElectronsCutsBasedSpring16_80X_VID(float PtThr, float EtaThr) const
+{
+  std::vector<TRootElectron*> selectedElectrons;
+
+  for(unsigned int i=0; i<electrons.size(); i++)
+  {
+      TRootElectron* el = (TRootElectron*) electrons[i];
+      
+      if(el->isCB_MediumID() && el->Pt() > PtThr && fabs(el->Eta()) < EtaThr) selectedElectrons.push_back(electrons[i]);
+  }
+  
+  return selectedElectrons;
+}
+
+std::vector<TRootElectron*> ElectronSelection::GetSelectedLooseElectronsCutsBasedSpring16_80X_VID(float PtThr, float EtaThr) const
+{
+  std::vector<TRootElectron*> selectedElectrons;
+
+  for(unsigned int i=0; i<electrons.size(); i++)
+  {
+      TRootElectron* el = (TRootElectron*) electrons[i];
+      
+      if(el->isCB_LooseID() && el->Pt() > PtThr && fabs(el->Eta()) < EtaThr) selectedElectrons.push_back(electrons[i]);
+  }
+  
+  return selectedElectrons;
+}
+
+std::vector<TRootElectron*> ElectronSelection::GetSelectedVetoElectronsCutsBasedSpring16_80X_VID(float PtThr, float EtaThr) const
+{
+  std::vector<TRootElectron*> selectedElectrons;
+
+  for(unsigned int i=0; i<electrons.size(); i++)
+  {
+      TRootElectron* el = (TRootElectron*) electrons[i];
+    
+      if(el->isCB_VetoID() && el->Pt() > PtThr && fabs(el->Eta()) < EtaThr) selectedElectrons.push_back(electrons[i]);
+  }
+  
+  return selectedElectrons;
+}
+
+
+std::vector<TRootElectron*> ElectronSelection::GetSelectedTightElectronsMVABasedSpring16_80X_VID(float PtThr, float EtaThr) const
+{
+  std::vector<TRootElectron*> selectedElectrons;
+
+  for(unsigned int i=0; i<electrons.size(); i++)
+  {
+      TRootElectron* el = (TRootElectron*) electrons[i];
+      
+      if(el->isMVA_TightID() && el->Pt() > PtThr && fabs(el->Eta()) < EtaThr) selectedElectrons.push_back(electrons[i]);
+  }
+  
+  return selectedElectrons;
+}
+
+std::vector<TRootElectron*> ElectronSelection::GetSelectedMediumElectronsMVABasedSpring16_80X_VID(float PtThr, float EtaThr) const
+{
+  std::vector<TRootElectron*> selectedElectrons;
+
+  for(unsigned int i=0; i<electrons.size(); i++)
+  {
+      TRootElectron* el = (TRootElectron*) electrons[i];
+      
+      if(el->isMVA_MediumID() && el->Pt() > PtThr && fabs(el->Eta()) < EtaThr) selectedElectrons.push_back(electrons[i]);
+  }
+  
+  return selectedElectrons;
+}
+
+std::vector<TRootElectron*> ElectronSelection::GetSelectedLooseElectronsMVABasedSpring16_80X_VID(float PtThr, float EtaThr) const
+{
+  std::vector<TRootElectron*> selectedElectrons;
+
+  for(unsigned int i=0; i<electrons.size(); i++)
+  {
+      TRootElectron* el = (TRootElectron*) electrons[i];
+      
+      if(el->isMVA_LooseID() && el->Pt() > PtThr && fabs(el->Eta()) < EtaThr) selectedElectrons.push_back(electrons[i]);
+  }
+  
+  return selectedElectrons;
+}
+
+
+
+
 
 // displaced electrons
 std::vector<TRootElectron*> ElectronSelection::GetSelectedDisplacedElectrons(float PtThr, float EtaThr, float relIsoB, float relIsoEC, bool applyIso, bool applyId) const
@@ -249,7 +425,8 @@ std::vector<TRootElectron*> ElectronSelection::GetSelectedTightElectronsCutsBase
                         && el->hadronicOverEm() < 0.0414
                         && el->ioEmIoP() < 0.0129
                         && pfElectronIso(el) <  0.0588
-                        && el->missingHits() <= 1)
+                        && el->missingHits() <= 1
+                        && el->passConversion())
                 {
                     selectedElectrons.push_back(electrons[i]);
                 }
@@ -263,7 +440,8 @@ std::vector<TRootElectron*> ElectronSelection::GetSelectedTightElectronsCutsBase
                         && (el->hadronicOverEm() < 0.0641)
                         && el->ioEmIoP() < 0.0129
                         && pfElectronIso(el) < 0.0571
-                        && el->missingHits() <= 1)
+                        && el->missingHits() <= 1
+                        && el->passConversion())
                 {
                     selectedElectrons.push_back(electrons[i]);
                 }
@@ -296,7 +474,8 @@ std::vector<TRootElectron*> ElectronSelection::GetSelectedMediumElectronsCutsBas
                         && el->hadronicOverEm() < 0.253
                         && el->ioEmIoP() < 0.134
                         && pfElectronIso(el) <  0.0695
-                        && el->missingHits() <= 1)
+                        && el->missingHits() <= 1
+                        && el->passConversion())
                 {
                     selectedElectrons.push_back(electrons[i]);
                 }
@@ -310,7 +489,8 @@ std::vector<TRootElectron*> ElectronSelection::GetSelectedMediumElectronsCutsBas
                         && (el->hadronicOverEm() < 0.0878)
                         && el->ioEmIoP() < 0.13
                         && pfElectronIso(el) < 0.0821
-                        && el->missingHits() <= 1)
+                        && el->missingHits() <= 1
+                        && el->passConversion())
                 {
                     selectedElectrons.push_back(electrons[i]);
                 }
@@ -343,7 +523,8 @@ std::vector<TRootElectron*> ElectronSelection::GetSelectedLooseElectronsCutsBase
                         && el->hadronicOverEm() < 0.298
                         && el->ioEmIoP() < 0.241
                         && pfElectronIso(el) <  0.0994
-                        && el->missingHits() <= 1)
+                        && el->missingHits() <= 1
+                        && el->passConversion())
                 {
                     selectedElectrons.push_back(electrons[i]);
                 }
@@ -357,7 +538,8 @@ std::vector<TRootElectron*> ElectronSelection::GetSelectedLooseElectronsCutsBase
                         && (el->hadronicOverEm() < 0.101)
                         && el->ioEmIoP() < 0.14
                         && pfElectronIso(el) < 0.107
-                        && el->missingHits() <= 1)
+                        && el->missingHits() <= 1
+                        && el->passConversion())
                 {
                     selectedElectrons.push_back(electrons[i]);
                 }
@@ -390,7 +572,8 @@ std::vector<TRootElectron*> ElectronSelection::GetSelectedVetoElectronsCutsBased
                         && el->hadronicOverEm() < 0.356
                         && el->ioEmIoP() < 0.299
                         && pfElectronIso(el) <  0.175
-                        && el->missingHits() <= 2)
+                        && el->missingHits() <= 2
+                        && el->passConversion())
                 {
                     selectedElectrons.push_back(electrons[i]);
                 }
@@ -404,7 +587,8 @@ std::vector<TRootElectron*> ElectronSelection::GetSelectedVetoElectronsCutsBased
                         && (el->hadronicOverEm() < 0.211)
                         && el->ioEmIoP() < 0.15
                         && pfElectronIso(el) < 0.159
-                        && el->missingHits() <= 3)
+                        && el->missingHits() <= 3
+                        && el->passConversion())
                 {
                     selectedElectrons.push_back(electrons[i]);
                 }

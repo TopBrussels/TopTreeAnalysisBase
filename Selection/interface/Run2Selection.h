@@ -85,7 +85,8 @@ public:
 // ELECTRON GETTERS ===============================================
     std::vector<TRootElectron*> GetSelectedElectrons() const;
     std::vector<TRootElectron*> GetSelectedElectrons(string WorkingPoint, string ProductionCampaign, bool CutsBased) const;
-    std::vector<TRootElectron*> GetSelectedElectrons(float PTthr, float EtaThr, string WorkingPoint, string ProductionCampaign, bool CutsBased) const;
+    std::vector<TRootElectron*> GetSelectedElectrons(float PTthr, float EtaThr, string WorkingPoint) const;
+    std::vector<TRootElectron*> GetSelectedElectrons(float PTthr, float EtaThr, string WorkingPoint, string ProductionCampaign, bool CutsBased, bool applyVID) const;
 
 
     // displaced electrons
