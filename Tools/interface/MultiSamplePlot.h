@@ -45,6 +45,7 @@ class MultiSamplePlot{
 		void setDataLumi(float lum) { lumi_ = lum; } /**if running over data, you don't need to use this method, as the lumi will be taken from the dataset info*/
 		void setSqrtsTeV(float sqrts) { sqrts_ = sqrts; } /**"sqrt(s) = 8 TeV" displayed by default in title*/
 		void setPreliminary(bool prelim) { prelim_ = prelim; } /**"CMS Preliminary" displayed by default in title; set it to "CMS" via this method*/
+  void setChannel(bool chan, string channel){chan_ = chan; channel_ = channel; }
 		void showNumberEntries(bool a) { showNumberEntries_ = a; } /**show number of entries in the legend (default = true)*/
 		void setMaxY(float y) { maxY_ = y; } /**set maximum value of y-axis*/
 		void setMinLogY(float y) { minLogY_ = y; } /**set minimum value of log-scale y-axis*/
@@ -85,6 +86,8 @@ class MultiSamplePlot{
 		float lumi_;   /**in pb^-1, for cms title of plot*/
 		float sqrts_;  /**in TeV, for cms title of plot */
 		bool prelim_;  /**to display "Preliminary" in cms title of plot*/
+    bool chan_;  /** to displac decay channel */
+  string channel_ = "" ; /** decaychannel */
 		string plotName_;
 		//Variables from May 2016 version of CMS Plotting style
                 TString cmsText     = "CMS";
