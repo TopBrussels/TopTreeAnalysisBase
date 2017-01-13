@@ -50,6 +50,8 @@ MultiSamplePlot::MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int
     h->Sumw2();
     h->GetXaxis()->SetTitle(XaxisLabel_.c_str());
     h->GetYaxis()->SetTitle(YaxisLabel_.c_str());
+    
+    
     plots_.push_back(pair<TH1F*,Dataset*>(h,datasets[i]));
     if(datasets[i]->Name().find("data") == 0 || datasets[i]->Name().find("Data") == 0 || datasets[i]->Name().find("DATA") == 0 )
       lumi_ = datasets[i]->EquivalentLumi();
@@ -73,6 +75,7 @@ MultiSamplePlot::MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int
     h->Sumw2();
     h->GetXaxis()->SetTitle(XaxisLabel.c_str());
     h->GetYaxis()->SetTitle(YaxisLabel.c_str());
+    
     plots_.push_back(pair<TH1F*,Dataset*>(h,datasets[i]));
     if(datasets[i]->Name().find("data") == 0 || datasets[i]->Name().find("Data") == 0 || datasets[i]->Name().find("DATA") == 0 )
       lumi_ = datasets[i]->EquivalentLumi();
@@ -122,6 +125,9 @@ void MultiSamplePlot::Initialize()
   prelim_=true;
   chan_=false;
   channel_ = " ";
+  setBinLabels_ = false;
+  nCuts_ = -1;
+  vlabel_ = {""};
 }
 
 MultiSamplePlot::~MultiSamplePlot()
@@ -495,6 +501,7 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
         ratio->GetYaxis()->SetTitle("Data/MC");
         ratio->SetMaximum(1.5);
         ratio->SetMinimum(0.5);
+        
       }
       else if(RatioType==2)
       {
@@ -513,6 +520,11 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
     ratio->SetMarkerSize(1.);
     ratio->GetYaxis()->SetNdivisions(5);
     ratio->SetTitle("");
+    if(setBinLabels_ ){
+      for(int ibin = 1; ibin < nCuts_+1; ibin++){
+        ratio->GetXaxis()->SetBinLabel(ibin,vlabel_[ibin-1].c_str());
+      }
+    }
     
     pad = new TPad("pad", "pad", 0.0, 0.0, 1.0, 1.0);
     pad->SetTopMargin(0.7);
@@ -915,6 +927,11 @@ void MultiSamplePlot::DrawStackedPlot(TCanvas* canvas, TCanvas* canvasLogY, THSt
   hstack->GetXaxis()->SetTitle(xaxistitle);
   hstack->GetYaxis()->SetTitle(yaxistitle);
   hstack->GetYaxis()->SetTitleOffset(1.0);  //or 1.4
+  if(setBinLabels_ && RatioType == 0){
+    for(int ibin = 1; ibin < nCuts_+1; ibin++){
+      hstack->GetXaxis()->SetBinLabel(ibin,vlabel_[ibin-1].c_str());
+    }
+  }
   
   cmstext.DrawLatex(1-r,1-t+lumiTextOffset*t,lumiText);
   

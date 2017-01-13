@@ -46,6 +46,7 @@ class MultiSamplePlot{
 		void setSqrtsTeV(float sqrts) { sqrts_ = sqrts; } /**"sqrt(s) = 8 TeV" displayed by default in title*/
 		void setPreliminary(bool prelim) { prelim_ = prelim; } /**"CMS Preliminary" displayed by default in title; set it to "CMS" via this method*/
   void setChannel(bool chan, string channel){chan_ = chan; channel_ = channel; }
+  void setBins(bool setBinLabels, vector <string> vlabel, int nCuts){ setBinLabels_ = setBinLabels; vlabel_ = vlabel; nCuts_ = nCuts;  }
 		void showNumberEntries(bool a) { showNumberEntries_ = a; } /**show number of entries in the legend (default = true)*/
 		void setMaxY(float y) { maxY_ = y; } /**set maximum value of y-axis*/
 		void setMinLogY(float y) { minLogY_ = y; } /**set minimum value of log-scale y-axis*/
@@ -88,6 +89,9 @@ class MultiSamplePlot{
 		bool prelim_;  /**to display "Preliminary" in cms title of plot*/
     bool chan_;  /** to displac decay channel */
   string channel_ = "" ; /** decaychannel */
+  bool setBinLabels_;
+  int nCuts_;
+  vector<string> vlabel_ = {""};
 		string plotName_;
 		//Variables from May 2016 version of CMS Plotting style
                 TString cmsText     = "CMS";
