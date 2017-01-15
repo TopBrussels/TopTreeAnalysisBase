@@ -50,7 +50,7 @@ MultiSamplePlot::MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int
     h->Sumw2();
     h->GetXaxis()->SetTitle(XaxisLabel_.c_str());
     h->GetYaxis()->SetTitle(YaxisLabel_.c_str());
-    
+
     
     plots_.push_back(pair<TH1F*,Dataset*>(h,datasets[i]));
     if(datasets[i]->Name().find("data") == 0 || datasets[i]->Name().find("Data") == 0 || datasets[i]->Name().find("DATA") == 0 )
@@ -75,7 +75,7 @@ MultiSamplePlot::MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int
     h->Sumw2();
     h->GetXaxis()->SetTitle(XaxisLabel.c_str());
     h->GetYaxis()->SetTitle(YaxisLabel.c_str());
-    
+
     plots_.push_back(pair<TH1F*,Dataset*>(h,datasets[i]));
     if(datasets[i]->Name().find("data") == 0 || datasets[i]->Name().find("Data") == 0 || datasets[i]->Name().find("DATA") == 0 )
       lumi_ = datasets[i]->EquivalentLumi();
@@ -126,8 +126,8 @@ void MultiSamplePlot::Initialize()
   chan_=false;
   channel_ = " ";
   setBinLabels_ = false;
-  nCuts_ = -1;
   vlabel_ = {""};
+  doCutFlow_ = false;
 }
 
 MultiSamplePlot::~MultiSamplePlot()
@@ -147,6 +147,12 @@ MultiSamplePlot::~MultiSamplePlot()
 void MultiSamplePlot::AddDataHisto(TH1F* histo)
 {
   hData_ = (TH1F*) histo->Clone();
+  if(doCutFlow_ ){
+    for(int iBin = 1; iBin < histo->GetNbinsX()+1; iBin++){
+      hData_->SetBinError(iBin, std::sqrt(histo->GetBinContent(iBin)));
+      //cout << "bin " << iBin << " error " << std::sqrt(histo->GetBinContent(iBin)) << " content " << histo->GetBinContent(iBin) << endl;
+    }
+  }
 }
 
 void MultiSamplePlot::Fill(float value, Dataset* data, bool scale, float Lumi)
@@ -166,6 +172,8 @@ void MultiSamplePlot::Fill(float value, Dataset* data, bool scale, float Lumi)
       if(data->Name()==plots_[i].second->Name()) plots_[i].first->Fill(value);
     }
   }
+  
+  
 }
 
 void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioErrorBand, bool addErrorBand, bool ErrorBandAroundTotalInput, int scaleNPSignal)
@@ -308,6 +316,13 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
     {
       if ((dataPlotID != (int)i) && (plots_[i].second->Name().find("NP_")!=0))
         integralSM += plots_[i].first->Integral(0,plots_[i].first->GetNbinsX());
+    }
+    
+    if(doCutFlow_ ){
+      for(int iBin = 1; iBin < plots_[dataPlotID].first->GetNbinsX()+1; iBin++){
+        plots_[dataPlotID].first->SetBinError(iBin, std::sqrt(plots_[dataPlotID].first->GetBinContent(iBin)));
+        //cout << "bin " << iBin << " error " << std::sqrt(plots_[dataPlotID].first->GetBinContent(iBin)) << " content " << plots_[dataPlotID].first->GetBinContent(iBin) << endl;
+      }
     }
   }
   
@@ -493,6 +508,8 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
     hData_->SetMarkerStyle(20);
     
     ratio = (TH1F*) hData_->Clone();
+    
+    double binerror = 0.0;
     if(hStack_)
     {
       if(RatioType==1)
@@ -501,6 +518,15 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
         ratio->GetYaxis()->SetTitle("Data/MC");
         ratio->SetMaximum(1.5);
         ratio->SetMinimum(0.5);
+        if(doCutFlow_ ){
+          for(int iBin = 1; iBin < ratio->GetNbinsX()+1; iBin++){
+            double a = hData_->GetBinContent(iBin);
+            double b = totalSM->GetBinContent(iBin);
+            binerror = std::sqrt( (a/(b*b)) + ((a*a)/(b*b*b))  );
+            ratio->SetBinError(iBin, binerror);
+            //cout << "bin " << iBin << " error " << binerror << " content " << ratio->GetBinContent(iBin) << endl;
+          }
+        }
         
       }
       else if(RatioType==2)
@@ -510,6 +536,16 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
         ratio->GetYaxis()->SetTitle("(Data-MC)/MC");
         ratio->SetMaximum(0.5);
         ratio->SetMinimum(-0.5);
+        if(doCutFlow_ ){
+          for(int iBin = 1; iBin < ratio->GetNbinsX()+1; iBin++){
+            double a = hData_->GetBinContent(iBin);
+            double b = totalSM->GetBinContent(iBin);
+            binerror = std::sqrt( (a/(b*b)) + ((a*a)/(b*b*b))  );
+            ratio->SetBinError(iBin, binerror);
+            //cout << "bin " << iBin << " error " << binerror << " content " << ratio->GetBinContent(iBin) << endl;
+          }
+        }
+        
       }
     }
     ratio->SetMarkerStyle(20);
@@ -520,8 +556,8 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
     ratio->SetMarkerSize(1.);
     ratio->GetYaxis()->SetNdivisions(5);
     ratio->SetTitle("");
-    if(setBinLabels_ ){
-      for(int ibin = 1; ibin < nCuts_+1; ibin++){
+    if(doCutFlow_ ){
+      for(int ibin = 1; ibin < vlabel_.size()+1; ibin++){
         ratio->GetXaxis()->SetBinLabel(ibin,vlabel_[ibin-1].c_str());
       }
     }
@@ -545,14 +581,17 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
     if(hData_)
     {
       hData_->Draw("same E");
+     
       
       if(RatioType>0)
       {
         pad->Draw();
         pad->cd(0);
         ratio->Draw("e");
+        
         if(addRatioErrorBand)
         {
+          if(doCutFlow_) cout << "watch out! uncertainties are not set properly" << endl;
           TH1F* totalSMRatio = (TH1F*) totalSM->Clone();
           TH1F* hErrorPlusRatio = (TH1F*) hErrorPlus->Clone();
           TH1F* hErrorMinusRatio = (TH1F*) hErrorMinus->Clone();
@@ -582,7 +621,10 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
   }
   else
   {
-    if(hData_) hData_->Draw("E");
+    if(hData_) {
+      hData_->Draw("E");
+    
+    }
   }
   
   
@@ -596,7 +638,9 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
     
     if(hData_)
     {
-      hData_->Draw("same E");
+      
+     hData_->Draw("same E");
+      
       
       if(RatioType>0)
       {
@@ -605,6 +649,7 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
         ratio->Draw("e");
         if(addRatioErrorBand)
         {
+          if(doCutFlow_) cout << "watch out! uncertainties are not set properly" << endl;
           TH1F* totalSMRatio = (TH1F*) totalSM->Clone();
           TH1F* hErrorPlusRatio = (TH1F*) hErrorPlus->Clone();
           TH1F* hErrorMinusRatio = (TH1F*) hErrorMinus->Clone();
@@ -634,7 +679,10 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
   }
   else
   {
-    if(hData_) hData_->Draw("E");
+    if(hData_) {
+      hData_->Draw("E");
+      
+    }
   }
   
   //Now area-normalized plots...
@@ -644,6 +692,7 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
   if(hData_)
   {
     ratioAreaNorm = (TH1F*) hData_->Clone();
+    double binerror = 0.0;
     if(hStackAreaNorm_)
     {
       if(RatioType==1)
@@ -652,6 +701,15 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
         ratioAreaNorm->GetYaxis()->SetTitle("Data/MC");
         ratioAreaNorm->SetMaximum(1.5);
         ratioAreaNorm->SetMinimum(0.5);
+        if(doCutFlow_ ){
+          for(int iBin = 1; iBin < ratio->GetNbinsX()+1; iBin++){
+            double a = hData_->GetBinContent(iBin);
+            double b = totalSMAreaNorm->GetBinContent(iBin);
+            binerror = std::sqrt( (a/(b*b)) + ((a*a)/(b*b*b))  );
+            ratioAreaNorm->SetBinError(iBin, binerror);
+            //cout << "bin " << iBin << " error " << binerror << " content " << ratioAeraNorm->GetBinContent(iBin) << endl;
+          }
+        }
       }
       else if(RatioType==2)
       {
@@ -660,6 +718,15 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
         ratioAreaNorm->GetYaxis()->SetTitle("(Data-MC)/MC");
         ratioAreaNorm->SetMaximum(0.5);
         ratioAreaNorm->SetMinimum(-0.5);
+        if(doCutFlow_ ){
+          for(int iBin = 1; iBin < ratio->GetNbinsX()+1; iBin++){
+            double a = hData_->GetBinContent(iBin);
+            double b = totalSMAreaNorm->GetBinContent(iBin);
+            binerror = std::sqrt( (a/(b*b)) + ((a*a)/(b*b*b))  );
+            ratioAreaNorm->SetBinError(iBin, binerror);
+            //cout << "bin " << iBin << " error " << binerror << " content " << ratioAreaNorm->GetBinContent(iBin) << endl;
+          }
+        }
       }
     }
     ratioAreaNorm->SetMarkerStyle(20);
@@ -699,6 +766,7 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
         ratioAreaNorm->Draw("e");
         if(addRatioErrorBand)
         {
+          if(doCutFlow_) cout << "watch out! uncertainties are not set properly" << endl;
           TH1F* totalSMAreaNormRatio = (TH1F*) totalSM->Clone();
           TH1F* hErrorPlusRatio = (TH1F*) hErrorPlus->Clone();
           TH1F* hErrorMinusRatio = (TH1F*) hErrorMinus->Clone();
@@ -750,6 +818,7 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
         ratioAreaNorm->Draw("e");
         if(addRatioErrorBand)
         {
+          if(doCutFlow_) cout << "watch out! uncertainties are not set properly" << endl;
           TH1F* totalSMAreaNormRatio = (TH1F*) totalSM->Clone();
           TH1F* hErrorPlusRatio = (TH1F*) hErrorPlus->Clone();
           TH1F* hErrorMinusRatio = (TH1F*) hErrorMinus->Clone();
@@ -928,7 +997,7 @@ void MultiSamplePlot::DrawStackedPlot(TCanvas* canvas, TCanvas* canvasLogY, THSt
   hstack->GetYaxis()->SetTitle(yaxistitle);
   hstack->GetYaxis()->SetTitleOffset(1.0);  //or 1.4
   if(setBinLabels_ && RatioType == 0){
-    for(int ibin = 1; ibin < nCuts_+1; ibin++){
+    for(int ibin = 1; ibin < vlabel_.size()+1; ibin++){
       hstack->GetXaxis()->SetBinLabel(ibin,vlabel_[ibin-1].c_str());
     }
   }
@@ -1017,6 +1086,8 @@ void MultiSamplePlot::DrawStackedPlot(TCanvas* canvas, TCanvas* canvasLogY, THSt
   }
   
 }
+
+
 
 void MultiSamplePlot::DrawErrorBand(TH1F* totalSM, TH1F* hErrorPlus, TH1F* hErrorMinus, TH1F* hNominal, TGraphAsymmErrors*  ErrorGraph, bool ErrorBandAroundTotalInput)
 {
