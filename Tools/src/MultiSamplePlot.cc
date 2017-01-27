@@ -1169,7 +1169,7 @@ void MultiSamplePlot::DrawErrorBand(TH1F* totalSM, TH1F* hErrorPlus, TH1F* hErro
     
   }
   
-  ErrorGraph = new TGraphAsymmErrors(nbins,bins,bincontents,dummy,dummy,erroryplus,erroryminus);
+  ErrorGraph = new TGraphAsymmErrors(nbins,bins,bincontents,dummy,dummy,erroryminus,erroryplus);
   ErrorGraph->SetFillStyle(3004);//3005 diagonal dashed //3001 ~plain //3013 double diagonal dashed
   ErrorGraph->SetFillColor(kBlack);
   ErrorGraph->SetLineColor(kBlack);
@@ -1235,7 +1235,7 @@ void MultiSamplePlot::Write(TFile* fout, string label, bool savePNG, string path
     if(plots_[i].second->Name().find("data") != 0 && plots_[i].second->Name().find("Data") != 0 && plots_[i].second->Name().find("DATA") != 0 )
     {
       plots_[i].first->SetMarkerSize(0.5);
-      plots_[i].first->Write();
+      plots_[i].first->Write((label+"_"+plots_[i].second->Name()+"_").c_str());
     }
 }
 
