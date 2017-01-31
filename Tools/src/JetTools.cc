@@ -269,7 +269,7 @@ void JetTools::correctJetJER(TRootJet* inJet, TRootGenJet* inGenJet, string dire
   
   if(!oldnumbers) /// SFs for CMSSW_8_0_X (13 TeV)
   {
-    /// numbers from https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetResolution -- Last updated: 27 October 2016
+    /// numbers from https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetResolution -- Last updated: 25 January 2017
     /// corrFactor = c - 1; because ptscale is defined differently (pt is used instead of pt,gen)
     if(JER_minus)
     {
@@ -323,7 +323,7 @@ void JetTools::correctJetJER(TRootJet* inJet, TRootGenJet* inGenJet, string dire
       else corrFactor = 1.16 - 1; //fabsEta > 5.0
     }
   }
-  else  /// SFs for CMSSW_8_0_X, ICHEP dataset (at the moment same as above)
+  else  /// SFs for CMSSW_8_0_X, ICHEP dataset
   {
     if(JER_minus)
     {
