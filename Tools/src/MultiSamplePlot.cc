@@ -550,9 +550,10 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
     }
     ratio->SetMarkerStyle(20);
     ratio->GetXaxis()->SetLabelSize(0.04);
+    ratio->GetXaxis()->SetTitleSize(0.045);
     ratio->GetYaxis()->SetLabelSize(0.04);
     ratio->GetYaxis()->SetTitleSize(0.045);
-    ratio->GetYaxis()->SetTitleOffset(1.15);
+    ratio->GetYaxis()->SetTitleOffset(1.2);
     ratio->SetMarkerSize(1.);
     ratio->GetYaxis()->SetNdivisions(5);
     ratio->SetTitle("");
@@ -731,10 +732,11 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
     }
     ratioAreaNorm->SetMarkerStyle(20);
     ratioAreaNorm->GetXaxis()->SetLabelSize(0.04);
+    ratioAreaNorm->GetXaxis()->SetTitleSize(0.045);
     ratioAreaNorm->GetYaxis()->SetLabelSize(0.04);
     //    ratioAreaNorm->GetXaxis()->SetTitle(stack->GetXaxis()->GetTitle());
     ratioAreaNorm->GetYaxis()->SetTitleSize(0.045);
-    ratioAreaNorm->GetYaxis()->SetTitleOffset(1.15);
+    ratioAreaNorm->GetYaxis()->SetTitleOffset(1.2);
     ratioAreaNorm->SetMarkerSize(1.);
     ratioAreaNorm->GetYaxis()->SetNdivisions(5);
     ratioAreaNorm->SetTitle("");
@@ -859,7 +861,7 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
     ErrorGraph->SetFillColor(kBlack);
     ErrorGraph->SetLineColor(kBlack);
     ErrorGraph->SetLineWidth(1);
-    leg_->AddEntry(ErrorGraph,"Systematic Uncertainty","F");
+    leg_->AddEntry(ErrorGraph,"MC Uncertainty","F");
   }
   
   if(hData_)
@@ -993,9 +995,14 @@ void MultiSamplePlot::DrawStackedPlot(TCanvas* canvas, TCanvas* canvasLogY, THSt
   
   canvas->cd();
   hstack->Draw("HIST");
-  hstack->GetXaxis()->SetTitle(xaxistitle);
+  hstack->GetXaxis()->SetTitle(xaxistitle);//Make TGaxis to force not too many digits on y-axis
   hstack->GetYaxis()->SetTitle(yaxistitle);
-  hstack->GetYaxis()->SetTitleOffset(1.0);  //or 1.4
+  hstack->GetYaxis()->SetLabelSize(0.04);
+  hstack->GetYaxis()->SetTitleSize(0.045);
+  hstack->GetYaxis()->SetTitleOffset(1.2);
+
+  TGaxis *myY = (TGaxis*)hstack->GetYaxis();//Make TGaxis to force not too many digits on y-axis
+  myY->SetMaxDigits(4);
   if(setBinLabels_ && RatioType == 0){
     for(int ibin = 1; ibin < vlabel_.size()+1; ibin++){
       hstack->GetXaxis()->SetBinLabel(ibin,vlabel_[ibin-1].c_str());
@@ -1165,7 +1172,7 @@ void MultiSamplePlot::DrawErrorBand(TH1F* totalSM, TH1F* hErrorPlus, TH1F* hErro
       dummy[iBin] = binwidth/2;
     }
     
-    cout <<"  bin "<<   iBin << " error plus  " <<  hErrorPlus->GetBinContent(iBin)	  <<  " error minus  " << hErrorMinus->GetBinContent(iBin)  <<" SM total  " <<  bincontents[iBin]   << " band up "  <<  erroryplus[iBin]    << "  band down " <<  erroryminus[iBin]  << endl;
+    if(iBin == totalSM->GetNbinsX()) cout <<"  bin "<<   iBin << " error plus  " <<  hErrorPlus->GetBinContent(iBin)	  <<  " error minus  " << hErrorMinus->GetBinContent(iBin)  <<" SM total  " <<  bincontents[iBin]   << " band up "  <<  erroryplus[iBin]    << "  band down " <<  erroryminus[iBin]  << endl;
     
   }
   
@@ -1235,6 +1242,14 @@ void MultiSamplePlot::Write(TFile* fout, string label, bool savePNG, string path
     if(plots_[i].second->Name().find("data") != 0 && plots_[i].second->Name().find("Data") != 0 && plots_[i].second->Name().find("DATA") != 0 )
     {
       plots_[i].first->SetMarkerSize(0.5);
+
+      //making sure that the overflow is transferred to the last 'visible' bin; analogously for underflow...
+      Nbins_ = (plots_[i].first)->GetNbinsX();
+      (plots_[i].first)->SetBinContent(Nbins_,(plots_[i].first)->GetBinContent(Nbins_)+(plots_[i].first)->GetBinContent(Nbins_+1));
+      (plots_[i].first)->SetBinContent(Nbins_+1,0);
+      (plots_[i].first)->SetBinContent(1,(plots_[i].first)->GetBinContent(0)+(plots_[i].first)->GetBinContent(1));
+      (plots_[i].first)->SetBinContent(0,0);
+
       plots_[i].first->Write((label+"_"+plots_[i].second->Name()+"_").c_str());
     }
 }
