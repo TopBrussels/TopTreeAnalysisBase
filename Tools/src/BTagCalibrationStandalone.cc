@@ -372,17 +372,17 @@ BTagCalibrationReader::BTagCalibrationReader(const BTagCalibration* c,
   setupTmpData(c);
   op_cutvalue_ = -999;
   std::string tagger_name = c->tagger();
-  // OPs updated according to https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80X (Seth, 29-07-2016)
+  // OPs updated according to https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80X (Seth, 29-07-2016) Isis 9/02/2017
   if (tagger_name.find("CSVv2") != std::string::npos || tagger_name.find("csvv2") != std::string::npos){
-    if (params.operatingPoint == BTagEntry::OP_LOOSE){op_cutvalue_ = 0.460;}
-    else if (params.operatingPoint == BTagEntry::OP_MEDIUM){op_cutvalue_ = 0.800;}
-    else if (params.operatingPoint == BTagEntry::OP_TIGHT){op_cutvalue_ = 0.935;}
+    if (params.operatingPoint == BTagEntry::OP_LOOSE){op_cutvalue_ = 0.5426;}
+    else if (params.operatingPoint == BTagEntry::OP_MEDIUM){op_cutvalue_ = 0.8484;}
+    else if (params.operatingPoint == BTagEntry::OP_TIGHT){op_cutvalue_ = 0.9535;}
     else if (params.operatingPoint == BTagEntry::OP_RESHAPING){op_cutvalue_ = -999;} //default value, of no importance
   }
   else if (tagger_name.find("cMVAv2") != std::string::npos || tagger_name.find("cmvav2") != std::string::npos || tagger_name.find("CMVAv2") != std::string::npos){
-    if (params.operatingPoint == BTagEntry::OP_LOOSE){op_cutvalue_ = -0.715;}
-    else if (params.operatingPoint == BTagEntry::OP_MEDIUM){op_cutvalue_ = 0.185;}
-    else if (params.operatingPoint == BTagEntry::OP_TIGHT){op_cutvalue_ = 0.875;}
+    if (params.operatingPoint == BTagEntry::OP_LOOSE){op_cutvalue_ = -0.5884;}
+    else if (params.operatingPoint == BTagEntry::OP_MEDIUM){op_cutvalue_ = 0.4432;}
+    else if (params.operatingPoint == BTagEntry::OP_TIGHT){op_cutvalue_ = 0.9432;}
     else if (params.operatingPoint == BTagEntry::OP_RESHAPING){op_cutvalue_ = -999;} //default value, of no importance
   }
   else{
@@ -390,9 +390,9 @@ BTagCalibrationReader::BTagCalibrationReader(const BTagCalibration* c,
 	<< "Please define your BTagCalibration object with one of these tagger names." << std::endl
 	<< "The working point cut value of CSVv2 is used instead" << std::endl;
 	
-	if (params.operatingPoint == BTagEntry::OP_LOOSE){op_cutvalue_ = 0.460;}
-    	else if (params.operatingPoint == BTagEntry::OP_MEDIUM){op_cutvalue_ = 0.800;}
-    	else if (params.operatingPoint == BTagEntry::OP_TIGHT){op_cutvalue_ = 0.935;}
+	if (params.operatingPoint == BTagEntry::OP_LOOSE){op_cutvalue_ = 0.5426;}
+    	else if (params.operatingPoint == BTagEntry::OP_MEDIUM){op_cutvalue_ = 0.8484;}
+    	else if (params.operatingPoint == BTagEntry::OP_TIGHT){op_cutvalue_ = 0.9535;}
     	else if (params.operatingPoint == BTagEntry::OP_RESHAPING){op_cutvalue_ = -999;} //default value, of no importance
   }
 }
