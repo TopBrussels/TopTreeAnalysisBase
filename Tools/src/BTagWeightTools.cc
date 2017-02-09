@@ -67,10 +67,11 @@ _histogramsFilled(false)
   _etamax = maxeta;
   _reader = reader;
   InitializeMCEfficiencyHistos(20,_ptmin,_ptmax,4);
-  _f = TFile::Open(histoFileName.c_str(),"READ");
-  if (!_f){_f = TFile::Open(histoFileName.c_str(),"RECREATE");}
-  else if (!(_f->GetListOfKeys()->FindObject("BtaggedJets"))){_f->ReOpen("UPDATE");}
-  
+  ifstream filetest(histoFileName.c_str());
+  if( filetest.good()) cout << "file exists" << endl; 
+  else cout << "file doesn't exits" << endl; 
+  if (!filetest.good()){_f = TFile::Open(histoFileName.c_str(),"RECREATE");}
+  else if (filetest.good()){_f = TFile::Open(histoFileName.c_str(),"READ");}
 }
 
 
