@@ -479,7 +479,7 @@ double BTagCalibrationReader::eval(TopTree::TRootPFJet *jet) const
   BTagEntry::JetFlavor jf_;
   if (hadronFlavour_ == 5){jf_ = BTagEntry::FLAV_B;}
   else if (hadronFlavour_ == 4){jf_ = BTagEntry::FLAV_C;}
-  else if (hadronFlavour_ == 0){jf_ = BTagEntry::FLAV_UDSG;}
+  else if (hadronFlavour_ == 0){jf_ = BTagEntry::FLAV_UDSG; }
   else
   {
     std::cerr << "WARNING in BTagCalibrationReader: "

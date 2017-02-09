@@ -214,6 +214,7 @@ float BTagWeightTools::getMCEventWeight(vector< TopTree::TRootPFJet* > jetsPerEv
 							btagSF = _reader->eval(jf,jetsPerEvent[i]->Eta(),jetsPerEvent[i]->Pt(),jetsPerEvent[i]->btag_combinedInclusiveSecondaryVertexV2BJetTags());
 						}
 						else{
+						 	if(_verbose) cout << " jetsPerEvent[i]->hadronFlavour() " << jetsPerEvent[i]->hadronFlavour() << endl; 
 							tagEff = getTagEff(jetsPerEvent[i]->Pt(), jetsPerEvent[i]->Eta(), jetsPerEvent[i]->hadronFlavour());											
 							btagSF = _reader->eval(jetsPerEvent[i]);
 						}
