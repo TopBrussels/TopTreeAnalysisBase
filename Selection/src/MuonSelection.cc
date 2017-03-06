@@ -52,6 +52,9 @@ std::vector<TRootMuon*> MuonSelection::GetSelectedMuons(float PtThr, float etaTh
 		else if (ProductionCampaign == "Spring15" && WorkingPoint == "Loose"){
 			MuonCollection = GetSelectedLooseMuonsJuly2015(PtThr, etaThr, relIso);
 		}
+    else if (ProductionCampaign == "Spring15" && WorkingPoint == "Fake"){
+      MuonCollection = GetSelectedFakeMuonsJuly2015(PtThr, etaThr, relIso);
+    }
 		else {
 			throw std::invalid_argument( "received incorrect args to GetSelectedMuons, requested: "+WorkingPoint+", "+ProductionCampaign);
 		}
@@ -108,6 +111,30 @@ std::vector<TRootMuon*> MuonSelection::GetSelectedDisplacedMuons() const
 {
   return GetSelectedDisplacedMuons(35.,2.4,0.15, true, true);
 }
+
+
+std::vector<TRootMuon*> MuonSelection::GetSelectedFakeMuonsJuly2015(float PtThr, float EtaThr,float MuonRelIso) const
+{
+  //Thes quality cuts reflect the LooseMuon ID as provided by the MUON POG.  PT, Eta, and Iso thresholds are not tuned as of July 17, 2015.
+  std::vector<TRootMuon*> selectedMuons;
+  for(unsigned int i=0; i<muons.size(); i++)
+  {
+    
+    //float reliso = (muons[i]->chargedHadronIso()+muons[i]->neutralHadronIso()+muons[i]->photonIso())/muons[i]->Pt();
+    // use cone 4 iso for muons:
+    float reliso = (muons[i]->chargedHadronIso(4) + max( 0.0, muons[i]->neutralHadronIso(4) + muons[i]->photonIso(4) - 0.5*muons[i]->puChargedHadronIso(4) ) ) / muons[i]->Pt(); // dBeta corrected
+    if(     (muons[i]->isGlobalMuon() || muons[i]->isTrackerMuon()) && muons[i]->isPFMuon()
+       && muons[i]->Pt()>PtThr
+       && fabs(muons[i]->Eta())<EtaThr
+       && reliso >= MuonRelIso) // reverse isolation to get fake
+    {
+      selectedMuons.push_back(muons[i]);
+    }
+  }
+  std::sort(selectedMuons.begin(),selectedMuons.end(),HighestMuonPt());
+  return selectedMuons;
+}
+
 
 
 

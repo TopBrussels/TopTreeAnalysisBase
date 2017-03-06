@@ -77,7 +77,7 @@ private:
     std::vector<TRootMuon*> GetSelectedLooseMuonsJuly2015(float PtThr, float EtaThr,float MuonRelIso) const;
     std::vector<TRootMuon*> GetSelectedMediumMuonsJuly2015(float PtThr, float EtaThr,float MuonRelIso) const;
     std::vector<TRootMuon*> GetSelectedTightMuonsJuly2015(float PtThr, float EtaThr,float MuonRelIso) const;
-
+std::vector<TRootMuon*> GetSelectedFakeMuonsJuly2015(float PtThr, float EtaThr,float MuonRelIso) const;
 
 
 
