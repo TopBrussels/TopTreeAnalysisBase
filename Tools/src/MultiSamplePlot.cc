@@ -34,7 +34,6 @@ MultiSamplePlot::MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int
   if(!Units.empty()) stream << std::fixed << std::setprecision(2) << binWidth;
   else stream << std::fixed << std::setprecision(2) << binWidth;
   string sbinWidth = stream.str();
-  
   if(!Units.empty()) XaxisLabel_ = XaxisLabel + " (" + Units + ")";
   else XaxisLabel_ = XaxisLabel;
   if(!Units.empty()) YaxisLabel_ = YaxisLabel + " #backslash " + sbinWidth + " " + Units;
@@ -557,7 +556,7 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
     ratio->SetMarkerSize(1.);
     ratio->GetYaxis()->SetNdivisions(5);
     ratio->SetTitle("");
-    if(doCutFlow_ ){
+    if(setBinLabels_ ){
       for(int ibin = 1; ibin < vlabel_.size()+1; ibin++){
         ratio->GetXaxis()->SetBinLabel(ibin,vlabel_[ibin-1].c_str());
       }
@@ -856,12 +855,15 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
   if(addErrorBand)
   {
     //make dummy graph for legend; dirty because color/style parameters of the error band now configured in 2 places...
+    gStyle->SetHatchesLineWidth(1);
+    gStyle->SetHatchesSpacing(1.);
     TGraphAsymmErrors* ErrorGraph = new TGraphAsymmErrors();
-    ErrorGraph->SetFillStyle(3004);//3005 diagonal dashed //3001 ~plain //3013 double diagonal dashed
-    ErrorGraph->SetFillColor(kBlack);
-    ErrorGraph->SetLineColor(kBlack);
-    ErrorGraph->SetLineWidth(1);
-    leg_->AddEntry(ErrorGraph,"MC Uncertainty","F");
+    ErrorGraph->SetFillStyle(3345);//3005 diagonal dashed //3001 ~plain //3013 double diagonal dashed
+    ErrorGraph->SetFillColor(kGray+3);
+    ErrorGraph->SetLineColor(kGray+3);
+    ErrorGraph->SetLineWidth(2);
+    ErrorGraph->Draw("2SAME");
+    leg_->AddEntry(ErrorGraph,"Uncertainty","F");
   }
   
   if(hData_)
@@ -954,7 +956,8 @@ void MultiSamplePlot::DrawStackedPlot(TCanvas* canvas, TCanvas* canvasLogY, THSt
   //if( iPosX == 0  ) relPosX = 0.12;
   int align_ = 10*alignX_ + alignY_;
   
-  stringstream slumi; slumi.precision(3); slumi << lumi_/1000; //luminosity given in picobarns, but will be displayed in femtobarns, because this in not 2010 anymore.
+//  stringstream slumi; slumi.precision(2); slumi << lumi_/1000; //luminosity given in picobarns, but will be displayed in femtobarns, because this in not 2010 anymore.
+  stringstream slumi; slumi.precision(2); slumi << 36; //luminosity given in picobarns, but will be displayed in femtobarns, because this in not 2010 anymore.
   stringstream ssqrts; ssqrts << sqrts_; //sqrt(s) given in TeV
   TLatex cmstext;
   
@@ -1177,11 +1180,13 @@ void MultiSamplePlot::DrawErrorBand(TH1F* totalSM, TH1F* hErrorPlus, TH1F* hErro
   }
   
   ErrorGraph = new TGraphAsymmErrors(nbins,bins,bincontents,dummy,dummy,erroryminus,erroryplus);
-  ErrorGraph->SetFillStyle(3004);//3005 diagonal dashed //3001 ~plain //3013 double diagonal dashed
-  ErrorGraph->SetFillColor(kBlack);
-  ErrorGraph->SetLineColor(kBlack);
-  ErrorGraph->SetLineWidth(1);
-  ErrorGraph->Draw("2");
+  gStyle->SetHatchesLineWidth(1);
+  gStyle->SetHatchesSpacing(1);
+  ErrorGraph->SetFillStyle(3345);//3005 diagonal dashed //3001 ~plain //3013 double diagonal dashed
+  ErrorGraph->SetFillColor(kGray+3);
+  ErrorGraph->SetLineColor(kGray+3);
+  ErrorGraph->SetLineWidth(2);
+  ErrorGraph->Draw("2SAME");
 }
 
 void MultiSamplePlot::Write(TFile* fout, string label, bool savePNG, string pathPNG, string ext)
