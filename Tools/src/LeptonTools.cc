@@ -164,8 +164,8 @@ ElectronSFWeight::at(const double &eta, const double &pt, const int &shiftUpDown
   double Xmin = electronSFWeight_->GetXaxis()->GetBinLowEdge(1) ;
   double Xmax = electronSFWeight_->GetXaxis()->GetBinUpEdge(electronSFWeight_->GetNbinsX());
   double Ymin = electronSFWeight_->GetYaxis()->GetBinLowEdge(1);
-  double Ymax = electronSFWeight_->GetYaxis()->GetBinUpEdge(electronSFWeight_->GetNbinsY()) ;
-
+  //double Ymax = electronSFWeight_->GetYaxis()->GetBinUpEdge(electronSFWeight_->GetNbinsY()) ;
+  double Ymax = 150.;  // see https://twiki.cern.ch/twiki/bin/view/CMS/EgammaIDRecipesRun2#Efficiencies_and_scale_factors
 
   // some cout to help debug
   if (debug_){
@@ -182,28 +182,28 @@ ElectronSFWeight::at(const double &eta, const double &pt, const int &shiftUpDown
   if (extendRange_){
     if ( pt < Ymin ){
       pt_hist = electronSFWeight_->GetYaxis()->GetBinCenter(1);
-      uncertaintyMultiplier *= 2;
+      uncertaintyMultiplier = 2;
       isOutOfRange = true;
     }
-    if ( Ymax < pt){
+    else  if ( Ymax < pt){
       pt_hist = electronSFWeight_->GetYaxis()->GetBinCenter(electronSFWeight_->GetNbinsY());
-      uncertaintyMultiplier *= 2;
+      uncertaintyMultiplier = 2;
       isOutOfRange = true;
     }
     if (abs(eta) < Xmin){
       eta_hist = electronSFWeight_->GetXaxis()->GetBinCenter(1);
-      uncertaintyMultiplier *= 2;
+      uncertaintyMultiplier = 2;
       isOutOfRange = true;
     }
-    if (Xmax < abs(eta)){
-      eta_hist=electronSFWeight_->GetXaxis()->GetBinCenter(electronSFWeight_->GetNbinsX());
-      uncertaintyMultiplier *= 2;
+    else if (Xmax < abs(eta)){
+      eta_hist = electronSFWeight_->GetXaxis()->GetBinCenter(electronSFWeight_->GetNbinsX());
+      uncertaintyMultiplier = 2;
       isOutOfRange = true;
     }
   }
   
   Int_t foundBin = electronSFWeight_->FindBin(abs(eta_hist),pt_hist);
-  double SF = electronSFWeight_->GetBinContent(foundBin) + shiftUpDown * uncertaintyMultiplier * electronSFWeight_->GetBinError(foundBin);
+  double SF = electronSFWeight_->GetBinContent(foundBin) + ( shiftUpDown * uncertaintyMultiplier * electronSFWeight_->GetBinError(foundBin));
 
   if (isOutOfRange && printWarning_) {
     cout << "The value of pt/and or eta for which you want a SF is outside the range of the histogram you have laoded. The SF of the closest bin will be used and the uncertainty is doubled!" << endl;
