@@ -102,7 +102,7 @@ bool JetSelection::passLoosePFJetID13TeV(const TRootPFJet* PFJet) const
   }
   else if(fabs(PFJet->Eta()) > 2.7 && fabs(PFJet->Eta()) <= 3.0)
   {
-      if(PFJet->neutralEmEnergyFraction() < 0.90 && PFJet->neutralMultiplicity() > 2) return true;
+      if(PFJet->neutralEmEnergyFraction() > 0.01 && PFJet->neutralHadronEnergyFraction() < 0.98 && PFJet->neutralMultiplicity() > 2) return true;
   }
   else
   {
@@ -110,11 +110,12 @@ bool JetSelection::passLoosePFJetID13TeV(const TRootPFJet* PFJet) const
   }
   return false;
 }
+
 bool JetSelection::passTightPFJetID13TeV(const TRootPFJet* PFJet) const
 {
   if(fabs(fabs(PFJet->Eta()) <= 2.4))
   {
-      if(PFJet->chargedHadronEnergyFraction() > 0 && PFJet->chargedEmEnergyFraction() < 0.99 && PFJet->chargedMultiplicity() > 0)
+      if(PFJet->chargedHadronEnergyFraction() > 0 && PFJet->chargedEmEnergyFraction() < 0.90 && PFJet->chargedMultiplicity() > 0)
       {
           if(PFJet->neutralHadronEnergyFraction() < 0.90 && PFJet->neutralEmEnergyFraction() < 0.90  && PFJet->nConstituents() > 1) return true;
       }
@@ -125,7 +126,7 @@ bool JetSelection::passTightPFJetID13TeV(const TRootPFJet* PFJet) const
   }
   else if(fabs(PFJet->Eta()) > 2.7 && fabs(PFJet->Eta()) <= 3.0)
   {
-      if(PFJet->neutralEmEnergyFraction() < 0.90 && PFJet->neutralMultiplicity() > 2) return true;
+      if(PFJet->neutralEmEnergyFraction() > 0.01 && PFJet->neutralHadronEnergyFraction() < 0.98 && PFJet->neutralMultiplicity() > 2) return true;
   }
   else
   {

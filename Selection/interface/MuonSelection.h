@@ -74,10 +74,10 @@ public:
 private:
 
 	//July 2015 Muon Getters
-    std::vector<TRootMuon*> GetSelectedLooseMuonsJuly2015(float PtThr, float EtaThr,float MuonRelIso) const;
-    std::vector<TRootMuon*> GetSelectedMediumMuonsJuly2015(float PtThr, float EtaThr,float MuonRelIso) const;
-    std::vector<TRootMuon*> GetSelectedTightMuonsJuly2015(float PtThr, float EtaThr,float MuonRelIso) const;
-std::vector<TRootMuon*> GetSelectedFakeMuonsJuly2015(float PtThr, float EtaThr,float MuonRelIso) const;
+    std::vector<TRootMuon*> GetSelectedLooseMuons2016(float PtThr, float EtaThr,float MuonRelIso) const;
+    std::vector<TRootMuon*> GetSelectedMediumMuons2016(float PtThr, float EtaThr,float MuonRelIso, string ProductionCampaign) const;
+    std::vector<TRootMuon*> GetSelectedTightMuons2016(float PtThr, float EtaThr,float MuonRelIso) const;
+    std::vector<TRootMuon*> GetSelectedFakeMuons2016(float PtThr, float EtaThr,float MuonRelIso) const;
 
 
 
