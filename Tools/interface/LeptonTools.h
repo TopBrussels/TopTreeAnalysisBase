@@ -36,13 +36,14 @@ class ElectronSFWeight
 {
  public:
   ElectronSFWeight () {};
-  ElectronSFWeight (const string &, const string &, const bool &extendRange = false, const bool &debug = false, const bool &printWarning = true);
+  ElectronSFWeight (const string &, const string &, const bool &extendRange = false, const bool &debug = false, const bool &printWarning = true, const bool &recoSF = false);
   ~ElectronSFWeight ();
   double at (const double &eta, const double &pt, const int &shiftUpDown = 0);
 
  private:
   TH2 *electronSFWeight_;
   bool extendRange_;
+  bool recoSF_;
   bool debug_;
   bool printWarning_;
 };

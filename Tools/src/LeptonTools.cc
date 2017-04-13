@@ -61,33 +61,34 @@ MuonSFWeight::at(const double &eta, const double &pt, const int &shiftUpDown)
   double pt_hist= pt;
   double eta_hist= eta;
   bool isOutOfRange = false;
-  double uncertaintyMultiplier = 1;
+ // double uncertaintyMultiplier = 1;
   // to give a non null SF for muons being out of eta and/or pt range of the input histo
   if (extendRange_){
     if ( pt < Ymin ){
       pt_hist = muonSFWeight_->GetYaxis()->GetBinCenter(1);
-      uncertaintyMultiplier *= 2;
+     // uncertaintyMultiplier = 2;
       isOutOfRange = true;
     }
     if ( Ymax < pt){
       pt_hist = muonSFWeight_->GetYaxis()->GetBinCenter(muonSFWeight_->GetNbinsY());
-      uncertaintyMultiplier *= 2;
+     // uncertaintyMultiplier = 2;
       isOutOfRange = true;
     }
     if (abs(eta) < Xmin){
       eta_hist = muonSFWeight_->GetXaxis()->GetBinCenter(1);
-      uncertaintyMultiplier *= 2;
+    //  uncertaintyMultiplier = 2;
       isOutOfRange = true;
     }
     if (Xmax < abs(eta)){
       eta_hist=muonSFWeight_->GetXaxis()->GetBinCenter(muonSFWeight_->GetNbinsX());
-      uncertaintyMultiplier *= 2;
+   //   uncertaintyMultiplier = 2;
       isOutOfRange = true;
     }
   }
   
+ 
   Int_t foundBin = muonSFWeight_->FindBin(abs(eta_hist),pt_hist);
-  double SF = muonSFWeight_->GetBinContent(foundBin) + shiftUpDown * uncertaintyMultiplier * muonSFWeight_->GetBinError(foundBin);
+  double SF = muonSFWeight_->GetBinContent(foundBin) + shiftUpDown *  muonSFWeight_->GetBinError(foundBin);
 
   if (isOutOfRange && printWarning_) {
     cout << "The value of pt/and or eta for which you want a SF is outside the range of the histogram you have laoded. The SF of the closest bin will be used and the uncertainty is doubled!" << endl;
@@ -118,9 +119,10 @@ MuonSFWeight::~MuonSFWeight ()
 
 
 // electronSFweight constructor
-ElectronSFWeight::ElectronSFWeight (const string &sfFile, const string &dataOverMC, const bool &extendRange, const bool &debug, const bool &printWarning)
+ElectronSFWeight::ElectronSFWeight (const string &sfFile, const string &dataOverMC, const bool &extendRange, const bool &debug, const bool &printWarning, const bool &recoSF)
 {
   printWarning_ = printWarning;
+  recoSF_ = recoSF;
   debug_ = debug;
   extendRange_ = extendRange;
   if (debug_) {
@@ -177,34 +179,54 @@ ElectronSFWeight::at(const double &eta, const double &pt, const int &shiftUpDown
   double pt_hist= pt;
   double eta_hist= eta;
   bool isOutOfRange = false;
-  double uncertaintyMultiplier = 1;
+  //double uncertaintyMultiplier = 1;
   // to give a non null SF for electrons being out of eta and/or pt range of the input histo
   if (extendRange_){
+    // out of pt range
     if ( pt < Ymin ){
       pt_hist = electronSFWeight_->GetYaxis()->GetBinCenter(1);
-      uncertaintyMultiplier = 2;
+      //uncertaintyMultiplier = 2;
       isOutOfRange = true;
     }
     else  if ( Ymax < pt){
-      pt_hist = electronSFWeight_->GetYaxis()->GetBinCenter(electronSFWeight_->GetNbinsY());
-      uncertaintyMultiplier = 2;
+     if(!recoSF_) pt_hist = electronSFWeight_->GetYaxis()->GetBinCenter(electronSFWeight_->GetNbinsY()-1);
+     else  pt_hist = electronSFWeight_->GetYaxis()->GetBinCenter(electronSFWeight_->GetNbinsY());
+     // uncertaintyMultiplier = 2;
       isOutOfRange = true;
     }
-    if (abs(eta) < Xmin){
+    //out of eta range
+    if (eta < Xmin){
       eta_hist = electronSFWeight_->GetXaxis()->GetBinCenter(1);
-      uncertaintyMultiplier = 2;
+     // uncertaintyMultiplier = 2;
       isOutOfRange = true;
     }
-    else if (Xmax < abs(eta)){
+    else if (Xmax < eta){
       eta_hist = electronSFWeight_->GetXaxis()->GetBinCenter(electronSFWeight_->GetNbinsX());
-      uncertaintyMultiplier = 2;
+     // uncertaintyMultiplier = 2;
       isOutOfRange = true;
     }
   }
   
-  Int_t foundBin = electronSFWeight_->FindBin(abs(eta_hist),pt_hist);
-  double SF = electronSFWeight_->GetBinContent(foundBin) + ( shiftUpDown * uncertaintyMultiplier * electronSFWeight_->GetBinError(foundBin));
-
+  
+  
+  
+  Int_t foundBin = electronSFWeight_->FindBin(eta_hist,pt_hist);
+  
+  double SF = electronSFWeight_->GetBinContent(foundBin) ;
+  double totalunc = 0;
+  totalunc = electronSFWeight_->GetBinError(foundBin) ;
+  if((pt < 20. || pt > 80.) && recoSF_ ){
+    totalunc = TMath::Sqrt((electronSFWeight_->GetBinError(foundBin)*electronSFWeight_->GetBinError(foundBin)) + (SF*0.01*SF*0.01));
+  }
+  SF += shiftUpDown*totalunc;
+  
+  
+  if(debug_ && recoSF_) cout << "extra unc of 1% for pt for RecoSF" << endl;
+  if(debug_ && shiftUpDown < 0) cout << "SF down " << endl;
+  else if(debug_ && shiftUpDown > 0) cout << "SF up" << endl;
+  else if(debug_ && shiftUpDown == 0) cout << "SF nom" << endl;
+  if(debug_) cout << "The total uncertainty is " << totalunc << " for as SF of " << SF << endl;
+  
   if (isOutOfRange && printWarning_) {
     cout << "The value of pt/and or eta for which you want a SF is outside the range of the histogram you have laoded. The SF of the closest bin will be used and the uncertainty is doubled!" << endl;
     cout << "The pt is " << pt << " and the eta is " << eta << endl;
