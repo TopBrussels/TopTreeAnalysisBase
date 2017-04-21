@@ -84,6 +84,7 @@ void JetTools::correctJet(TRootJet* inJet, int nPV, bool isData)
     JEC_->setNPV(nPV);
   }
   float corr = JEC_->getCorrection();
+ // cout << "JEC corr " << corr << endl;
   inJet->SetPxPyPzE(inJet->Px()*corr, inJet->Py()*corr, inJet->Pz()*corr, inJet->E()*corr);
 }
 
@@ -125,7 +126,7 @@ void JetTools::correctJet(TRootJet* inJet, float rhoPU, bool isData)
   
   //float corr = JEC_->getCorrection(); //strangely enough, this starts complaining when JEC_->getSubCorrections() is called first
   float corr = SubCorrections[SubCorrections.size()-1]; //this is the correction UP TO the last level; so the complete correction
-//  cout << "Apply new JES correction:  " << corr << endl;
+ // cout << "Apply new JES correction:  " << corr << endl;
   inJet->SetPxPyPzE(inJet->Px()*corr, inJet->Py()*corr, inJet->Pz()*corr, inJet->E()*corr);
 }
 
@@ -133,6 +134,44 @@ void JetTools::correctJets(vector<TRootJet*> inJets, float rhoPU, bool isData)
 {
   for(unsigned int j=0; j<inJets.size(); j++)
     correctJet(inJets[j],rhoPU,isData);
+}
+
+void JetTools::correctJetMet(TRootJet* inJet, TRootMET* inMET, float rhoPU, bool isData)
+{
+  if(startFromRaw_)
+    unCorrectJet(inJet, isData);
+  JEC_->setJetEta(inJet->Eta());
+  JEC_->setJetPt(inJet->Pt());
+  JEC_->setJetA(inJet->jetArea());
+  JEC_->setRho(rhoPU);
+  
+  //set the correction factors for the type 1 MET correction
+  std::vector<float> SubCorrections = JEC_->getSubCorrections(); //0: L1FastJet, 1: L1FastJetL2, 2: L1FastJetL2L3, and if data: 3: L1FastJetL2L3L23Residual
+  /*for(unsigned int c=0; c<SubCorrections.size(); c++)
+   cout<<"SubCorrections["<<c<<"] = "<<SubCorrections[c]<<endl;
+   */
+  inJet->setJetCorrFactor(0,"L1FastJet",SubCorrections[0]);
+  inJet->setJetCorrFactor(1,"L1FastJetL2",SubCorrections[1]);
+  inJet->setJetCorrFactor(2,"L1FastJetL2L3",SubCorrections[2]);
+  if(isData)
+    inJet->setJetCorrFactor(3,"L1FastJetL2L3L23Residual",SubCorrections[3]);
+  
+  //float corr = JEC_->getCorrection(); //strangely enough, this starts complaining when JEC_->getSubCorrections() is called first
+  float corr = SubCorrections[SubCorrections.size()-1]; //this is the correction UP TO the last level; so the complete correction
+  //cout << "Apply new JES correction:  " << corr << endl;
+  inJet->SetPxPyPzE(inJet->Px()*corr, inJet->Py()*corr, inJet->Pz()*corr, inJet->E()*corr);
+  
+  float L1corr = inJet->getJetCorrFactor("L1FastJet");
+ // cout << "correction factor " << corr << " L1 corr "<<  L1corr <<  endl;
+  if (inJet->Pt() > 15 && (convertToPFJets(inJet)->chargedEmEnergyFraction() + convertToPFJets(inJet)->neutralEmEnergyFraction()) < 0.9){
+    inMET->SetPxPyPzE(inMET->Px()-(inJet->Px()-inJet->Px()*L1corr/corr), inMET->Py()-(inJet->Py()-inJet->Py()*L1corr/corr), 0, sqrt(pow(inMET->Px()-(inJet->Px()-inJet->Px()*L1corr/corr),2) + pow(inMET->Py()-(inJet->Py()-inJet->Py()*L1corr/corr),2)) ); //METx_raw = METx_raw + Px_raw - Px_corr
+  }
+}
+
+void JetTools::correctJetsMet(vector<TRootJet*> inJets, TRootMET* inMET, float rhoPU, bool isData)
+{
+  for(unsigned int j=0; j<inJets.size(); j++)
+    correctJetMet(inJets[j], inMET, rhoPU, isData);
 }
 
 float JetTools::calculateJESUnc(float eta, float pt, string direction)
@@ -506,7 +545,10 @@ void JetTools::correctMETTypeOne(TRootJet* inJet, TRootMET* inMET, bool isData) 
   float corr = -9999;
   if(!isData) corr = inJet->getJetCorrFactor("L1FastJetL2L3");
   else corr = inJet->getJetCorrFactor("L1FastJetL2L3L23Residual"); //see JetAnalyzer.cc in TopTreeProducer
+  
   float L1corr = inJet->getJetCorrFactor("L1FastJet");
+  //cout << "correction factor " << corr << " L1 corr "<<  L1corr <<  endl;
+  
   inMET->SetPxPyPzE(inMET->Px()-(inJet->Px()-inJet->Px()*L1corr/corr), inMET->Py()-(inJet->Py()-inJet->Py()*L1corr/corr), 0, sqrt(pow(inMET->Px()-(inJet->Px()-inJet->Px()*L1corr/corr),2) + pow(inMET->Py()-(inJet->Py()-inJet->Py()*L1corr/corr),2)) ); //METx_raw = METx_raw + Px_raw - Px_corr    
 }
 

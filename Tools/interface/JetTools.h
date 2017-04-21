@@ -43,7 +43,10 @@ class JetTools
     void correctJets(vector<TRootJet*> inJets, vector<TRootVertex*> PVs, bool isData = false);
     void correctJet(TRootJet* inJet, float rhoPU, bool isData = false);
     void correctJets(vector<TRootJet*> inJets, float rhoPU, bool isData = false);
-
+    void correctJetMet(TRootJet* inJet, TRootMET* inMET, float rhoPU, bool isData = false);
+    void correctJetsMet(vector<TRootJet*> inJets, TRootMET* inMET, float rhoPU, bool isData = false);
+  
+  
     // Calculate JES uncertainty
     float calculateJESUnc(float eta, float pt, string direction);
     // Jet correctors for JES systematic
