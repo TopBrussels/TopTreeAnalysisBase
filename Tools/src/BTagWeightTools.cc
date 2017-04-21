@@ -68,8 +68,8 @@ _histogramsFilled(false)
   _reader = reader;
   InitializeMCEfficiencyHistos(20,_ptmin,_ptmax,4);
   ifstream filetest(histoFileName.c_str());
-  if( filetest.good()) cout << "file exists" << endl; 
-  else cout << "file doesn't exits" << endl; 
+  if(verbose && filetest.good()) cout << "BTag weights file exists" << endl; 
+  else if (verbose) cout << "BTag weights file doesn't exits" << endl; 
   if (!filetest.good()){_f = TFile::Open(histoFileName.c_str(),"RECREATE");}
   else if (filetest.good()){_f = TFile::Open(histoFileName.c_str(),"READ");}
 }
