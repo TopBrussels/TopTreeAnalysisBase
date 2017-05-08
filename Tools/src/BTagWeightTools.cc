@@ -46,11 +46,10 @@ _verbose(verbose),
 _histogramsFilled(false)
 
 {
-  InitializeMCEfficiencyHistos();
   _f = TFile::Open(histoFileName.c_str(),"READ");
   if (!_f){_f = TFile::Open(histoFileName.c_str(),"RECREATE");}
   else if (!(_f->GetListOfKeys()->FindObject("BtaggedJets"))){_f->ReOpen("UPDATE");}
-  
+  InitializeMCEfficiencyHistos();
 }
 
 BTagWeightTools::BTagWeightTools(const BTagCalibrationReader *reader, string histoFileName, bool verbose, float minpt, float maxpt, float maxeta):
@@ -66,11 +65,15 @@ _histogramsFilled(false)
   _ptmin = minpt;
   _etamax = maxeta;
   _reader = reader;
-  InitializeMCEfficiencyHistos(20,_ptmin,_ptmax,4);
+  
   ifstream filetest(histoFileName.c_str());
   if(verbose && filetest.good()) cout << "BTag weights file exists" << endl; 
   else if (verbose) cout << "BTag weights file doesn't exits" << endl; 
-  if (!filetest.good()){_f = TFile::Open(histoFileName.c_str(),"RECREATE");}
+  if (!filetest.good())
+  {
+    _f = TFile::Open(histoFileName.c_str(),"RECREATE");
+    InitializeMCEfficiencyHistos(20,_ptmin,_ptmax,4);
+  }
   else if (filetest.good()){_f = TFile::Open(histoFileName.c_str(),"READ");}
 }
 
