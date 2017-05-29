@@ -175,9 +175,13 @@ std::vector<TRootElectron*> ElectronSelection::GetSelectedElectrons(float PtThr,
     {
       ElectronCollection = GetSelectedVetoElectronsCutsBasedSpring16_80X(PtThr, etaThr);
     }
-    else if (ProductionCampaign == "Spring16_80X" && WorkingPoint == "Fake")
+    else if (ProductionCampaign == "Spring16_80X" && WorkingPoint == "FakeLoose")
     {
-      ElectronCollection = GetSelectedFakeElectronsCutsBasedSpring16_80X(PtThr, etaThr);
+      ElectronCollection = GetSelectedFakeLooseElectronsCutsBasedSpring16_80X(PtThr, etaThr);
+    }
+    else if (ProductionCampaign == "Spring16_80X" && WorkingPoint == "FakeTight")
+    {
+      ElectronCollection = GetSelectedFakeTightElectronsCutsBasedSpring16_80X(PtThr, etaThr);
     }
     else
     {
@@ -566,7 +570,7 @@ std::vector<TRootElectron*> ElectronSelection::GetSelectedLooseElectronsCutsBase
   return selectedElectrons;
 }
 
-std::vector<TRootElectron*> ElectronSelection::GetSelectedFakeElectronsCutsBasedSpring16_80X(float PtThr, float EtaThr) const
+std::vector<TRootElectron*> ElectronSelection::GetSelectedFakeLooseElectronsCutsBasedSpring16_80X(float PtThr, float EtaThr) const
 {
   // (PLEASE UPDATE IF YOU CHANGE THIS CODE)
   //These quality cuts reflect the recommended Tight cut-based electron ID as provided by the EGM POG. Last updated: 7 October 2016
@@ -616,6 +620,55 @@ std::vector<TRootElectron*> ElectronSelection::GetSelectedFakeElectronsCutsBased
   return selectedElectrons;
 }
 
+std::vector<TRootElectron*> ElectronSelection::GetSelectedFakeTightElectronsCutsBasedSpring16_80X(float PtThr, float EtaThr) const
+{
+  // (PLEASE UPDATE IF YOU CHANGE THIS CODE)
+  //These quality cuts reflect the recommended Tight cut-based electron ID as provided by the EGM POG. Last updated: 7 October 2016
+  // as these are still in flux, it is probably useful to check them here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2#Working_points_for_2016_data_for (revision 37)
+  
+  std::vector<TRootElectron*> selectedElectrons;
+  for(unsigned int i=0; i<electrons.size(); i++)
+  {
+    TRootElectron* el = (TRootElectron*) electrons[i];
+    // Using cut-based, BARREL:
+    if(el->Pt() > PtThr && fabs(el->Eta())< EtaThr)
+    {
+      if( fabs(el->superClusterEta()) <= 1.479)
+      {
+        if( fabs(el->deltaEtaIn()) <  0.00477
+           && fabs(el->deltaPhiIn()) < 0.222
+           && el->sigmaIEtaIEta_full5x5() < 0.011
+           && el->hadronicOverEm() < 0.298
+           && el->ioEmIoP() < 0.0129 // like tight id
+           && pfElectronIso(el) >=  0.0588 // invert iso
+           && pfElectronIso(el) < 1 // extra cut on iso
+           && el->missingHits() <= 1
+           && el->passConversion())
+        {
+          selectedElectrons.push_back(electrons[i]);
+        }
+      }
+      // using cut-based, ENDCAP:
+      else
+      {
+        if( fabs(el->deltaEtaIn()) <  0.00868
+           && fabs(el->deltaPhiIn()) <  0.213
+           && el->sigmaIEtaIEta_full5x5() <  0.0314
+           && (el->hadronicOverEm() < 0.101)
+           && el->ioEmIoP() < 0.0129 // like tight
+           && pfElectronIso(el) >= 0.0571// invert iso
+           && pfElectronIso(el) < 1
+           && el->missingHits() <= 1
+           && el->passConversion())
+        {
+          selectedElectrons.push_back(electrons[i]);
+        }
+      }
+    }
+  }
+  std::sort(selectedElectrons.begin(),selectedElectrons.end(),HighestElectronPt());
+  return selectedElectrons;
+}
 
 
 std::vector<TRootElectron*> ElectronSelection::GetSelectedVetoElectronsCutsBasedSpring16_80X(float PtThr, float EtaThr) const

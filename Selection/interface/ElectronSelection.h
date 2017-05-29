@@ -78,8 +78,9 @@ private:
 	std::vector<TRootElectron*> GetSelectedMediumElectronsCutsBasedSpring16_80X(float PtThr, float EtaThr) const;
 	std::vector<TRootElectron*> GetSelectedLooseElectronsCutsBasedSpring16_80X(float PtThr, float EtaThr) const;
 	std::vector<TRootElectron*> GetSelectedVetoElectronsCutsBasedSpring16_80X(float PtThr, float EtaThr) const;
-  std::vector<TRootElectron*> GetSelectedFakeElectronsCutsBasedSpring16_80X(float PtThr, float EtaThr) const;
-
+  std::vector<TRootElectron*> GetSelectedFakeLooseElectronsCutsBasedSpring16_80X(float PtThr, float EtaThr) const;
+  std::vector<TRootElectron*> GetSelectedFakeTightElectronsCutsBasedSpring16_80X(float PtThr, float EtaThr) const;
+  
 	std::vector<TRootElectron*> GetSelectedHeepElectronsCutsBasedSpring16_80X_VID(float PtThr, float EtaThr) const;
 	std::vector<TRootElectron*> GetSelectedTightElectronsCutsBasedSpring16_80X_VID(float PtThr, float EtaThr) const;
 	std::vector<TRootElectron*> GetSelectedMediumElectronsCutsBasedSpring16_80X_VID(float PtThr, float EtaThr) const;
