@@ -32,7 +32,7 @@ class MultiSamplePlot{
   
 public:
   //		MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int Nbins, float Min, float Max, string XaxisLabel = string("Variable"), string YaxisLabel = string("Events"), string AddText = string(""));
-		MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int Nbins, float Min, float Max, string XaxisLabel = string("Variable"), string YaxisLabel = string("Events"), string AddText = string(""), string Units = string(""));
+		MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int Nbins, float Min, float Max, string XaxisLabel = string("Variable"), string Units = string(""), string YaxisLabel = string("Events"), string AddText = string(""));
 		MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int Nbins, float* binsX, string XaxisLabel = string("Variable"), string YaxisLabel = string("Events"), string AddText = string(""));
 		MultiSamplePlot(vector<pair<TH1F*,Dataset*> > vec, string PlotName, string XaxisLabel, string YaxisLabel, string AddText);
 		~MultiSamplePlot();

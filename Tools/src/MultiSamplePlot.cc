@@ -23,7 +23,7 @@
  Initialize();
  }*/
 
-MultiSamplePlot::MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int Nbins, float Min, float Max, string XaxisLabel, string YaxisLabel, string Text, string Units)
+MultiSamplePlot::MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int Nbins, float Min, float Max, string XaxisLabel, string Units, string YaxisLabel, string Text)
 {
   std::stringstream stream;
   string XaxisLabel_, YaxisLabel_;
@@ -36,8 +36,8 @@ MultiSamplePlot::MultiSamplePlot(vector<Dataset*> datasets, string PlotName, int
   string sbinWidth = stream.str();
   if(!Units.empty()) XaxisLabel_ = XaxisLabel + " (" + Units + ")";
   else XaxisLabel_ = XaxisLabel;
-  if(!Units.empty()) YaxisLabel_ = YaxisLabel + " #backslash " + sbinWidth + " " + Units;
-  else YaxisLabel_ = YaxisLabel + " #backslash " + sbinWidth + Units;
+  if(!Units.empty()) YaxisLabel_ = YaxisLabel + " / " + sbinWidth + " " + Units;
+  else YaxisLabel_ = YaxisLabel + " / " + sbinWidth + Units;
   plotName_ = PlotName;
   text_ = TString(Text);
   lumi_ = 1.;
