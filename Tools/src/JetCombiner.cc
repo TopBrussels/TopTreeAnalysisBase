@@ -512,7 +512,7 @@ void JetCombiner::ProcessEvent_SingleHadTop(Dataset* dataSet, const vector<TRoot
 
                     vector<float> PTJetComb;
                     float sumPt = 0;
-                    sumPt = selectedJets_[wj1]->Pt() + selectedJets_[wj2]->Pt() + selectedJets_[bj1]->Pt();
+                    sumPt = selectedJets_[i]->Pt() + selectedJets_[j]->Pt() + selectedJets_[k]->Pt();
 
                     // sumPt += (*selectedJets_[0]+*selectedJets_[1]+*selectedJets_[2]).Pt();
                     // sumPt += (*selectedJets_[0]+*selectedJets_[1]+*selectedJets_[3]).Pt();
