@@ -39,7 +39,7 @@ public:
   
   void AddDataHisto(TH1F* histo); /**add a data histogram*/
 		void Fill(float value, Dataset* data, bool scale = true, float Lumi = 1.); /**if scale==true: histo are scaled by data.NormFactor()*Lumi */
-		void Draw(string label = string("CMSPlot"), unsigned int RatioType = 0, bool addRatioErrorBand = false, bool addErrorBand = false, bool ErrorBandAroundTotalInput = false, int scaleNPSignal = 1); /**RatioType=1: ratio = data/MC, RatioType=2: ratio=(data-MC)/MC and RatioType=0: no ratio plot drawn. ErrorBandAroundTotalInput set on false means that the error band will be centered around a nominal histogram read in from an external errorband file*/
+		void Draw(string label = string("CMSPlot"), unsigned int RatioType = 0, bool addRatioErrorBand = false, bool addErrorBand = false, bool ErrorBandAroundTotalInput = false, int scaleNPSignal = 1, double scaleFake = 1. ); /**RatioType=1: ratio = data/MC, RatioType=2: ratio=(data-MC)/MC and RatioType=0: no ratio plot drawn. ErrorBandAroundTotalInput set on false means that the error band will be centered around a nominal histogram read in from an external errorband file*/
 		void Write(TFile* file, string label = string(""), bool savePNG = false, string pathPNG = string(""), string ext = string("png"));
   
 		void setDataLumi(float lum) { lumi_ = lum; } /**if running over data, you don't need to use this method, as the lumi will be taken from the dataset info*/

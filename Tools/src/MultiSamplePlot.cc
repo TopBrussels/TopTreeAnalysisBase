@@ -175,7 +175,7 @@ void MultiSamplePlot::Fill(float value, Dataset* data, bool scale, float Lumi)
   
 }
 
-void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioErrorBand, bool addErrorBand, bool ErrorBandAroundTotalInput, int scaleNPSignal)
+void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioErrorBand, bool addErrorBand, bool ErrorBandAroundTotalInput, int scaleNPSignal, double scaleFake)
 {
   vector<TH1F*> normalizedhistos;
   vector<Dataset*> mergeddatasets;
@@ -234,6 +234,11 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
     {
       dataPlotID = i;
       nDataPlots++;
+    }
+    if(plots_[i].second->Name().find("fake") == 0 || plots_[i].second->Name().find("Fake") == 0 || plots_[i].second->Name().find("FAKE") == 0 )
+    {
+      plots_[i].first->Scale(scaleFake);
+      
     }
     
     string datasetTitle = plots_[i].second->Title();
@@ -468,7 +473,7 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
     }
     
     DrawStackedPlot(hCanvasStack_,hCanvasStackLogY_,hStack_,histosForOverlay,scaleNPSignal,histosForHStack[0]->GetXaxis()->GetTitle(),histosForHStack[0]->GetYaxis()->GetTitle(),RatioType);
-    ymax = 1.3*hStack_->GetMaximum();
+    ymax = 1.5*hStack_->GetMaximum();
     if(ymaxoverlay > ymax) ymax = ymaxoverlay;
     maxLogY_ = logYMultiplicator_ * ymax;
   }
@@ -491,7 +496,7 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
     }
     
     DrawStackedPlot(hCanvasStackAreaNorm_,hCanvasStackAreaNormLogY_,hStackAreaNorm_,histosForOverlayAreaNorm,scaleNPSignal,histosForHStackAreaNorm[0]->GetXaxis()->GetTitle(),histosForHStackAreaNorm[0]->GetYaxis()->GetTitle(),RatioType);
-    ymaxAreaNorm = 1.3*hStackAreaNorm_->GetMaximum();
+    ymaxAreaNorm = 1.5*hStackAreaNorm_->GetMaximum();
     if(ymaxoverlayAreaNorm > ymaxAreaNorm) ymaxAreaNorm = ymaxoverlayAreaNorm;
     maxLogYAreaNorm_ = logYMultiplicator_ * ymaxAreaNorm;
   }
@@ -868,8 +873,8 @@ void MultiSamplePlot::Draw(string label, unsigned int RatioType, bool addRatioEr
   
   if(hData_)
   {
-    if(hStack_ && ymax < 1.3*(hData_->GetMaximum())) ymax = 1.3*(hData_->GetMaximum());
-    if(hStackAreaNorm_ && ymaxAreaNorm < 1.3*(hData_->GetMaximum())) ymaxAreaNorm = 1.3*(hData_->GetMaximum());
+    if(hStack_ && ymax < 1.5*(hData_->GetMaximum())) ymax = 1.5*(hData_->GetMaximum());
+    if(hStackAreaNorm_ && ymaxAreaNorm < 1.5*(hData_->GetMaximum())) ymaxAreaNorm = 1.5*(hData_->GetMaximum());
   }
   
   if(maxY_ > 0)
