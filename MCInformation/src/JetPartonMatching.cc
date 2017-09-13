@@ -2,9 +2,9 @@
 #include <Math/VectorUtil.h>
 
 JetPartonMatching::JetPartonMatching(const std::vector<TLorentzVector>& p, const std::vector<TLorentzVector>& j,
-				     const int algorithm = totalMinDist, const bool useMaxDist = true, 
-				     const bool useDeltaR = true, const double maxDist = 0.3)
-  :partons(p), jets(j), algorithm_(algorithm), useMaxDist_(useMaxDist), useDeltaR_(useDeltaR), maxDist_(maxDist)
+                                     const int algorithm = totalMinDist, const bool useMaxDist = true, 
+                                     const bool useDeltaR = true, const double maxDist = 0.3)
+:partons(p), jets(j), algorithm_(algorithm), useMaxDist_(useMaxDist), useDeltaR_(useDeltaR), maxDist_(maxDist)
 {
   calculate();
 }
@@ -16,7 +16,7 @@ JetPartonMatching::calculate()
   // use maximal distance between objects 
   // in case of unambiguousOnly algorithmm
   if(algorithm_==unambiguousOnly) useMaxDist_=true;
-
+  
   // check if there are empty partons in
   // the vector, which happpens if the 
   // event is not ttbar or the decay is 
@@ -28,7 +28,7 @@ JetPartonMatching::calculate()
       break;
     }
   }
-
+  
   // switch algorithm, default is to match
   // on the minimal sum of the distance 
   // (if jets or a parton is empty fill match with blanks)
@@ -40,28 +40,28 @@ JetPartonMatching::calculate()
   }
   else {
     switch(algorithm_) {
-      
-    case totalMinDist: 
-      matchingTotalMinDist();    
-      break;
-      
-    case minSumDist: 
-      matchingMinSumDist();
-      break;
-      
-    case ptOrderedMinDist: 
-      matchingPtOrderedMinDist();
-      break;
-      
-    case unambiguousOnly:
-      matchingUnambiguousOnly();
-      break;
-      
-    default:
-      matchingMinSumDist();
+        
+      case totalMinDist: 
+        matchingTotalMinDist();    
+        break;
+        
+      case minSumDist: 
+        matchingMinSumDist();
+        break;
+        
+      case ptOrderedMinDist: 
+        matchingPtOrderedMinDist();
+        break;
+        
+      case unambiguousOnly:
+        matchingUnambiguousOnly();
+        break;
+        
+      default:
+        matchingMinSumDist();
     }
   }
-
+  
   numberOfUnmatchedPartons.clear();
   sumDeltaE .clear();
   sumDeltaPt.clear();
@@ -74,7 +74,7 @@ JetPartonMatching::calculate()
     int nUnmatchedPartons = partons.size();
     for(unsigned int part=0; part<partons.size(); ++part)
       if(getMatchForParton(part,comb)>=0) --nUnmatchedPartons;
-
+    
     double sumDE  = -999.;
     double sumDPt = -999.;
     double sumDR  = -999.;
@@ -83,12 +83,12 @@ JetPartonMatching::calculate()
       sumDPt = 0;
       sumDR  = 0;
       for(unsigned int i=0; i<match.size(); ++i){
-	sumDE  += fabs(partons[match[i].first].Energy() - jets[match[i].second].Energy());
-	sumDPt += fabs(partons[match[i].first].Pt()     - jets[match[i].second].Pt());
-	sumDR  += distance(partons[match[i].first], jets[match[i].second]);
+        sumDE  += fabs(partons[match[i].first].Energy() - jets[match[i].second].Energy());
+        sumDPt += fabs(partons[match[i].first].Pt()     - jets[match[i].second].Pt());
+        sumDR  += distance(partons[match[i].first], jets[match[i].second]);
       }
     }
-
+    
     numberOfUnmatchedPartons.push_back( nUnmatchedPartons );
     sumDeltaE .push_back( sumDE  );
     sumDeltaPt.push_back( sumDPt );
@@ -111,7 +111,7 @@ JetPartonMatching::matchingTotalMinDist()
   // match parton to jet with shortest distance
   // starting with the shortest distance available
   // apply some outlier rejection if desired
-
+  
   // prepare vector of pairs with distances between
   // all partons to all jets in the input vectors
   std::vector< std::pair<double, unsigned int> > distances;
@@ -122,16 +122,16 @@ JetPartonMatching::matchingTotalMinDist()
     }
   }
   std::sort(distances.begin(), distances.end());
-
+  
   MatchingCollection match;
-
+  
   while(match.size() < partons.size()){
     unsigned int partonIndex = distances[0].second/jets.size();
     int jetIndex = distances[0].second-jets.size()*partonIndex;
     
     // use primitive outlier rejection if desired
     if(useMaxDist_&& distances[0].first>maxDist_) jetIndex = -1;
-
+    
     // prevent underflow in case of too few jets
     if( distances.empty() )
       match.push_back(std::make_pair(partonIndex, -1));
@@ -144,12 +144,12 @@ JetPartonMatching::matchingTotalMinDist()
       unsigned int pIndex = distances[a].second/jets.size();
       int jIndex = distances[a].second-jets.size()*pIndex;
       if((pIndex == partonIndex) || (jIndex == jetIndex)){
-	distances.erase(distances.begin()+a, distances.begin()+a+1); 
-	--a;
+        distances.erase(distances.begin()+a, distances.begin()+a+1); 
+        --a;
       }
     }
   }
-
+  
   matching.clear();
   matching.push_back( match );
   return;
@@ -157,7 +157,7 @@ JetPartonMatching::matchingTotalMinDist()
 
 void 
 JetPartonMatching::minSumDist_recursion(const unsigned int ip, std::vector<unsigned int> & jetIndices,
-					std::vector<bool> & usedJets, std::vector<std::pair<double, MatchingCollection> > & distMatchVec)
+                                        std::vector<bool> & usedJets, std::vector<std::pair<double, MatchingCollection> > & distMatchVec)
 {
   // build up jet combinations recursively
   if(ip<partons.size()){
@@ -170,7 +170,7 @@ JetPartonMatching::minSumDist_recursion(const unsigned int ip, std::vector<unsig
     }
     return;
   }
-
+  
   // calculate sumDist for each completed combination
   double sumDist = 0;
   MatchingCollection match;
@@ -180,7 +180,7 @@ JetPartonMatching::minSumDist_recursion(const unsigned int ip, std::vector<unsig
     sumDist += distance(partons[ip], jets[jetIndices[ip]]);
     match.push_back(std::make_pair(ip, jetIndices[ip]));
   }
-
+  
   distMatchVec.push_back( std::make_pair(sumDist, match)  );
   return;
 }
@@ -189,21 +189,21 @@ void JetPartonMatching::matchingMinSumDist()
 {
   // match partons to jets with minimal sum of
   // the distances between all partons and jets
-
+  
   std::vector<std::pair<double, MatchingCollection> > distMatchVec;
-
+  
   std::vector<bool> usedJets;
   for(unsigned int i=0; i<jets.size(); ++i){
     usedJets.push_back(false);
   }
-
+  
   std::vector<unsigned int> jetIndices;
   jetIndices.reserve(partons.size());
-
+  
   minSumDist_recursion(0, jetIndices, usedJets, distMatchVec);
-
+  
   std::sort(distMatchVec.begin(), distMatchVec.end());
-
+  
   matching.clear();
   for(unsigned int i=0; i<distMatchVec.size(); ++i)
     matching.push_back( distMatchVec[i].second );  
@@ -217,29 +217,29 @@ JetPartonMatching::matchingPtOrderedMinDist()
   // the distances between all partons and jets
   // order partons in pt first
   std::vector<std::pair <double, unsigned int> > ptOrderedPartons;
-
+  
   for(unsigned int ip=0; ip<partons.size(); ++ip)
     ptOrderedPartons.push_back(std::make_pair(partons[ip].Pt(), ip));
-
+  
   std::sort(ptOrderedPartons.begin(), ptOrderedPartons.end());
   std::reverse(ptOrderedPartons.begin(), ptOrderedPartons.end());
-
+  
   std::vector<unsigned int> jetIndices;
   for(unsigned int ij=0; ij<jets.size(); ++ij) jetIndices.push_back(ij);
-
+  
   MatchingCollection match;
-
+  
   for(unsigned int ip=0; ip<ptOrderedPartons.size(); ++ip){
     double minDist = 999.;
     int ijMin = -1;
-
+    
     for(unsigned int ij=0; ij<jetIndices.size(); ++ij){
       double dist = distance(partons[ptOrderedPartons[ip].second], jets[jetIndices[ij]]);
       if(dist < minDist){
-	if(!useMaxDist_ || dist <= maxDist_){
-	  minDist = dist;
-	  ijMin = ij;
-	}
+        if(!useMaxDist_ || dist <= maxDist_){
+          minDist = dist;
+          ijMin = ij;
+        }
       }
     }
     
@@ -250,7 +250,7 @@ JetPartonMatching::matchingPtOrderedMinDist()
     else
       match.push_back( std::make_pair(ptOrderedPartons[ip].second, -1) );
   }
-
+  
   matching.clear();
   matching.push_back( match );
   return;
@@ -263,7 +263,7 @@ JetPartonMatching::matchingUnambiguousOnly()
   // if there are no ambiguities
   std::vector<bool> jetMatched;
   for(unsigned int ij=0; ij<jets.size(); ++ij) jetMatched.push_back(false);
-
+  
   MatchingCollection match;
   
   for(unsigned int ip=0; ip<partons.size(); ++ip){
@@ -271,20 +271,20 @@ JetPartonMatching::matchingUnambiguousOnly()
     for(unsigned int ij=0; ij<jets.size(); ++ij){
       double dist = distance(partons[ip], jets[ij]);
       if(dist <= maxDist_){
-	if(!jetMatched[ij]){ // new match for jet
-	  jetMatched[ij] = true;
-	  if(iMatch == -1) // new match for parton and jet
-	    iMatch = ij;
-	  else // parton already matched: ambiguity!
-	    iMatch = -2;
-	}
-	else // jet already matched: ambiguity!
-	  iMatch = -2;
+        if(!jetMatched[ij]){ // new match for jet
+          jetMatched[ij] = true;
+          if(iMatch == -1) // new match for parton and jet
+            iMatch = ij;
+          else // parton already matched: ambiguity!
+            iMatch = -2;
+        }
+        else // jet already matched: ambiguity!
+          iMatch = -2;
       }
     }
     match.push_back(std::make_pair(ip, iMatch));
   }
-
+  
   matching.clear();
   matching.push_back( match );
   return;
@@ -340,23 +340,23 @@ JetPartonMatching::print()
   cout << "++++++++++++++++++++++++++++++++++++++++++++++ \n";
   cout << " algorithm : ";
   switch(algorithm_) {
-  case totalMinDist     : cout << "totalMinDist    "; break;
-  case minSumDist       : cout << "minSumDist      "; break;
-  case ptOrderedMinDist : cout << "ptOrderedMinDist"; break;
-  case unambiguousOnly  : cout << "unambiguousOnly "; break;
-  default               : cout << "UNKNOWN         ";
+    case totalMinDist     : cout << "totalMinDist    "; break;
+    case minSumDist       : cout << "minSumDist      "; break;
+    case ptOrderedMinDist : cout << "ptOrderedMinDist"; break;
+    case unambiguousOnly  : cout << "unambiguousOnly "; break;
+    default               : cout << "UNKNOWN         ";
   }
   cout << "\n";
   cout << " useDeltaR : ";
   switch(useDeltaR_) {
-  case false : cout << "false"; break;
-  case true  : cout << "true ";
+    case false : cout << "false"; break;
+    case true  : cout << "true ";
   }
   cout << "\n";
   cout << " useMaxDist: ";
   switch(useMaxDist_) {
-  case false : cout << "false"; break;
-  case true  : cout << "true ";
+    case false : cout << "false"; break;
+    case true  : cout << "true ";
   }
   cout << "      maxDist: " << maxDist_ << "\n";
   cout << " number of partons / jets: " << partons.size() << " / " << jets.size() << "\n";
