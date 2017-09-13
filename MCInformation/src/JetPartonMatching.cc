@@ -226,6 +226,7 @@ JetPartonMatching::matchingPtOrderedMinDist()
   
   std::vector<unsigned int> jetIndices;
   for(unsigned int ij=0; ij<jets.size(); ++ij) jetIndices.push_back(ij);
+  vector<bool> mLock(jetIndices.size(),false);   // when locked, jet is already matched to a parton
   
   MatchingCollection match;
   
@@ -234,6 +235,7 @@ JetPartonMatching::matchingPtOrderedMinDist()
     int ijMin = -1;
     
     for(unsigned int ij=0; ij<jetIndices.size(); ++ij){
+      if(mLock[ij]) continue;
       double dist = distance(partons[ptOrderedPartons[ip].second], jets[jetIndices[ij]]);
       if(dist < minDist){
         if(!useMaxDist_ || dist <= maxDist_){
@@ -244,8 +246,8 @@ JetPartonMatching::matchingPtOrderedMinDist()
     }
     
     if(ijMin >= 0){
+      mLock[ijMin] = true;
       match.push_back( std::make_pair(ptOrderedPartons[ip].second, jetIndices[ijMin]) );
-      jetIndices.erase(jetIndices.begin() + ijMin, jetIndices.begin() + ijMin + 1);
     }
     else
       match.push_back( std::make_pair(ptOrderedPartons[ip].second, -1) );
